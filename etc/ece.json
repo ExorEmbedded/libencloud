@@ -1,0 +1,24 @@
+{
+  "sb" : {
+    "url" : "https://ws1.test/"
+  },
+
+  "timeout" : 10000,
+
+  "ssl_init" : {
+    "cacert" : "/etc/ece/cacert1.pem",
+    "cert" : "/etc/ece/cert1.pem",
+    "key" : "/etc/ece/key1.pem"
+  },
+
+  "ssl_op" : {
+    "sb" : {
+      "url" : "https://ws2.test/"
+    },
+    "cacert" : "/etc/ece/cacert2.pem",
+    "cert" : "/etc/ece/cert2.pem",
+    "key" : "/etc/ece/key2.pem"
+  },
+
+  "prefix" : "/tmp/local"
+}

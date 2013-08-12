@@ -1,0 +1,14 @@
+# TESTING: compile pure C version without QMake environment!
+
+TARGET = test-c
+SOURCES += main.c
+
+$(TARGET):
+	$(CC) $(CFLAGS) -o $(TARGET) -I../include -L../src $(SOURCES) -lece
+
+test: $(TARGET)
+	LD_LIBRARY_PATH=../src ./test-c
+
+clean:
+	$(RM) $(TARGET)
+
