@@ -3,6 +3,8 @@
 TARGET = test-c
 SOURCES += main.c
 
+all: $(TARGET) test
+
 $(TARGET):
 	$(CC) $(CFLAGS) -o $(TARGET) -I../include -L../src $(SOURCES) -lece
 

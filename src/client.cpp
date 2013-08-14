@@ -2,18 +2,18 @@
 
 namespace Ece {
 
-Client::Client()
+Client::Client ()
     : cfg(NULL), reply(NULL)
 {
     ECE_TRACE;
 }
 
-Client::~Client()
+Client::~Client ()
 {
     ECE_TRACE;
 }
 
-ece_rc_t Client::setConfig(Ece::Config *cfg)
+ece_rc_t Client::setConfig (Ece::Config *cfg)
 {
     ECE_RETURN_IF (cfg == NULL, ECE_RC_BADPARAMS);
 
@@ -22,28 +22,42 @@ ece_rc_t Client::setConfig(Ece::Config *cfg)
     return ECE_RC_SUCCESS;
 }
 
-ece_rc_t Client::run(Ece::ProtocolType protocol, Ece::MessageType message)
+ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
 {
+    ece_rc_t rc;
     QUrl serviceURL;
+    QUrl params;
     QSslConfiguration config;
+    QString response;
 
     // get proper configuration based on protocol type
     ECE_RETURN_IF (__loadSslConf(protocol, serviceURL, config), ECE_RC_BADPARAMS);
-    
-    return __run(serviceURL, config);
+
+    ECE_ERR_IF ((rc = message.encodeRequest(serviceURL, params)));
+
+    ECE_DBG("url=" << serviceURL);
+
+    if ((rc = __run(serviceURL, params, config, response)))
+        return rc;
+
+    ECE_DBG(" *** < *** " << response);
+
+    ECE_ERR_IF ((rc = message.decodeResponse(response)));
+
+    return ECE_RC_SUCCESS;
+err:
+    return rc;
 }
 
-ece_rc_t Client::__run(const QUrl &url, const QSslConfiguration &sslconf)
+ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response)
 {
     ece_rc_t rc = this->error = ECE_RC_SUCCESS;
-    QUrl params;
+
     QNetworkAccessManager qnam;
     QNetworkRequest request(url);
+
     request.setSslConfiguration(sslconf);
-
-    params.addQueryItem("key", "value");
-    params.addQueryItem("key2", "value2");
-
+    request.setRawHeader("Content-Type", "application/json");
     request.setRawHeader("User-Agent", ECE_STRING);
     request.setRawHeader("X-Custom-User-Agent", ECE_STRING);
 
@@ -68,7 +82,7 @@ ece_rc_t Client::__run(const QUrl &url, const QSslConfiguration &sslconf)
 
     ECE_ERR_MSG_IF(reply->error(),
             "Error in reply (" << reply->error() << "): " << reply->errorString());
-    ECE_OUT("reply: " << reply->readAll());
+    response = reply->readAll();
 
     delete this->reply;
 
@@ -83,14 +97,14 @@ err:
     return (rc ? rc : ECE_RC_GENERIC);
 }
 
-void Client::proxyAuthenticationRequiredSlot(const QNetworkProxy &proxy, QAuthenticator *authenticator)
+void Client::proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthenticator *authenticator)
 { 
     ECE_ERR(""); 
 
     this->error = ECE_RC_BADAUTH;
 }
 
-void Client::sslErrorsSlot(QNetworkReply *reply, const QList<QSslError> &errors) 
+void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors) 
 { 
     ECE_ERR(""); 
     
@@ -103,14 +117,14 @@ void Client::sslErrorsSlot(QNetworkReply *reply, const QList<QSslError> &errors)
     }
 }
 
-void Client::networkErrorSlot(QNetworkReply::NetworkError err)
+void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 { 
     ECE_DBG("NetworkError (" << err << ")");
 
     this->error = ECE_RC_FAILED;
 }
 
-void Client::timeoutSlot()
+void Client::timeoutSlot ()
 { 
     ECE_TRACE; 
 
@@ -125,22 +139,22 @@ void Client::timeoutSlot()
  * delete it inside the slot connected to finished(). You can use the
  * deleteLater() function."
  */
-void Client::finishedSlot(QNetworkReply *reply) 
+void Client::finishedSlot (QNetworkReply *reply) 
 { 
     ECE_TRACE; 
 }
 
-ece_rc_t Client::__loadSslConf(Ece::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
+ece_rc_t Client::__loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
 {
     ece_config_ssl_t *sslcfg;
     
     ECE_RETURN_IF (this->cfg == NULL, ECE_RC_BADPARAMS);
 
     switch (protocol) {
-        case ProtocolInitialization:
+        case ProtocolTypeInit:
             sslcfg = &this->cfg->config.sslInit;
             break;
-        case ProtocolOperation:
+        case ProtocolTypeOp:
             sslcfg = &this->cfg->config.sslOp;
             break;
         default:

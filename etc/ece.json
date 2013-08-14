@@ -1,4 +1,6 @@
 {
+  "prefix" : "/",
+
   "sb" : {
     "url" : "https://ws1.test/"
   },
@@ -20,5 +22,7 @@
     "key" : "/etc/ece/key2.pem"
   },
 
-  "prefix" : "/tmp/local"
+  "rsa" : {
+    "bits" : 2048
+  }
 }

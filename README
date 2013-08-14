@@ -11,11 +11,23 @@ JSON-over-HTTPS communication channel, PKI management and licensing details.
 
 [ Build ]
 
-Install QtCreator (tested on Ubuntu 12.04 with Qt 4.8.1-0ubuntu4.4), then:
+Tested on Ubuntu 12.04. Install dependencies:
+
+$ sudo apt-get install qtcreator
+$ sudo apt-get install libssl-dev
+
+Enter package directory, then:
 
 $ qmake
 $ make 
 $ make install 
+
+*Important Notes*: 
+    - configuration files *must not* be readable by other users
+        e.g. Linux: sudo chmod 600 /etc/ece/*
+    - configuration drectory and files *must* be writable by the user/process calling libece!
+        e.g. Linux: sudo chown -R my_user /etc/ece
+    - different paths for files and keys can be configured via "prefix" in /etc/ece/ece.json
 
 Run tests with:
 

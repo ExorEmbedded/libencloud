@@ -1,0 +1,12 @@
+[proto]
+    - cert, config retrieval
+
+[json]
+    - QtJson -> QJson
+
+[log]
+    - C logging module?
+
+[crypto]
+    - cleanup, json csr
+    - engine handling (e.g. pkcs#12)

@@ -6,16 +6,16 @@ namespace Ece {
 /* Protocol modes */
 enum ProtocolType
 {
-    ProtocolInitialization,
-    ProtocolOperation
+    ProtocolTypeInit,
+    ProtocolTypeOp
 };
 
 /* Message types */
 enum MessageType
 {
-    MessageRetrInfo,
-    MessageRetrCert,
-    MessageRetrConf
+    MessageTypeRetrInfo,
+    MessageTypeRetrCert,
+    MessageTypeRetrConf
 };
 
 } // namespace Ece

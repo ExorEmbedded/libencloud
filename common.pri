@@ -1,6 +1,6 @@
 # global defs
 PKGNAME = libece
-VERSION = 0.1
+VERSION = 0.1a
 
 QT += core
 QT += network
@@ -16,17 +16,18 @@ DEFINES += ECE_VERSION=\\\"$$VERSION\\\"
 
 # logging: valid only if QT_NO_DEBUG_OUTPUT is NOT set
 # (see README for info)
-DEFINES += ECE_LOGLEVEL=3
+#DEFINES += ECE_LOGLEVEL=3
+DEFINES += ECE_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include
 
 # install dirs
-INSTALLDIR = /tmp/local
+INSTALLDIR = /usr/local
 LIBDIR = $$INSTALLDIR/lib
 BINDIR = $$INSTALLDIR/bin
 INCDIR = $$INSTALLDIR/include
-CONFDIR = $$INSTALLDIR/etc/ece
+CONFDIR = /etc/ece
 
 ## keep build files separate from sources
 # UI_DIR = build/uics

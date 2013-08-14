@@ -13,8 +13,9 @@ INSTALLS += headers
 # configuration file installation
 headers.path = $$INCDIR
 conf.path = $$CONFDIR
-conf.files += etc/ece.json
+conf.files += etc/*.json
 conf.files += etc/*.pem
+conf.files += etc/*.tmpl
 INSTALLS += conf
 
 # generate tar package

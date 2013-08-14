@@ -1,7 +1,11 @@
 #ifndef _ECE_HELPERS_H_
 #define _ECE_HELPERS_H_
 
-// TODO: check if all macros are defined on Win
+/**
+ * TODO: check if all macros are defined on Win
+ */
+
+#define ECE_UNUSED(x)   (x=x)
 
 // from <sys/syslog.h>
 #define ECE_LOG_EMERG   0   /* system is unusable */
@@ -16,6 +20,7 @@
 #define __ECE_NOP do {;} while (0)
 #define __ECE_MSG(lev, msg) qDebug().nospace() << '[' << lev << "] [libece:" << \
         __FILE__ << ":" << __FUNCTION__ << "():" << __LINE__ << "] " << msg
+#define __ECE_PRINT(lev, msg) fprintf(stderr, "[%s] libece:%s:%s:%d] %s\n", lev, __FILE__, __FUNCTION__, __LINE__, msg)
 
 #ifdef QT_NO_DEBUG_OUTPUT
   #define ECE_TRACE __ECE_NOP
@@ -24,7 +29,7 @@
   #define ECE_DBG_IF(cond, msg) __ECE_NOP
   #define ECE_RETURN_IF(cond, rc) do { if (cond) return rc; } while (0)
   #define ECE_RETURN_MSG_IF(cond, rc, msg) ECE_RETURN_IF(cond, rc)
-  #define ECE_ERR_IF(cond) do { if (cond) goto err; } while (0);
+  #define ECE_ERR_IF(cond) do { if (cond) goto err; } while (0)
   #define ECE_ERR_RC_IF(cond, retcode) do { if (cond) { rc = retcode; goto err; } } while (0)
   #define ECE_ERR_MSG_IF(cond, msg) ECE_ERR_IF(cond)
 #else
