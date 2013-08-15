@@ -34,7 +34,7 @@ ece_rc_t Ece::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
     js = QtJson::serialize(jo);
     ECE_ERR_IF (js.isEmpty());
     
-    ECE_DBG(" *** > *** " << js);
+    ECE_DBG(" ### >>>>> ### " << js);
 
     params.addQueryItem(ECE_MSG_PARAM_DEFAULT, js);
 
@@ -56,6 +56,8 @@ ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response)
 
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());
+
+    this->csr_tmpl = jo["csr_tmpl"];
 
     return ECE_RC_SUCCESS;
 err:
@@ -84,7 +86,7 @@ ece_rc_t Ece::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
     js = QtJson::serialize(jo);
     ECE_ERR_IF (js.isEmpty());
     
-    ECE_DBG(" *** > *** " << js);
+    ECE_DBG(" ### >>>>> ### " << js);
 
     params.addQueryItem(ECE_MSG_PARAM_DEFAULT, js);
 
@@ -98,6 +100,9 @@ ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response)
     bool ok;
     QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
     ECE_ERR_IF (!ok);
+
+    this->cert = QSslCertificate(jo["certificate"].toString().toAscii());
+    ECE_ERR_IF (!this->cert.isValid());
 
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());
@@ -117,20 +122,33 @@ Ece::MessageRetrConf::MessageRetrConf ()
 
 ece_rc_t Ece::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
 { 
-    QString jreq = "{ foo3 : bar3 }";
+    const QUrl *p = &params;  // unused
+    ECE_UNUSED(p);
 
     url.setPath(ECE_CMD_GETCONFIG);
 
-    params.addQueryItem(ECE_MSG_PARAM_DEFAULT, jreq);
+    ECE_DBG(" ### >>>>> ### PLAIN GET!!! (no Json)");
 
     return ECE_RC_SUCCESS;
 }
 
 ece_rc_t Ece::MessageRetrConf::decodeResponse (QString &response)
-{ 
+{
     bool ok;
-    QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
+    QtJson::JsonObject jo = QtJson::parse(response, ok).toMap()["vpn"].toMap();
     ECE_ERR_IF (!ok);
+
+    this->vpnIp = jo["ip"].toString();
+    ECE_ERR_IF (this->vpnIp.isEmpty());
+
+    this->vpnPort = jo["port"].toInt();
+    ECE_ERR_IF (this->vpnPort <= 0);
+
+    this->vpnProto = jo["proto"].toString();
+    ECE_ERR_IF (this->vpnProto.isEmpty());
+
+    this->vpnType = jo["type"].toString();
+    ECE_ERR_IF (this->vpnType.isEmpty());
 
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());

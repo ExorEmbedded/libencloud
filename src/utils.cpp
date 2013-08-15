@@ -2,6 +2,7 @@
 
 namespace EceUtils {
 
+/* TESTME @ W32: used for Subject CN - maximum 64 chars! */
 QString getHwInfo (void)
 {
 #ifdef Q_OS_UNIX

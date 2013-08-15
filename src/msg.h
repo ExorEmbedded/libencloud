@@ -4,10 +4,12 @@
 #include <QDebug>
 #include <QString>
 #include <QDateTime>
+#include <QSslCertificate>
 #include <QUrl>
 #include <QUuid>
 #include <ece.h>
 #include "helpers.h"
+//#include "json.h"
 
 #define ECE_MSG_PARAM_DEFAULT "json"
 
@@ -30,7 +32,7 @@ public:
     virtual ece_rc_t encodeRequest (QUrl &url, QUrl &params) = 0;
     virtual ece_rc_t decodeResponse (QString &response) = 0;
 
-    //outputs
+    //response outputs
     QDateTime time;
 };
 
@@ -41,13 +43,14 @@ public:
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
     ece_rc_t decodeResponse (QString &response);
 
-    //inputs
+    //request inputs
     QUuid license;
     QString hwInfo;
 
-    //outputs
+    //response outputs
     bool valid;
     QDateTime expiry;
+    QVariant csr_tmpl;
 };
 
 class MessageRetrCert : public Message 
@@ -57,10 +60,13 @@ public:
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
     ece_rc_t decodeResponse (QString &response);
 
-    //inputs
+    //request inputs
     QUuid license;
     QString hwInfo;
     QString csr;
+
+    //response outputs
+    QSslCertificate cert;
 };
 
 class MessageRetrConf : public Message 
@@ -69,6 +75,12 @@ public:
     MessageRetrConf ();
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
     ece_rc_t decodeResponse (QString &response);
+
+    //response outputs
+    QString vpnIp;
+    int vpnPort;
+    QString vpnProto;
+    QString vpnType;
 };
 
 } // namespace Ece

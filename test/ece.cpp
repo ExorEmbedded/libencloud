@@ -24,6 +24,7 @@ int test_ece (int argc, char *argv[])
     ece_rc_t rc = ECE_RC_SUCCESS;
     ece_t *ece = NULL;
     ece_sb_info_t *sb_info;
+    ece_sb_conf_t *sb_conf;
 
 #ifdef QTCORE_APP_EXTERNAL
     QCoreApplication a(argc, argv);
@@ -43,13 +44,17 @@ int test_ece (int argc, char *argv[])
             (rc = ece_retr_sb_info(ece, &sb_info))
             ||
             (rc = ece_retr_sb_cert(ece))
-//            ||
-//            (rc = ece_retr_sb_conf(ece))
+            ||
+            (rc = ece_retr_sb_conf(ece, &sb_conf))
             )
         goto err;
 
     fprintf(stderr, "# license valid: %d\n", ece_sb_info_get_license_valid(sb_info));
-    fprintf(stderr, "# license expiry: %u\n", ece_sb_info_get_license_expiry(sb_info));
+    fprintf(stderr, "# license expiry: %ld\n", ece_sb_info_get_license_expiry(sb_info));
+    fprintf(stderr, "# vpn ip: %s\n", ece_sb_conf_get_vpn_ip(sb_conf));
+    fprintf(stderr, "# vpn port: %d\n", ece_sb_conf_get_vpn_port(sb_conf));
+    fprintf(stderr, "# vpn proto: %s\n", ece_sb_conf_get_vpn_proto(sb_conf));
+    fprintf(stderr, "# vpn type: %s\n", ece_sb_conf_get_vpn_type(sb_conf));
 
     ece_destroy(ece);
 

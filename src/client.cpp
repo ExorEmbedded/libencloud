@@ -40,9 +40,9 @@ ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
     if ((rc = __run(serviceURL, params, config, response)))
         return rc;
 
-    ECE_DBG(" *** < *** " << response);
+    ECE_DBG(" ### <<<<< ###  " << response);
 
-    ECE_ERR_IF ((rc = message.decodeResponse(response)));
+    ECE_ERR_RC_IF (message.decodeResponse(response), ECE_RC_BADRESPONSE);
 
     return ECE_RC_SUCCESS;
 err:
@@ -72,7 +72,10 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
 
     QTimer::singleShot(ECE_TIMEOUT, this, SLOT(timeoutSlot()));
 
-    ECE_ERR_RC_IF ((this->reply = qnam.post(request, params.encodedQuery())) == NULL, ECE_RC_FAILED);
+    if (params.isEmpty())
+        ECE_ERR_RC_IF ((this->reply = qnam.get(request)) == NULL, ECE_RC_FAILED);
+    else
+        ECE_ERR_RC_IF ((this->reply = qnam.post(request, params.encodedQuery())) == NULL, ECE_RC_FAILED);
 
     connect(this->reply, SIGNAL(error(QNetworkReply::NetworkError)), 
             SLOT(networkErrorSlot(QNetworkReply::NetworkError)));
@@ -85,11 +88,15 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     response = reply->readAll();
 
     delete this->reply;
+    this->reply = NULL;
 
     return ECE_RC_SUCCESS;
 err:
     if (this->reply)
+    {
         delete this->reply;
+        this->reply = NULL;
+    }
 
     if (this->error)
         return this->error;
@@ -99,6 +106,10 @@ err:
 
 void Client::proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthenticator *authenticator)
 { 
+    ECE_UNUSED(authenticator); 
+    const QNetworkProxy *p = &proxy;  //unused
+    ECE_UNUSED(p);
+
     ECE_ERR(""); 
 
     this->error = ECE_RC_BADAUTH;
@@ -106,11 +117,14 @@ void Client::proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthe
 
 void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors) 
 { 
-    ECE_ERR(""); 
+    ECE_UNUSED(reply);
     
+    ECE_ERR(""); 
+
     this->error = ECE_RC_BADAUTH;
 
-    foreach (QSslError err, errors) {
+    foreach (QSslError err, errors) 
+    {
         ECE_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
         ECE_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
                 " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
@@ -119,6 +133,8 @@ void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors
 
 void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 { 
+    ECE_UNUSED(err);
+
     ECE_DBG("NetworkError (" << err << ")");
 
     this->error = ECE_RC_FAILED;
@@ -136,11 +152,12 @@ void Client::timeoutSlot ()
 /**
  * "Note: After the request has finished, it is the responsibility of the user
  * to delete the QNetworkReply object at an appropriate time. Do not directly
- * delete it inside the slot connected to finished(). You can use the
- * deleteLater() function."
+ * delete it inside the slot connected to finished()"
  */
 void Client::finishedSlot (QNetworkReply *reply) 
 { 
+    ECE_UNUSED(reply);
+
     ECE_TRACE; 
 }
 

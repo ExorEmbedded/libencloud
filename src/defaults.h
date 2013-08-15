@@ -10,6 +10,7 @@
 #define ECE_TIMEOUT             10000
 #define ECE_URL_SZ              1024
 #define ECE_PATH_SZ             512
+#define ECE_DESC_SZ             64
 #define ECE_PREFIX_PATH         "/"
 #define ECE_CONF_PATH           "/etc/ece/ece.json"
 #define ECE_CACERT_PATH         "/etc/ece/cacert.pem"

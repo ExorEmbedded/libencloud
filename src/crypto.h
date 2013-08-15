@@ -1,3 +1,9 @@
+/** 
+ * Helper crypto lib.
+ * 
+ * Note: kept Qt-independent for possible reusage.
+ */
+
 #ifndef _ECE_CRYPTO_H_
 #define _ECE_CRYPTO_H_
 
@@ -8,11 +14,26 @@
 extern "C" {
 #endif
 
-int ece_crypto_init (ece_t *ece);
-int ece_crypto_term (ece_t *ece);
+/* Subject name setting callback - must return 0 on success */
+typedef int (*ece_crypto_name_cb) (X509_NAME *n, void *arg);
 
-int ece_crypto_genkey (ece_t *ece, size_t nbits, const char *outfile);
-int ece_crypto_gencsr (ece_t *ece, const char *keyfile, char **buf, long *buf_sz);
+struct ece_crypto_s
+{
+    ece_crypto_name_cb name_cb;
+    void *name_cb_ctx;
+};
+typedef struct ece_crypto_s ece_crypto_t;
+
+/* Initialization/Termination */
+int ece_crypto_init (ece_crypto_t *ec);
+int ece_crypto_term (ece_crypto_t *ec);
+
+/* Callbacks */
+int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
+
+/* Crypto methods */
+int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile);
+int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **buf, long *buf_sz);
 
 #ifdef __cplusplus
 }

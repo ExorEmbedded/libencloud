@@ -12,34 +12,45 @@
 #define __ECE_MSG(lev,msg) __ECE_PRINT(lev, msg)
 #include "crypto.h"
 
-/** 
- * Helper crypto lib.
- * 
- * Note: kept Qt-independent for possible reusage.
- */
+static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey);
 
-static X509_REQ *__make_req ();
-
-int ece_crypto_init (ece_t *ece)
+int ece_crypto_init (ece_crypto_t *ec)
 {
     ECE_TRACE;
-    ECE_UNUSED(ece);
+
+    if (ec == NULL)  // context is optional for now
+        return 0;
+
+    memset(ec, 0, sizeof(ece_crypto_t));
 
     OpenSSL_add_all_algorithms();
 
     return 0;
 }
 
-int ece_crypto_term (ece_t *ece)
+int ece_crypto_term (ece_crypto_t *ec)
 {
     ECE_TRACE;
-    ECE_UNUSED(ece);
+    ECE_UNUSED(ec);
 
     return 0;
 }
 
+int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx)
+{
+    ECE_ERR_IF (ec == NULL);
+    ECE_ERR_IF (cb == NULL);
+
+    ec->name_cb = cb;
+    ec->name_cb_ctx = ctx;
+
+    return 0;
+err:
+    return ~0;
+}
+
 /** \brief Generate an RSA key of size 'nbits' to 'outfile' */
-int ece_crypto_genkey (ece_t *ece, size_t nbits, const char *outfile)
+int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile)
 {
     int rc = ~0;
     unsigned long f4 = RSA_F4;
@@ -54,7 +65,7 @@ int ece_crypto_genkey (ece_t *ece, size_t nbits, const char *outfile)
         nbits = 2048;
 
     ECE_TRACE;
-    ECE_UNUSED(ece);
+    ECE_UNUSED(ec);
     ECE_ERR_IF (outfile == NULL);
 
     // make sure random number generator is adequately seeded
@@ -86,9 +97,13 @@ err:
 }
 
 /** \brief Write CSR based on 'keyfile' to output buffer {pbuf,plen}
-    (or to file if pbuf == NULL); if pbuf is defined, user owns it and must 
-    free() when finished with it  */
-int ece_crypto_gencsr (ece_t *ece, const char *keyfile, char **pbuf, long *plen)
+ *  (or to file if pbuf == NULL)
+ *  
+ *  If pbuf is defined, user owns it and must free() when finished with it.
+ *
+ *  Prerequisites: ece_crypto_set_name_cb() for subject name settings
+ */
+int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **pbuf, long *plen)
 {
     int rc = ~0;
     BIO *kfile = NULL;
@@ -100,8 +115,9 @@ int ece_crypto_gencsr (ece_t *ece, const char *keyfile, char **pbuf, long *plen)
     long len = 0;
 
     ECE_TRACE;
-    ECE_UNUSED(ece);
     ECE_ERR_IF (keyfile == NULL);
+    ECE_ERR_IF (ec == NULL);
+    ECE_ERR_IF (ec->name_cb == NULL);
 
     ECE_ERR_IF ((kfile = BIO_new(BIO_s_file())) == NULL);
     ECE_ERR_IF (BIO_read_filename(kfile, keyfile) <= 0);
@@ -110,7 +126,7 @@ int ece_crypto_gencsr (ece_t *ece, const char *keyfile, char **pbuf, long *plen)
     ECE_ERR_IF ((pkey = PEM_read_bio_PrivateKey(kfile, NULL, NULL, NULL)) == NULL);
 
     // generate the CSR
-    ECE_ERR_IF ((req = __make_req(pkey)) == NULL);
+    ECE_ERR_IF ((req = __make_req(ec, pkey)) == NULL);
 
     if (pbuf == NULL)  // output to standard output
     {
@@ -153,8 +169,7 @@ err:
     return rc;
 }
 
-// TODO fields from Json reply? probably better for parsing! => config
-static X509_REQ *__make_req (EVP_PKEY *pkey)
+static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey)
 {
     X509_REQ *req = NULL;
     X509_NAME *n = NULL;
@@ -163,11 +178,14 @@ static X509_REQ *__make_req (EVP_PKEY *pkey)
     EVP_PKEY_CTX *pkctx = NULL;
     const EVP_MD *digest = NULL;
 
+    ECE_ERR_IF (ec == NULL);
+    ECE_ERR_IF (pkey == NULL);
+    ECE_ERR_IF (ec->name_cb == NULL);
+
     ECE_ERR_IF ((req = X509_REQ_new()) == NULL);
     ECE_ERR_IF ((n = X509_NAME_new()) == NULL);
     
-    // TODO
-    ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "C", MBSTRING_ASC, (const unsigned char *) "AU", -1, -1, 0));
+    ECE_ERR_IF (ec->name_cb(n, ec->name_cb_ctx));
     ECE_ERR_IF (!X509_REQ_set_subject_name(req, n));
     ECE_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
 
