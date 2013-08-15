@@ -57,7 +57,7 @@ ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response)
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());
 
-    this->csr_tmpl = jo["csr_tmpl"];
+    this->csrTmpl = jo["csr_tmpl"];
 
     return ECE_RC_SUCCESS;
 err:

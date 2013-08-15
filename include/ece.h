@@ -7,11 +7,13 @@
 extern "C" {
 #endif
 
+/* ECE return codes */
 typedef enum
 {
     ECE_RC_SUCCESS = 0,
     ECE_RC_BADPARAMS,
     ECE_RC_NOMEM,
+    ECE_RC_NOLICENSE,
     ECE_RC_CONNECT,
     ECE_RC_BADAUTH,
     ECE_RC_TIMEOUT,
@@ -22,12 +24,15 @@ typedef enum
 } 
 ece_rc_t;
 
+/* Main ECE structure */
 struct ece_s;
 typedef struct ece_s ece_t;
 
+/* SB Info structure */
 struct ece_sb_info_s;
 typedef struct ece_sb_info_s ece_sb_info_t;
 
+/* SB Config structure */
 struct ece_sb_conf_s;
 typedef struct ece_sb_conf_s ece_sb_conf_t;
 

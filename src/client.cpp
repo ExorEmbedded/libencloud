@@ -145,8 +145,12 @@ void Client::timeoutSlot ()
     ECE_TRACE; 
 
     this->error = ECE_RC_TIMEOUT;
-    this->reply->abort();
-    this->loop->quit();
+
+    if (this->reply)
+        this->reply->abort();
+
+    if (this->loop)
+        this->loop->quit();
 }
 
 /**

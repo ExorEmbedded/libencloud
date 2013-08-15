@@ -5,12 +5,17 @@ namespace Ece {
 
 /* Set defaults from defaults.h definitions */
 Config::Config ()
+    : settings(NULL)
 {
     ECE_TRACE;
+
+    this->settings = new QSettings(ECE_SETTINGS_ORG, ECE_SETTINGS_APP);
 
     this->config.sbUrl = QUrl(ECE_SB_URL);
     this->config.timeout = ECE_TIMEOUT;
     this->config.prefix = QFileInfo(ECE_PREFIX_PATH);
+
+    this->config.csrTmplPath = QFileInfo(ECE_CSRTMPL_PATH);
 
     this->config.sslInit.cacertPath = QFileInfo(ECE_CACERT_PATH);
     this->config.sslInit.certPath = QFileInfo(ECE_CERT1_PATH);
@@ -20,33 +25,26 @@ Config::Config ()
     this->config.sslOp.certPath = QFileInfo(ECE_CERT2_PATH);
     this->config.sslOp.keyPath = QFileInfo(ECE_KEY2_PATH);
 
-    this->config.rsa_bits = ECE_RSA_BITS;
+    this->config.rsaBits = ECE_RSA_BITS;
 }
 
 Config::~Config()
 {
     ECE_TRACE;
+
+    if (this->settings)
+        delete this->settings;
 }
 
 /* Read config from file */
-int Config::loadFromFile (const QString &filename)
+int Config::loadFromFile (QString filename)
 {
     ECE_TRACE;
 
     QString fn = __join_paths(QString(ECE_PREFIX_PATH), filename);
     ECE_DBG("filename=" << fn);
 
-    QFile f(fn);
-    ECE_RETURN_MSG_IF (!f.open(QFile::ReadOnly | QFile::Text), ~0, 
-        "failed reading config file: " << fn);
-
-    QTextStream ts(&f);
-    QString json = ts.readAll();
-    ECE_RETURN_IF (json.isEmpty(), ~0);
-    
-    bool ok;
-    JsonObject jo = QtJson::parse(json, ok).toMap();
-    ECE_ERR_IF (!ok);
+    JsonObject jo = fileToJson(fn);
 
     ECE_DBG(QtJson::serialize(jo));
     ECE_ERR_IF (__parse(jo));
@@ -54,6 +52,26 @@ int Config::loadFromFile (const QString &filename)
     return 0;
 err: 
     return ~0;
+}
+
+JsonObject Config::fileToJson (QString filename)
+{
+    QFile f(filename);
+    JsonObject jo;
+
+    ECE_RETURN_MSG_IF (!f.open(QFile::ReadOnly | QFile::Text), jo,
+        "failed reading config file: " << filename);
+
+    bool ok;
+    QTextStream ts(&f);
+    QString json = ts.readAll();
+    ECE_ERR_IF (json.isEmpty());
+
+    jo = QtJson::parse(json, ok).toMap();
+    ECE_ERR_IF (!ok);
+
+err:
+    return jo;
 }
 
 int Config::__parse (const JsonObject &jo)
@@ -64,12 +82,16 @@ int Config::__parse (const JsonObject &jo)
     config.timeout = jo["timeout"].toInt();
     ECE_DBG("timeout=" << config.timeout);
 
+    config.csrTmplPath = __join_paths(config.prefix.absoluteFilePath(), \
+            jo["csr"].toMap()["tmpl"].toString());
+    ECE_DBG("csr tmpl=" << config.csrTmplPath.absoluteFilePath());
+
     ECE_ERR_IF (__parse_sb(jo["sb"].toMap()));
     ECE_ERR_IF (__parse_sslInit(jo["ssl_init"].toMap()));
     ECE_ERR_IF (__parse_sslOp(jo["ssl_op"].toMap()));
 
-    config.rsa_bits = jo["rsa"].toMap()["bits"].toInt();
-    ECE_DBG("rsa_bits=" << config.rsa_bits);
+    config.rsaBits = jo["rsa"].toMap()["bits"].toInt();
+    ECE_DBG("rsa bits=" << config.rsaBits);
 
     return 0;
 err:

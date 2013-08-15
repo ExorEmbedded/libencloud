@@ -13,16 +13,19 @@
 #define ECE_DESC_SZ             64
 #define ECE_PREFIX_PATH         "/"
 #define ECE_CONF_PATH           "/etc/ece/ece.json"
+#define ECE_CSRTMPL_PATH        "/etc/ece/csr-tmpl.json"
 #define ECE_CACERT_PATH         "/etc/ece/cacert.pem"
 #define ECE_CERT1_PATH          "/etc/ece/cert1.pem"
 #define ECE_KEY1_PATH           "/etc/ece/key1.pem"
 #define ECE_CERT2_PATH          "/etc/ece/cert2.pem"
 #define ECE_KEY2_PATH           "/etc/ece/key2.pem"
-#define ECE_CSR_TEMPLATE        "/etc/ece/csr.tmpl"
 #define ECE_RSA_BITS            1024
 
 #define ECE_CMD_GETINFO         "command.access.cloud.getInfo"
 #define ECE_CMD_GETCERT         "command.access.cloud.getCertificate"
 #define ECE_CMD_GETCONFIG       "command.access.cloud.getConfiguration"
+
+#define ECE_SETTINGS_ORG        "com.endian"
+#define ECE_SETTINGS_APP        "ECE"
 
 #endif

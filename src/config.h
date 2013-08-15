@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QUrl>
 #include <QTextStream>
+#include <QSettings>
 #include "json.h"
 #include "defaults.h"
 #include "helpers.h"
@@ -32,11 +33,12 @@ typedef struct
     QUrl sbUrl;
     int timeout;
     QFileInfo prefix;
+    QFileInfo csrTmplPath;
 
     ece_config_ssl_t sslInit;
     ece_config_ssl_t sslOp;
 
-    int rsa_bits;
+    int rsaBits;
 }
 ece_config_t;
 
@@ -47,10 +49,12 @@ public:
     ~Config ();
 
     /* Configuration loading */
-    int loadFromFile (const QString &filename);
+    int loadFromFile (QString filename);
+    static JsonObject fileToJson (QString filename);
 
-    /* Configuration struct is publicly accessible */
+    /* Configuration objects are publicly accessible */
     ece_config_t config;
+    QSettings *settings;
 
 private:
     int __parse (const JsonObject &jo);

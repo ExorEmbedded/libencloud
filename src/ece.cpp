@@ -5,13 +5,13 @@
 #include "client.h"
 #include "utils.h"
 #include "crypto.h"
+#include "config.h"
 
 /** \brief SB info object */
 struct ece_sb_info_s
 {
     bool license_valid;
     time_t license_expiry;
-    QVariant csr_tmpl;
 };
 
 /** \brief SB configuration object */
@@ -27,7 +27,6 @@ struct ece_sb_conf_s
 struct ece_s
 {
     QCoreApplication *app;
-    QUuid license;
 
     Ece::Client *client;
     Ece::Config *cfg;
@@ -69,7 +68,7 @@ ece_rc_t ece_create (int argc, char *argv[], ece_t **pece)
     ECE_ERR_IF (e->client->setConfig(e->cfg));
 
     ECE_ERR_IF (ece_crypto_init(&e->crypto));
-    ECE_ERR_IF (ece_crypto_set_name_cb(&e->crypto, &__name_cb, &e->sb_info));
+    ECE_ERR_IF (ece_crypto_set_name_cb(&e->crypto, &__name_cb, e));
 
     *pece = e;
 
@@ -107,7 +106,11 @@ ece_rc_t ece_destroy (ece_t *ece)
     return ECE_RC_SUCCESS;
 }
 
-/** \brief Set license from null-terminated 'guid' string */
+/** \brief Set license from null-terminated 'guid' string
+ * 
+ * The license is saved to a persistent Setting object ("lic" key in
+ * ECE_SETTINGS_ORG:ECE_SETTINGS_APP as defined in defaults.h.
+ */
 ece_rc_t ece_set_license (ece_t *ece, const char *guid)
 {
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
@@ -120,7 +123,8 @@ ece_rc_t ece_set_license (ece_t *ece, const char *guid)
 
     ECE_DBG("uiid=" << u << " variant=" << u.variant() << " version=" << u.version());
 
-    ece->license = u;
+    ece->cfg->settings->setValue("lic", u.toString());
+    ECE_RETURN_IF (ece->cfg->settings->status(), ECE_RC_SYSERR);
 
     return ECE_RC_SUCCESS;
 }
@@ -131,7 +135,7 @@ ece_rc_t ece_set_license (ece_t *ece, const char *guid)
  * The request is performed upon the Initialization secure channel set up using the
  * {key1, cert1} pair installed during production phase.
  * 
- * The license set using ece_set_license() along with retrieved hardware info are sent
+ * The license read from persistent storage along with retrieved hardware info are sent
  * as proof of identity.
  * 
  * License info is returned to the user and CSR template is stored internally.
@@ -140,23 +144,29 @@ ece_rc_t ece_set_license (ece_t *ece, const char *guid)
  */
 ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
 {
-    ece_rc_t rc = ECE_RC_GENERIC;
-    Ece::MessageRetrInfo msg;
-
     ECE_TRACE;
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
     ECE_RETURN_IF (pinfo == NULL, ECE_RC_BADPARAMS);
 
-    ECE_RETURN_IF (ece->license.isNull(), ECE_RC_BADPARAMS);
+    ece_rc_t rc = ECE_RC_GENERIC;
+    Ece::MessageRetrInfo msg;
+    QString csrfn = ece->cfg->config.csrTmplPath.absoluteFilePath();
+    QFile csr(csrfn);
 
-    msg.license = ece->license;
+    msg.license = QUuid(ece->cfg->settings->value("lic").toString());
+    ECE_RETURN_IF (msg.license.isNull(), ECE_RC_NOLICENSE);
+
     msg.hwInfo = EceUtils::getHwInfo();
 
     ECE_ERR_RC_IF ((rc = ece->client->run(Ece::ProtocolTypeInit, msg)), rc);
 
     ece->sb_info.license_valid = msg.valid;
     ece->sb_info.license_expiry = msg.expiry.toTime_t();
-    ece->sb_info.csr_tmpl = msg.csr_tmpl;
+
+    // save the CSR template to file
+    ECE_ERR_RC_IF (!csr.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
+    ECE_ERR_RC_IF (csr.write(QtJson::serialize(msg.csrTmpl)) == -1, ECE_RC_SYSERR);
+    csr.close();
 
     *pinfo = &ece->sb_info;
 
@@ -171,7 +181,7 @@ err:
  * The request is performed upon the Initialization secure channel set up using the
  * {key1, cert1} pair installed during production phase.
  * 
- * The license set using ece_set_license() along with retrieved hardware info are sent
+ * The license read from persistent storage along with retrieved hardware info are sent
  * as proof of identity. An internal key is generated and used to generate a Certificate
  * Signing Request which is sent to SB. 
  * 
@@ -179,27 +189,26 @@ err:
  */
 ece_rc_t ece_retr_sb_cert (ece_t *ece)
 {
+    ECE_TRACE;
+    ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
+
     ece_rc_t rc = ECE_RC_GENERIC;
     Ece::MessageRetrCert msg;
     char *buf = NULL;
     long len;
-
-    ECE_TRACE;
-    ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
-
-    ECE_RETURN_IF (ece->license.isNull(), ECE_RC_BADPARAMS);
-
     QString keyfn = ece->cfg->config.sslOp.keyPath.absoluteFilePath();
     QString tmpkeyfn = keyfn + ".tmp";
     QFile tmpkey(tmpkeyfn);
     QString certfn = ece->cfg->config.sslOp.certPath.absoluteFilePath();
     QFile certfile(certfn);
 
-    msg.license = ece->license;
+    msg.license = QUuid(ece->cfg->settings->value("lic").toString());
+    ECE_RETURN_IF (msg.license.isNull(), ECE_RC_NOLICENSE);
+
     msg.hwInfo = EceUtils::getHwInfo();
 
     // generate temporary key and CSR
-    ECE_ERR_IF (ece_crypto_genkey(&ece->crypto, ece->cfg->config.rsa_bits, qPrintable(tmpkeyfn)));
+    ECE_ERR_IF (ece_crypto_genkey(&ece->crypto, ece->cfg->config.rsaBits, qPrintable(tmpkeyfn)));
     ECE_ERR_IF (ece_crypto_gencsr(&ece->crypto, qPrintable(tmpkeyfn), &buf, &len));
 
     msg.csr = QByteArray(buf, len);
@@ -256,36 +265,48 @@ ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf)
 /** \brief Is license valid? */
 bool ece_sb_info_get_license_valid (ece_sb_info_t *info)
 {
+    ECE_RETURN_IF (info == NULL, false);
+
     return info->license_valid;
 }
 
 /** \brief Get certificate expiry - expressed in seconds since Epoch */
 time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info)
 {
+    ECE_RETURN_IF (info == NULL, -1);
+
     return info->license_expiry;
 }
 
 /** \brief Get VPN IP address */
 char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf)
 {
+    ECE_RETURN_IF (conf == NULL, NULL);
+
     return conf->vpn_ip;
 }
 
 /** \brief Get VPN port */
 int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf)
 {
+    ECE_RETURN_IF (conf == NULL, -1);
+
     return conf->vpn_port;
 }
 
 /** \brief Get VPN protocol */
 char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf)
 {
+    ECE_RETURN_IF (conf == NULL, NULL);
+
     return conf->vpn_proto;
 }
 
 /** \brief Get VPN type */
 char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf)
 {
+    ECE_RETURN_IF (conf == NULL, NULL);
+
     return conf->vpn_type;
 }
 
@@ -306,6 +327,8 @@ const char *ece_strerror (ece_rc_t rc)
             return "Bad parameters";
         case ECE_RC_NOMEM:
             return "Out of memory";
+        case ECE_RC_NOLICENSE:
+            return "No license found";
         case ECE_RC_CONNECT:
             return "Connection error";
         case ECE_RC_BADAUTH:
@@ -325,15 +348,17 @@ const char *ece_strerror (ece_rc_t rc)
     return "<undefined>";
 }
 
-/* Subject name settings from retrieved JSON CSR template */
+/* Subject name settings from JSON CSR template */
 static int __name_cb (X509_NAME *n, void *arg)
 {
     ECE_RETURN_IF (n == NULL, ~0);
     ECE_RETURN_IF (arg == NULL, ~0);
 
-    ece_sb_info_t *sb_info = (ece_sb_info_t *) arg;
+    ece_t *ece = (ece_t *) arg;
 
-    QVariantMap map = sb_info->csr_tmpl.toMap()["DN"].toMap();
+    JsonObject jo = Ece::Config::fileToJson(ece->cfg->config.csrTmplPath.absoluteFilePath());
+
+    QVariantMap map = jo["DN"].toMap();
 
     // parse DN fields
     for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)

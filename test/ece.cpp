@@ -2,6 +2,7 @@
 #ifdef QTCORE_APP_EXTERNAL
 #include <QtCore/QCoreApplication>
 #endif
+#include <QUuid>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ece.h>
@@ -10,6 +11,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// comment this to test persistent storage of license and csr
+#define TEST_ECE_RETR_INFO
 
 /**
  * Default is a "Pure C" libece test (no Qt objects): an internal
@@ -32,8 +36,13 @@ int test_ece (int argc, char *argv[])
 
     if (
             (rc = ece_create(argc, argv, &ece))
+#ifdef TEST_ECE_RETR_INFO
             ||
-            ((rc = ece_set_license(ece, "a-b-c-d")) == 0)  // must fail
+            // bad value - must fail
+            ((rc = ece_set_license(ece, "a-b-c-d")) == 0)
+            ||
+            // generate a random uuid
+            (rc = ece_set_license(ece, qPrintable(QUuid::createUuid().toString())))
             ||
             // variant() = 2 (Distributed Computing Environment), version() = 4 (Random-based)
             (rc = ece_set_license(ece, "67C8770B-44F1-410A-AB9A-F9B5446F13EE"))
@@ -42,6 +51,7 @@ int test_ece (int argc, char *argv[])
             (rc = ece_set_license(ece, "{a8098c1a-f86e-11da-bd1a-00112444be1e}"))
             ||
             (rc = ece_retr_sb_info(ece, &sb_info))
+#endif
             ||
             (rc = ece_retr_sb_cert(ece))
             ||

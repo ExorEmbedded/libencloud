@@ -50,7 +50,7 @@ public:
     //response outputs
     bool valid;
     QDateTime expiry;
-    QVariant csr_tmpl;
+    QVariant csrTmpl;
 };
 
 class MessageRetrCert : public Message 
