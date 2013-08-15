@@ -34,30 +34,26 @@ int test_ece (int argc, char *argv[])
     QCoreApplication a(argc, argv);
 #endif
 
-    if (
-            (rc = ece_create(argc, argv, &ece))
+    TEST_ZERO ((rc = ece_create(argc, argv, &ece)));
+
 #ifdef TEST_ECE_RETR_INFO
-            ||
-            // bad value - must fail
-            ((rc = ece_set_license(ece, "a-b-c-d")) == 0)
-            ||
-            // generate a random uuid
-            (rc = ece_set_license(ece, qPrintable(QUuid::createUuid().toString())))
-            ||
-            // variant() = 2 (Distributed Computing Environment), version() = 4 (Random-based)
-            (rc = ece_set_license(ece, "67C8770B-44F1-410A-AB9A-F9B5446F13EE"))
-            ||
-            // variant() = 2 (Distributed Computing Environment), version() = 1 (Time-based)
-            (rc = ece_set_license(ece, "{a8098c1a-f86e-11da-bd1a-00112444be1e}"))
-            ||
-            (rc = ece_retr_sb_info(ece, &sb_info))
+    // bad value - must fail
+    TEST_ZERO ((rc = ece_set_license(ece, "a-b-c-d")) == 0);
+
+    // generate a random uuid
+    TEST_ZERO ((rc = ece_set_license(ece, qPrintable(QUuid::createUuid().toString()))));
+
+    // variant() = 2 (Distributed Computing Environment), version() = 4 (Random-based)
+    TEST_ZERO ((rc = ece_set_license(ece, "67C8770B-44F1-410A-AB9A-F9B5446F13EE")));
+
+    // variant() = 2 (Distributed Computing Environment), version() = 1 (Time-based)
+    TEST_ZERO ((rc = ece_set_license(ece, "{a8098c1a-f86e-11da-bd1a-00112444be1e}")));
+
+    TEST_ZERO ((rc = ece_retr_sb_info(ece, &sb_info)));
 #endif
-            ||
-            (rc = ece_retr_sb_cert(ece))
-            ||
-            (rc = ece_retr_sb_conf(ece, &sb_conf))
-            )
-        goto err;
+
+    TEST_ZERO ((rc = ece_retr_sb_cert(ece)));
+    TEST_ZERO ((rc = ece_retr_sb_conf(ece, &sb_conf)));
 
     fprintf(stderr, "# license valid: %d\n", ece_sb_info_get_license_valid(sb_info));
     fprintf(stderr, "# license expiry: %ld\n", ece_sb_info_get_license_expiry(sb_info));

@@ -5,9 +5,11 @@
 [ $# -eq 1 ] || exit 1
 
 if [ "$1" = "g" ]; then
-    WRAPPER=gdb
+    WRAPPER="gdb"
 elif [ "$1" = "s" ]; then
-    WRAPPER=strace
+    WRAPPER="strace"
+elif [ "$1" = "v" ]; then
+    WRAPPER="valgrind --leak-check=full --trace-children=yes"
 else
     exit 2
 fi

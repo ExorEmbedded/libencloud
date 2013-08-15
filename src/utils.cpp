@@ -1,19 +1,37 @@
 #include "utils.h"
+#include "helpers.h"
+#include "crypto.h"
 
 namespace EceUtils {
 
-/* TESTME @ W32: used for Subject CN - maximum 64 chars! */
+/** \brief Hardware info used for Subject CN which has maximum 64 chars => return an MD5 checksum! */
 QString getHwInfo (void)
 {
+    char *s = NULL;
+    QString res;
+
 #ifdef Q_OS_UNIX
-    return QString("undefined-on-unix-TODO-test-me-on-W32-SECE");
+    QString hwInfo = QString("undefined-on-unix-TODO-test-me-on-W32-SECE");
 #endif
 #ifdef Q_OS_WIN32
-    return QSettings(QLatin1String("HKLM\\Software\\Microsoft\\Cryptography"), QSettings::NativeFormat).\
+    QString hwInfo = QSettings(QLatin1String("HKLM\\Software\\Microsoft\\Cryptography"), QSettings::NativeFormat).\
                 value(QLatin1String("MachineGuid")).toString() + " " + \
             QSettings(QLatin1String("HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat).\
                 value(QLatin1String("ProcessorNameString")).toString();
 #endif
+    ECE_ERR_IF (hwInfo.isEmpty());
+
+    ECE_DBG("hwInfo=" << hwInfo);
+
+    ECE_ERR_IF ((s = ece_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
+    res = QString(s);
+
+    free(s);
+    return res;
+err:
+    if (s)
+        free(s);
+    return NULL;
 }
 
 QDateTime pytime2DateTime (QString pydate)

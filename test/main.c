@@ -10,16 +10,12 @@ int main (int argc, char *argv[])
 
     fprintf(stderr, "# testing libece version %s\n", ece_version());
 
-    if (
-            (rc = ece_create(argc, argv, &ece))
-            ||
-            (rc = ece_retr_sb_info(ece))
-            ||
-            (rc = ece_retr_sb_cert(ece))
-            ||
-            (rc = ece_retr_sb_conf(ece))
-       )
-        goto err;
+    TEST_ZERO (rc = ece_create(argc, argv, &ece));
+
+    TEST_ZERO (rc = ece_retr_sb_info(ece));
+    TEST_ZERO (rc = ece_retr_sb_cert(ece));
+
+    TEST_ZERO (rc = ece_retr_sb_conf(ece));
 
     ece_destroy(ece);
 

@@ -3,6 +3,7 @@
 #include <QtCore>
 #include "ece.h"
 #include "utils.h"
+#include "test.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,12 +30,8 @@ int main (int argc, char *argv[])
 #endif
     fprintf(stderr, "# hw_info: %s\n", qPrintable(EceUtils::getHwInfo()));
 
-    if (
-            test_crypto()
-            ||
-            test_ece(argc, argv)
-            )
-        goto err;
+    TEST_ZERO (test_crypto());
+    TEST_ZERO (test_ece(argc, argv));
 
     fprintf (stderr, "# All tests passed.\n");
     return EXIT_SUCCESS;

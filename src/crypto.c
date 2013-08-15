@@ -14,6 +14,7 @@
 
 static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey);
 
+/** \brief Initialize crypto context */
 int ece_crypto_init (ece_crypto_t *ec)
 {
     ECE_TRACE;
@@ -28,6 +29,7 @@ int ece_crypto_init (ece_crypto_t *ec)
     return 0;
 }
 
+/** \brief Release crypto context */
 int ece_crypto_term (ece_crypto_t *ec)
 {
     ECE_TRACE;
@@ -36,6 +38,7 @@ int ece_crypto_term (ece_crypto_t *ec)
     return 0;
 }
 
+/** \brief Set callback used by calling API to set X509 subject name values */
 int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx)
 {
     ECE_ERR_IF (ec == NULL);
@@ -202,6 +205,38 @@ err:
         X509_NAME_free(n);
     if (req)
         X509_REQ_free(req);
+
+    return NULL;
+}
+
+/** 
+ * \brief Calculate md5sum of {buf, buf_sz} and return it as a null-terminated string 
+ * 
+ * Result string must be free()d by caller.
+ */
+char *ece_crypto_md5 (ece_crypto_t *ec, char *buf, long buf_sz)
+{
+    unsigned char md5[MD5_DIGEST_LENGTH];
+    char *s = NULL;
+    long i;
+
+    ECE_UNUSED(ec);
+
+    ECE_ERR_IF (buf == NULL);
+    ECE_ERR_IF (buf_sz <= 0);
+
+    ECE_ERR_IF (!EVP_Digest(buf, buf_sz, md5, NULL, EVP_md5(), NULL));
+    ECE_ERR_IF ((s = (char *) calloc(1, sizeof(char) * MD5_DIGEST_LENGTH*2 + 1)) == NULL);
+
+    for (i = 0; i < MD5_DIGEST_LENGTH; i++)
+        sprintf(s + (i*2), "%02X", md5[i]);
+
+    s[MD5_DIGEST_LENGTH*2] = '\0';
+
+    return s;
+err:
+    if (s)
+        free(s);
 
     return NULL;
 }
