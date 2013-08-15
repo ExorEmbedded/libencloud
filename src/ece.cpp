@@ -221,7 +221,8 @@ ece_rc_t ece_retr_sb_cert (ece_t *ece)
     certfile.close();
 
     // all ok - now we can commit the temporary key
-    ECE_ERR_RC_IF (!QFile::remove(keyfn), ECE_RC_SYSERR);
+    QFile::remove(keyfn);
+    ECE_RETURN_IF (!tmpkey.setPermissions(QFile::ReadOwner|QFile::WriteOwner), ECE_RC_SYSERR);
     ECE_ERR_RC_IF (!tmpkey.rename(keyfn), ECE_RC_SYSERR);
 
     rc = ECE_RC_SUCCESS;
