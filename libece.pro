@@ -2,23 +2,10 @@ include(common.pri)
 
 TEMPLATE = subdirs
 
+SUBDIRS += include
 SUBDIRS += src
+SUBDIRS += etc
 SUBDIRS += test
-
-HEADERS += include/ece.h
-
-# header installation
-headers.path = $${INCDIR}
-headers.files = $${HEADERS}
-INSTALLS += headers
-
-# configuration file installation
-headers.path = $${INCDIR}
-conf.path = $${CONFDIR}
-conf.files += etc/*.json
-conf.files += etc/*.pem
-conf.files += etc/*.tmpl
-INSTALLS += conf
 
 # tests depend on build
 check.depends = all
