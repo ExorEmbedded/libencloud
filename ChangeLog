@@ -1,2 +1,5 @@
+libece 0.2a (DD/MM/YYYY):
+	- test/sb += double-CA/SNI test case
+
 libece 0.1a (16/08/2013):
 	- first alpha release for testing/integration
