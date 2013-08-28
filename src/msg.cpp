@@ -23,24 +23,14 @@ Ece::MessageRetrInfo::MessageRetrInfo ()
 
 ece_rc_t Ece::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
 {
-    QtJson::JsonObject jo;
-    QString js;
-
     url.setPath(ECE_CMD_GETINFO);
 
-    jo["lic"] = this->license.toString();
-    jo["hw_info"] = this->hwInfo;
+    params.addQueryItem("lic", this->license.toString());
+    params.addQueryItem("hw_info", this->hwInfo);
 
-    js = QtJson::serialize(jo);
-    ECE_ERR_IF (js.isEmpty());
-    
-    ECE_DBG(" ### >>>>> ### " << js);
-
-    params.addQueryItem(ECE_MSG_PARAM_DEFAULT, js);
+    ECE_DBG(" ### >>>>> ### " << params.toString());
 
     return ECE_RC_SUCCESS;
-err:
-    return ECE_RC_GENERIC;
 }
 
 ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
@@ -77,25 +67,15 @@ Ece::MessageRetrCert::MessageRetrCert ()
 
 ece_rc_t Ece::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 {
-    QtJson::JsonObject jo;
-    QString js;
-
     url.setPath(ECE_CMD_GETCERT);
 
-    jo["lic"] = this->license.toString();
-    jo["hw_info"] = this->hwInfo;
-    jo["certificate_request_data"] = this->csr;
+    params.addQueryItem("lic", this->license.toString());
+    params.addQueryItem("hw_info", this->hwInfo);
+    params.addQueryItem("certificate_request_data", this->csr);
 
-    js = QtJson::serialize(jo);
-    ECE_ERR_IF (js.isEmpty());
-    
-    ECE_DBG(" ### >>>>> ### " << js);
-
-    params.addQueryItem(ECE_MSG_PARAM_DEFAULT, js);
+    ECE_DBG(" ### >>>>> ### " << params.toString());
 
     return ECE_RC_SUCCESS;
-err:
-    return ECE_RC_GENERIC;
 }
 
 ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response, QString &errString)
@@ -133,7 +113,7 @@ ece_rc_t Ece::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
 
     url.setPath(ECE_CMD_GETCONFIG);
 
-    ECE_DBG(" ### >>>>> ### PLAIN GET!!! (no Json)");
+    ECE_DBG(" ### >>>>> ### GET (no params)");
 
     return ECE_RC_SUCCESS;
 }

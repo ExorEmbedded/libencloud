@@ -64,7 +64,7 @@ def handler_info (req):
     
     [..] here SB:
        - parses/checks received message
-       - checks validity of license 
+       - checks validity of license/hw_info
        - grabs CSR template 
     """
 
@@ -95,12 +95,11 @@ def handler_csr (req):
     csrfn = '/tmp/sbsim-csr.pem'
     certfn = '/tmp/sbsim-cert.pem'
 
-    js = urllib2.urlparse.parse_qs(req.read())['json'][0]
-    jo = json.loads(js)
+    params = urllib2.urlparse.parse_qs(req.read())
 
     # quick hack? URL decoding (correctly) changes '+' simbols to ' ', breaking
     # base64 CSR data => replace them back
-    csr = jo['certificate_request_data'].replace(' ', '+')
+    csr = params['certificate_request_data'][0].replace(' ', '+')
     # .. but rollback only start/end markers
     csr = csr.replace('--BEGIN+CERTIFICATE+REQUEST--', '--BEGIN CERTIFICATE REQUEST--')
     csr = csr.replace('--END+CERTIFICATE+REQUEST--', '--END CERTIFICATE REQUEST--')

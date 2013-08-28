@@ -9,9 +9,6 @@
 #include <QUuid>
 #include <ece.h>
 #include "helpers.h"
-//#include "json.h"
-
-#define ECE_MSG_PARAM_DEFAULT "json"
 
 namespace Ece {
 
