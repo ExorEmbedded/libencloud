@@ -30,7 +30,7 @@ class Message
 public:
     Message ();
     virtual ece_rc_t encodeRequest (QUrl &url, QUrl &params) = 0;
-    virtual ece_rc_t decodeResponse (QString &response) = 0;
+    virtual ece_rc_t decodeResponse (QString &response, QString &errString) = 0;
 
     //response outputs
     QDateTime time;
@@ -41,7 +41,7 @@ class MessageRetrInfo : public Message
 public:
     MessageRetrInfo ();
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
-    ece_rc_t decodeResponse (QString &response);
+    ece_rc_t decodeResponse (QString &response, QString &errString);
 
     //request inputs
     QUuid license;
@@ -58,7 +58,7 @@ class MessageRetrCert : public Message
 public:
     MessageRetrCert ();
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
-    ece_rc_t decodeResponse (QString &response);
+    ece_rc_t decodeResponse (QString &response, QString &errString);
 
     //request inputs
     QUuid license;
@@ -74,7 +74,7 @@ class MessageRetrConf : public Message
 public:
     MessageRetrConf ();
     ece_rc_t encodeRequest (QUrl &url, QUrl &params);
-    ece_rc_t decodeResponse (QString &response);
+    ece_rc_t decodeResponse (QString &response, QString &errString);
 
     //response outputs
     QString vpnIp;

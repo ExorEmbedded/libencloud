@@ -28,7 +28,7 @@ ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
     QUrl serviceURL;
     QUrl params;
     QSslConfiguration config;
-    QString response;
+    QString response, errString;
 
     // get proper configuration based on protocol type
     ECE_RETURN_IF (__loadSslConf(protocol, serviceURL, config), ECE_RC_BADPARAMS);
@@ -40,12 +40,15 @@ ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
     if ((rc = __run(serviceURL, params, config, response)))
         return rc;
 
-    ECE_DBG(" ### <<<<< ###  " << response);
+    ECE_ERR_RC_IF (message.decodeResponse(response, errString), ECE_RC_BADRESPONSE);
 
-    ECE_ERR_RC_IF (message.decodeResponse(response), ECE_RC_BADRESPONSE);
+    ECE_DBG(" ### <<<<< ###  " << response);
 
     return ECE_RC_SUCCESS;
 err:
+    if (!errString.isEmpty())
+        ECE_ERR("SB error: " << errString);
+    
     return rc;
 }
 
@@ -81,9 +84,14 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
             SLOT(networkErrorSlot(QNetworkReply::NetworkError)));
 
     ECE_ERR_IF (this->loop->exec());
-    ECE_ERR_IF (this->error != ECE_RC_SUCCESS);
 
-    ECE_ERR_MSG_IF(reply->error(),
+    // All NetworkError(s) currently handled by slot as ECE_RC_FAILED.
+    // Possible error code remappings (if required because they should not
+    // occur with proper configuration):
+    //  - handshake failed (6)
+    //  - key values mismatch (99)
+
+    ECE_ERR_MSG_IF(this->error || reply->error(),
             "Error in reply (" << reply->error() << "): " << reply->errorString());
     response = reply->readAll();
 
@@ -135,7 +143,7 @@ void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 { 
     ECE_UNUSED(err);
 
-    ECE_DBG("NetworkError (" << err << ")");
+    ECE_ERR("NetworkError (" << err << ")");
 
     this->error = ECE_RC_FAILED;
 }

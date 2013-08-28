@@ -43,11 +43,14 @@ err:
     return ECE_RC_GENERIC;
 }
 
-ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response)
+ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
     QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
     ECE_ERR_IF (!ok);
+
+    errString = jo["error"].toString();
+    ECE_ERR_IF (!errString.isEmpty());
 
     this->valid = jo["valid"].toBool();
 
@@ -95,11 +98,14 @@ err:
     return ECE_RC_GENERIC;
 }
 
-ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response)
+ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
     QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
     ECE_ERR_IF (!ok);
+
+    errString = jo["error"].toString();
+    ECE_ERR_IF (!errString.isEmpty());
 
     this->cert = QSslCertificate(jo["certificate"].toString().toAscii());
     ECE_ERR_IF (!this->cert.isValid());
@@ -132,11 +138,14 @@ ece_rc_t Ece::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
     return ECE_RC_SUCCESS;
 }
 
-ece_rc_t Ece::MessageRetrConf::decodeResponse (QString &response)
+ece_rc_t Ece::MessageRetrConf::decodeResponse (QString &response, QString &errString)
 {
     bool ok;
     QtJson::JsonObject jo = QtJson::parse(response, ok).toMap()["vpn"].toMap();
     ECE_ERR_IF (!ok);
+
+    errString = jo["error"].toString();
+    ECE_ERR_IF (!errString.isEmpty());
 
     this->vpnIp = jo["ip"].toString();
     ECE_ERR_IF (this->vpnIp.isEmpty());

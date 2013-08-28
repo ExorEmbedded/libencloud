@@ -3,8 +3,9 @@
 # Tiny Switchboard simulator for libece communication testing
 #
 # Prerequisites:
-#   * apache2 config:
+#   * apache2 config: sample in test/sb/default-ssl
 #   * demoCA directory setup in /var/www/ws1, with key unprotected by password
+#       Note: must point to CA2 (Operation)!
 #   * sudo chown -R www-data:www-data /var/www/
 #       (allows $RANDFILE to be written in $HOME - could change settings in /usr/lib/ssl/openssl.cnf)
 
@@ -15,7 +16,17 @@ import urllib2
 import subprocess
 import simplejson as json
 
+# testing
+#force_error = True
+force_error = False
+
+def err (s):
+
+    apache.log_error(s)
+
 def handler (req):
+
+    rc = apache.OK
 
     """
     # force timeout (testing)
@@ -27,17 +38,24 @@ def handler (req):
     req.send_http_header()
     req.content_type = 'application/json'
 
+    if force_error:
+        req.write(json.dumps({
+                    'time' : time.time(),
+                    'error' : 'test error message from SB'
+                    }))
+        return apache.OK
+
     if command == 'command.access.cloud.getInfo':
-        return handler_info(req)
+        rc = handler_info(req)
     elif command == 'command.access.cloud.getCertificate':
-        return handler_csr(req)
+        rc = handler_csr(req)
     elif command == 'command.access.cloud.getConfiguration':
-        return handler_conf(req)
+        rc = handler_conf(req)
     else:
         req.write('bad command: ' + command)
-        return apache.DECLINED
+        rc = apache.DECLINED
 
-    return apache.OK
+    return rc
 
 def handler_info (req):
 
