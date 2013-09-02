@@ -1,4 +1,4 @@
-libece 0.2a (DD/MM/YYYY):
+libece 0.2a (02/09/2013):
 	- QtJson (GPL) -> QJson (LGPL)
 	- contrib: produce.sh - basic keygen + csr tool
 	- test/sb += double-CA/SNI test case
