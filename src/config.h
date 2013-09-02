@@ -14,9 +14,6 @@
 #include "defaults.h"
 #include "helpers.h"
 
-using QtJson::JsonObject;
-using QtJson::JsonArray;
-
 namespace Ece {
 
 typedef struct
@@ -50,18 +47,18 @@ public:
 
     /* Configuration loading */
     int loadFromFile (QString filename);
-    static JsonObject fileToJson (QString filename);
+    static QVariantMap fileToJson (QString filename);
 
     /* Configuration objects are publicly accessible */
     ece_config_t config;
     QSettings *settings;
 
 private:
-    int __parse (const JsonObject &jo);
-    int __parse_sb (const JsonObject &jo);
-    int __parse_sslInit (const JsonObject &jo);
-    int __parse_sslOp (const JsonObject &jo);
-    int __parse_ssl (const JsonObject &jo, ece_config_ssl_t &sc);
+    int __parse (const QVariantMap &jo);
+    int __parse_sb (const QVariantMap &jo);
+    int __parse_sslInit (const QVariantMap &jo);
+    int __parse_sslOp (const QVariantMap &jo);
+    int __parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc);
     QString __join_paths (const QString &s1, const QString &s2);
 };
 

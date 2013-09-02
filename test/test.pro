@@ -5,6 +5,7 @@ TEMPLATE = app
 TARGET = test
 
 SOURCES += main.cpp
+SOURCES += json.cpp
 SOURCES += crypto.cpp
 SOURCES += ece.cpp
 
@@ -16,4 +17,10 @@ LIBS += -lssl -lcrypto
 # libece
 LIBS += -L../src -lece
 
-check.commands = LD_LIBRARY_PATH=../src ./test
+# json - external linkage only for QJson
+contains(CONFIG, qjson) {
+    LIBS += -lqjson
+}
+
+# command to run upon 'make check'
+check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR ./test

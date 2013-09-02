@@ -10,11 +10,17 @@ functionality to handle:
 JSON-over-HTTPS communication channel, PKI management and licensing details.
 
 [ Build ]
+                                                Tested version (s)
+                                                ^^^^^^^^^^^^^^
+Linux                                           Ubuntu 12.04
 
-Tested on Ubuntu 12.04. Install dependencies:
+Install dependencies:
 
-$ sudo apt-get install qtcreator
-$ sudo apt-get install libssl-dev
+$ sudo apt-get install qtcreator                2.4.1-0ubuntu2
+$ sudo apt-get install libssl-dev               1.0.1-4ubuntu5.10
+
+Install QJson as per instructions here:         0.8.1
+http://qjson.sourceforge.net/build/       
 
 Enter package directory, then:
 

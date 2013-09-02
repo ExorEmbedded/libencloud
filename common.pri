@@ -9,6 +9,10 @@ QT -= gui
 # debugging
 CONFIG += debug
 
+# json
+#CONFIG += qtjson  # GPL/self-contained
+CONFIG += qjson   # LGPL/external (default)
+
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
 
 # uncomment or set globally to avoid debug output
@@ -28,7 +32,7 @@ BINDIR = $${INSTALLDIR}/bin
 INCDIR = $${INSTALLDIR}/include
 CONFDIR = /etc/ece
 
-## keep build files separate from sources
-# UI_DIR = build/uics
-# MOC_DIR = build/mocs
-# OBJECTS_DIR = build/objs
+# keep build files separate from sources
+UI_DIR = build/uics
+MOC_DIR = build/mocs
+OBJECTS_DIR = build/objs

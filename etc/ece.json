@@ -9,7 +9,7 @@
 
   "csr" : {
     "tmpl" : "/etc/ece/csr-tmpl.json"
-  }
+  },
 
   "ssl_init" : {
     "cacert" : "/etc/ece/cacert1.pem",

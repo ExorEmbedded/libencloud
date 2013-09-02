@@ -1,10 +1,17 @@
 #ifndef _ECE_TEST_H_
 #define _ECE_TEST_H_
 
+#include <stdio.h>
+
 #include "helpers.h"
-// don't depend on Qt for debug
-#undef __ECE_MSG
-#define __ECE_MSG(lev,msg) __ECE_PRINT(lev, msg)
+
+// if compiling with gcc, don't depend on Qt for debug
+#ifndef __cplusplus
+  #undef __ECE_MSG
+  #define __ECE_MSG(lev,msg) __ECE_PRINT(lev, msg)
+#else
+  #include <QDebug>
+#endif
 
 #define TEST_ZERO(z) ECE_ERR_IF(z)
 #define TEST_EQUALS(x,y) ECE_ERR_IF(x!=y)

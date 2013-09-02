@@ -1,6 +1,7 @@
 #ifndef _ECE_H_
 #define _ECE_H_
 
+#include <time.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus

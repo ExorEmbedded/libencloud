@@ -40,41 +40,25 @@ Config::~Config()
 int Config::loadFromFile (QString filename)
 {
     ECE_TRACE;
+    bool ok;
 
     QString fn = __join_paths(QString(ECE_PREFIX_PATH), filename);
     ECE_DBG("filename=" << fn);
 
-    JsonObject jo = fileToJson(fn);
+    QVariant json = EceJson::parseFromFile(fn, ok);
+    ECE_ERR_IF (!ok);
 
-    ECE_DBG(QtJson::serialize(jo));
-    ECE_ERR_IF (__parse(jo));
+    ECE_DBG(EceJson::serialize(json, ok));
+    ECE_ERR_IF (!ok);
+
+    ECE_ERR_IF (__parse(json.toMap()));
 
     return 0;
 err: 
     return ~0;
 }
 
-JsonObject Config::fileToJson (QString filename)
-{
-    QFile f(filename);
-    JsonObject jo;
-
-    ECE_RETURN_MSG_IF (!f.open(QFile::ReadOnly | QFile::Text), jo,
-        "failed reading config file: " << filename);
-
-    bool ok;
-    QTextStream ts(&f);
-    QString json = ts.readAll();
-    ECE_ERR_IF (json.isEmpty());
-
-    jo = QtJson::parse(json, ok).toMap();
-    ECE_ERR_IF (!ok);
-
-err:
-    return jo;
-}
-
-int Config::__parse (const JsonObject &jo)
+int Config::__parse (const QVariantMap &jo)
 {
     config.prefix = jo["prefix"].toString();
     ECE_DBG("prefix=" << config.prefix.absoluteFilePath());
@@ -91,6 +75,8 @@ int Config::__parse (const JsonObject &jo)
     ECE_ERR_IF (__parse_sslOp(jo["ssl_op"].toMap()));
 
     config.rsaBits = jo["rsa"].toMap()["bits"].toInt();
+    ECE_ERR_MSG_IF ((config.rsaBits == 0 || (config.rsaBits % 512) != 0),
+            "rsa bits must be a multiple of 512!");
     ECE_DBG("rsa bits=" << config.rsaBits);
 
     return 0;
@@ -98,7 +84,7 @@ err:
     return ~0;
 }
 
-int Config::__parse_sb (const JsonObject &jo)
+int Config::__parse_sb (const QVariantMap &jo)
 {
     config.sbUrl = jo["url"].toString();
 
@@ -107,17 +93,17 @@ int Config::__parse_sb (const JsonObject &jo)
     return 0;
 }
 
-int Config::__parse_sslInit (const JsonObject &jo)
+int Config::__parse_sslInit (const QVariantMap &jo)
 {
     return __parse_ssl(jo, config.sslInit);
 }
 
-int Config::__parse_sslOp (const JsonObject &jo)
+int Config::__parse_sslOp (const QVariantMap &jo)
 {
     return __parse_ssl(jo, config.sslOp);
 }
 
-int Config::__parse_ssl (const JsonObject &jo, ece_config_ssl_t &sc)
+int Config::__parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc)
 {
     sc.cacertPath = __join_paths(config.prefix.absoluteFilePath(), jo["cacert"].toString());
     ECE_DBG("cacert=" << sc.cacertPath.absoluteFilePath());
@@ -131,9 +117,13 @@ int Config::__parse_ssl (const JsonObject &jo, ece_config_ssl_t &sc)
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
         sc.sbUrl = config.sbUrl;
+    ECE_ERR_MSG_IF (sc.sbUrl.isEmpty(),
+            "sb url undefined!");
     ECE_DBG("sb url=" << sc.sbUrl.toString());
 
     return 0;
+err:
+    return ~0;
 }
 
 QString Config::__join_paths (const QString &s1, const QString &s2)

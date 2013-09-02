@@ -152,6 +152,7 @@ ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
     Ece::MessageRetrInfo msg;
     QString csrfn = ece->cfg->config.csrTmplPath.absoluteFilePath();
     QFile csr(csrfn);
+    bool ok;
 
     msg.license = QUuid(ece->cfg->settings->value("lic").toString());
     ECE_RETURN_IF (msg.license.isNull(), ECE_RC_NOLICENSE);
@@ -165,7 +166,7 @@ ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
 
     // save the CSR template to file
     ECE_ERR_RC_IF (!csr.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
-    ECE_ERR_RC_IF (csr.write(QtJson::serialize(msg.csrTmpl)) == -1, ECE_RC_SYSERR);
+    ECE_ERR_RC_IF (csr.write(EceJson::serialize(msg.csrTmpl, ok).toAscii()) == -1, ECE_RC_SYSERR);
     csr.close();
 
     *pinfo = &ece->sb_info;
@@ -355,11 +356,15 @@ static int __name_cb (X509_NAME *n, void *arg)
     ECE_RETURN_IF (n == NULL, ~0);
     ECE_RETURN_IF (arg == NULL, ~0);
 
+    QVariant json;
+    QVariantMap map;
     ece_t *ece = (ece_t *) arg;
+    bool ok;
 
-    JsonObject jo = Ece::Config::fileToJson(ece->cfg->config.csrTmplPath.absoluteFilePath());
+    json = EceJson::parseFromFile(ece->cfg->config.csrTmplPath.absoluteFilePath(), ok);
+    ECE_ERR_IF (!ok);
 
-    QVariantMap map = jo["DN"].toMap();
+    map = json.toMap()["DN"].toMap();
 
     // parse DN fields
     for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)

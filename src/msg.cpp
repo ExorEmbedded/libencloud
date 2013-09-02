@@ -36,7 +36,7 @@ ece_rc_t Ece::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
 ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
-    QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
+    QVariantMap jo = EceJson::parse(response, ok).toMap();
     ECE_ERR_IF (!ok);
 
     errString = jo["error"].toString();
@@ -81,7 +81,7 @@ ece_rc_t Ece::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
-    QtJson::JsonObject jo = QtJson::parse(response, ok).toMap();
+    QVariantMap jo = EceJson::parse(response, ok).toMap();
     ECE_ERR_IF (!ok);
 
     errString = jo["error"].toString();
@@ -121,7 +121,7 @@ ece_rc_t Ece::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
 ece_rc_t Ece::MessageRetrConf::decodeResponse (QString &response, QString &errString)
 {
     bool ok;
-    QtJson::JsonObject jo = QtJson::parse(response, ok).toMap()["vpn"].toMap();
+    QVariantMap jo = EceJson::parse(response, ok).toMap()["vpn"].toMap();
     ECE_ERR_IF (!ok);
 
     errString = jo["error"].toString();

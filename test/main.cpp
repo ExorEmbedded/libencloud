@@ -9,6 +9,7 @@
 extern "C" {
 #endif
 
+int test_json ();
 int test_crypto ();
 int test_ece (int argc, char *argv[]);
 
@@ -30,6 +31,7 @@ int main (int argc, char *argv[])
 #endif
     fprintf(stderr, "# hw_info: %s\n", qPrintable(EceUtils::getHwInfo()));
 
+    TEST_ZERO (test_json());
     TEST_ZERO (test_crypto());
     TEST_ZERO (test_ece(argc, argv));
 
