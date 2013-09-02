@@ -15,15 +15,19 @@ TARFILE = $${PKGNAME}-$${VERSION}.tar.gz
 dist.target = dist
 dist.depends = all
 dist.commands = @( \
-                echo Making tar package $${TARFILE}; \
+                echo "Making tar package $${TARFILE}"; \
                 if [ -e .svn ]; then \
-                    # under VCS \
+                    echo "found VCS: SVN"; \
                     find . -type f -not -iwholename '*.svn*' | \
                     xargs svn status -v 2>/dev/null | grep -v "^[?I]" | \
                     sed 's,^\\ ,-,' | sed 's,A*+,,' | \
                     tr -s "[:space:]" | cut -d '\\ ' -f 5 | \
                     xargs tar czf .$${TARFILE}; \
+                elif [ -e .git ]; then \
+                    echo "found VCS: GIT"; \
+                    git ls-files | xargs tar czf .$${TARFILE}; \
                 else \
+                    echo "[warn] no VCS found"; \
                     # not under VCS \
                     find . -type f -not -name Makefile | \
                     xargs tar czf .$${TARFILE}; \
