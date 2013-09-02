@@ -1,6 +1,6 @@
 # global defs
 PKGNAME = libece
-VERSION = 0.2a
+VERSION = 0.2.1-wip
 
 QT += core
 QT += network

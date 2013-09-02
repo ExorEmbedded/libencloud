@@ -1,0 +1,18 @@
+# globally ignored extensions
+*~
+*.a
+*.la
+*.o
+*.lo
+*.so
+*.so.*
+
+# build files
+Makefile
+etc/Makefile
+include/Makefile
+src/Makefile
+src/build/
+test/Makefile
+test/build/
+test/test

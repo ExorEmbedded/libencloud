@@ -1,3 +1,6 @@
+libece 0.2.1-wip (DD/MM/YYYY):
+	- added .gitignore
+
 libece 0.2a (02/09/2013):
 	- QtJson (GPL) -> QJson (LGPL)
 	- contrib: produce.sh - basic keygen + csr tool
