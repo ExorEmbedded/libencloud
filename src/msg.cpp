@@ -50,7 +50,10 @@ ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response, QString &errSt
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());
 
-    this->csrTmpl = jo["csr_tmpl"];
+    this->csrTmpl = jo["csr_template"];
+
+    this->caCert = QSslCertificate(jo["ca_cert"].toString().toAscii());
+    ECE_ERR_IF (!this->caCert.isValid());
 
     return ECE_RC_SUCCESS;
 err:

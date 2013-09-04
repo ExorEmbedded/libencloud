@@ -4,7 +4,7 @@
 #
 # Prerequisites:
 #   * apache2 config: sample in test/sb/default-ssl
-#   * demoCA directory setup in /var/www/ws1, with key unprotected by password
+#   * demoCA directory setup in op_ca_dir (/var/www/ws1), with key unprotected by password
 #       Note: must point to CA2 (Operation)!
 #   * sudo chown -R www-data:www-data /var/www/
 #       (allows $RANDFILE to be written in $HOME - could change settings in /usr/lib/ssl/openssl.cnf)
@@ -15,6 +15,10 @@ import time
 import urllib2
 import subprocess
 import simplejson as json
+
+# directory where demoCA
+op_ca_dir = '/var/www/ws1'
+op_cacert_fn = os.path.join(op_ca_dir, 'demoCA/cacert.pem')
 
 # testing
 #force_error = True
@@ -69,11 +73,12 @@ def handler_info (req):
     """
 
     day = 60*60*24;
+    cacert = open(op_cacert_fn, 'r')
 
     req.write(json.dumps({
                 'valid' : True,
                 'expiry' : time.time() + 30*day,
-                'csr_tmpl' :
+                'csr_template' :
                     { 'DN' :
                         {
                         'C' : 'AU',
@@ -82,15 +87,19 @@ def handler_info (req):
                         # CN added by ECE
                         }
                     },
+                # note: cert could be run through 'openssl x509' to get PEM-only part
+                'ca_cert' : cacert.read(),
                 'time' : time.time()
                 }))
+
+    cacert.close()
 
     return apache.OK
 
 def handler_csr (req):
 
     # enter demoCA context dir
-    os.chdir('/var/www/ws1')
+    os.chdir(op_ca_dir)
 
     csrfn = '/tmp/sbsim-csr.pem'
     certfn = '/tmp/sbsim-cert.pem'
@@ -128,6 +137,7 @@ def handler_csr (req):
     certf.close()
 
     req.write(json.dumps({
+                # note: cert could be run through 'openssl x509' to get PEM-only part
                 'certificate' : cert,
                 'time' : time.time()
                 }))
@@ -145,7 +155,7 @@ def handler_conf (req):
                     'ip' : '192.168.0.169', 
                     'port' : 443,
                     'proto' : 'tcp',
-                    'type' : 'tap',
+                    'type' : 'tap'
                     }
                 }))
     

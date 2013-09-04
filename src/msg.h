@@ -48,6 +48,7 @@ public:
     bool valid;
     QDateTime expiry;
     QVariant csrTmpl;
+    QSslCertificate caCert;
 };
 
 class MessageRetrCert : public Message 
