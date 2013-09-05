@@ -177,9 +177,10 @@ static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey)
     X509_REQ *req = NULL;
     X509_NAME *n = NULL;
     EVP_MD_CTX mctx;
-    EVP_MD_CTX_init(&mctx);
     EVP_PKEY_CTX *pkctx = NULL;
     const EVP_MD *digest = NULL;
+
+    EVP_MD_CTX_init(&mctx);
 
     ECE_ERR_IF (ec == NULL);
     ECE_ERR_IF (pkey == NULL);

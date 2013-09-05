@@ -8,8 +8,8 @@
 
 namespace EceUtils {
 
-QString getHwInfo (void);
-QDateTime pytime2DateTime (QString pydate);
+ECE_DLLSPEC QString getHwInfo (void);
+ECE_DLLSPEC QDateTime pytime2DateTime (QString pydate);
 
 } // namespace EceUtils
 

@@ -26,16 +26,16 @@ struct ece_crypto_s
 typedef struct ece_crypto_s ece_crypto_t;
 
 /* Initialization/Termination */
-int ece_crypto_init (ece_crypto_t *ec);
-int ece_crypto_term (ece_crypto_t *ec);
+ECE_DLLSPEC int ece_crypto_init (ece_crypto_t *ec);
+ECE_DLLSPEC int ece_crypto_term (ece_crypto_t *ec);
 
 /* Callbacks */
-int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
+ECE_DLLSPEC int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
 
 /* Crypto methods */
-int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile);
-int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **buf, long *buf_sz);
-char * ece_crypto_md5 (ece_crypto_t *ec, char *buf, long buf_sz);
+ECE_DLLSPEC int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile);
+ECE_DLLSPEC int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **buf, long *buf_sz);
+ECE_DLLSPEC char * ece_crypto_md5 (ece_crypto_t *ec, char *buf, long buf_sz);
 
 #ifdef __cplusplus
 }

@@ -9,13 +9,23 @@ SOURCES += json.cpp
 SOURCES += crypto.cpp
 SOURCES += ece.cpp
 
+HEADERS += test.h
+
 INCLUDEPATH += ../src
 
-# openssl
-LIBS += -lssl -lcrypto
-
 # libece
-LIBS += -L../src -lece
+win32 {
+    *-g++* {
+        # MinGW
+        LIBS += ../src/$$DESTDIR/libece0.a
+    }
+    *-msvc* {
+        # MSVC
+        LIBS += ../src/$$DESTDIR/ece.lib
+    }
+} else {
+    LIBS += -L../src/ -lece
+}
 
 # json - external linkage only for QJson
 contains(CONFIG, qjson) {

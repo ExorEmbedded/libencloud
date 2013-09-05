@@ -3,6 +3,14 @@ include(../common.pri)
 TEMPLATE = lib
 
 TARGET = ece
+win32 {
+    CONFIG += dll
+    # disable number in mingw output (libece0.dll vs libece.dll)
+    TARGET_EXT = .dll
+}
+
+# define used to select dllimport/dllexport attributes
+DEFINES += _ECELIB_
 
 HEADERS += helpers.h
 HEADERS += defaults.h
@@ -41,8 +49,6 @@ SOURCES += utils.cpp
 HEADERS += crypto.h
 SOURCES += crypto.c
 
-# openssl
-LIBS += -lssl -lcrypto
 
 target.path = $$LIBDIR
 INSTALLS += target

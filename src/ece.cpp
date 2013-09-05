@@ -111,7 +111,7 @@ ece_rc_t ece_destroy (ece_t *ece)
  * The license is saved to a persistent Setting object ("lic" key in
  * ECE_SETTINGS_ORG:ECE_SETTINGS_APP as defined in defaults.h.
  */
-ece_rc_t ece_set_license (ece_t *ece, const char *guid)
+ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid)
 {
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
     ECE_RETURN_IF (guid == NULL, ECE_RC_BADPARAMS);
@@ -142,7 +142,7 @@ ece_rc_t ece_set_license (ece_t *ece, const char *guid)
  * 
  * Note: 'pinfo' points to an internal object (no memory management necessary).
  */
-ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
+ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
 {
     ECE_TRACE;
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
@@ -188,7 +188,7 @@ err:
  * 
  * Upon success, a new certificate is returned and stored internally.
  */
-ece_rc_t ece_retr_sb_cert (ece_t *ece)
+ECE_DLLSPEC ece_rc_t ece_retr_sb_cert (ece_t *ece)
 {
     ECE_TRACE;
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
@@ -243,7 +243,7 @@ err:
  * 
  * Note: 'pconf' points to an internal object (no memory management necessary).
  */
-ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf)
+ECE_DLLSPEC ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf)
 {
     ece_rc_t rc = ECE_RC_SUCCESS;
     Ece::MessageRetrConf msg;
@@ -265,7 +265,7 @@ ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf)
 }
 
 /** \brief Is license valid? */
-bool ece_sb_info_get_license_valid (ece_sb_info_t *info)
+ECE_DLLSPEC bool ece_sb_info_get_license_valid (ece_sb_info_t *info)
 {
     ECE_RETURN_IF (info == NULL, false);
 
@@ -273,7 +273,7 @@ bool ece_sb_info_get_license_valid (ece_sb_info_t *info)
 }
 
 /** \brief Get certificate expiry - expressed in seconds since Epoch */
-time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info)
+ECE_DLLSPEC time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info)
 {
     ECE_RETURN_IF (info == NULL, -1);
 
@@ -281,7 +281,7 @@ time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info)
 }
 
 /** \brief Get VPN IP address */
-char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf)
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf)
 {
     ECE_RETURN_IF (conf == NULL, NULL);
 
@@ -289,7 +289,7 @@ char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf)
 }
 
 /** \brief Get VPN port */
-int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf)
+ECE_DLLSPEC int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf)
 {
     ECE_RETURN_IF (conf == NULL, -1);
 
@@ -297,7 +297,7 @@ int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf)
 }
 
 /** \brief Get VPN protocol */
-char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf)
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf)
 {
     ECE_RETURN_IF (conf == NULL, NULL);
 
@@ -305,7 +305,7 @@ char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf)
 }
 
 /** \brief Get VPN type */
-char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf)
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf)
 {
     ECE_RETURN_IF (conf == NULL, NULL);
 
@@ -313,13 +313,13 @@ char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf)
 }
 
 /** \brief Return ECE version string */
-const char *ece_version ()
+ECE_DLLSPEC const char *ece_version ()
 {
     return ECE_VERSION;
 }
 
 /** \brief Convert a return code to string representation */
-const char *ece_strerror (ece_rc_t rc)
+ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc)
 {
     switch (rc)
     {

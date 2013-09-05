@@ -1,6 +1,18 @@
 #ifndef _ECE_H_
 #define _ECE_H_
 
+#ifndef ECE_DLLSPEC
+#  if defined(ECE_WIN32)
+#    if defined _ECELIB_
+#       define ECE_DLLSPEC __declspec(dllexport)
+#    else
+#       define ECE_DLLSPEC __declspec(dllimport)
+#    endif
+#  else
+#    define ECE_DLLSPEC
+#  endif
+#endif
+
 #include <time.h>
 #include <stdbool.h>
 
@@ -26,42 +38,42 @@ typedef enum
 ece_rc_t;
 
 /* Main ECE structure */
-struct ece_s;
+struct ECE_DLLSPEC ece_s;
 typedef struct ece_s ece_t;
 
 /* SB Info structure */
-struct ece_sb_info_s;
+struct ECE_DLLSPEC ece_sb_info_s;
 typedef struct ece_sb_info_s ece_sb_info_t;
 
 /* SB Config structure */
-struct ece_sb_conf_s;
+struct ECE_DLLSPEC ece_sb_conf_s;
 typedef struct ece_sb_conf_s ece_sb_conf_t;
 
 /* Constructor/Destructor */
-ece_rc_t ece_create (int argc, char *argv[], ece_t **pece);
-ece_rc_t ece_destroy (ece_t *ece);
+ECE_DLLSPEC ece_rc_t ece_create (int argc, char *argv[], ece_t **pece);
+ECE_DLLSPEC ece_rc_t ece_destroy (ece_t *ece);
 
 /* Licensing */
-ece_rc_t ece_set_license (ece_t *ece, const char *guid);
+ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid);
 
 /* Communication */
-ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo);
-ece_rc_t ece_retr_sb_cert (ece_t *ece);
-ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf);
+ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo);
+ECE_DLLSPEC ece_rc_t ece_retr_sb_cert (ece_t *ece);
+ECE_DLLSPEC ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf);
 
 /* Accessor methods - ece_sb_info_t */
-bool ece_sb_info_get_license_valid (ece_sb_info_t *info);
-time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info);
+ECE_DLLSPEC bool ece_sb_info_get_license_valid (ece_sb_info_t *info);
+ECE_DLLSPEC time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info);
 
 /* Accessor methods - ece_sb_conf_t */
-char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf);
-int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf);
-char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf);
-char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf);
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf);
+ECE_DLLSPEC int ece_sb_conf_get_vpn_port (ece_sb_conf_t *conf);
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf);
+ECE_DLLSPEC char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf);
 
 /* Other */
-const char *ece_version ();
-const char *ece_strerror (ece_rc_t rc);
+ECE_DLLSPEC const char *ece_version ();
+ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc);
 
 #ifdef __cplusplus
 }

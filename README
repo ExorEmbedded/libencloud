@@ -39,6 +39,17 @@ Run tests with:
 
 $ make check  # Note: requires Switchboard or simulator.
 
+Windows
+
+Install qt 4.8 (MinGW or VS2008 version) and qtcreator (or sdk) from here http://qt-project.org/downloads/
+Install openssl 1.0.1e from here http://slproweb.com/download/Win32OpenSSL-1_0_1e.exe
+
+Open the project file with qtcreator and select the kit (MinGW or VS2008).
+
+Add the environment variable OPENSSL_INCLUDEPATH to build environment (otherwise use default path c:\openssl).
+
+Run qmake and build.
+
 [ Logging ]
 
 Follow syslog() numbering, for example modifying common.pri as follows:
