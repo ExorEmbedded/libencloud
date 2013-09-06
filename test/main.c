@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ece.h>
+#include "test.h"
 
 int main (int argc, char *argv[])
 {
@@ -12,10 +13,10 @@ int main (int argc, char *argv[])
 
     TEST_ZERO (rc = ece_create(argc, argv, &ece));
 
-    TEST_ZERO (rc = ece_retr_sb_info(ece));
+    TEST_ZERO (rc = ece_retr_sb_info(ece, NULL));
     TEST_ZERO (rc = ece_retr_sb_cert(ece));
 
-    TEST_ZERO (rc = ece_retr_sb_conf(ece));
+    TEST_ZERO (rc = ece_retr_sb_conf(ece, NULL));
 
     ece_destroy(ece);
 

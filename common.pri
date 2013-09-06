@@ -1,17 +1,27 @@
 # global defs
 PKGNAME = libece
-VERSION = 0.2.1-wip
+# only x.x.x.x format allowed, where x is a number
+VERSION = 0.2.1
+QMAKE_TARGET_COMPANY = Endian
+QMAKE_TARGET_PRODUCT = libECE
+QMAKE_TARGET_DESCRIPTION = libECE
+QMAKE_TARGET_COPYRIGHT =
+
 
 QT += core
 QT += network
 QT -= gui
 
-# debugging
-CONFIG += debug
+# debugging: pass it from command line: qmake CONFIG+=debug
+# CONFIG += debug
 
 # json
-#CONFIG += qtjson  # GPL/self-contained
-CONFIG += qjson   # LGPL/external (default)
+win32 {
+    CONFIG += qtjson  # GPL/self-contained
+    DEFINES += ECE_WIN32 _CRT_SECURE_NO_WARNINGS
+} else {
+    CONFIG += qjson   # LGPL/external (default)
+}
 
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
 
@@ -25,6 +35,20 @@ DEFINES += ECE_LOGLEVEL=3
 # public API is included globally
 INCLUDEPATH += ../include
 
+# openssl
+OPENSSLPATH = $$(OPENSSL_INSTALLPATH)
+windows{
+    isEmpty(OPENSSLPATH){
+        OPENSSLPATH="c:\\openssl"
+    }
+    INCLUDEPATH += "$$OPENSSLPATH\\include\\"
+    LIBS += $$OPENSSLPATH\\lib\\libeay32.lib
+} else {
+    LIBS += -lssl -lcrypto
+}
+
+
+
 # install dirs
 INSTALLDIR = /usr/local
 LIBDIR = $${INSTALLDIR}/lib
@@ -36,3 +60,5 @@ CONFDIR = /etc/ece
 UI_DIR = build/uics
 MOC_DIR = build/mocs
 OBJECTS_DIR = build/objs
+Release:DESTDIR = release
+Debug:DESTDIR = debug
