@@ -331,6 +331,12 @@ ECE_DLLSPEC const char *ece_version ()
     return ECE_VERSION;
 }
 
+/** \brief Return ECE revision (GIT commit ID) */
+ECE_DLLSPEC const char *ece_revision ()
+{
+    return ECE_REVISION;
+}
+
 /** \brief Convert a return code to string representation */
 ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc)
 {

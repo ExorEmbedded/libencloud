@@ -24,6 +24,7 @@ win32 {
 }
 
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
+DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
@@ -46,8 +47,6 @@ windows{
 } else {
     LIBS += -lssl -lcrypto
 }
-
-
 
 # install dirs
 INSTALLDIR = /usr/local

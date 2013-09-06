@@ -9,7 +9,8 @@ int main (int argc, char *argv[])
 
     ece_t *ece = NULL;
 
-    fprintf(stderr, "# testing libece version %s\n", ece_version());
+    fprintf(stderr, "# testing libece version %s (rev: %s)\n",
+            ece_version(), ece_revision());
 
     TEST_ZERO (rc = ece_create(argc, argv, &ece));
 
