@@ -20,7 +20,8 @@ int test_ece (int argc, char *argv[]);
 int main (int argc, char *argv[])
 {
     fprintf(stderr, "#\n");
-    fprintf(stderr, "# testing libece version %s\n", ece_version());
+    fprintf(stderr, "# testing libece version %s (rev: %s)\n",
+            ece_version(), ece_revision());
     fprintf(stderr, "#\n");
 
 #ifdef Q_OS_UNIX
