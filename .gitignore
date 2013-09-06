@@ -6,8 +6,9 @@
 *.lo
 *.so
 *.so.*
+*.tar.gz
 
-# build files
+# build-generated files
 Makefile
 etc/Makefile
 include/Makefile
@@ -16,3 +17,6 @@ src/build/
 test/Makefile
 test/build/
 test/test
+
+# dist-generated files
+/libece-*

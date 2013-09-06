@@ -1,4 +1,6 @@
 libece 0.2.1-wip (DD/MM/YYYY):
+	- contrib: produce.sh extensions
+	- SB API: getInfo returns Operation CA Cert; s/csr_tmpl/csr_template
 	- added .gitignore
 
 libece 0.2a (02/09/2013):

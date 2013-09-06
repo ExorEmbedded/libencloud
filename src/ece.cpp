@@ -151,7 +151,10 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
     ece_rc_t rc = ECE_RC_GENERIC;
     Ece::MessageRetrInfo msg;
     QString csrfn = ece->cfg->config.csrTmplPath.absoluteFilePath();
-    QFile csr(csrfn);
+    QFile csrf(csrfn);
+    QString cacertfn = ece->cfg->config.sslOp.cacertPath.absoluteFilePath();
+    QFile cacertf(cacertfn);
+
     bool ok;
 
     msg.license = QUuid(ece->cfg->settings->value("lic").toString());
@@ -165,14 +168,24 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
     ece->sb_info.license_expiry = msg.expiry.toTime_t();
 
     // save the CSR template to file
-    ECE_ERR_RC_IF (!csr.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
-    ECE_ERR_RC_IF (csr.write(EceJson::serialize(msg.csrTmpl, ok).toAscii()) == -1, ECE_RC_SYSERR);
-    csr.close();
+    ECE_ERR_RC_IF (!csrf.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
+    ECE_ERR_RC_IF (csrf.write(EceJson::serialize(msg.csrTmpl, ok).toAscii()) == -1, ECE_RC_SYSERR);
+    csrf.close();
+
+    // save the Operation CA certificate to file
+    ECE_ERR_RC_IF (!cacertf.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
+    ECE_ERR_RC_IF (cacertf.write(msg.caCert.toPem()) == -1, ECE_RC_SYSERR);
+    cacertf.close();
 
     *pinfo = &ece->sb_info;
 
     rc = ECE_RC_SUCCESS;
 err:
+    if (rc) {
+        csrf.close();
+        cacertf.close();
+    }
+
     return rc;
 }
 
