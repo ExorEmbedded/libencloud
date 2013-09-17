@@ -1,4 +1,5 @@
 libece 0.2.1-wip (DD/MM/YYYY):
+	- yocto wip: added LICENSE file
 	- ece_revision() returns GIT commit ID
 	- contrib: produce.sh extensions
 	- SB API: getInfo returns Operation CA Cert; s/csr_tmpl/csr_template
