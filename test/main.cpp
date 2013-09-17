@@ -19,27 +19,26 @@ int test_ece (int argc, char *argv[]);
 
 int main (int argc, char *argv[])
 {
-    fprintf(stderr, "#\n");
-    fprintf(stderr, "# testing libece version %s (rev: %s)\n",
-            ece_version(), ece_revision());
-    fprintf(stderr, "#\n");
+    qDebug() << "#";
+    qDebug() << "# testing libece version " << ece_version() << " (commit: " << ece_commit() <<  ")";
+    qDebug() << "#";
 
 #ifdef Q_OS_UNIX
-    fprintf(stderr, "# OS: Unix\n");
+    qDebug() << "# OS: Unix";
 #endif
 #ifdef Q_OS_WIN32
-    fprintf(stderr, "# OS: W32\n");
+    qDebug() << "# OS: W32";
 #endif
-    fprintf(stderr, "# hw_info: %s\n", qPrintable(EceUtils::getHwInfo()));
+    qDebug() << "# hw_info: " << EceUtils::getHwInfo();
 
     TEST_ZERO (test_json());
     TEST_ZERO (test_crypto());
     TEST_ZERO (test_ece(argc, argv));
 
-    fprintf (stderr, "# All tests passed.\n");
+    qDebug() << "# All tests passed.";
     return EXIT_SUCCESS;
 
 err:
-    fprintf (stderr, "# Tests KO!\n");
+    qDebug() <<"# Tests KO!";
     return EXIT_FAILURE;
 }

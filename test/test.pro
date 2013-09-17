@@ -1,7 +1,7 @@
 include(../common.pri)
 
 TEMPLATE = app
-
+CONFIG += console
 TARGET = test
 
 SOURCES += main.cpp
