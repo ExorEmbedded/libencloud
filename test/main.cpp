@@ -20,7 +20,7 @@ int test_ece (int argc, char *argv[]);
 int main (int argc, char *argv[])
 {
     qDebug() << "#";
-    qDebug() << "# testing libece version " << ece_version() << " (commit: " << ece_commit() <<  ")";
+    qDebug() << "# testing libece version " << ece_version() << " (commit: " << ece_revision() <<  ")";
     qDebug() << "#";
 
 #ifdef Q_OS_UNIX
