@@ -1,7 +1,7 @@
 # global defs
 PKGNAME = libece
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.2.1
+VERSION = 0.3
 QMAKE_TARGET_COMPANY = Endian
 QMAKE_TARGET_PRODUCT = libECE
 QMAKE_TARGET_DESCRIPTION = libECE
@@ -18,7 +18,9 @@ QT -= gui
 # json
 win32 {
     CONFIG += qtjson  # GPL/self-contained
-    DEFINES += ECE_WIN32 _CRT_SECURE_NO_WARNINGS
+    DEFINES += _CRT_SECURE_NO_WARNINGS
+    DEFINES += ECE_WIN32
+    DEFINES += ECE_PREFIX_PATH=\\\"/sece\\\"
 } else {
     CONFIG += qjson   # LGPL/external (default)
 }

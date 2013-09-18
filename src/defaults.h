@@ -11,7 +11,9 @@
 #define ECE_URL_SZ              1024
 #define ECE_PATH_SZ             512
 #define ECE_DESC_SZ             64
+#ifndef ECE_PREFIX_PATH                             /* [overridable] */
 #define ECE_PREFIX_PATH         "/"
+#endif
 #define ECE_CONF_PATH           "/etc/ece/ece.json"
 #define ECE_CSRTMPL_PATH        "/etc/ece/csr-tmpl.json"
 #define ECE_CACERT_PATH         "/etc/ece/cacert.pem"

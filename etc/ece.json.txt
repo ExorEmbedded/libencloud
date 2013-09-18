@@ -1,0 +1,40 @@
+ECE configuration
+^^^^^^^^^^^^^^^^^
+
+* Notes: 
+    - all paths are relative to ECE_PREFIX_PATH (optionally defined in common.pri)
+    - comments are *not* valid Json
+    - prefix
+
+* Sample:
+
+{
+  "sb" : {                                      # global SB settings 
+    "url" : "https://ws1.test.local/"
+  },
+
+  "timeout" : 10000,                            # timeout in ms for net operations
+
+  "csr" : {                                     # certificate Request template
+    "tmpl" : "/etc/ece/csr-tmpl.json"
+  },
+
+  "ssl_init" : {                                # initialization channel setup
+    "cacert" : "/etc/ece/cacert1.pem",
+    "cert" : "/etc/ece/cert1.pem",
+    "key" : "/etc/ece/key1.pem"
+  },
+
+  "ssl_op" : {                                  # operation channel setup
+    "sb" : {
+      "url" : "https://ws2.test.local/"
+    },
+    "cacert" : "/etc/ece/cacert2.pem",
+    "cert" : "/etc/ece/cert2.pem",
+    "key" : "/etc/ece/key2.pem"
+  },
+
+  "rsa" : {                                     # key size for generated RSA keys
+    "bits" : 2048
+  }
+}

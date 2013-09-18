@@ -16,7 +16,7 @@ import urllib2
 import subprocess
 import simplejson as json
 
-# directory where demoCA
+# directory where demoCA can be found
 op_ca_dir = '/var/www/ws1'
 op_cacert_fn = os.path.join(op_ca_dir, 'demoCA/cacert.pem')
 
