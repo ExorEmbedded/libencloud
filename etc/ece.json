@@ -15,5 +15,5 @@
     "cacert" : "/etc/ece/cacert2.pem",
     "cert" : "/etc/ece/cert2.pem",
     "key" : "/etc/ece/key2.pem"
-  },
+  }
 }
