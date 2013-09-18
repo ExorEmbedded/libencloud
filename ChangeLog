@@ -1,4 +1,5 @@
 libece 0.2.1-wip (DD/MM/YYYY):
+	- test/sb += automated credential generation and SB simulator setup
 	- crypto: ece_crypto_genkey() failed if no rnd file was detected
 	- yocto wip: added LICENSE file
 	- ece_revision() returns GIT commit ID

@@ -2,7 +2,7 @@
   "prefix" : "/",
 
   "sb" : {
-    "url" : "https://ws1.test/"
+    "url" : "https://ws1.test.local/"
   },
 
   "timeout" : 10000,
@@ -19,7 +19,7 @@
 
   "ssl_op" : {
     "sb" : {
-      "url" : "https://ws2.test/"
+      "url" : "https://ws2.test.local/"
     },
     "cacert" : "/etc/ece/cacert2.pem",
     "cert" : "/etc/ece/cert2.pem",

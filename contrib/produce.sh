@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Helper script to automate key, CSR and certificate generation.
+# Helper script to automate CA creation and credential generation.
 #
 # SECE: Cert/Key are unique for software package
 #       => run only once!
@@ -9,14 +9,15 @@
 # defaults
 TMPDIR=/tmp/ece
 DESTDIR=.
-KEY=key1.pem
+KEY=key.pem
 KEY_SZ=2048
 REQ=req.pem
 CN="SECE"
-CERT=cert1.pem
-CACERT_DST=cacert1.pem
+CERT=cert.pem
+CACERT_DST=cacert.pem
 CADIR=./demoCA
 ENDDATE=""
+CMD="newcreds"  # make credentials by default
 
 msg()
 {
@@ -48,6 +49,7 @@ usage()
     echo
     echo "      -help         this help"
     echo "      -dest   DIR   specify destination directory for output files (default = '.')"
+    echo "      -newca        create a new CA (can combine with: -cadir, -subj)"
     echo "      -cadir  DIR   specify CA directory"
     echo "      -subj   STR   Subject Name (for CSR)"
     echo "      -cn     STR   Common Name part of Subject Name (for CSR)"
@@ -72,6 +74,9 @@ parse_args()
                 shift
                 [ -z $VALUE ] && die "-dest requires DIR parameter!"
                 DESTDIR=$VALUE
+                ;;
+            -newca)
+                CMD="newca"
                 ;;
             -cadir)
                 shift
@@ -125,29 +130,62 @@ parse_args()
     [ "${ENDDATE}" != "" ] && msg "ENDDATE=${ENDDATE}"
 }
 
-mkdir ${TMPDIR}
+cmd_newcreds()
+{
+    cd "${TMPDIR}"
+
+    ln -s "${CADIR}" demoCA
+
+    GENRSA_ARGS="-out ${KEY} ${KEY_SZ}"
+    wrap openssl genrsa ${GENRSA_ARGS}
+
+    REQ_ARGS="-batch -new -key ${KEY} -out ${REQ} -subj ${SUBJ}"
+    wrap openssl req ${REQ_ARGS}
+
+    CA_ARGS="-batch -in ${REQ} -out ${CERT}"
+    [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
+    wrap openssl ca ${CA_ARGS}
+
+    wrap cp "${CACERT}" "${CACERT_DST}"
+
+    cd -
+
+    wrap mv "${TMPDIR}/${KEY}" "${DESTDIR}"
+    wrap mv "${TMPDIR}/${CERT}" "${DESTDIR}"
+    wrap cp "${TMPDIR}/${CACERT_DST}" "${DESTDIR}"
+}
+
+cmd_newca()
+{
+    cd "${TMPDIR}"
+
+    wrap mkdir "${CADIR}"
+    wrap mkdir "${CADIR}/certs"
+    wrap mkdir "${CADIR}/crl"
+    wrap mkdir "${CADIR}/newcerts"
+    wrap mkdir "${CADIR}/private"
+    wrap touch "${CADIR}/index.txt"
+
+    GENRSA_ARGS="-out ${CADIR}/private/cakey.pem ${KEY_SZ}"
+    wrap openssl genrsa ${GENRSA_ARGS}
+
+    REQ_ARGS="-batch -new -key ${CADIR}/private/cakey.pem -out ${REQ} -subj ${SUBJ}"
+    wrap openssl req ${REQ_ARGS}
+
+    CA_ARGS="-batch -in ${REQ} -keyfile ${CADIR}/private/cakey.pem -out ${CADIR}/cacert.pem"
+    CA_ARGS="${CA_ARGS} -create_serial -selfsign -extensions v3_ca"
+    [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
+    wrap openssl ca ${CA_ARGS}
+
+    cd -
+
+    wrap rm -rf "${DESTDIR}/${CADIR}"
+    wrap mv "${TMPDIR}/${CADIR}" "${DESTDIR}"
+}
+
+mkdir "${TMPDIR}"
 trap cleanup 0 1 2 3 4 6 7 8 9 11 13 15
 
 parse_args $@
 
-cd ${TMPDIR}
-
-ln -s ${CADIR} demoCA
-
-GENRSA_ARGS="-out ${KEY} ${KEY_SZ}"
-wrap openssl genrsa ${GENRSA_ARGS}
-
-REQ_ARGS="-batch -new -key ${KEY} -out ${REQ} -subj ${SUBJ}"
-wrap openssl req ${REQ_ARGS}
-
-CA_ARGS="-batch -in ${REQ} -out ${CERT}"
-[ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
-wrap openssl ca ${CA_ARGS}
-
-wrap cp ${CACERT} ${CACERT_DST}
-
-cd -
-
-wrap mv ${TMPDIR}/${KEY} ${DESTDIR}
-wrap mv ${TMPDIR}/${CERT} ${DESTDIR}
-wrap cp ${TMPDIR}/${CACERT_DST} ${DESTDIR}
+cmd_"${CMD}"
