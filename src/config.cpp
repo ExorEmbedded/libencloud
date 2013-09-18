@@ -9,6 +9,8 @@ Config::Config ()
 {
     ECE_TRACE;
 
+    ECE_DBG("prefix=" << ECE_PREFIX_PATH);
+
     this->settings = new QSettings(ECE_SETTINGS_ORG, ECE_SETTINGS_APP);
 
     this->config.sbUrl = QUrl(ECE_SB_URL);
@@ -60,9 +62,6 @@ err:
 
 int Config::__parse (const QVariantMap &jo)
 {
-    config.prefix = jo["prefix"].toString();
-    ECE_DBG("prefix=" << config.prefix.absoluteFilePath());
-
     config.timeout = jo["timeout"].toInt();
     ECE_DBG("timeout=" << config.timeout);
 

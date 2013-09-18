@@ -1,17 +1,8 @@
 {
-  "prefix" : "/",
-
-  "sb" : {
-    "url" : "https://ws1.test.local/"
-  },
-
-  "timeout" : 10000,
-
-  "csr" : {
-    "tmpl" : "/etc/ece/csr-tmpl.json"
-  },
-
   "ssl_init" : {
+    "sb" : {
+      "url" : "https://ws1.test.local/"
+    },
     "cacert" : "/etc/ece/cacert1.pem",
     "cert" : "/etc/ece/cert1.pem",
     "key" : "/etc/ece/key1.pem"
@@ -25,8 +16,4 @@
     "cert" : "/etc/ece/cert2.pem",
     "key" : "/etc/ece/key2.pem"
   },
-
-  "rsa" : {
-    "bits" : 2048
-  }
 }
