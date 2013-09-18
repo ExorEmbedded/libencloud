@@ -71,9 +71,14 @@ int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile)
     ECE_UNUSED(ec);
     ECE_ERR_IF (outfile == NULL);
 
-    // make sure random number generator is adequately seeded
+    // grab name of rand file path - see RAND_load_file(3)
     ECE_ERR_IF ((file = RAND_file_name(rbuf, sizeof(rbuf))) == NULL);
-    ECE_ERR_IF (!RAND_load_file(file, -1));
+
+    // the following is allowed to fail if seeding is not based on rand file
+    // e.g. /dev/urandom is used if found on system,
+    RAND_load_file(file, -1);
+
+    // but still make sure random number generator is adequately seeded
     ECE_ERR_IF (!RAND_status());
 
     // create output file
