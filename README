@@ -26,14 +26,14 @@ Enter package directory, then:
 
 $ qmake
 $ make 
-$ make install 
+$ sudo make install
 
 *Important Notes*: 
     - configuration files *must not* be readable by other users
         e.g. Linux: sudo chmod 600 /etc/ece/*
     - configuration drectory and files *must* be writable by the user/process calling libece!
         e.g. Linux: sudo chown -R my_user /etc/ece
-    - different paths for files and keys can be configured via "prefix" in /etc/ece/ece.json
+    - different paths for files and keys can be configured in /etc/ece/ece.json
 
 Run tests with:
 

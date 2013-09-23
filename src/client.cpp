@@ -98,12 +98,24 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     delete this->reply;
     this->reply = NULL;
 
+    if (this->loop)
+    {
+        delete this->loop;
+        this->loop = NULL;
+    }
+
     return ECE_RC_SUCCESS;
 err:
     if (this->reply)
     {
         delete this->reply;
         this->reply = NULL;
+    }
+
+    if (this->loop)
+    {
+        delete this->loop;
+        this->loop = NULL;
     }
 
     if (this->error)
@@ -145,7 +157,8 @@ void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 
     ECE_ERR("NetworkError (" << err << ")");
 
-    this->error = ECE_RC_FAILED;
+    if (!this->error)  // can be already set by timeoutSlot()
+        this->error = ECE_RC_FAILED;
 }
 
 void Client::timeoutSlot ()
@@ -158,7 +171,11 @@ void Client::timeoutSlot ()
         this->reply->abort();
 
     if (this->loop)
+    {
         this->loop->quit();
+        delete this->loop;
+        this->loop = NULL;
+    }
 }
 
 /**
