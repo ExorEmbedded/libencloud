@@ -157,7 +157,8 @@ void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 
     ECE_ERR("NetworkError (" << err << ")");
 
-    this->error = ECE_RC_FAILED;
+    if (!this->error)  // can be already set by timeoutSlot()
+        this->error = ECE_RC_FAILED;
 }
 
 void Client::timeoutSlot ()

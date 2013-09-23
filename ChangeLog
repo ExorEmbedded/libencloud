@@ -1,5 +1,5 @@
 libece 0.3a-wip (DD/MM/YYYY):
-	- fix: minor leak in Client::run
+	- fixes: minor leak in Client::run; ECE_RC_TIMEOUT sometimes not being returned
 	- config: improved defaults handling
 	- build: runtime prefix by setting ECE_PREFIX_PATH
 	- test/sb += automated credential generation and SB simulator setup
