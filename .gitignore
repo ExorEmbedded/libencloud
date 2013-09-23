@@ -6,17 +6,20 @@
 *.lo
 *.so
 *.so.*
+*.pyc
 *.tar.gz
 
 # build-generated files
-Makefile
-etc/Makefile
-include/Makefile
-src/Makefile
-src/build/
-test/Makefile
-test/build/
-test/test
+/Makefile
+/etc/Makefile
+/include/Makefile
+/src/Makefile
+/src/build/
+/test/Makefile
+/test/build/
+/test/test
+/bindings/ece.py
+/bindings/*_wrap.c
 
 # dist-generated files
 /libece-*
