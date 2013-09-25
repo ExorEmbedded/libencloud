@@ -1,4 +1,4 @@
-libece 0.3a-wip (DD/MM/YYYY):
+libece 0.3 (25/09/3013):
 	- fix certificate request encoding
 	- commands paths changed
 	- digest changed to SHA1
