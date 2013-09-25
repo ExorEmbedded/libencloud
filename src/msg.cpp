@@ -74,7 +74,7 @@ ece_rc_t Ece::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 
     params.addQueryItem("lic", this->license.toString());
     params.addQueryItem("hw_info", this->hwInfo);
-    params.addEncodedQueryItem("certificate_request_data", EceUtils::encodeQueryItem(this->csr));
+    params.addQueryItem("certificate_request_data", this->csr);
 
     ECE_DBG(" ### >>>>> ### " << params.toString());
 
