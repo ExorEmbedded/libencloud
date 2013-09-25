@@ -60,6 +60,7 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     QNetworkRequest request(url);
 
     request.setSslConfiguration(sslconf);
+    request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
     request.setRawHeader("User-Agent", ECE_STRING);
     request.setRawHeader("X-Custom-User-Agent", ECE_STRING);
 

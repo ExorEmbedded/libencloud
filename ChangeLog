@@ -1,4 +1,5 @@
 libece 0.3a-wip (DD/MM/YYYY):
+	- Content-Type changed to -ww-form-urlencoded
 	- bindings: basic swig-based python bindings
 	- fixes: minor leak in Client::run; ECE_RC_TIMEOUT sometimes not being returned;
 	  remove spurious getHwInfo in __name_cb(); removed old json Content-Type;
