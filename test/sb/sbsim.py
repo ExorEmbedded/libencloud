@@ -49,11 +49,11 @@ def handler (req):
                     }))
         return apache.OK
 
-    if command == 'command.access.cloud.getInfo':
+    if command == 'manage/commands/commands.access.cloud.getInfo':
         rc = handler_info(req)
-    elif command == 'command.access.cloud.getCertificate':
+    elif command == 'manage/commands/commands.access.cloud.getCertificate':
         rc = handler_csr(req)
-    elif command == 'command.access.cloud.getConfiguration':
+    elif command == 'manage/commands/commands.access.cloud.getConfiguration':
         rc = handler_conf(req)
     else:
         req.write('bad command: ' + command)
