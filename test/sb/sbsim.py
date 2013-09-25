@@ -112,6 +112,7 @@ def handler_csr (req):
     # .. but rollback only start/end markers
     csr = csr.replace('--BEGIN+CERTIFICATE+REQUEST--', '--BEGIN CERTIFICATE REQUEST--')
     csr = csr.replace('--END+CERTIFICATE+REQUEST--', '--END CERTIFICATE REQUEST--')
+    csr = csr.replace('\\n', '\n')
 
     csrf = open(csrfn, 'w')
     csrf.write(csr)

@@ -40,4 +40,18 @@ QDateTime pytime2DateTime (QString pydate)
     return QDateTime::fromMSecsSinceEpoch(pydate.split(".")[0].toLongLong(NULL, 10)*1000);
 }
 
+/* \brief Differs from addQueryItem() which does not properly handle newlines & CO */
+ECE_DLLSPEC QByteArray encodeQueryItem (QString s)
+{
+    s.replace(QLatin1String("\\"), QLatin1String("\\\\"));
+    s.replace(QLatin1String("\""), QLatin1String("\\\""));
+    s.replace(QLatin1String("\b"), QLatin1String("\\b"));
+    s.replace(QLatin1String("\f"), QLatin1String("\\f"));
+    s.replace(QLatin1String("\n"), QLatin1String("\\n"));
+    s.replace(QLatin1String("\r"), QLatin1String("\\r"));
+    s.replace(QLatin1String("\t"), QLatin1String("\\t"));
+
+    return qPrintable(s);
+}
+
 } //namespace EceUtils
