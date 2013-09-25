@@ -23,9 +23,9 @@
 #define ECE_KEY2_PATH           "/etc/ece/key2.pem"
 #define ECE_RSA_BITS            1024
 
-#define ECE_CMD_GETINFO         "command.access.cloud.getInfo"
-#define ECE_CMD_GETCERT         "command.access.cloud.getCertificate"
-#define ECE_CMD_GETCONFIG       "command.access.cloud.getConfiguration"
+#define ECE_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"
+#define ECE_CMD_GETCERT         "manage/commands/commands.access.cloud.getCertificate"
+#define ECE_CMD_GETCONFIG       "manage/commands/commands.access.cloud.getConfiguration"
 
 #define ECE_SETTINGS_ORG        "com.endian"
 #define ECE_SETTINGS_APP        "ECE"

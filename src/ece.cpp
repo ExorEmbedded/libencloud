@@ -393,7 +393,6 @@ static int __name_cb (X509_NAME *n, void *arg)
     }
 
     // CN based on hw_info
-    EceUtils::getHwInfo();
     ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
             (const unsigned char *) EceUtils::getHwInfo().toUtf8().data(), -1, -1, 0));
 
