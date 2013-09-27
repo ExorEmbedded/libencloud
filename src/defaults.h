@@ -27,6 +27,8 @@
 #define ECE_CMD_GETCERT         "manage/commands/commands.access.cloud.getCertificate"
 #define ECE_CMD_GETCONFIG       "manage/commands/commands.access.cloud.getConfiguration"
 
+#define ECE_GETCONFIG_HOSTNAME  "configuration-host"
+
 #define ECE_SETTINGS_ORG        "com.endian"
 #define ECE_SETTINGS_APP        "ECE"
 

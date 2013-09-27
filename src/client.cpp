@@ -64,6 +64,9 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     request.setRawHeader("User-Agent", ECE_STRING);
     request.setRawHeader("X-Custom-User-Agent", ECE_STRING);
 
+    if (url.path().compare(ECE_CMD_GETCONFIG) == 0)
+        request.setRawHeader("Host", ECE_GETCONFIG_HOSTNAME);
+
     ECE_RETURN_IF ((this->loop = new QEventLoop) == NULL, ECE_RC_NOMEM);
 
     connect(&qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
