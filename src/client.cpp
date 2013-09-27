@@ -141,6 +141,13 @@ void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors
     
     ECE_ERR(""); 
 
+    // Ignore the SslError 22 "The host name did not match any of the valid hosts for this certificate"
+    if ((errors.size() == 1) && (errors.first().error() == QSslError::HostNameMismatch)) {
+        ECE_DBG("The host name did not match any of the valid hosts for this certificate");
+        reply->ignoreSslErrors(errors);
+        return;
+    }
+
     this->error = ECE_RC_BADAUTH;
 
     foreach (QSslError err, errors) 
