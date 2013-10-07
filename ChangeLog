@@ -1,4 +1,5 @@
 iibece 0.4 ():
+	- new host names: initialization-host, operation-host
 	- ignore errors about not matching certificate/hostname
 	- set a different host name for the command getConfiguration
 

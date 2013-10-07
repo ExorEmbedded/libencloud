@@ -1,7 +1,7 @@
 [[ Test environment info ]]
 
 Prerequisites: 
-    - add appropriate "ws1.test.local" "ws2.test.local" definitions to /etc/hosts
+    - add appropriate "initialization-host" "operation-host" definitions to /etc/hosts
     - change fields in /etc/ssl/openssl.cnf policy_match section to "optional"
     instead of "required" to avoid openssl bug in ASN1 type matching
 
