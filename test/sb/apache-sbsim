@@ -8,7 +8,7 @@ NameVirtualHost *:443
 
 <VirtualHost *:443>
     SSLEngine               on
-	ServerName              ws1.test.local:443
+	ServerName              initialization-host:443
 	DocumentRoot            /var/www/ws1
 	SSLCertificateFile      /test/etc/ws1/cert.pem
 	SSLCertificateKeyFile   /test/etc/ws1/key.pem
@@ -23,7 +23,7 @@ NameVirtualHost *:443
 
 <VirtualHost *:443>
     SSLEngine               on
-	ServerName              ws2.test.local:443
+	ServerName              operation-host:44
 	DocumentRoot            /var/www/ws2
 	SSLCertificateFile      /test/etc/ws2/cert.pem
 	SSLCertificateKeyFile   /test/etc/ws2/key.pem

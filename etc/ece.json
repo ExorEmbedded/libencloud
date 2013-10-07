@@ -1,7 +1,7 @@
 {
   "ssl_init" : {
     "sb" : {
-      "url" : "https://ws1.test.local/"
+      "url" : "https://initialization-host/"
     },
     "cacert" : "/etc/ece/cacert1.pem",
     "cert" : "/etc/ece/cert1.pem",
@@ -10,7 +10,7 @@
 
   "ssl_op" : {
     "sb" : {
-      "url" : "https://ws2.test.local/"
+      "url" : "https://operation-host/"
     },
     "cacert" : "/etc/ece/cacert2.pem",
     "cert" : "/etc/ece/cert2.pem",

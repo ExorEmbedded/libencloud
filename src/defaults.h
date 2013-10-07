@@ -6,7 +6,7 @@
 #define ECE_STRING              "libece v"ECE_VERSION
 
 /* Timeout in ms */
-#define ECE_SB_URL              "https://ws1.test/"
+#define ECE_SB_URL              "https://sb-host/"
 #define ECE_TIMEOUT             10000
 #define ECE_URL_SZ              1024
 #define ECE_PATH_SZ             512
@@ -26,6 +26,8 @@
 #define ECE_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"
 #define ECE_CMD_GETCERT         "manage/commands/commands.access.cloud.getCertificate"
 #define ECE_CMD_GETCONFIG       "manage/commands/commands.access.cloud.getConfiguration"
+
+#define ECE_GETCONFIG_HOSTNAME  "operation-host"
 
 #define ECE_SETTINGS_ORG        "com.endian"
 #define ECE_SETTINGS_APP        "ECE"

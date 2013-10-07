@@ -18,8 +18,8 @@ CA2DIR="${CONFDIR}/${CA2}"
 
 WS1=ws1
 WS2=ws2
-WS1CN=ws1.test.local
-WS2CN=ws2.test.local
+WS1CN=initialization-host
+WS2CN=operation-host
 WS1DIR="${CONFDIR}/${WS1}"
 WS2DIR="${CONFDIR}/${WS2}"
 

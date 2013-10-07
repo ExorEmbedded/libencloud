@@ -10,7 +10,7 @@ ECE configuration
 
 {
   "sb" : {                                      # global SB settings 
-    "url" : "https://ws1.test.local/"
+    "url" : "https://sb-host"
   },
 
   "timeout" : 10000,                            # timeout in ms for net operations
@@ -20,6 +20,9 @@ ECE configuration
   },
 
   "ssl_init" : {                                # initialization channel setup
+    "sb" : {
+      "url" : "https://initialization-host/"    # override sb host
+    },
     "cacert" : "/etc/ece/cacert1.pem",
     "cert" : "/etc/ece/cert1.pem",
     "key" : "/etc/ece/key1.pem"
@@ -27,7 +30,7 @@ ECE configuration
 
   "ssl_op" : {                                  # operation channel setup
     "sb" : {
-      "url" : "https://ws2.test.local/"
+      "url" : "https://operation-host/"         # override sb host
     },
     "cacert" : "/etc/ece/cacert2.pem",
     "cert" : "/etc/ece/cert2.pem",
