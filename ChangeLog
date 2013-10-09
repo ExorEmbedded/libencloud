@@ -1,7 +1,8 @@
-iibece 0.4 ():
+libece 0.3.1 ():
 	- new host names: initialization-host, operation-host
 	- ignore errors about not matching certificate/hostname
 	- set a different host name for the command getConfiguration
+	- bindings: use distutils for build/install
 
 libece 0.3 (25/09/2013):
 	- fix certificate request encoding
