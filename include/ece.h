@@ -72,8 +72,8 @@ ECE_DLLSPEC char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf);
 ECE_DLLSPEC char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf);
 
 /* Other */
-ECE_DLLSPEC const char *ece_version ();
-ECE_DLLSPEC const char *ece_revision ();
+ECE_DLLSPEC const char *ece_version (void);
+ECE_DLLSPEC const char *ece_revision (void);
 ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc);
 
 #ifdef __cplusplus
