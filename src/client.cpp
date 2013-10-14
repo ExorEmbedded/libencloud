@@ -60,9 +60,12 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     QNetworkRequest request(url);
 
     request.setSslConfiguration(sslconf);
-    request.setRawHeader("Content-Type", "application/json");
+    request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
     request.setRawHeader("User-Agent", ECE_STRING);
     request.setRawHeader("X-Custom-User-Agent", ECE_STRING);
+
+    if (url.path().compare(ECE_CMD_GETCONFIG) == 0)
+        request.setRawHeader("Host", ECE_GETCONFIG_HOSTNAME);
 
     ECE_RETURN_IF ((this->loop = new QEventLoop) == NULL, ECE_RC_NOMEM);
 
@@ -98,12 +101,24 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     delete this->reply;
     this->reply = NULL;
 
+    if (this->loop)
+    {
+        delete this->loop;
+        this->loop = NULL;
+    }
+
     return ECE_RC_SUCCESS;
 err:
     if (this->reply)
     {
         delete this->reply;
         this->reply = NULL;
+    }
+
+    if (this->loop)
+    {
+        delete this->loop;
+        this->loop = NULL;
     }
 
     if (this->error)
@@ -129,6 +144,13 @@ void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors
     
     ECE_ERR(""); 
 
+    // Ignore the SslError 22 "The host name did not match any of the valid hosts for this certificate"
+    if ((errors.size() == 1) && (errors.first().error() == QSslError::HostNameMismatch)) {
+        ECE_DBG("The host name did not match any of the valid hosts for this certificate");
+        reply->ignoreSslErrors(errors);
+        return;
+    }
+
     this->error = ECE_RC_BADAUTH;
 
     foreach (QSslError err, errors) 
@@ -145,7 +167,8 @@ void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 
     ECE_ERR("NetworkError (" << err << ")");
 
-    this->error = ECE_RC_FAILED;
+    if (!this->error)  // can be already set by timeoutSlot()
+        this->error = ECE_RC_FAILED;
 }
 
 void Client::timeoutSlot ()
@@ -158,7 +181,11 @@ void Client::timeoutSlot ()
         this->reply->abort();
 
     if (this->loop)
+    {
         this->loop->quit();
+        delete this->loop;
+        this->loop = NULL;
+    }
 }
 
 /**

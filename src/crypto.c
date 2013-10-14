@@ -198,7 +198,8 @@ static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey)
     ECE_ERR_IF (!X509_REQ_set_subject_name(req, n));
     ECE_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
 
-    ECE_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL);
+    // ECE_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Non supported by the current Switchboard openssl version
+    ECE_ERR_IF ((digest = EVP_get_digestbyname(SN_sha1)) == NULL);
     ECE_ERR_IF (!EVP_DigestSignInit(&mctx, &pkctx, digest, NULL, pkey));
     ECE_ERR_IF (!X509_REQ_sign_ctx(req, &mctx));
     EVP_MD_CTX_cleanup(&mctx);

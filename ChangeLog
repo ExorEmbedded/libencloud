@@ -1,4 +1,17 @@
-libece 0.3a-wip (DD/MM/YYYY):
+iibece 0.4 ():
+	- new host names: initialization-host, operation-host
+	- ignore errors about not matching certificate/hostname
+	- set a different host name for the command getConfiguration
+
+libece 0.3 (25/09/2013):
+	- fix certificate request encoding
+	- commands paths changed
+	- digest changed to SHA1
+	- Content-Type changed to -ww-form-urlencoded
+	- bindings: basic swig-based python bindings
+	- fixes: minor leak in Client::run; ECE_RC_TIMEOUT sometimes not being returned;
+	  remove spurious getHwInfo in __name_cb(); removed old json Content-Type;
+	  fix encoding of special chars not handled by addQueryItem() - e.g. newline
 	- config: improved defaults handling
 	- build: runtime prefix by setting ECE_PREFIX_PATH
 	- test/sb += automated credential generation and SB simulator setup
