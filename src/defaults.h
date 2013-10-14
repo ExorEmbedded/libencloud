@@ -14,13 +14,19 @@
 #ifndef ECE_PREFIX_PATH                             /* [overridable] */
 #define ECE_PREFIX_PATH         "/"
 #endif
-#define ECE_CONF_PATH           "/etc/ece/ece.json"
-#define ECE_CSRTMPL_PATH        "/etc/ece/csr-tmpl.json"
-#define ECE_CACERT_PATH         "/etc/ece/cacert.pem"
-#define ECE_CERT1_PATH          "/etc/ece/cert1.pem"
-#define ECE_KEY1_PATH           "/etc/ece/key1.pem"
-#define ECE_CERT2_PATH          "/etc/ece/cert2.pem"
-#define ECE_KEY2_PATH           "/etc/ece/key2.pem"
+#ifdef _WIN32
+#define ECE_ETC_PREFIX          "\\etc\\ece\\"
+#else
+#error cannot be here
+#define ECE_ETC_PREFIX          "/etc/ece"
+#endif
+#define ECE_CONF_PATH           ECE_ETC_PREFIX"ece.json"
+#define ECE_CSRTMPL_PATH        ECE_ETC_PREFIX"csr-tmpl.json"
+#define ECE_CACERT_PATH         ECE_ETC_PREFIX"cacert.pem"
+#define ECE_CERT1_PATH          ECE_ETC_PREFIX"cert1.pem"
+#define ECE_KEY1_PATH           ECE_ETC_PREFIX"key1.pem"
+#define ECE_CERT2_PATH          ECE_ETC_PREFIX"cert2.pem"
+#define ECE_KEY2_PATH           ECE_ETC_PREFIX"key2.pem"
 #define ECE_RSA_BITS            1024
 
 #define ECE_CMD_GETINFO         "command.access.cloud.getInfo"

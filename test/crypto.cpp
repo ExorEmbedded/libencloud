@@ -5,7 +5,11 @@
 #include "test.h"
 #include "crypto.h"
 
+#ifdef Q_OS_WIN
+#define TEST_CRYPTO_OUTFILE "c:\\temp\\libece-test-key.pem"
+#else
 #define TEST_CRYPTO_OUTFILE "/tmp/libece-test-key.pem"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

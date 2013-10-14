@@ -20,7 +20,9 @@ win32 {
     CONFIG += qtjson  # GPL/self-contained
     DEFINES += _CRT_SECURE_NO_WARNINGS
     DEFINES += ECE_WIN32
-    DEFINES += ECE_PREFIX_PATH=\\\"/sece\\\"
+    # working dir is test, etc is one level up
+    DEFINES += ECE_PREFIX_PATH=\\\"..\\\"
+    system("mkdir $$(APPDATA)\\sece")
 } else {
     CONFIG += qjson   # LGPL/external (default)
 }
@@ -33,7 +35,7 @@ DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 
 # logging: valid only if QT_NO_DEBUG_OUTPUT is NOT set
 # (see README for info)
-DEFINES += ECE_LOGLEVEL=3
+DEFINES += ECE_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include
@@ -51,11 +53,19 @@ windows{
 }
 
 # install dirs
-INSTALLDIR = /usr/local
-LIBDIR = $${INSTALLDIR}/lib
-BINDIR = $${INSTALLDIR}/bin
-INCDIR = $${INSTALLDIR}/include
-CONFDIR = /etc/ece
+windows {
+    INSTALLDIR = %ProgramFiles%/SECE
+    LIBDIR = $${INSTALLDIR}/lib
+    BINDIR = $${INSTALLDIR}/bin
+    INCDIR = $${INSTALLDIR}/include
+    CONFDIR = %APPDATA%/sece
+} else {
+    INSTALLDIR = /usr/local
+    LIBDIR = $${INSTALLDIR}/lib
+    BINDIR = $${INSTALLDIR}/bin
+    INCDIR = $${INSTALLDIR}/include
+    CONFDIR = /etc/ece
+}
 
 # keep build files separate from sources
 UI_DIR = build/uics

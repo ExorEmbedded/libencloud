@@ -11,6 +11,12 @@ SOURCES += ece.cpp
 
 HEADERS += test.h
 
+windows {
+    # this is required in order to use bio functions of openssl dll
+    SOURCES += $$OPENSSLPATH\\include\\openssl\\applink.c
+}
+
+
 INCLUDEPATH += ../src
 
 # libece
