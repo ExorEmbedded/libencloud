@@ -31,9 +31,9 @@ DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
-# logging: valid only if QT_NO_DEBUG_OUTPUT is NOT set
-# (see README for info)
-DEFINES += ECE_LOGLEVEL=3
+# *old-style* static/compile-time logging; log level can be changed dynamically
+# by changing value of "log/lev" in /etc/ece/ece.json
+#DEFINES += ECE_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include

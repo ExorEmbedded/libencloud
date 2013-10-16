@@ -1,6 +1,7 @@
 #include "utils.h"
 #include "helpers.h"
 #include "crypto.h"
+#include "config.h"
 
 namespace EceUtils {
 

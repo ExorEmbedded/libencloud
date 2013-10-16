@@ -7,6 +7,8 @@
 #include "crypto.h"
 #include "config.h"
 
+Ece::Config *g_cfg = NULL;
+
 /** \brief SB info object */
 struct ece_sb_info_s
 {
@@ -64,6 +66,8 @@ ece_rc_t ece_create (int argc, char *argv[], ece_t **pece)
     ECE_ERR_RC_IF ((e->cfg = new Ece::Config) == NULL, ECE_RC_NOMEM);
     ECE_ERR_IF (e->cfg->loadFromFile(ECE_CONF_PATH));
 
+    g_cfg = e->cfg;
+
     ECE_ERR_RC_IF ((e->client = new Ece::Client) == NULL, ECE_RC_NOMEM);
     ECE_ERR_IF (e->client->setConfig(e->cfg));
 
@@ -93,8 +97,10 @@ ece_rc_t ece_destroy (ece_t *ece)
     if (ece->client)
         delete ece->client;
 
-    if (ece->cfg)
+    if (ece->cfg) {
+        g_cfg = NULL;
         delete ece->cfg;
+    }
 
     if (ece->app) {
         ece->app->quit();

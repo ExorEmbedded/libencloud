@@ -52,11 +52,13 @@ Run qmake and build.
 
 [ Logging ]
 
-Follow syslog() numbering, for example modifying common.pri as follows:
+The log level/verbosity is set in /etc/ece/ece.json, following syslog() numbering. For example the following:
 
-QMAKE_CXXFLAGS += -DECE_LOGLEVEL=7
+"log" : {
+  "lev": 7
+}
 
-which will increase to maximum verbosity (default is 3).
+will increase to maximum verbosity (default is 3).
 
 #define LOG_EMERG   0   /* system is unusable */
 #define LOG_ALERT   1   /* action must be taken immediately */

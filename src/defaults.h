@@ -32,4 +32,6 @@
 #define ECE_SETTINGS_ORG        "com.endian"
 #define ECE_SETTINGS_APP        "ECE"
 
+#define ECE_LOG_LEV             3
+
 #endif

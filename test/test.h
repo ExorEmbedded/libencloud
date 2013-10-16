@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "helpers.h"
+#include "config.h"
 
 // if compiling with gcc, don't depend on Qt for debug
 #ifndef __cplusplus
