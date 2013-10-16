@@ -40,9 +40,9 @@ ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
     if ((rc = __run(serviceURL, params, config, response)))
         return rc;
 
-    ECE_ERR_RC_IF (message.decodeResponse(response, errString), ECE_RC_BADRESPONSE);
-
     ECE_DBG(" ### <<<<< ###  " << response);
+
+    ECE_ERR_IF ((rc = message.decodeResponse(response, errString)));
 
     return ECE_RC_SUCCESS;
 err:
