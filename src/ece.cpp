@@ -358,6 +358,8 @@ ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc)
             return "Operation timed out";
         case ECE_RC_BADRESPONSE:
             return "Bad response from peer";
+        case ECE_RC_INVALIDCERT:
+            return "Certificate validity check failed";
         case ECE_RC_FAILED:
             return "Operation failed";
         case ECE_RC_SYSERR:

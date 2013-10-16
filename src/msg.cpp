@@ -57,7 +57,7 @@ ece_rc_t Ece::MessageRetrInfo::decodeResponse (QString &response, QString &errSt
 
     return ECE_RC_SUCCESS;
 err:
-    return ECE_RC_GENERIC;
+    return ECE_RC_BADRESPONSE;
 }
 
 /**
@@ -91,14 +91,17 @@ ece_rc_t Ece::MessageRetrCert::decodeResponse (QString &response, QString &errSt
     ECE_ERR_IF (!errString.isEmpty());
 
     this->cert = QSslCertificate(jo["certificate"].toString().toAscii());
-    ECE_ERR_IF (!this->cert.isValid());
+    // "checks that the current data-time is within the date-time range during
+    // which the certificate is considered valid, and checks that the
+    // certificate is not in a blacklist of fraudulent certificates"
+    ECE_RETURN_IF (!this->cert.isValid(), ECE_RC_INVALIDCERT);
 
     this->time = EceUtils::pytime2DateTime(jo["time"].toString());
     ECE_ERR_IF (!this->time.isValid());
 
     return ECE_RC_SUCCESS;
 err:
-    return ECE_RC_GENERIC;
+    return ECE_RC_BADRESPONSE;
 }
 
 /**
@@ -147,5 +150,5 @@ ece_rc_t Ece::MessageRetrConf::decodeResponse (QString &response, QString &errSt
 
     return ECE_RC_SUCCESS;
 err:
-    return ECE_RC_GENERIC;
+    return ECE_RC_BADRESPONSE;
 }
