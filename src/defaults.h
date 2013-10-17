@@ -22,8 +22,7 @@
 #ifdef _WIN32
 #define ECE_ETC_PREFIX          "\\etc\\ece\\"
 #else
-#error cannot be here
-#define ECE_ETC_PREFIX          "/etc/ece"
+#define ECE_ETC_PREFIX          "/etc/ece/"
 #endif
 #define ECE_CONF_PATH           ECE_ETC_PREFIX"ece.json"
 #define ECE_CSRTMPL_PATH        ECE_ETC_PREFIX"csr-tmpl.json"
