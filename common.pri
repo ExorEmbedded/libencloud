@@ -26,7 +26,9 @@ win32 {
 }
 
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
-DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+exists(".git") {
+    DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+}
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT

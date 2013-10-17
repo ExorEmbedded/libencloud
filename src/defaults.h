@@ -3,7 +3,12 @@
 
 /* This file should NOT be Qt-specific (used by pure C modules) */
 
+#ifndef ECE_REVISION
+#define ECE_REVISION            ""
 #define ECE_STRING              "libece v"ECE_VERSION
+#else
+#define ECE_STRING              "libece v"ECE_VERSION" r"ECE_REVISION
+#endif
 
 /* Timeout in ms */
 #define ECE_SB_URL              "https://sb-host/"
