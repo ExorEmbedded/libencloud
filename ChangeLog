@@ -4,7 +4,8 @@ libece 0.4 ():
 	- set a different host name for the command getConfiguration
 	- bindings: use distutils for build/install; added relative include and
 	  library dirs
-	- api: return ECE_RC_INVALIDCERT upon certification validation failures
+	- api: return ECE_RC_INVALIDCERT upon certification validation failures;
+	  return ECE_RC_BADCONFIG upon bad configuration (ece.json)
 	- logging: log level can be configured at runtime in ece.json (log/lev)
 	- sbsim: make certs valid from yesterday to avoid races
 	- build: temporarily use qtjson (Yocto TODO)

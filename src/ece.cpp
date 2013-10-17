@@ -57,14 +57,13 @@ ece_rc_t ece_create (int argc, char *argv[], ece_t **pece)
     ECE_RETURN_IF (pece == NULL, ECE_RC_BADPARAMS);
 
     ECE_RETURN_IF ((e = (ece_t *) calloc(1, sizeof(ece_t))) == NULL, ECE_RC_NOMEM);
-
     if (QCoreApplication::instance() == NULL) {
         ECE_DBG ("creating internal application instance");
         ECE_ERR_RC_IF ((e->app = new QCoreApplication(argc, argv)) == NULL, ECE_RC_NOMEM);
     }
 
     ECE_ERR_RC_IF ((e->cfg = new Ece::Config) == NULL, ECE_RC_NOMEM);
-    ECE_ERR_IF (e->cfg->loadFromFile(ECE_CONF_PATH));
+    ECE_ERR_RC_IF (e->cfg->loadFromFile(ECE_CONF_PATH), ECE_RC_BADCONFIG);
 
     g_cfg = e->cfg;
 
@@ -354,6 +353,8 @@ ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc)
             return "Bad parameters";
         case ECE_RC_NOMEM:
             return "Out of memory";
+        case ECE_RC_BADCONFIG:
+            return "Bad configuration";
         case ECE_RC_NOLICENSE:
             return "No license found";
         case ECE_RC_CONNECT:
