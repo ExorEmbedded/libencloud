@@ -7,7 +7,6 @@ QMAKE_TARGET_PRODUCT = libECE
 QMAKE_TARGET_DESCRIPTION = libECE
 QMAKE_TARGET_COPYRIGHT =
 
-
 QT += core
 QT += network
 QT -= gui
@@ -22,7 +21,11 @@ win32 {
     DEFINES += ECE_WIN32
     DEFINES += ECE_PREFIX_PATH=\\\"/sece\\\"
 } else {
-    CONFIG += qjson   # LGPL/external (default)
+
+#   This is OK on Ubuntu but TODO on Yocto
+#   CONFIG += qjson   # LGPL/external
+
+    CONFIG += qtjson  # GPL/self-contained
 }
 
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
