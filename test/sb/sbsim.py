@@ -15,6 +15,7 @@ import time
 import urllib2
 import subprocess
 import simplejson as json
+from datetime import datetime, timedelta
 
 # directory where demoCA can be found
 op_ca_dir = '/var/www/ws1'
@@ -125,8 +126,12 @@ def handler_csr (req):
     #req.write('received csr: ' + str(sp.communicate(csr)))
     """
 
+    # FIX: make certificate valid from yesterday to avoid errors due to clock desync
+    yesterday = datetime.utcnow() - timedelta(days=1)
+    startdate = yesterday.strftime("%y%m%d%H%M%SZ")
+
     # request certificate from CA based on CSR and without prompts
-    os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' 2>/dev/null');
+    os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' 2>/dev/null');
 
     """
     upon duplicates 'openssl ca' returns 'failed to update database\nTXT_DB error number 2'

@@ -31,6 +31,7 @@ typedef enum
     ECE_RC_BADAUTH,
     ECE_RC_TIMEOUT,
     ECE_RC_BADRESPONSE,
+    ECE_RC_INVALIDCERT,
     ECE_RC_FAILED,
     ECE_RC_SYSERR,
     ECE_RC_GENERIC
@@ -72,8 +73,8 @@ ECE_DLLSPEC char *ece_sb_conf_get_vpn_proto (ece_sb_conf_t *conf);
 ECE_DLLSPEC char *ece_sb_conf_get_vpn_type (ece_sb_conf_t *conf);
 
 /* Other */
-ECE_DLLSPEC const char *ece_version ();
-ECE_DLLSPEC const char *ece_revision ();
+ECE_DLLSPEC const char *ece_version (void);
+ECE_DLLSPEC const char *ece_revision (void);
 ECE_DLLSPEC const char *ece_strerror (ece_rc_t rc);
 
 #ifdef __cplusplus

@@ -7,7 +7,6 @@ QMAKE_TARGET_PRODUCT = libECE
 QMAKE_TARGET_DESCRIPTION = libECE
 QMAKE_TARGET_COPYRIGHT =
 
-
 QT += core
 QT += network
 QT -= gui
@@ -24,18 +23,24 @@ win32 {
     DEFINES += ECE_PREFIX_PATH=\\\"..\\\"
     system("mkdir $$(APPDATA)\\sece")
 } else {
-    CONFIG += qjson   # LGPL/external (default)
+
+#   This is OK on Ubuntu but TODO on Yocto
+#   CONFIG += qjson   # LGPL/external
+
+    CONFIG += qtjson  # GPL/self-contained
 }
 
 DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
-DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+exists(".git") {
+    DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+}
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
-# logging: valid only if QT_NO_DEBUG_OUTPUT is NOT set
-# (see README for info)
-DEFINES += ECE_LOGLEVEL=7
+# *old-style* static/compile-time logging; log level can be changed dynamically
+# by changing value of "log/lev" in /etc/ece/ece.json
+#DEFINES += ECE_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include

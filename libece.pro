@@ -13,7 +13,6 @@ check.depends = all
 # generate tar package
 TARFILE = $${PKGNAME}-$${VERSION}.tar.gz
 dist.target = dist
-dist.depends = all
 dist.commands = @( \
                 echo "Making tar package $${TARFILE}"; \
                 if [ -e .svn ]; then \

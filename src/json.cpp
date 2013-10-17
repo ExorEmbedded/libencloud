@@ -4,6 +4,7 @@
 #include <QDebug>
 #include "ece.h"
 #include "helpers.h"
+#include "config.h"
 #include "json.h"
 
 namespace EceJson {

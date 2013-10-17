@@ -1,6 +1,6 @@
 import ece
 
-print 'Runnings libece tests'
+print 'Runnings libece (v%s rev: %s) tests' % (ece.version(), ece.revision())
 
 e = ece.create(0, None)
 

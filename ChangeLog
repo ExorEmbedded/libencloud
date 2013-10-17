@@ -1,7 +1,13 @@
-iibece 0.4 ():
+libece 0.4 ():
 	- new host names: initialization-host, operation-host
 	- ignore errors about not matching certificate/hostname
 	- set a different host name for the command getConfiguration
+	- bindings: use distutils for build/install; added relative include and
+	  library dirs
+	- api: return ECE_RC_INVALIDCERT upon certification validation failures
+	- logging: log level can be configured at runtime in ece.json (log/lev)
+	- sbsim: make certs valid from yesterday to avoid races
+	- build: temporarily use qtjson (Yocto TODO)
 
 libece 0.3 (25/09/2013):
 	- fix certificate request encoding

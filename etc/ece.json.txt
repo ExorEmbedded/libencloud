@@ -39,5 +39,9 @@ ECE configuration
 
   "rsa" : {                                     # key size for generated RSA keys
     "bits" : 2048
+  },
+
+  "log" : {
+    "lev" : 3       # log level: 0 = min .. 7 = max
   }
 }

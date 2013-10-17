@@ -28,6 +28,8 @@ Config::Config ()
     this->config.sslOp.keyPath = QFileInfo(ECE_KEY2_PATH);
 
     this->config.rsaBits = ECE_RSA_BITS;
+
+    this->config.logLevel = ECE_LOG_LEV;
 }
 
 Config::~Config()
@@ -87,6 +89,14 @@ int Config::__parse (const QVariantMap &jo)
                 "rsa bits must be a multiple of 512!");
     }
     ECE_DBG("rsa bits=" << this->config.rsaBits);
+
+    if (!jo["log"].toMap()["lev"].isNull())
+    {
+        this->config.logLevel = jo["log"].toMap()["lev"].toInt();
+        ECE_ERR_MSG_IF ((this->config.logLevel < 0 || this->config.logLevel > 7),
+                "log level must be between 0 and 7!");
+    }
+    ECE_DBG("log lev=" << this->config.logLevel);
 
     return 0;
 err:

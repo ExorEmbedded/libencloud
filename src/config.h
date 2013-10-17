@@ -36,6 +36,8 @@ typedef struct
     ece_config_ssl_t sslOp;
 
     int rsaBits;
+
+    int logLevel;
 }
 ece_config_t;
 
@@ -63,5 +65,7 @@ private:
 };
 
 } // namespace Ece
+
+extern Ece::Config *g_cfg;
 
 #endif

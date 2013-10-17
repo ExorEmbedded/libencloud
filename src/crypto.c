@@ -9,7 +9,7 @@
 #include "defaults.h"
 // don't depend on Qt for debug
 #undef __ECE_MSG
-#define __ECE_MSG(lev,msg) __ECE_PRINT(lev, msg)
+#define __ECE_MSG(lev, levstr, msg) __ECE_PRINT(lev, levstr, msg)
 #include "crypto.h"
 
 static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey);
@@ -17,7 +17,7 @@ static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey);
 /** \brief Initialize crypto context */
 int ece_crypto_init (ece_crypto_t *ec)
 {
-    ECE_TRACE;
+    //ECE_TRACE;
 
     if (ec == NULL)  // context is optional for now
         return 0;
@@ -32,7 +32,8 @@ int ece_crypto_init (ece_crypto_t *ec)
 /** \brief Release crypto context */
 int ece_crypto_term (ece_crypto_t *ec)
 {
-    ECE_TRACE;
+    //ECE_TRACE;
+
     ECE_UNUSED(ec);
 
     return 0;
@@ -67,7 +68,8 @@ int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile)
     if (nbits == 0)
         nbits = 2048;
 
-    ECE_TRACE;
+    //ECE_TRACE;
+
     ECE_UNUSED(ec);
     ECE_ERR_IF (outfile == NULL);
 
@@ -122,7 +124,8 @@ int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **pbuf, long 
     char *buf = NULL, *pb;
     long len = 0;
 
-    ECE_TRACE;
+    //ECE_TRACE;
+
     ECE_ERR_IF (keyfile == NULL);
     ECE_ERR_IF (ec == NULL);
     ECE_ERR_IF (ec->name_cb == NULL);
