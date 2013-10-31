@@ -1,4 +1,4 @@
-libece 0.4 ():
+libece 0.4 (31/10/2013):
 	- new host names: initialization-host, operation-host
 	- ignore errors about not matching certificate/hostname
 	- set a different host name for the command getConfiguration
