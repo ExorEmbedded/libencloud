@@ -26,11 +26,11 @@
 #endif
 #define ECE_CONF_PATH           ECE_ETC_PREFIX"ece.json"
 #define ECE_CSRTMPL_PATH        ECE_ETC_PREFIX"csr-tmpl.json"
-#define ECE_CACERT_PATH         ECE_ETC_PREFIX"cacert.pem"
-#define ECE_CERT1_PATH          ECE_ETC_PREFIX"cert1.pem"
-#define ECE_KEY1_PATH           ECE_ETC_PREFIX"key1.pem"
-#define ECE_CERT2_PATH          ECE_ETC_PREFIX"cert2.pem"
-#define ECE_KEY2_PATH           ECE_ETC_PREFIX"key2.pem"
+#define ECE_INIT_CA_PATH        ECE_ETC_PREFIX"init_ca.pem"
+#define ECE_INIT_CERT_PATH      ECE_ETC_PREFIX"init_cert.pem"
+#define ECE_INIT_KEY_PATH       ECE_ETC_PREFIX"init_key.pem"
+#define ECE_OP_CERT_PATH        ECE_ETC_PREFIX"op_cert.pem"
+#define ECE_OP_KEY_PATH         ECE_ETC_PREFIX"op_key.pem"
 #define ECE_RSA_BITS            1024
 
 #define ECE_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"
