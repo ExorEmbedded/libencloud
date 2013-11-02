@@ -19,13 +19,13 @@ Config::Config ()
 
     this->config.csrTmplPath = QFileInfo(ECE_CSRTMPL_PATH);
 
-    this->config.sslInit.cacertPath = QFileInfo(ECE_CACERT_PATH);
-    this->config.sslInit.certPath = QFileInfo(ECE_CERT1_PATH);
-    this->config.sslInit.keyPath = QFileInfo(ECE_KEY1_PATH);
+    this->config.sslInit.caPath = QFileInfo(ECE_INIT_CA_PATH);
+    this->config.sslInit.certPath = QFileInfo(ECE_INIT_CERT_PATH);
+    this->config.sslInit.keyPath = QFileInfo(ECE_INIT_KEY_PATH);
 
-    this->config.sslOp.cacertPath = QFileInfo(ECE_CACERT_PATH);
-    this->config.sslOp.certPath = QFileInfo(ECE_CERT2_PATH);
-    this->config.sslOp.keyPath = QFileInfo(ECE_KEY2_PATH);
+    this->config.sslOp.caPath = QFileInfo(ECE_INIT_CA_PATH);
+    this->config.sslOp.certPath = QFileInfo(ECE_OP_CERT_PATH);
+    this->config.sslOp.keyPath = QFileInfo(ECE_OP_KEY_PATH);
 
     this->config.rsaBits = ECE_RSA_BITS;
 
@@ -125,9 +125,9 @@ int Config::__parse_sslOp (const QVariantMap &jo)
 
 int Config::__parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc)
 {
-    if (!jo["cacert"].isNull())
-        sc.cacertPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["cacert"].toString());
-    ECE_DBG("cacert=" << sc.cacertPath.absoluteFilePath());
+    if (!jo["ca"].isNull())
+        sc.caPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["ca"].toString());
+    ECE_DBG("ca=" << sc.caPath.absoluteFilePath());
 
     if (!jo["cert"].isNull())
         sc.certPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["cert"].toString());

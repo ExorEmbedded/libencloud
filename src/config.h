@@ -19,7 +19,7 @@ namespace Ece {
 typedef struct
 {
     QUrl sbUrl;
-    QFileInfo cacertPath;
+    QFileInfo caPath;
     QFileInfo certPath;
     QFileInfo keyPath;
 } 

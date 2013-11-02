@@ -1,3 +1,8 @@
+libece X.Y ():
+	- rename: {cacert,cert,key}1 => init_{ca,cert,key},
+	  {cacaert,cert,key}2 => op_{ca,cert,key}
+	- bindings: fix typo in sb_conf_get_vpn_ip()
+
 libece 0.4 (31/10/2013):
 	- new host names: initialization-host, operation-host
 	- ignore errors about not matching certificate/hostname

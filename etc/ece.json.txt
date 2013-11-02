@@ -23,18 +23,18 @@ ECE configuration
     "sb" : {
       "url" : "https://initialization-host/"    # override sb host
     },
-    "cacert" : "/etc/ece/cacert1.pem",
-    "cert" : "/etc/ece/cert1.pem",
-    "key" : "/etc/ece/key1.pem"
+    "ca" : "/etc/ece/init_ca.pem",
+    "cert" : "/etc/ece/init_cert.pem",
+    "key" : "/etc/ece/init_key.pem"
   },
 
   "ssl_op" : {                                  # operation channel setup
     "sb" : {
       "url" : "https://operation-host/"         # override sb host
     },
-    "cacert" : "/etc/ece/cacert2.pem",
-    "cert" : "/etc/ece/cert2.pem",
-    "key" : "/etc/ece/key2.pem"
+    "ca" : "/etc/ece/op_ca.pem",
+    "cert" : "/etc/ece/op_cert.pem",
+    "key" : "/etc/ece/op_key.pem"
   },
 
   "rsa" : {                                     # key size for generated RSA keys

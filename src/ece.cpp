@@ -138,7 +138,7 @@ ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid)
  *  \brief Synchronous retrieval of info from SB
  *
  * The request is performed upon the Initialization secure channel set up using the
- * {key1, cert1} pair installed during production phase.
+ * {init_key, init_cert} pair installed during production phase.
  * 
  * The license read from persistent storage along with retrieved hardware info are sent
  * as proof of identity.
@@ -157,8 +157,8 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
     Ece::MessageRetrInfo msg;
     QString csrfn = ece->cfg->config.csrTmplPath.absoluteFilePath();
     QFile csrf(csrfn);
-    QString cacertfn = ece->cfg->config.sslOp.cacertPath.absoluteFilePath();
-    QFile cacertf(cacertfn);
+    QString cafn = ece->cfg->config.sslOp.caPath.absoluteFilePath();
+    QFile caf(cafn);
 
     bool ok;
 
@@ -178,9 +178,9 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
     csrf.close();
 
     // save the Operation CA certificate to file
-    ECE_ERR_RC_IF (!cacertf.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
-    ECE_ERR_RC_IF (cacertf.write(msg.caCert.toPem()) == -1, ECE_RC_SYSERR);
-    cacertf.close();
+    ECE_ERR_RC_IF (!caf.open(QIODevice::WriteOnly), ECE_RC_SYSERR);
+    ECE_ERR_RC_IF (caf.write(msg.caCert.toPem()) == -1, ECE_RC_SYSERR);
+    caf.close();
 
     *pinfo = &ece->sb_info;
 
@@ -188,7 +188,7 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
 err:
     if (rc) {
         csrf.close();
-        cacertf.close();
+        caf.close();
     }
 
     return rc;
@@ -198,7 +198,7 @@ err:
  *  \brief Synchronous retrieval of certificate from SB
  *
  * The request is performed upon the Initialization secure channel set up using the
- * {key1, cert1} pair installed during production phase.
+ * {init_key, init_cert} pair installed during production phase.
  * 
  * The license read from persistent storage along with retrieved hardware info are sent
  * as proof of identity. An internal key is generated and used to generate a Certificate
@@ -255,7 +255,7 @@ err:
  *  \brief Synchronous retrieval of configuration from SB
  *
  * The request is performed upon the Operation secure channel set up using the
- * {key2, cert2} pair installed via ece_retr_sb_cert().
+ * {op_key, op_cert} pair installed via ece_retr_sb_cert().
  *
  * Upon success, configuration info is returned to the user in 'pconf'.
  * 

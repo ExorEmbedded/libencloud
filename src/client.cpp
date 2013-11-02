@@ -221,11 +221,11 @@ ece_rc_t Client::__loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfi
     ECE_DBG("url=" << url.toString());
 
     // get CA cert(s)
-    QSslCertificate cacert;
-    QList<QSslCertificate> cacerts(cacert.fromPath(sslcfg->cacertPath.absoluteFilePath()));
-    ECE_RETURN_MSG_IF (cacerts.empty(), ECE_RC_BADPARAMS, "missing CA cert!");
-    ECE_DBG("CaCert subj_CN=" << cacerts.first().subjectInfo(QSslCertificate::CommonName) << \
-            " issuer_O=" << cacerts.first().issuerInfo(QSslCertificate::Organization));
+    QSslCertificate ca;
+    QList<QSslCertificate> cas(ca.fromPath(sslcfg->caPath.absoluteFilePath()));
+    ECE_RETURN_MSG_IF (cas.empty(), ECE_RC_BADPARAMS, "missing CA cert!");
+    ECE_DBG("CaCert subj_CN=" << cas.first().subjectInfo(QSslCertificate::CommonName) << \
+            " issuer_O=" << cas.first().issuerInfo(QSslCertificate::Organization));
 
     // get local cert(s)
     QSslCertificate cert;
@@ -241,7 +241,7 @@ ece_rc_t Client::__loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfi
     ECE_RETURN_MSG_IF (key.isNull(), ECE_RC_BADPARAMS, "missing key!");
     ECE_DBG("Key length=" << key.length() << " algorithm=" << key.algorithm());
 
-    sslconf.setCaCertificates(cacerts);
+    sslconf.setCaCertificates(cas);
     sslconf.setLocalCertificate(certs.first());
     sslconf.setPrivateKey(key);
 

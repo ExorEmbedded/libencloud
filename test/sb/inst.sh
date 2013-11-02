@@ -59,9 +59,9 @@ mv *.pem "${WS2DIR}"
 rm -rf "${ECEDIR}"
 mkdir -p "${ECEDIR}"
 "${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}"
-mv key.pem "${ECEDIR}/key1.pem"
-mv cert.pem "${ECEDIR}/cert1.pem"
-mv cacert.pem "${ECEDIR}/cacert1.pem"
+mv key.pem "${ECEDIR}/init_key.pem"
+mv cert.pem "${ECEDIR}/init_cert.pem"
+mv ca.pem "${ECEDIR}/init_ca.pem"
 
 # install deps
 sudo apt-get install apache2 libapache2-mod-python

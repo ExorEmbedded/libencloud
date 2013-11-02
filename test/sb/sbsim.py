@@ -19,7 +19,7 @@ from datetime import datetime, timedelta
 
 # directory where demoCA can be found
 op_ca_dir = '/var/www/ws1'
-op_cacert_fn = os.path.join(op_ca_dir, 'demoCA/cacert.pem')
+op_ca_fn = os.path.join(op_ca_dir, 'demoCA/cacert.pem')
 
 # testing
 #force_error = True
@@ -74,7 +74,7 @@ def handler_info (req):
     """
 
     day = 60*60*24;
-    cacert = open(op_cacert_fn, 'r')
+    ca = open(op_ca_fn, 'r')
 
     req.write(json.dumps({
                 'valid' : True,
@@ -89,11 +89,11 @@ def handler_info (req):
                         }
                     },
                 # note: cert could be run through 'openssl x509' to get PEM-only part
-                'ca_cert' : cacert.read(),
+                'ca_cert' : ca.read(),
                 'time' : time.time()
                 }))
 
-    cacert.close()
+    ca.close()
 
     return apache.OK
 

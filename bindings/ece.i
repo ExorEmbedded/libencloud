@@ -123,7 +123,7 @@ ECE_DLLSPEC bool ece_sb_info_get_license_valid (ece_sb_info_t *info);
 ECE_DLLSPEC time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info);
 
 /* Accessor methods - ece_sb_conf_t */
-%rename ece__sb_conf_get_vpn_ip _sb_conf_get_vpn_ip;
+%rename ece_sb_conf_get_vpn_ip sb_conf_get_vpn_ip;
 ECE_DLLSPEC char *ece_sb_conf_get_vpn_ip (ece_sb_conf_t *conf);
 
 %rename ece_sb_conf_get_vpn_port sb_conf_get_vpn_port;

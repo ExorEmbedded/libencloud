@@ -14,7 +14,7 @@ KEY_SZ=2048
 REQ=req.pem
 CN="SECE"
 CERT=cert.pem
-CACERT_DST=cacert.pem
+CA_DST=ca.pem
 CADIR=./demoCA
 ENDDATE=""
 CMD="newcreds"  # make credentials by default
@@ -116,12 +116,12 @@ parse_args()
         shift
     done
 
-    CACERT=${CADIR}/cacert.pem
+    CA=${CADIR}/cacert.pem
     SUBJ="/C=IT/O=efw/CN=${CN}"
 
     msg "DESTDIR=${DESTDIR}"
     msg "CADIR=${CADIR}"
-    msg "CACERT=${CACERT}"
+    msg "CA=${CA}"
     msg "KEY=${KEY}"
     msg "KEY_SZ=${KEY_SZ}"
     msg "SUBJ=${SUBJ}"
@@ -146,13 +146,13 @@ cmd_newcreds()
     [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
     wrap openssl ca ${CA_ARGS}
 
-    wrap cp "${CACERT}" "${CACERT_DST}"
+    wrap cp "${CA}" "${CA_DST}"
 
     cd -
 
     wrap mv "${TMPDIR}/${KEY}" "${DESTDIR}"
     wrap mv "${TMPDIR}/${CERT}" "${DESTDIR}"
-    wrap cp "${TMPDIR}/${CACERT_DST}" "${DESTDIR}"
+    wrap cp "${TMPDIR}/${CA_DST}" "${DESTDIR}"
 }
 
 cmd_newca()
