@@ -23,6 +23,9 @@ WS2CN=operation-host
 WS1DIR="${CONFDIR}/${WS1}"
 WS2DIR="${CONFDIR}/${WS2}"
 
+VPNDIR="${CONFDIR}/vpnsrv"
+VPNCN="vpnsrv"
+
 ECEDIR="${CONFDIR}/ece"
 
 DOCROOT=/var/www
@@ -54,6 +57,13 @@ rm -rf "${WS2DIR}"
 mkdir -p "${WS2DIR}"
 "${CONTRIB}/produce.sh" -cn "${WS2CN}" -cadir "${CA2DIR}"
 mv *.pem "${WS2DIR}"
+
+# produce OpenVPN server
+rm -rf "${VPNDIR}"
+mkdir -p "${VPNDIR}"
+"${CONTRIB}/produce.sh" -cn "${VPNCN}" -cadir "${CA2DIR}" -exts server
+openssl dhparam -out dh.pem 1024
+mv *.pem "${VPNDIR}"
 
 # produce SECE (Initialization)
 rm -rf "${ECEDIR}"
