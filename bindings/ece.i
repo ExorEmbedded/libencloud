@@ -28,6 +28,7 @@ typedef enum
     ECE_RC_SUCCESS = 0,
     ECE_RC_BADPARAMS,
     ECE_RC_NOMEM,
+    ECE_RC_BADCONFIG,
     ECE_RC_NOLICENSE,
     ECE_RC_CONNECT,
     ECE_RC_BADAUTH,
@@ -102,8 +103,18 @@ ECE_DLLSPEC ece_rc_t ece_create (int argc, char *argv[], ece_t **pece);
 ECE_DLLSPEC ece_rc_t ece_destroy (ece_t *ece);
 
 /* Licensing */
+#ifdef ECE_TYPE_SECE
+/* SECE: Licensing */
 %rename ece_set_license set_license;
 ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid);
+#else
+/* ECE: Identification */
+%rename ece_get_serial get_serial;
+ECE_DLLSPEC const char *ece_get_serial (ece_t *ece);
+
+%rename ece_get_poi get_poi;
+ECE_DLLSPEC const char *ece_get_poi (ece_t *ece);
+#endif
 
 /* Communication */
 %rename ece_retr_sb_info retr_sb_info;

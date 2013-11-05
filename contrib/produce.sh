@@ -2,9 +2,6 @@
 #
 # Helper script to automate CA creation and credential generation.
 #
-# SECE: Cert/Key are unique for software package
-#       => run only once!
-# ECE: Subject will depend on PoI (TODO)
 
 # defaults
 TMPDIR=/tmp/ece

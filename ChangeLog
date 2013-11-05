@@ -1,4 +1,5 @@
 libece X.Y ():
+	- API: ECE-specific extensions (ECE_TYPE_SECE defined on win32)
 	- rename: {cacert,cert,key}1 => init_{ca,cert,key},
 	  {cacaert,cert,key}2 => op_{ca,cert,key}
 	- bindings: fix typo in sb_conf_get_vpn_ip()

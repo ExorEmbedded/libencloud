@@ -27,6 +27,11 @@ ece_config_ssl_t;
 
 typedef struct
 {
+#ifndef ECE_TYPE_SECE
+    QFileInfo serialPath;
+    QFileInfo poiPath;
+#endif
+    
     QUrl sbUrl;
     int timeout;
     QFileInfo prefix;

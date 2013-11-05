@@ -26,8 +26,10 @@ ece_rc_t Ece::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
 {
     url.setPath(ECE_CMD_GETINFO);
 
+#ifdef ECE_TYPE_SECE
     params.addQueryItem("lic", this->license.toString());
     params.addQueryItem("hw_info", this->hwInfo);
+#endif
 
     ECE_DBG(" ### >>>>> ### " << params.toString());
 
@@ -73,8 +75,11 @@ ece_rc_t Ece::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 {
     url.setPath(ECE_CMD_GETCERT);
 
+#ifdef ECE_TYPE_SECE
     params.addQueryItem("lic", this->license.toString());
     params.addQueryItem("hw_info", this->hwInfo);
+#endif
+
     params.addQueryItem("certificate_request_data", this->csr);
 
     ECE_DBG(" ### >>>>> ### " << params.toString());

@@ -26,7 +26,10 @@ WS2DIR="${CONFDIR}/${WS2}"
 VPNDIR="${CONFDIR}/vpnsrv"
 VPNCN="vpnsrv"
 
-ECEDIR="${CONFDIR}/ece"
+#ECEDIR="${CONFDIR}/ece"
+ECEDIR="/etc/ece"
+ECESERIAL="123"
+ECEPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
 
 DOCROOT=/var/www
 
@@ -66,12 +69,26 @@ openssl dhparam -out dh.pem 1024
 mv *.pem "${VPNDIR}"
 
 # produce SECE (Initialization)
-rm -rf "${ECEDIR}"
+#rm -rf "${ECEDIR}"
+#mkdir -p "${ECEDIR}"
+#"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}"
+#mv key.pem "${ECEDIR}/init_key.pem"
+#mv cert.pem "${ECEDIR}/init_cert.pem"
+#mv ca.pem "${ECEDIR}/init_ca.pem"
+
+# produce ECE (Initialization)
 mkdir -p "${ECEDIR}"
-"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}"
+"${CONTRIB}/produce.sh" -cn "${ECESERIAL}" -cadir "${CA1DIR}"
 mv key.pem "${ECEDIR}/init_key.pem"
 mv cert.pem "${ECEDIR}/init_cert.pem"
 mv ca.pem "${ECEDIR}/init_ca.pem"
+echo "${ECESERIAL}" > "${ECEDIR}/serial"
+echo "${ECEPOI}" > "${ECEDIR}/poi"
+sudo chmod 600 "${ECEDIR}/"*
+sudo chown -R "${USER}" "${ECEDIR}"
+
+# install deps
+sudo apt-get install apache2 libapache2-mod-python
 
 # install deps
 sudo apt-get install apache2 libapache2-mod-python

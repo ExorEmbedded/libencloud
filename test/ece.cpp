@@ -12,9 +12,6 @@
 extern "C" {
 #endif
 
-// comment this to test persistent storage of license and csr
-#define TEST_ECE_RETR_INFO
-
 /**
  * Default is a "Pure C" libece test (no Qt objects): an internal
  * QCoreApplication is created if no instance is found!
@@ -36,7 +33,9 @@ int test_ece (int argc, char *argv[])
 
     TEST_ZERO ((rc = ece_create(argc, argv, &ece)));
 
-#ifdef TEST_ECE_RETR_INFO
+#ifdef ECE_TYPE_SECE
+    fprintf(stderr, "# type: SECE\n");
+
     // bad value - must fail
     TEST_ZERO ((rc = ece_set_license(ece, "a-b-c-d")) == 0);
 
@@ -49,9 +48,13 @@ int test_ece (int argc, char *argv[])
     // variant() = 2 (Distributed Computing Environment), version() = 1 (Time-based)
     TEST_ZERO ((rc = ece_set_license(ece, "{a8098c1a-f86e-11da-bd1a-00112444be1e}")));
 
-    TEST_ZERO ((rc = ece_retr_sb_info(ece, &sb_info)));
+#else
+    fprintf(stderr, "# type: ECE\n");
+    fprintf(stderr, "# serial: %s\n", ece_get_serial(ece));
+    fprintf(stderr, "# poi: %s\n", ece_get_poi(ece));
 #endif
 
+    TEST_ZERO ((rc = ece_retr_sb_info(ece, &sb_info)));
     TEST_ZERO ((rc = ece_retr_sb_cert(ece)));
     TEST_ZERO ((rc = ece_retr_sb_conf(ece, &sb_conf)));
 

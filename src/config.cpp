@@ -12,6 +12,11 @@ Config::Config ()
 {
     this->settings = new QSettings(ECE_SETTINGS_ORG, ECE_SETTINGS_APP);
 
+#ifndef ECE_TYPE_SECE
+    this->config.serialPath = QFileInfo(ECE_SERIAL_PATH);
+    this->config.poiPath = QFileInfo(ECE_POI_PATH);
+#endif
+
     this->config.sbUrl = QUrl(ECE_SB_URL);
     this->config.timeout = ECE_TIMEOUT;
     this->config.prefix = QFileInfo(ECE_PREFIX_PATH);
@@ -73,6 +78,16 @@ err:
 
 int Config::__parse (const QVariantMap &jo)
 {
+#ifndef ECE_TYPE_SECE
+    if (!jo["serial"].isNull())
+        this->config.serialPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+                jo["serial"].toString());
+
+    if (!jo["poi"].isNull())
+        this->config.poiPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+                jo["poi"].toString());
+#endif
+
     if (!jo["timeout"].isNull())
         this->config.timeout = jo["timeout"].toInt();
 

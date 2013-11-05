@@ -25,6 +25,8 @@
 #define ECE_ETC_PREFIX          "/etc/ece/"
 #endif
 #define ECE_CONF_PATH           ECE_ETC_PREFIX"ece.json"
+#define ECE_SERIAL_PATH         ECE_ETC_PREFIX"serial"
+#define ECE_POI_PATH            ECE_ETC_PREFIX"poi"
 #define ECE_CSRTMPL_PATH        ECE_ETC_PREFIX"csr-tmpl.json"
 #define ECE_INIT_CA_PATH        ECE_ETC_PREFIX"init_ca.pem"
 #define ECE_INIT_CERT_PATH      ECE_ETC_PREFIX"init_cert.pem"

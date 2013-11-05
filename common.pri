@@ -7,6 +7,8 @@ QMAKE_TARGET_PRODUCT = libECE
 QMAKE_TARGET_DESCRIPTION = libECE
 QMAKE_TARGET_COPYRIGHT =
 
+QMAKE_CXXFLAGS += -g
+
 QT += core
 QT += network
 QT -= gui
@@ -14,13 +16,15 @@ QT -= gui
 # debugging: pass it from command line: qmake CONFIG+=debug
 # CONFIG += debug
 
-# json
 win32 {
     CONFIG += qtjson  # GPL/self-contained
+
     DEFINES += _CRT_SECURE_NO_WARNINGS
     DEFINES += ECE_WIN32
     # working dir is test, etc is one level up
     DEFINES += ECE_PREFIX_PATH=\\\"..\\\"
+    DEFINES += ECE_TYPE_SECE
+
     system("mkdir $$(APPDATA)\\sece")
 } else {
 

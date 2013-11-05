@@ -36,7 +36,7 @@ typedef enum
     ECE_RC_FAILED,
     ECE_RC_SYSERR,
     ECE_RC_GENERIC
-} 
+}
 ece_rc_t;
 
 /* Main ECE structure */
@@ -55,8 +55,14 @@ typedef struct ece_sb_conf_s ece_sb_conf_t;
 ECE_DLLSPEC ece_rc_t ece_create (int argc, char *argv[], ece_t **pece);
 ECE_DLLSPEC ece_rc_t ece_destroy (ece_t *ece);
 
-/* Licensing */
+#ifdef ECE_TYPE_SECE
+/* SECE: Licensing */
 ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid);
+#else
+/* ECE: Identification */
+ECE_DLLSPEC const char *ece_get_serial (ece_t *ece);
+ECE_DLLSPEC const char *ece_get_poi (ece_t *ece);
+#endif
 
 /* Communication */
 ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo);
