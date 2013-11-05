@@ -9,6 +9,9 @@ ECE configuration
 * Sample:
 
 {
+  "serial" : "/etc/ece/serial",                 # serial number (ECE only)
+  "poi" : "/etc/ece/poi",                       # Proof of Identity (ECE only)
+
   "sb" : {                                      # global SB settings 
     "url" : "https://sb-host"
   },

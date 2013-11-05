@@ -2,9 +2,6 @@
 #
 # Helper script to automate CA creation and credential generation.
 #
-# SECE: Cert/Key are unique for software package
-#       => run only once!
-# ECE: Subject will depend on PoI (TODO)
 
 # defaults
 TMPDIR=/tmp/ece
@@ -55,6 +52,7 @@ usage()
     echo "      -cn     STR   Common Name part of Subject Name (for CSR)"
     echo "      -key    FN    Output key file"
     echo "      -cert   FN    Output certificate file"
+    echo "      -exts   exts  Specify OpenSSL extensions"
     echo "      -test-expiry  Make certifcate expire in 3 minutes"
 }
 
@@ -103,6 +101,11 @@ parse_args()
                 [ -z $VALUE ] && die "-cert requires filename argument!"
                 CERT=$VALUE
                 ;;
+            -exts)
+                shift
+                [ -z $VALUE ] && die "-exts requires extensions argument!"
+                EXTS=$VALUE
+                ;;
             -test-expiry)
                 # now + 3 minutes
                 ENDDATE=$[ $(date +%Y%m%d%H%M%S) + 3*60 ]
@@ -127,6 +130,7 @@ parse_args()
     msg "SUBJ=${SUBJ}"
     msg "CN=${CN}"
     msg "CERT=${CERT}"
+    msg "EXTS=${EXTS}"
     [ "${ENDDATE}" != "" ] && msg "ENDDATE=${ENDDATE}"
 }
 
@@ -140,10 +144,12 @@ cmd_newcreds()
     wrap openssl genrsa ${GENRSA_ARGS}
 
     REQ_ARGS="-batch -new -key ${KEY} -out ${REQ} -subj ${SUBJ}"
+    [ "${EXTS}" != "" ] && REQ_ARGS="${REQ_ARGS} -reqexts ${EXTS}"
     wrap openssl req ${REQ_ARGS}
 
     CA_ARGS="-batch -in ${REQ} -out ${CERT}"
     [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
+    [ "${EXTS}" != "" ] && CA_ARGS="${CA_ARGS} -extensions ${EXTS}"
     wrap openssl ca ${CA_ARGS}
 
     wrap cp "${CA}" "${CA_DST}"

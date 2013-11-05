@@ -27,6 +27,11 @@ ece_config_ssl_t;
 
 typedef struct
 {
+#ifndef ECE_TYPE_SECE
+    QFileInfo serialPath;
+    QFileInfo poiPath;
+#endif
+    
     QUrl sbUrl;
     int timeout;
     QFileInfo prefix;
@@ -50,6 +55,7 @@ public:
     /* Configuration loading */
     int loadFromFile (QString filename);
     static QVariantMap fileToJson (QString filename);
+    QString dump ();
 
     /* Configuration objects are publicly accessible */
     ece_config_t config;
@@ -62,6 +68,8 @@ private:
     int __parse_sslOp (const QVariantMap &jo);
     int __parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc);
     QString __join_paths (const QString &s1, const QString &s2);
+
+    QVariant json;
 };
 
 } // namespace Ece

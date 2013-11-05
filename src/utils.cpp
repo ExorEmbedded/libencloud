@@ -55,4 +55,21 @@ ECE_DLLSPEC QByteArray encodeQueryItem (QString s)
     return qPrintable(s);
 }
 
+ECE_DLLSPEC const char *file2Data (QFileInfo fi)
+{
+    ECE_RETURN_IF (!fi.isFile(), NULL);
+
+    QByteArray ba;
+    QString fn = fi.absoluteFilePath();
+    ECE_DBG("fn=" << fn);
+    QFile f(fn);
+
+    ECE_ERR_IF (!f.open(QIODevice::ReadOnly));
+    ECE_ERR_IF ((ba = f.readAll()).isEmpty());
+
+    return QString(ba.trimmed()).toLocal8Bit();
+err:
+    return NULL;
+}
+
 } //namespace EceUtils

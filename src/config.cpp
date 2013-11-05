@@ -1,5 +1,8 @@
 #include "config.h"
 #include "helpers.h"
+// don't depend on Qt for debug so we can print errors before log level is set
+#undef __ECE_MSG
+#define __ECE_MSG(lev, levstr, msg) __ECE_PRINT(lev, levstr, msg)
 
 namespace Ece {
 
@@ -7,11 +10,12 @@ namespace Ece {
 Config::Config ()
     : settings(NULL)
 {
-    ECE_TRACE;
-
-    ECE_DBG("prefix=" << ECE_PREFIX_PATH);
-
     this->settings = new QSettings(ECE_SETTINGS_ORG, ECE_SETTINGS_APP);
+
+#ifndef ECE_TYPE_SECE
+    this->config.serialPath = QFileInfo(ECE_SERIAL_PATH);
+    this->config.poiPath = QFileInfo(ECE_POI_PATH);
+#endif
 
     this->config.sbUrl = QUrl(ECE_SB_URL);
     this->config.timeout = ECE_TIMEOUT;
@@ -34,28 +38,38 @@ Config::Config ()
 
 Config::~Config()
 {
-    ECE_TRACE;
-
     if (this->settings)
         delete this->settings;
+}
+
+QString Config::dump ()
+{
+    QString s;
+    QTextStream ts(&s);
+    bool ok;
+
+    ts << "dumping configuration:";
+    ts << endl;
+
+    ts << "prefix= " << ECE_PREFIX_PATH << endl;
+    ts << "settings=%s" << this->settings->fileName() << endl;
+
+    ts << EceJson::serialize(this->json, ok);
+
+    return s;
 }
 
 /* Read config from file */
 int Config::loadFromFile (QString filename)
 {
-    ECE_TRACE;
     bool ok;
 
     QString fn = __join_paths(QString(ECE_PREFIX_PATH), filename);
-    ECE_DBG("filename=" << fn);
 
-    QVariant json = EceJson::parseFromFile(fn, ok);
+    this->json = EceJson::parseFromFile(fn, ok);
     ECE_ERR_IF (!ok);
 
-    ECE_DBG(EceJson::serialize(json, ok));
-    ECE_ERR_IF (!ok);
-
-    ECE_ERR_IF (__parse(json.toMap()));
+    ECE_ERR_IF (__parse(this->json.toMap()));
 
     return 0;
 err: 
@@ -64,14 +78,22 @@ err:
 
 int Config::__parse (const QVariantMap &jo)
 {
+#ifndef ECE_TYPE_SECE
+    if (!jo["serial"].isNull())
+        this->config.serialPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+                jo["serial"].toString());
+
+    if (!jo["poi"].isNull())
+        this->config.poiPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+                jo["poi"].toString());
+#endif
+
     if (!jo["timeout"].isNull())
         this->config.timeout = jo["timeout"].toInt();
-    ECE_DBG("timeout=" << this->config.timeout);
 
     if (!jo["csr"].toMap()["tmpl"].isNull())
         this->config.csrTmplPath = __join_paths(this->config.prefix.absoluteFilePath(), \
                 jo["csr"].toMap()["tmpl"].toString());
-    ECE_DBG("csr tmpl=" << this->config.csrTmplPath.absoluteFilePath());
 
     if (!jo["sb"].isNull())
         ECE_ERR_IF (__parse_sb(jo["sb"].toMap()));
@@ -88,7 +110,6 @@ int Config::__parse (const QVariantMap &jo)
         ECE_ERR_MSG_IF ((this->config.rsaBits == 0 || (this->config.rsaBits % 512) != 0),
                 "rsa bits must be a multiple of 512!");
     }
-    ECE_DBG("rsa bits=" << this->config.rsaBits);
 
     if (!jo["log"].toMap()["lev"].isNull())
     {
@@ -96,7 +117,6 @@ int Config::__parse (const QVariantMap &jo)
         ECE_ERR_MSG_IF ((this->config.logLevel < 0 || this->config.logLevel > 7),
                 "log level must be between 0 and 7!");
     }
-    ECE_DBG("log lev=" << this->config.logLevel);
 
     return 0;
 err:
@@ -107,8 +127,6 @@ int Config::__parse_sb (const QVariantMap &jo)
 {
     if (!jo["url"].isNull())
         this->config.sbUrl = jo["url"].toString();
-
-    ECE_DBG("sb url=" << this->config.sbUrl.toString());
 
     return 0;
 }
@@ -127,22 +145,18 @@ int Config::__parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc)
 {
     if (!jo["ca"].isNull())
         sc.caPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["ca"].toString());
-    ECE_DBG("ca=" << sc.caPath.absoluteFilePath());
 
     if (!jo["cert"].isNull())
         sc.certPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["cert"].toString());
-    ECE_DBG("cert=" << sc.certPath.absoluteFilePath());
 
     if (!jo["key"].isNull())
         sc.keyPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["key"].toString());
-    ECE_DBG("key=" << sc.keyPath.absoluteFilePath());
 
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
         sc.sbUrl = this->config.sbUrl;
     ECE_ERR_MSG_IF (sc.sbUrl.isEmpty(),
             "sb url undefined!");
-    ECE_DBG("sb url=" << sc.sbUrl.toString());
 
     return 0;
 err:

@@ -30,6 +30,11 @@ struct ece_s
 {
     QCoreApplication *app;
 
+#ifndef ECE_TYPE_SECE
+    char *serial;
+    char *poi;
+#endif
+
     Ece::Client *client;
     Ece::Config *cfg;
 
@@ -66,6 +71,17 @@ ece_rc_t ece_create (int argc, char *argv[], ece_t **pece)
     ECE_ERR_RC_IF (e->cfg->loadFromFile(ECE_CONF_PATH), ECE_RC_BADCONFIG);
 
     g_cfg = e->cfg;
+    ECE_DBG(g_cfg->dump());
+
+#ifndef ECE_TYPE_SECE
+    e->serial = strdup(EceUtils::file2Data(g_cfg->config.serialPath));
+    ECE_ERR_RC_IF ((e->serial == NULL), ECE_RC_BADCONFIG);
+    ECE_DBG("serial=" << QString::fromLocal8Bit(e->serial));
+
+    e->poi = strdup(EceUtils::file2Data(g_cfg->config.poiPath));
+    ECE_ERR_RC_IF ((e->poi == NULL), ECE_RC_BADCONFIG);
+    ECE_DBG("poi=" << QString::fromLocal8Bit(e->poi));
+#endif
 
     ECE_ERR_RC_IF ((e->client = new Ece::Client) == NULL, ECE_RC_NOMEM);
     ECE_ERR_IF (e->client->setConfig(e->cfg));
@@ -106,16 +122,25 @@ ece_rc_t ece_destroy (ece_t *ece)
         delete ece->app;
     }
 
+#ifndef ECE_TYPE_SECE 
+    if (ece->serial)
+        free(ece->serial);
+
+    if (ece->poi)
+        free(ece->poi);
+#endif
+
     free(ece);
 
     return ECE_RC_SUCCESS;
 }
 
-/** \brief Set license from null-terminated 'guid' string
+/** \brief Set license from null-terminated 'guid' string (SECE only)
  * 
  * The license is saved to a persistent Setting object ("lic" key in
  * ECE_SETTINGS_ORG:ECE_SETTINGS_APP as defined in defaults.h.
  */
+#ifdef ECE_TYPE_SECE
 ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid)
 {
     ECE_RETURN_IF (ece == NULL, ECE_RC_BADPARAMS);
@@ -133,6 +158,27 @@ ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid)
 
     return ECE_RC_SUCCESS;
 }
+#endif
+
+/** \brief Get device's serial (ECE only) */
+#ifndef ECE_TYPE_SECE
+ECE_DLLSPEC const char *ece_get_serial (ece_t *ece)
+{
+    ECE_RETURN_IF (ece == NULL, NULL);
+
+    return ece->serial;
+}
+#endif
+
+/** \brief Get device's PoI (ECE only) */
+#ifndef ECE_TYPE_SECE
+ECE_DLLSPEC const char *ece_get_poi (ece_t *ece)
+{
+    ECE_RETURN_IF (ece == NULL, NULL);
+
+    return ece->poi;
+}
+#endif
 
 /**
  *  \brief Synchronous retrieval of info from SB
@@ -162,10 +208,12 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_info (ece_t *ece, ece_sb_info_t **pinfo)
 
     bool ok;
 
+#ifdef ECE_TYPE_SECE
     msg.license = QUuid(ece->cfg->settings->value("lic").toString());
     ECE_RETURN_IF (msg.license.isNull(), ECE_RC_NOLICENSE);
 
     msg.hwInfo = EceUtils::getHwInfo();
+#endif
 
     ECE_ERR_RC_IF ((rc = ece->client->run(Ece::ProtocolTypeInit, msg)), rc);
 
@@ -221,10 +269,12 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_cert (ece_t *ece)
     QString certfn = ece->cfg->config.sslOp.certPath.absoluteFilePath();
     QFile certfile(certfn);
 
+#ifdef ECE_TYPE_SECE
     msg.license = QUuid(ece->cfg->settings->value("lic").toString());
     ECE_RETURN_IF (msg.license.isNull(), ECE_RC_NOLICENSE);
 
     msg.hwInfo = EceUtils::getHwInfo();
+#endif
 
     // generate temporary key and CSR
     ECE_ERR_IF (ece_crypto_genkey(&ece->crypto, ece->cfg->config.rsaBits, qPrintable(tmpkeyfn)));
@@ -401,9 +451,15 @@ static int __name_cb (X509_NAME *n, void *arg)
                 (const unsigned char *) iter.value().toString().toUtf8().data(), -1, -1, 0));
     }
 
-    // CN based on hw_info
+#ifdef ECE_TYPE_SECE    
+    // SECE: CN based on hw_info
     ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
             (const unsigned char *) EceUtils::getHwInfo().toUtf8().data(), -1, -1, 0));
+#else
+    // ECE: CN based on serial
+    ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
+            (const unsigned char *) ece_get_serial(ece), -1, -1, 0));
+#endif
 
     return 0;
 err:
