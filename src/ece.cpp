@@ -66,6 +66,7 @@ ece_rc_t ece_create (int argc, char *argv[], ece_t **pece)
     ECE_ERR_RC_IF (e->cfg->loadFromFile(ECE_CONF_PATH), ECE_RC_BADCONFIG);
 
     g_cfg = e->cfg;
+    ECE_DBG(g_cfg->dump());
 
     ECE_ERR_RC_IF ((e->client = new Ece::Client) == NULL, ECE_RC_NOMEM);
     ECE_ERR_IF (e->client->setConfig(e->cfg));

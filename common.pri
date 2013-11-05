@@ -1,7 +1,7 @@
 # global defs
 PKGNAME = libece
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.4
+VERSION = 0.5
 QMAKE_TARGET_COMPANY = Endian
 QMAKE_TARGET_PRODUCT = libECE
 QMAKE_TARGET_DESCRIPTION = libECE
