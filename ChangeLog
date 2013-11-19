@@ -6,6 +6,7 @@ libece X.Y ():
 	- bindings: fix typo in sb_conf_get_vpn_ip()
 	- sbsim/contrib: produce and test OpenVPN server
 	- config: fix debug messages not being displayed; fix timeout not configurable
+	- test: retries on failure
 
 libece 0.4 (31/10/2013):
 	- new host names: initialization-host, operation-host

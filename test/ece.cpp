@@ -12,6 +12,8 @@
 extern "C" {
 #endif
 
+#define TEST_TOUT_MINS 5
+
 /**
  * Default is a "Pure C" libece test (no Qt objects): an internal
  * QCoreApplication is created if no instance is found!
@@ -54,9 +56,9 @@ int test_ece (int argc, char *argv[])
     fprintf(stderr, "# poi: %s\n", ece_get_poi(ece));
 #endif
 
-    TEST_ZERO ((rc = ece_retr_sb_info(ece, &sb_info)));
-    TEST_ZERO ((rc = ece_retr_sb_cert(ece)));
-    TEST_ZERO ((rc = ece_retr_sb_conf(ece, &sb_conf)));
+    TEST_ZERO_RETRY ((rc = ece_retr_sb_info(ece, &sb_info)), TEST_TOUT_MINS);
+    TEST_ZERO_RETRY ((rc = ece_retr_sb_cert(ece)), TEST_TOUT_MINS);
+    TEST_ZERO_RETRY ((rc = ece_retr_sb_conf(ece, &sb_conf)), TEST_TOUT_MINS);
 
     fprintf(stderr, "# license valid: %d\n", ece_sb_info_get_license_valid(sb_info));
     fprintf(stderr, "# license expiry: %ld\n", ece_sb_info_get_license_expiry(sb_info));

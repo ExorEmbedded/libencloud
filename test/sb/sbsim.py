@@ -160,10 +160,10 @@ def handler_conf (req):
 
     req.write(json.dumps({
                 'vpn' : {
-                    'ip' : '192.168.0.169', 
-                    'port' : 443,
+                    'ip' : 'localhost', 
+                    'port' : '1194',
                     'proto' : 'tcp',
-                    'type' : 'tap'
+                    'type' : 'null'
                     }
                 }))
     
