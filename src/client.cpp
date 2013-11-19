@@ -76,7 +76,7 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     connect(&qnam, SIGNAL(finished(QNetworkReply*)), this->loop,
             SLOT(quit()));
 
-    QTimer::singleShot(ECE_TIMEOUT, this, SLOT(timeoutSlot()));
+    QTimer::singleShot(this->cfg->config.timeout, this, SLOT(timeoutSlot()));
 
     if (params.isEmpty())
         ECE_ERR_RC_IF ((this->reply = qnam.get(request)) == NULL, ECE_RC_FAILED);
