@@ -77,15 +77,17 @@ def handler_info (req):
     ca = open(op_ca_fn, 'r')
 
     req.write(json.dumps({
+                # ECE?
                 'valid' : True,
                 'expiry' : time.time() + 30*day,
                 'csr_template' :
                     { 'DN' :
                         {
                         'C' : 'AU',
+                        'C' : 'AU',
                         'ST' : 'Some-State',
-                        'O' : 'Internet Widgits Pty Ltd'
-                        # CN added by ECE
+                        'O' : 'Internet Widgits Pty Ltd',
+                        'CN' : 'label from SB 123'
                         }
                     },
                 # note: cert could be run through 'openssl x509' to get PEM-only part

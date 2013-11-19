@@ -451,15 +451,19 @@ static int __name_cb (X509_NAME *n, void *arg)
                 (const unsigned char *) iter.value().toString().toUtf8().data(), -1, -1, 0));
     }
 
+    // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (ECE)
+    if (map["CN"].isNull())
+    {
 #ifdef ECE_TYPE_SECE    
-    // SECE: CN based on hw_info
-    ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
-            (const unsigned char *) EceUtils::getHwInfo().toUtf8().data(), -1, -1, 0));
+        // SECE: CN based on hw_info
+        ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
+                (const unsigned char *) EceUtils::getHwInfo().toUtf8().data(), -1, -1, 0));
 #else
-    // ECE: CN based on serial
-    ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
-            (const unsigned char *) ece_get_serial(ece), -1, -1, 0));
+        // ECE: CN based on serial
+        ECE_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
+                (const unsigned char *) ece_get_serial(ece), -1, -1, 0));
 #endif
+    }
 
     return 0;
 err:

@@ -60,7 +60,7 @@ ECE_DLLSPEC ece_rc_t ece_destroy (ece_t *ece);
 ECE_DLLSPEC ece_rc_t ece_set_license (ece_t *ece, const char *guid);
 #else
 /* ECE: Identification */
-ECE_DLLSPEC const char *ece_get_serial (ece_t *ece);
+ECE_DLLSPEC const char *ece_get_serial (ece_t *ece);  /* optional if CN provided in CSR template */
 ECE_DLLSPEC const char *ece_get_poi (ece_t *ece);
 #endif
 
@@ -70,6 +70,7 @@ ECE_DLLSPEC ece_rc_t ece_retr_sb_cert (ece_t *ece);
 ECE_DLLSPEC ece_rc_t ece_retr_sb_conf (ece_t *ece, ece_sb_conf_t **pconf);
 
 /* Accessor methods - ece_sb_info_t */
+/* SECE: based license, ECE: based on op_cert validity/expiry */
 ECE_DLLSPEC bool ece_sb_info_get_license_valid (ece_sb_info_t *info);
 ECE_DLLSPEC time_t ece_sb_info_get_license_expiry (ece_sb_info_t *info);
 
