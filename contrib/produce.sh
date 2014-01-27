@@ -15,6 +15,7 @@ CA_DST=ca.pem
 CADIR=./demoCA
 ENDDATE=""
 CMD="newcreds"  # make credentials by default
+POLICY=""
 
 msg()
 {
@@ -53,6 +54,7 @@ usage()
     echo "      -key    FN    Output key file"
     echo "      -cert   FN    Output certificate file"
     echo "      -exts   exts  Specify OpenSSL extensions"
+    echo "      -policy P     Specify CA policy"
     echo "      -test-expiry  Make certifcate expire in 3 minutes"
 }
 
@@ -106,6 +108,11 @@ parse_args()
                 [ -z $VALUE ] && die "-exts requires extensions argument!"
                 EXTS=$VALUE
                 ;;
+            -policy)
+                shift
+                [ -z $VALUE ] && die "-policy requires policy argument!"
+                POLICY=$VALUE
+                ;;
             -test-expiry)
                 # now + 3 minutes
                 ENDDATE=$[ $(date +%Y%m%d%H%M%S) + 3*60 ]
@@ -115,6 +122,7 @@ parse_args()
                 echo "Option $OPTARG requires arguments"
                 usage
                 exit 1
+                ;;
         esac
         shift
     done
@@ -150,6 +158,7 @@ cmd_newcreds()
     CA_ARGS="-batch -in ${REQ} -out ${CERT}"
     [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
     [ "${EXTS}" != "" ] && CA_ARGS="${CA_ARGS} -extensions ${EXTS}"
+    [ "${POLICY}" != "" ] && CA_ARGS="${CA_ARGS} -policy ${POLICY}"
     wrap openssl ca ${CA_ARGS}
 
     wrap cp "${CA}" "${CA_DST}"
@@ -180,6 +189,7 @@ cmd_newca()
 
     CA_ARGS="-batch -in ${REQ} -keyfile ${CADIR}/private/cakey.pem -out ${CADIR}/cacert.pem"
     CA_ARGS="${CA_ARGS} -create_serial -selfsign -extensions v3_ca"
+    [ "${POLICY}" != "" ] && CA_ARGS="${CA_ARGS} -policy ${POLICY}"
     [ "${ENDDATE}" != "" ] && CA_ARGS="${CA_ARGS} -enddate ${ENDDATE}"
     wrap openssl ca ${CA_ARGS}
 

@@ -5,7 +5,8 @@ libece X.Y ():
 	- rename: {cacert,cert,key}1 => init_{ca,cert,key},
 	  {cacaert,cert,key}2 => op_{ca,cert,key}
 	- bindings: fix typo in sb_conf_get_vpn_ip()
-	- sbsim/contrib: produce and test OpenVPN server
+	- sbsim/contrib: produce and test OpenVPN server; no need to modify opeensl.conf by
+	  passing policy to openssl ca
 	- config: fix debug messages not being displayed; fix timeout not configurable
 	- test: retries on failure
 

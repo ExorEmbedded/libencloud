@@ -133,7 +133,10 @@ def handler_csr (req):
     startdate = yesterday.strftime("%y%m%d%H%M%SZ")
 
     # request certificate from CA based on CSR and without prompts
-    os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' 2>/dev/null');
+    rc = os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' -policy policy_anything');
+    if rc:
+        req.write(json.dumps({ 'error' : 'opeensl failure', 'rc:' : rc }))
+        return apache.DECLINED
 
     """
     upon duplicates 'openssl ca' returns 'failed to update database\nTXT_DB error number 2'
