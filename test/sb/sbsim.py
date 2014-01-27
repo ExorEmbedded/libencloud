@@ -77,15 +77,17 @@ def handler_info (req):
     ca = open(op_ca_fn, 'r')
 
     req.write(json.dumps({
+                # ECE?
                 'valid' : True,
                 'expiry' : time.time() + 30*day,
                 'csr_template' :
                     { 'DN' :
                         {
                         'C' : 'AU',
+                        'C' : 'AU',
                         'ST' : 'Some-State',
-                        'O' : 'Internet Widgits Pty Ltd'
-                        # CN added by ECE
+                        'O' : 'Internet Widgits Pty Ltd',
+                        'CN' : 'label from SB 123'
                         }
                     },
                 # note: cert could be run through 'openssl x509' to get PEM-only part
@@ -131,7 +133,10 @@ def handler_csr (req):
     startdate = yesterday.strftime("%y%m%d%H%M%SZ")
 
     # request certificate from CA based on CSR and without prompts
-    os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' 2>/dev/null');
+    rc = os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' -policy policy_anything');
+    if rc:
+        req.write(json.dumps({ 'error' : 'opeensl failure', 'rc:' : rc }))
+        return apache.DECLINED
 
     """
     upon duplicates 'openssl ca' returns 'failed to update database\nTXT_DB error number 2'
@@ -158,10 +163,10 @@ def handler_conf (req):
 
     req.write(json.dumps({
                 'vpn' : {
-                    'ip' : '192.168.0.169', 
-                    'port' : 443,
+                    'ip' : 'localhost', 
+                    'port' : '1194',
                     'proto' : 'tcp',
-                    'type' : 'tap'
+                    'type' : 'null'
                     }
                 }))
     

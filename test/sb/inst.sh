@@ -31,6 +31,8 @@ ECEDIR="/etc/ece"
 ECESERIAL="123"
 ECEPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
 
+EXTRAARGS="-policy policy_anything"
+
 DOCROOT=/var/www
 
 # give current user permissions on DESTDIR
@@ -41,44 +43,44 @@ mkdir -p "${CONFDIR}"
 
 # produce CA1
 rm -rf "${CA1DIR}"
-"${CONTRIB}/produce.sh" -newca -cn "${CA1}"
+"${CONTRIB}/produce.sh" -newca -cn "${CA1}" ${EXTRAARGS}
 mv "${CADIR}" "${CA1DIR}"
 
 # produce CA2
 rm -rf "${CA2DIR}"
-"${CONTRIB}/produce.sh" -newca -cn "${CA2}"
+"${CONTRIB}/produce.sh" -newca -cn "${CA2}" ${EXTRAARGS}
 mv "${CADIR}" "${CA2DIR}"
 
 # produce SB web service 1 (Initialization)
 rm -rf "${WS1DIR}"
 mkdir -p "${WS1DIR}"
-"${CONTRIB}/produce.sh" -cn "${WS1CN}" -cadir "${CA1DIR}"
+"${CONTRIB}/produce.sh" -cn "${WS1CN}" -cadir "${CA1DIR}" ${EXTRAARGS}
 mv *.pem "${WS1DIR}"
 
 # produce SB web service 2 (Operation)
 rm -rf "${WS2DIR}"
 mkdir -p "${WS2DIR}"
-"${CONTRIB}/produce.sh" -cn "${WS2CN}" -cadir "${CA2DIR}"
+"${CONTRIB}/produce.sh" -cn "${WS2CN}" -cadir "${CA2DIR}" ${EXTRAARGS}
 mv *.pem "${WS2DIR}"
 
 # produce OpenVPN server
 rm -rf "${VPNDIR}"
 mkdir -p "${VPNDIR}"
-"${CONTRIB}/produce.sh" -cn "${VPNCN}" -cadir "${CA2DIR}" -exts server
+"${CONTRIB}/produce.sh" -cn "${VPNCN}" -cadir "${CA2DIR}" -exts server ${EXTRAARGS}
 openssl dhparam -out dh.pem 1024
 mv *.pem "${VPNDIR}"
 
 # produce SECE (Initialization)
 #rm -rf "${ECEDIR}"
 #mkdir -p "${ECEDIR}"
-#"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}"
+#"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}" ${EXTRAARGS}
 #mv key.pem "${ECEDIR}/init_key.pem"
 #mv cert.pem "${ECEDIR}/init_cert.pem"
 #mv ca.pem "${ECEDIR}/init_ca.pem"
 
 # produce ECE (Initialization)
 mkdir -p "${ECEDIR}"
-"${CONTRIB}/produce.sh" -cn "${ECESERIAL}" -cadir "${CA1DIR}"
+"${CONTRIB}/produce.sh" -cn "${ECESERIAL}" -cadir "${CA1DIR}" ${EXTRAARGS}
 mv key.pem "${ECEDIR}/init_key.pem"
 mv cert.pem "${ECEDIR}/init_cert.pem"
 mv ca.pem "${ECEDIR}/init_ca.pem"
