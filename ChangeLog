@@ -1,4 +1,4 @@
-libece X.Y ():
+libece 0.5 (27/01/2014):
 	- API: ECE-specific extensions (ECE_TYPE_SECE defined on win32)
 	- SB: remove curly brackets around Qt's uuid representation
 	- op_cert: CN based on CSR template value if provided (user can give a label)
