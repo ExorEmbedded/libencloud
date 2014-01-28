@@ -1,7 +1,7 @@
 
-[ What is libece? ]
+[ What is libencloud? ]
 
-libece is a simplified Switchboard communication library which provides
+libencloud is a simplified Switchboard communication library which provides
 functionality to handle:
  - request and renewal of Operation certificates
  - retrieval of license info and VPN connection configuration
@@ -30,10 +30,10 @@ $ sudo make install
 
 *Important Notes*: 
     - configuration files *must not* be readable by other users
-        e.g. Linux: sudo chmod 600 /etc/ece/*
-    - configuration drectory and files *must* be writable by the user/process calling libece!
-        e.g. Linux: sudo chown -R my_user /etc/ece
-    - different paths for files and keys can be configured in /etc/ece/ece.json
+        e.g. Linux: sudo chmod 600 /etc/encloud/*
+    - configuration drectory and files *must* be writable by the user/process calling libencloud!
+        e.g. Linux: sudo chown -R my_user /etc/encloud
+    - different paths for files and keys can be configured in /etc/encloud/encloud.json
 
 Run tests with:
 
@@ -52,7 +52,7 @@ Run qmake and build.
 
 [ Logging ]
 
-The log level/verbosity is set in /etc/ece/ece.json, following syslog() numbering. For example the following:
+The log level/verbosity is set in /etc/encloud/encloud.json, following syslog() numbering. For example the following:
 
 "log" : {
   "lev": 7

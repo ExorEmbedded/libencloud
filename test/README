@@ -8,7 +8,7 @@ $ ./inst.sh
 
 The script will:
 - generate 2 test CAs
-- create credentials for SB simulator services and ECE
+- create credentials for SB simulator services and ENCLOUD
 - configure apache accordingly
 
 Components are installed to /test.

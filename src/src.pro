@@ -2,21 +2,21 @@ include(../common.pri)
 
 TEMPLATE = lib
 
-TARGET = ece
+TARGET = encloud
 win32 {
     CONFIG += dll
-    # disable number in mingw output (libece0.dll vs libece.dll)
+    # disable number in mingw output (libencloud0.dll vs libencloud.dll)
     TARGET_EXT = .dll
 }
 
 # define used to select dllimport/dllexport attributes
-DEFINES += _ECELIB_
+DEFINES += _ENCLOUDLIB_
 
 HEADERS += helpers.h
 HEADERS += defaults.h
 
-# ece public header in ../include/
-SOURCES += ece.cpp
+# encloud public header in ../include/
+SOURCES += encloud.cpp
 
 HEADERS += client.h
 SOURCES += client.cpp

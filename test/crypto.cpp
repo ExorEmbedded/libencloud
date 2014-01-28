@@ -6,9 +6,9 @@
 #include "crypto.h"
 
 #ifdef Q_OS_WIN
-#define TEST_CRYPTO_OUTFILE "c:\\temp\\libece-test-key.pem"
+#define TEST_CRYPTO_OUTFILE "c:\\temp\\libencloud-test-key.pem"
 #else
-#define TEST_CRYPTO_OUTFILE "/tmp/libece-test-key.pem"
+#define TEST_CRYPTO_OUTFILE "/tmp/libencloud-test-key.pem"
 #endif
 
 #ifdef __cplusplus
@@ -17,7 +17,7 @@ extern "C" {
 
 static int __name_cb (X509_NAME *n, void *arg)
 {
-    ECE_UNUSED(arg);
+    ENCLOUD_UNUSED(arg);
 
     X509_NAME_add_entry_by_txt(n, "C", MBSTRING_ASC, (const unsigned char *) "AU", -1, -1, 0);
 
@@ -29,24 +29,24 @@ int test_crypto ()
     char *s = NULL;
     TEST_TRACE;
 
-    ece_crypto_t ec;
+    encloud_crypto_t ec;
 
-    TEST_ZERO (ece_crypto_init(&ec));
+    TEST_ZERO (encloud_crypto_init(&ec));
 
-    TEST_ZERO (ece_crypto_set_name_cb(&ec, &__name_cb, NULL));
+    TEST_ZERO (encloud_crypto_set_name_cb(&ec, &__name_cb, NULL));
 
-    TEST_ZERO (ece_crypto_genkey(&ec, 1024, TEST_CRYPTO_OUTFILE));
-    TEST_ZERO (ece_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
+    TEST_ZERO (encloud_crypto_genkey(&ec, 1024, TEST_CRYPTO_OUTFILE));
+    TEST_ZERO (encloud_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
 
-    TEST_ZERO (ece_crypto_genkey(&ec, 2048, TEST_CRYPTO_OUTFILE));
-    TEST_ZERO (ece_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
+    TEST_ZERO (encloud_crypto_genkey(&ec, 2048, TEST_CRYPTO_OUTFILE));
+    TEST_ZERO (encloud_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
 
-    TEST_ZERO (ece_crypto_genkey(&ec, 4096, TEST_CRYPTO_OUTFILE));
-    TEST_ZERO (ece_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
+    TEST_ZERO (encloud_crypto_genkey(&ec, 4096, TEST_CRYPTO_OUTFILE));
+    TEST_ZERO (encloud_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
 
-    TEST_ZERO (ece_crypto_term(&ec));
+    TEST_ZERO (encloud_crypto_term(&ec));
 
-    s = ece_crypto_md5(&ec, (char *) "foo bar", strlen("foo bar"));
+    s = encloud_crypto_md5(&ec, (char *) "foo bar", strlen("foo bar"));
     TEST_ZERO (strcmp(s, "327B6F07435811239BC47E1544353273"));
 
     free(s);

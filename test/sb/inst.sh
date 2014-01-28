@@ -26,10 +26,10 @@ WS2DIR="${CONFDIR}/${WS2}"
 VPNDIR="${CONFDIR}/vpnsrv"
 VPNCN="vpnsrv"
 
-#ECEDIR="${CONFDIR}/ece"
-ECEDIR="/etc/ece"
-ECESERIAL="123"
-ECEPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
+#ENCLOUDDIR="${CONFDIR}/encloud"
+ENCLOUDDIR="/etc/encloud"
+ENCLOUDSERIAL="123"
+ENCLOUDPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
 
 EXTRAARGS="-policy policy_anything"
 
@@ -71,23 +71,23 @@ openssl dhparam -out dh.pem 1024
 mv *.pem "${VPNDIR}"
 
 # produce SECE (Initialization)
-#rm -rf "${ECEDIR}"
-#mkdir -p "${ECEDIR}"
+#rm -rf "${ENCLOUDDIR}"
+#mkdir -p "${ENCLOUDDIR}"
 #"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}" ${EXTRAARGS}
-#mv key.pem "${ECEDIR}/init_key.pem"
-#mv cert.pem "${ECEDIR}/init_cert.pem"
-#mv ca.pem "${ECEDIR}/init_ca.pem"
+#mv key.pem "${ENCLOUDDIR}/init_key.pem"
+#mv cert.pem "${ENCLOUDDIR}/init_cert.pem"
+#mv ca.pem "${ENCLOUDDIR}/init_ca.pem"
 
-# produce ECE (Initialization)
-mkdir -p "${ECEDIR}"
-"${CONTRIB}/produce.sh" -cn "${ECESERIAL}" -cadir "${CA1DIR}" ${EXTRAARGS}
-mv key.pem "${ECEDIR}/init_key.pem"
-mv cert.pem "${ECEDIR}/init_cert.pem"
-mv ca.pem "${ECEDIR}/init_ca.pem"
-echo "${ECESERIAL}" > "${ECEDIR}/serial"
-echo "${ECEPOI}" > "${ECEDIR}/poi"
-sudo chmod 600 "${ECEDIR}/"*
-sudo chown -R "${USER}" "${ECEDIR}"
+# produce ENCLOUD (Initialization)
+mkdir -p "${ENCLOUDDIR}"
+"${CONTRIB}/produce.sh" -cn "${ENCLOUDSERIAL}" -cadir "${CA1DIR}" ${EXTRAARGS}
+mv key.pem "${ENCLOUDDIR}/init_key.pem"
+mv cert.pem "${ENCLOUDDIR}/init_cert.pem"
+mv ca.pem "${ENCLOUDDIR}/init_ca.pem"
+echo "${ENCLOUDSERIAL}" > "${ENCLOUDDIR}/serial"
+echo "${ENCLOUDPOI}" > "${ENCLOUDDIR}/poi"
+sudo chmod 600 "${ENCLOUDDIR}/"*
+sudo chown -R "${USER}" "${ENCLOUDDIR}"
 
 # install deps
 sudo apt-get install apache2 libapache2-mod-python

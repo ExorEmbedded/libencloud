@@ -4,7 +4,7 @@
 #
 
 # defaults
-TMPDIR=/tmp/ece
+TMPDIR=/tmp/encloud
 DESTDIR=.
 KEY=key.pem
 KEY_SZ=2048

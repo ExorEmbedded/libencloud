@@ -18,9 +18,9 @@
 /test/Makefile
 /test/build/
 /test/test
-/bindings/ece.py
+/bindings/encloud.py
 /bindings/*_wrap.c
 /bindings/build
 
 # dist-generated files
-/libece-*
+/libencloud-*

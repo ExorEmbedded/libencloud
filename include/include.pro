@@ -2,7 +2,7 @@ include(../common.pri)
 
 TEMPLATE = subdirs
 
-HEADERS += ece.h
+HEADERS += encloud.h
 win32 {
     HEADERS += stdbool.h
 }

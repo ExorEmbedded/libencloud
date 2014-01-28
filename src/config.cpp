@@ -1,39 +1,39 @@
 #include "config.h"
 #include "helpers.h"
 // don't depend on Qt for debug so we can print errors before log level is set
-#undef __ECE_MSG
-#define __ECE_MSG(lev, levstr, msg) __ECE_PRINT(lev, levstr, msg)
+#undef __ENCLOUD_MSG
+#define __ENCLOUD_MSG(lev, levstr, msg) __ENCLOUD_PRINT(lev, levstr, msg)
 
-namespace Ece {
+namespace encloud {
 
 /* Set defaults from defaults.h definitions */
 Config::Config ()
     : settings(NULL)
 {
-    this->settings = new QSettings(ECE_SETTINGS_ORG, ECE_SETTINGS_APP);
+    this->settings = new QSettings(ENCLOUD_SETTINGS_ORG, ENCLOUD_SETTINGS_APP);
 
-#ifndef ECE_TYPE_SECE
-    this->config.serialPath = QFileInfo(ECE_SERIAL_PATH);
-    this->config.poiPath = QFileInfo(ECE_POI_PATH);
+#ifndef ENCLOUD_TYPE_SECE
+    this->config.serialPath = QFileInfo(ENCLOUD_SERIAL_PATH);
+    this->config.poiPath = QFileInfo(ENCLOUD_POI_PATH);
 #endif
 
-    this->config.sbUrl = QUrl(ECE_SB_URL);
-    this->config.timeout = ECE_TIMEOUT;
-    this->config.prefix = QFileInfo(ECE_PREFIX_PATH);
+    this->config.sbUrl = QUrl(ENCLOUD_SB_URL);
+    this->config.timeout = ENCLOUD_TIMEOUT;
+    this->config.prefix = QFileInfo(ENCLOUD_PREFIX_PATH);
 
-    this->config.csrTmplPath = QFileInfo(ECE_CSRTMPL_PATH);
+    this->config.csrTmplPath = QFileInfo(ENCLOUD_CSRTMPL_PATH);
 
-    this->config.sslInit.caPath = QFileInfo(ECE_INIT_CA_PATH);
-    this->config.sslInit.certPath = QFileInfo(ECE_INIT_CERT_PATH);
-    this->config.sslInit.keyPath = QFileInfo(ECE_INIT_KEY_PATH);
+    this->config.sslInit.caPath = QFileInfo(ENCLOUD_INIT_CA_PATH);
+    this->config.sslInit.certPath = QFileInfo(ENCLOUD_INIT_CERT_PATH);
+    this->config.sslInit.keyPath = QFileInfo(ENCLOUD_INIT_KEY_PATH);
 
-    this->config.sslOp.caPath = QFileInfo(ECE_INIT_CA_PATH);
-    this->config.sslOp.certPath = QFileInfo(ECE_OP_CERT_PATH);
-    this->config.sslOp.keyPath = QFileInfo(ECE_OP_KEY_PATH);
+    this->config.sslOp.caPath = QFileInfo(ENCLOUD_INIT_CA_PATH);
+    this->config.sslOp.certPath = QFileInfo(ENCLOUD_OP_CERT_PATH);
+    this->config.sslOp.keyPath = QFileInfo(ENCLOUD_OP_KEY_PATH);
 
-    this->config.rsaBits = ECE_RSA_BITS;
+    this->config.rsaBits = ENCLOUD_RSA_BITS;
 
-    this->config.logLevel = ECE_LOG_LEV;
+    this->config.logLevel = ENCLOUD_LOG_LEV;
 }
 
 Config::~Config()
@@ -51,10 +51,10 @@ QString Config::dump ()
     ts << "dumping configuration:";
     ts << endl;
 
-    ts << "prefix= " << ECE_PREFIX_PATH << endl;
-    ts << "settings=%s" << this->settings->fileName() << endl;
+    ts << "prefix=" << ENCLOUD_PREFIX_PATH << endl;
+    ts << "settings=" << this->settings->fileName() << endl;
 
-    ts << EceJson::serialize(this->json, ok);
+    ts << encloud::json::serialize(this->json, ok);
 
     return s;
 }
@@ -64,12 +64,12 @@ int Config::loadFromFile (QString filename)
 {
     bool ok;
 
-    QString fn = __join_paths(QString(ECE_PREFIX_PATH), filename);
+    QString fn = __join_paths(QString(ENCLOUD_PREFIX_PATH), filename);
 
-    this->json = EceJson::parseFromFile(fn, ok);
-    ECE_ERR_IF (!ok);
+    this->json = encloud::json::parseFromFile(fn, ok);
+    ENCLOUD_ERR_IF (!ok);
 
-    ECE_ERR_IF (__parse(this->json.toMap()));
+    ENCLOUD_ERR_IF (__parse(this->json.toMap()));
 
     return 0;
 err: 
@@ -78,7 +78,7 @@ err:
 
 int Config::__parse (const QVariantMap &jo)
 {
-#ifndef ECE_TYPE_SECE
+#ifndef ENCLOUD_TYPE_SECE
     if (!jo["serial"].isNull())
         this->config.serialPath = __join_paths(this->config.prefix.absoluteFilePath(), \
                 jo["serial"].toString());
@@ -96,25 +96,25 @@ int Config::__parse (const QVariantMap &jo)
                 jo["csr"].toMap()["tmpl"].toString());
 
     if (!jo["sb"].isNull())
-        ECE_ERR_IF (__parse_sb(jo["sb"].toMap()));
+        ENCLOUD_ERR_IF (__parse_sb(jo["sb"].toMap()));
 
     if (!jo["ssl_init"].isNull())
-        ECE_ERR_IF (__parse_sslInit(jo["ssl_init"].toMap()));
+        ENCLOUD_ERR_IF (__parse_sslInit(jo["ssl_init"].toMap()));
 
     if (!jo["ssl_op"].isNull())
-        ECE_ERR_IF (__parse_sslOp(jo["ssl_op"].toMap()));
+        ENCLOUD_ERR_IF (__parse_sslOp(jo["ssl_op"].toMap()));
 
     if (!jo["rsa"].toMap()["bits"].isNull())
     {
         this->config.rsaBits = jo["rsa"].toMap()["bits"].toInt();
-        ECE_ERR_MSG_IF ((this->config.rsaBits == 0 || (this->config.rsaBits % 512) != 0),
+        ENCLOUD_ERR_MSG_IF ((this->config.rsaBits == 0 || (this->config.rsaBits % 512) != 0),
                 "rsa bits must be a multiple of 512!");
     }
 
     if (!jo["log"].toMap()["lev"].isNull())
     {
         this->config.logLevel = jo["log"].toMap()["lev"].toInt();
-        ECE_ERR_MSG_IF ((this->config.logLevel < 0 || this->config.logLevel > 7),
+        ENCLOUD_ERR_MSG_IF ((this->config.logLevel < 0 || this->config.logLevel > 7),
                 "log level must be between 0 and 7!");
     }
 
@@ -141,7 +141,7 @@ int Config::__parse_sslOp (const QVariantMap &jo)
     return __parse_ssl(jo, this->config.sslOp);
 }
 
-int Config::__parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc)
+int Config::__parse_ssl (const QVariantMap &jo, encloud_config_ssl_t &sc)
 {
     if (!jo["ca"].isNull())
         sc.caPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["ca"].toString());
@@ -155,7 +155,7 @@ int Config::__parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc)
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
         sc.sbUrl = this->config.sbUrl;
-    ECE_ERR_MSG_IF (sc.sbUrl.isEmpty(),
+    ENCLOUD_ERR_MSG_IF (sc.sbUrl.isEmpty(),
             "sb url undefined!");
 
     return 0;
@@ -168,4 +168,4 @@ QString Config::__join_paths (const QString &s1, const QString &s2)
     return QDir::cleanPath(s1 + QDir::separator() + s2);
 }
 
-} // namespace Ece
+} // namespace encloud

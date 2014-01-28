@@ -1,21 +1,21 @@
-import ece
+import encloud
 
-print 'Runnings libece (v%s rev: %s) tests' % (ece.version(), ece.revision())
+print 'Runnings libencloud (v%s rev: %s) tests' % (encloud.version(), encloud.revision())
 
-e = ece.create(0, None)
+e = encloud.create(0, None)
 
 # SECE only
-ece.set_license(e, '{a8098c1a-f86e-11da-bd1a-00112444be1e}')
+encloud.set_license(e, '{a8098c1a-f86e-11da-bd1a-00112444be1e}')
 
-ece.retr_sb_info(e)
-ece.retr_sb_cert(e)
-c = ece.retr_sb_conf(e)
+encloud.retr_sb_info(e)
+encloud.retr_sb_cert(e)
+c = encloud.retr_sb_conf(e)
 
-print "ip: " + ece.sb_conf_get_vpn_ip(c)
-print "port: " + str(ece.sb_conf_get_vpn_port(c))
-print "proto: " + ece.sb_conf_get_vpn_proto(c)
-print "type: " + ece.sb_conf_get_vpn_type(c)
+print "ip: " + encloud.sb_conf_get_vpn_ip(c)
+print "port: " + str(encloud.sb_conf_get_vpn_port(c))
+print "proto: " + encloud.sb_conf_get_vpn_proto(c)
+print "type: " + encloud.sb_conf_get_vpn_type(c)
 
-ece.destroy(e)
+encloud.destroy(e)
 
 print 'All tests passed'

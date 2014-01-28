@@ -1,5 +1,5 @@
-#ifndef _ECE_CONFIG_H_
-#define _ECE_CONFIG_H_
+#ifndef _ENCLOUD_CONFIG_H_
+#define _ENCLOUD_CONFIG_H_
 
 #include <QDebug>
 #include <QObject>
@@ -14,7 +14,7 @@
 #include "defaults.h"
 #include "helpers.h"
 
-namespace Ece {
+namespace encloud {
 
 typedef struct
 {
@@ -23,11 +23,11 @@ typedef struct
     QFileInfo certPath;
     QFileInfo keyPath;
 } 
-ece_config_ssl_t;
+encloud_config_ssl_t;
 
 typedef struct
 {
-#ifndef ECE_TYPE_SECE
+#ifndef ENCLOUD_TYPE_SECE
     QFileInfo serialPath;
     QFileInfo poiPath;
 #endif
@@ -37,14 +37,14 @@ typedef struct
     QFileInfo prefix;
     QFileInfo csrTmplPath;
 
-    ece_config_ssl_t sslInit;
-    ece_config_ssl_t sslOp;
+    encloud_config_ssl_t sslInit;
+    encloud_config_ssl_t sslOp;
 
     int rsaBits;
 
     int logLevel;
 }
-ece_config_t;
+encloud_config_t;
 
 class Config
 {
@@ -58,7 +58,7 @@ public:
     QString dump ();
 
     /* Configuration objects are publicly accessible */
-    ece_config_t config;
+    encloud_config_t config;
     QSettings *settings;
 
 private:
@@ -66,14 +66,14 @@ private:
     int __parse_sb (const QVariantMap &jo);
     int __parse_sslInit (const QVariantMap &jo);
     int __parse_sslOp (const QVariantMap &jo);
-    int __parse_ssl (const QVariantMap &jo, ece_config_ssl_t &sc);
+    int __parse_ssl (const QVariantMap &jo, encloud_config_ssl_t &sc);
     QString __join_paths (const QString &s1, const QString &s2);
 
     QVariant json;
 };
 
-} // namespace Ece
+} // namespace encloud
 
-extern Ece::Config *g_cfg;
+extern encloud::Config *g_cfg;
 
 #endif

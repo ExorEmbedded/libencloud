@@ -1,33 +1,33 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <ece.h>
+#include <encloud.h>
 #include "test.h"
 
 int main (int argc, char *argv[])
 {
-    ece_rc_t rc = ECE_RC_SUCCESS;
+    encloud_rc_t rc = ENCLOUD_RC_SUCCESS;
 
-    ece_t *ece = NULL;
+    encloud_t *encloud = NULL;
 
-    fprintf(stderr, "# testing libece version %s (rev: %s)\n",
-            ece_version(), ece_revision());
+    fprintf(stderr, "# testing libencloud version %s (rev: %s)\n",
+            encloud_version(), encloud_revision());
 
-    TEST_ZERO (rc = ece_create(argc, argv, &ece));
+    TEST_ZERO (rc = encloud_create(argc, argv, &encloud));
 
-    TEST_ZERO (rc = ece_retr_sb_info(ece, NULL));
-    TEST_ZERO (rc = ece_retr_sb_cert(ece));
+    TEST_ZERO (rc = encloud_retr_sb_info(encloud, NULL));
+    TEST_ZERO (rc = encloud_retr_sb_cert(encloud));
 
-    TEST_ZERO (rc = ece_retr_sb_conf(ece, NULL));
+    TEST_ZERO (rc = encloud_retr_sb_conf(encloud, NULL));
 
-    ece_destroy(ece);
+    encloud_destroy(encloud);
 
     return EXIT_SUCCESS;
 
 err:
-    if (ece)
-        ece_destroy(ece);
+    if (encloud)
+        encloud_destroy(encloud);
 
-    fprintf (stderr, "# libece error (%d): %s\n", rc, ece_strerror(rc));
+    fprintf (stderr, "# libencloud error (%d): %s\n", rc, encloud_strerror(rc));
 
     return EXIT_FAILURE;
 }

@@ -1,16 +1,16 @@
-ECE configuration
-^^^^^^^^^^^^^^^^^
+libencloud configuration
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Notes: 
-    - all paths are relative to ECE_PREFIX_PATH (optionally defined in common.pri)
+    - all paths are relative to ENCLOUD_PREFIX_PATH (optionally defined in common.pri)
     - comments are *not* valid Json
     - prefix
 
 * Sample:
 
 {
-  "serial" : "/etc/ece/serial",                 # serial number (ECE only)
-  "poi" : "/etc/ece/poi",                       # Proof of Identity (ECE only)
+  "serial" : "/etc/encloud/serial",             # serial number (ECE only)
+  "poi" : "/etc/encloud/poi",                   # Proof of Identity (ECE only)
 
   "sb" : {                                      # global SB settings 
     "url" : "https://sb-host"
@@ -19,25 +19,25 @@ ECE configuration
   "timeout" : 10000,                            # timeout in ms for net operations
 
   "csr" : {                                     # certificate Request template
-    "tmpl" : "/etc/ece/csr-tmpl.json"
+    "tmpl" : "/etc/encloud/csr-tmpl.json"
   },
 
   "ssl_init" : {                                # initialization channel setup
     "sb" : {
       "url" : "https://initialization-host/"    # override sb host
     },
-    "ca" : "/etc/ece/init_ca.pem",
-    "cert" : "/etc/ece/init_cert.pem",
-    "key" : "/etc/ece/init_key.pem"
+    "ca" : "/etc/encloud/init_ca.pem",
+    "cert" : "/etc/encloud/init_cert.pem",
+    "key" : "/etc/encloud/init_key.pem"
   },
 
   "ssl_op" : {                                  # operation channel setup
     "sb" : {
       "url" : "https://operation-host/"         # override sb host
     },
-    "ca" : "/etc/ece/op_ca.pem",
-    "cert" : "/etc/ece/op_cert.pem",
-    "key" : "/etc/ece/op_key.pem"
+    "ca" : "/etc/encloud/op_ca.pem",
+    "cert" : "/etc/encloud/op_cert.pem",
+    "key" : "/etc/encloud/op_key.pem"
   },
 
   "rsa" : {                                     # key size for generated RSA keys

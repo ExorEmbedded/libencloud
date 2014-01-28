@@ -1,13 +1,14 @@
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
-#include "ece.h"
+#include "encloud.h"
 #include "json.h"
 
 /**
  * QJson-based interface (LGPL/external)
  */
 
-namespace EceJson {
+namespace encloud {
+namespace json {
 
 QVariant parse (const QString &str, bool &ok)
 {
@@ -23,4 +24,5 @@ QString serialize (const QVariant &json, bool &ok)
     return serializer.serialize(json, &ok);
 }
 
-} // namespace
+} // namespace json
+} // namespace encloud

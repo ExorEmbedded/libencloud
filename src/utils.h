@@ -1,18 +1,21 @@
-#ifndef _ECE_UTILS_H
-#define _ECE_UTILS_H
+#ifndef _ENCLOUD_UTILS_H
+#define _ENCLOUD_UTILS_H
 
 #include <QtCore>
 #include <QString>
 #include <QDateTime>
-#include "ece.h"
+#include "encloud.h"
 
-namespace EceUtils {
+namespace encloud {
+namespace utils {
 
-ECE_DLLSPEC QString getHwInfo (void);
-ECE_DLLSPEC QDateTime pytime2DateTime (QString pydate);
-ECE_DLLSPEC QByteArray encodeQueryItem (QString pydate);
-ECE_DLLSPEC const char *file2Data (QFileInfo fi);
+ENCLOUD_DLLSPEC QString getHwInfo (void);
+ENCLOUD_DLLSPEC QDateTime pytime2DateTime (QString pydate);
+ENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString pydate);
+ENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi);
+ENCLOUD_DLLSPEC char *ustrdup (const char *s);
 
-} // namespace EceUtils
+} // namespace utils
+} // namespace encloud
 
 #endif

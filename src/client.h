@@ -1,5 +1,5 @@
-#ifndef _ECE_CLIENT_H_
-#define _ECE_CLIENT_H_
+#ifndef _ENCLOUD_CLIENT_H_
+#define _ENCLOUD_CLIENT_H_
 
 #include <QObject>
 #include <QFile>
@@ -12,14 +12,14 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkAccessManager>
-#include <ece.h>
+#include <encloud.h>
 #include "common.h"
 #include "helpers.h"
 #include "defaults.h"
 #include "config.h"
 #include "msg.h"
 
-namespace Ece {
+namespace encloud {
 
 class Client : public QObject
 {
@@ -29,8 +29,8 @@ public:
     Client();
     ~Client();
 
-    ece_rc_t setConfig (Ece::Config *cfg);
-    ece_rc_t run (Ece::ProtocolType protocol, Ece::Message &message);
+    encloud_rc_t setConfig (encloud::Config *cfg);
+    encloud_rc_t run (encloud::ProtocolType protocol, encloud::Message &message);
 
 private slots:
     void proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthenticator *authenticator);
@@ -40,15 +40,15 @@ private slots:
     void timeoutSlot ();
 
 private:
-    ece_rc_t __run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response);
-    ece_rc_t __loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf);
+    encloud_rc_t __run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response);
+    encloud_rc_t __loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf);
 
-    ece_rc_t error;
+    encloud_rc_t error;
     Config *cfg;
     QEventLoop *loop;
     QNetworkReply *reply;
 };
 
-} // namespace Ece
+} // namespace encloud
 
 #endif

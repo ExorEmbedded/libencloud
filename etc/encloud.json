@@ -1,0 +1,23 @@
+{
+  "ssl_init" : {
+    "sb" : {
+      "url" : "https://initialization-host/"
+    },
+    "ca" : "/etc/encloud/init_ca.pem",
+    "cert" : "/etc/encloud/init_cert.pem",
+    "key" : "/etc/encloud/init_key.pem"
+  },
+
+  "ssl_op" : {
+    "sb" : {
+      "url" : "https://operation-host/"
+    },
+    "ca" : "/etc/encloud/op_ca.pem",
+    "cert" : "/etc/encloud/op_cert.pem",
+    "key" : "/etc/encloud/op_key.pem"
+  },
+
+  "log" : {
+    "lev" : 3
+  }
+}

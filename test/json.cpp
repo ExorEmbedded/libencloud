@@ -16,28 +16,28 @@ int test_json ()
 
     // simple test
     sin = "{ \"teststr\" : \"mystr\", \"testint\" : 123 }";
-    json = EceJson::parse(sin, ok);
+    json = encloud::json::parse(sin, ok);
     jm = json.toMap();
 
     TEST_ZERO (strcmp(qPrintable(jm["teststr"].toString()), "mystr"));
     TEST_EQUALS (jm["testint"].toInt(), 123);
 
-    sout = EceJson::serialize(json, ok);
+    sout = encloud::json::serialize(json, ok);
 
-    ECE_DBG("sin: " << sin);
-    ECE_DBG("sout: " << sout);
+    ENCLOUD_DBG("sin: " << sin);
+    ENCLOUD_DBG("sout: " << sout);
 
     // with newlines and tabs
     sin = "\n{\n\t\"teststr\":\t\"mystr\",\n\t\"testint\":\t123\n}\n";
-    json = EceJson::parse(sin, ok);
+    json = encloud::json::parse(sin, ok);
 
     TEST_ZERO (strcmp(qPrintable(jm["teststr"].toString()), "mystr"));
     TEST_EQUALS (jm["testint"].toInt(), 123);
 
-    sout = EceJson::serialize(json, ok);
+    sout = encloud::json::serialize(json, ok);
 
-    ECE_DBG("sin: " << sin);
-    ECE_DBG("sout: " << sout);
+    ENCLOUD_DBG("sin: " << sin);
+    ENCLOUD_DBG("sout: " << sout);
 
     return 0;
 

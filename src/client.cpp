@@ -1,73 +1,73 @@
 #include "client.h"
 
-namespace Ece {
+namespace encloud {
 
 Client::Client ()
     : cfg(NULL), reply(NULL)
 {
-    ECE_TRACE;
+    ENCLOUD_TRACE;
 }
 
 Client::~Client ()
 {
-    ECE_TRACE;
+    ENCLOUD_TRACE;
 }
 
-ece_rc_t Client::setConfig (Ece::Config *cfg)
+encloud_rc_t Client::setConfig (encloud::Config *cfg)
 {
-    ECE_RETURN_IF (cfg == NULL, ECE_RC_BADPARAMS);
+    ENCLOUD_RETURN_IF (cfg == NULL, ENCLOUD_RC_BADPARAMS);
 
     this->cfg = cfg;
 
-    return ECE_RC_SUCCESS;
+    return ENCLOUD_RC_SUCCESS;
 }
 
-ece_rc_t Client::run (Ece::ProtocolType protocol, Ece::Message &message)
+encloud_rc_t Client::run (encloud::ProtocolType protocol, encloud::Message &message)
 {
-    ece_rc_t rc;
+    encloud_rc_t rc;
     QUrl serviceURL;
     QUrl params;
     QSslConfiguration config;
     QString response, errString;
 
     // get proper configuration based on protocol type
-    ECE_RETURN_IF (__loadSslConf(protocol, serviceURL, config), ECE_RC_BADPARAMS);
+    ENCLOUD_RETURN_IF (__loadSslConf(protocol, serviceURL, config), ENCLOUD_RC_BADPARAMS);
 
-    ECE_ERR_IF ((rc = message.encodeRequest(serviceURL, params)));
+    ENCLOUD_ERR_IF ((rc = message.encodeRequest(serviceURL, params)));
 
-    ECE_DBG("url=" << serviceURL);
+    ENCLOUD_DBG("url=" << serviceURL);
 
     if ((rc = __run(serviceURL, params, config, response)))
         return rc;
 
-    ECE_DBG(" ### <<<<< ###  " << response);
+    ENCLOUD_DBG(" ### <<<<< ###  " << response);
 
-    ECE_ERR_IF ((rc = message.decodeResponse(response, errString)));
+    ENCLOUD_ERR_IF ((rc = message.decodeResponse(response, errString)));
 
-    return ECE_RC_SUCCESS;
+    return ENCLOUD_RC_SUCCESS;
 err:
     if (!errString.isEmpty())
-        ECE_ERR("SB error: " << errString);
+        ENCLOUD_ERR("SB error: " << errString);
     
     return rc;
 }
 
-ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response)
+encloud_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response)
 {
-    ece_rc_t rc = this->error = ECE_RC_SUCCESS;
+    encloud_rc_t rc = this->error = ENCLOUD_RC_SUCCESS;
 
     QNetworkAccessManager qnam;
     QNetworkRequest request(url);
 
     request.setSslConfiguration(sslconf);
     request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-    request.setRawHeader("User-Agent", ECE_STRING);
-    request.setRawHeader("X-Custom-User-Agent", ECE_STRING);
+    request.setRawHeader("User-Agent", ENCLOUD_STRING);
+    request.setRawHeader("X-Custom-User-Agent", ENCLOUD_STRING);
 
-    if (url.path().compare(ECE_CMD_GETCONFIG) == 0)
-        request.setRawHeader("Host", ECE_GETCONFIG_HOSTNAME);
+    if (url.path().compare(ENCLOUD_CMD_GETCONFIG) == 0)
+        request.setRawHeader("Host", ENCLOUD_GETCONFIG_HOSTNAME);
 
-    ECE_RETURN_IF ((this->loop = new QEventLoop) == NULL, ECE_RC_NOMEM);
+    ENCLOUD_RETURN_IF ((this->loop = new QEventLoop) == NULL, ENCLOUD_RC_NOMEM);
 
     connect(&qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(proxyAuthenticationRequiredSlot(const QNetworkProxy &, QAuthenticator *)));
@@ -79,22 +79,22 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
     QTimer::singleShot(this->cfg->config.timeout, this, SLOT(timeoutSlot()));
 
     if (params.isEmpty())
-        ECE_ERR_RC_IF ((this->reply = qnam.get(request)) == NULL, ECE_RC_FAILED);
+        ENCLOUD_ERR_RC_IF ((this->reply = qnam.get(request)) == NULL, ENCLOUD_RC_FAILED);
     else
-        ECE_ERR_RC_IF ((this->reply = qnam.post(request, params.encodedQuery())) == NULL, ECE_RC_FAILED);
+        ENCLOUD_ERR_RC_IF ((this->reply = qnam.post(request, params.encodedQuery())) == NULL, ENCLOUD_RC_FAILED);
 
     connect(this->reply, SIGNAL(error(QNetworkReply::NetworkError)), 
             SLOT(networkErrorSlot(QNetworkReply::NetworkError)));
 
-    ECE_ERR_IF (this->loop->exec());
+    ENCLOUD_ERR_IF (this->loop->exec());
 
-    // All NetworkError(s) currently handled by slot as ECE_RC_FAILED.
+    // All NetworkError(s) currently handled by slot as ENCLOUD_RC_FAILED.
     // Possible error code remappings (if required because they should not
     // occur with proper configuration):
     //  - handshake failed (6)
     //  - key values mismatch (99)
 
-    ECE_ERR_MSG_IF(this->error || reply->error(),
+    ENCLOUD_ERR_MSG_IF(this->error || reply->error(),
             "Error in reply (" << reply->error() << "): " << reply->errorString());
     response = reply->readAll();
 
@@ -107,7 +107,7 @@ ece_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfigura
         this->loop = NULL;
     }
 
-    return ECE_RC_SUCCESS;
+    return ENCLOUD_RC_SUCCESS;
 err:
     if (this->reply)
     {
@@ -124,58 +124,58 @@ err:
     if (this->error)
         return this->error;
 
-    return (rc ? rc : ECE_RC_GENERIC);
+    return (rc ? rc : ENCLOUD_RC_GENERIC);
 }
 
 void Client::proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthenticator *authenticator)
 { 
-    ECE_UNUSED(authenticator); 
+    ENCLOUD_UNUSED(authenticator); 
     const QNetworkProxy *p = &proxy;  //unused
-    ECE_UNUSED(p);
+    ENCLOUD_UNUSED(p);
 
-    ECE_ERR(""); 
+    ENCLOUD_ERR(""); 
 
-    this->error = ECE_RC_BADAUTH;
+    this->error = ENCLOUD_RC_BADAUTH;
 }
 
 void Client::sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors) 
 { 
-    ECE_UNUSED(reply);
+    ENCLOUD_UNUSED(reply);
     
-    ECE_ERR(""); 
+    ENCLOUD_ERR(""); 
 
     // Ignore the SslError 22 "The host name did not match any of the valid hosts for this certificate"
     if ((errors.size() == 1) && (errors.first().error() == QSslError::HostNameMismatch)) {
-        ECE_DBG("The host name did not match any of the valid hosts for this certificate");
+        ENCLOUD_DBG("The host name did not match any of the valid hosts for this certificate");
         reply->ignoreSslErrors(errors);
         return;
     }
 
-    this->error = ECE_RC_BADAUTH;
+    this->error = ENCLOUD_RC_BADAUTH;
 
     foreach (QSslError err, errors) 
     {
-        ECE_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
-        ECE_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
+        ENCLOUD_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
+        ENCLOUD_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
                 " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
     }
 }
 
 void Client::networkErrorSlot (QNetworkReply::NetworkError err)
 { 
-    ECE_UNUSED(err);
+    ENCLOUD_UNUSED(err);
 
-    ECE_ERR("NetworkError (" << err << ")");
+    ENCLOUD_ERR("NetworkError (" << err << ")");
 
     if (!this->error)  // can be already set by timeoutSlot()
-        this->error = ECE_RC_FAILED;
+        this->error = ENCLOUD_RC_FAILED;
 }
 
 void Client::timeoutSlot ()
 { 
-    ECE_TRACE; 
+    ENCLOUD_TRACE; 
 
-    this->error = ECE_RC_TIMEOUT;
+    this->error = ENCLOUD_RC_TIMEOUT;
 
     if (this->reply)
         this->reply->abort();
@@ -195,16 +195,16 @@ void Client::timeoutSlot ()
  */
 void Client::finishedSlot (QNetworkReply *reply) 
 { 
-    ECE_UNUSED(reply);
+    ENCLOUD_UNUSED(reply);
 
-    ECE_TRACE; 
+    ENCLOUD_TRACE; 
 }
 
-ece_rc_t Client::__loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
+encloud_rc_t Client::__loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
 {
-    ece_config_ssl_t *sslcfg;
+    encloud_config_ssl_t *sslcfg;
     
-    ECE_RETURN_IF (this->cfg == NULL, ECE_RC_BADPARAMS);
+    ENCLOUD_RETURN_IF (this->cfg == NULL, ENCLOUD_RC_BADPARAMS);
 
     switch (protocol) {
         case ProtocolTypeInit:
@@ -214,38 +214,38 @@ ece_rc_t Client::__loadSslConf (Ece::ProtocolType protocol, QUrl &url, QSslConfi
             sslcfg = &this->cfg->config.sslOp;
             break;
         default:
-            ECE_RETURN_IF (1, ECE_RC_BADPARAMS);
+            ENCLOUD_RETURN_IF (1, ENCLOUD_RC_BADPARAMS);
     }
 
     url = sslcfg->sbUrl;
-    ECE_DBG("url=" << url.toString());
+    ENCLOUD_DBG("url=" << url.toString());
 
     // get CA cert(s)
     QSslCertificate ca;
     QList<QSslCertificate> cas(ca.fromPath(sslcfg->caPath.absoluteFilePath()));
-    ECE_RETURN_MSG_IF (cas.empty(), ECE_RC_BADPARAMS, "missing CA cert!");
-    ECE_DBG("CaCert subj_CN=" << cas.first().subjectInfo(QSslCertificate::CommonName) << \
+    ENCLOUD_RETURN_MSG_IF (cas.empty(), ENCLOUD_RC_BADPARAMS, "missing CA cert!");
+    ENCLOUD_DBG("CaCert subj_CN=" << cas.first().subjectInfo(QSslCertificate::CommonName) << \
             " issuer_O=" << cas.first().issuerInfo(QSslCertificate::Organization));
 
     // get local cert(s)
     QSslCertificate cert;
     QList<QSslCertificate> certs(cert.fromPath(sslcfg->certPath.absoluteFilePath()));
-    ECE_RETURN_MSG_IF (certs.empty(), ECE_RC_BADPARAMS, "missing cert!");
-    ECE_DBG("Cert subj_CN=" << certs.first().subjectInfo(QSslCertificate::CommonName) << \
+    ENCLOUD_RETURN_MSG_IF (certs.empty(), ENCLOUD_RC_BADPARAMS, "missing cert!");
+    ENCLOUD_DBG("Cert subj_CN=" << certs.first().subjectInfo(QSslCertificate::CommonName) << \
             " issuer_O=" << certs.first().issuerInfo(QSslCertificate::Organization));
 
     // get local key
     QFile kfile(sslcfg->keyPath.absoluteFilePath());
     kfile.open(QIODevice::ReadOnly | QIODevice::Text);
     QSslKey key(&kfile, QSsl::Rsa);
-    ECE_RETURN_MSG_IF (key.isNull(), ECE_RC_BADPARAMS, "missing key!");
-    ECE_DBG("Key length=" << key.length() << " algorithm=" << key.algorithm());
+    ENCLOUD_RETURN_MSG_IF (key.isNull(), ENCLOUD_RC_BADPARAMS, "missing key!");
+    ENCLOUD_DBG("Key length=" << key.length() << " algorithm=" << key.algorithm());
 
     sslconf.setCaCertificates(cas);
     sslconf.setLocalCertificate(certs.first());
     sslconf.setPrivateKey(key);
 
-    return ECE_RC_SUCCESS;
+    return ENCLOUD_RC_SUCCESS;
 }
 
-} // namespace Ece
+} // namespace encloud

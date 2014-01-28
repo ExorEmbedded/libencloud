@@ -1,6 +1,6 @@
 # *** EXPERIMENTAL/TESTING ONLY ***
 #
-# Tiny Switchboard simulator for libece communication testing
+# Tiny Switchboard simulator for libencloud communication testing
 #
 # Prerequisites:
 #   * apache2 config: sample in test/sb/default-ssl

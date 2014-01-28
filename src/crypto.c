@@ -8,21 +8,21 @@
 #include "helpers.h"
 #include "defaults.h"
 // don't depend on Qt for debug
-#undef __ECE_MSG
-#define __ECE_MSG(lev, levstr, msg) __ECE_PRINT(lev, levstr, msg)
+#undef __ENCLOUD_MSG
+#define __ENCLOUD_MSG(lev, levstr, msg) __ENCLOUD_PRINT(lev, levstr, msg)
 #include "crypto.h"
 
-static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey);
+static X509_REQ *__make_req (encloud_crypto_t *ec, EVP_PKEY *pkey);
 
 /** \brief Initialize crypto context */
-int ece_crypto_init (ece_crypto_t *ec)
+int encloud_crypto_init (encloud_crypto_t *ec)
 {
-    //ECE_TRACE;
+    //ENCLOUD_TRACE;
 
     if (ec == NULL)  // context is optional for now
         return 0;
 
-    memset(ec, 0, sizeof(ece_crypto_t));
+    memset(ec, 0, sizeof(encloud_crypto_t));
 
     OpenSSL_add_all_algorithms();
 
@@ -30,20 +30,20 @@ int ece_crypto_init (ece_crypto_t *ec)
 }
 
 /** \brief Release crypto context */
-int ece_crypto_term (ece_crypto_t *ec)
+int encloud_crypto_term (encloud_crypto_t *ec)
 {
-    //ECE_TRACE;
+    //ENCLOUD_TRACE;
 
-    ECE_UNUSED(ec);
+    ENCLOUD_UNUSED(ec);
 
     return 0;
 }
 
 /** \brief Set callback used by calling API to set X509 subject name values */
-int ece_crypto_set_name_cb (ece_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx)
+int encloud_crypto_set_name_cb (encloud_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx)
 {
-    ECE_ERR_IF (ec == NULL);
-    ECE_ERR_IF (cb == NULL);
+    ENCLOUD_ERR_IF (ec == NULL);
+    ENCLOUD_ERR_IF (cb == NULL);
 
     ec->name_cb = cb;
     ec->name_cb_ctx = ctx;
@@ -54,7 +54,7 @@ err:
 }
 
 /** \brief Generate an RSA key of size 'nbits' to 'outfile' */
-int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile)
+int encloud_crypto_genkey (encloud_crypto_t *ec, size_t nbits, const char *outfile)
 {
     int rc = ~0;
     unsigned long f4 = RSA_F4;
@@ -68,31 +68,31 @@ int ece_crypto_genkey (ece_crypto_t *ec, size_t nbits, const char *outfile)
     if (nbits == 0)
         nbits = 2048;
 
-    //ECE_TRACE;
+    //ENCLOUD_TRACE;
 
-    ECE_UNUSED(ec);
-    ECE_ERR_IF (outfile == NULL);
+    ENCLOUD_UNUSED(ec);
+    ENCLOUD_ERR_IF (outfile == NULL);
 
     // grab name of rand file path - see RAND_load_file(3)
-    ECE_ERR_IF ((file = RAND_file_name(rbuf, sizeof(rbuf))) == NULL);
+    ENCLOUD_ERR_IF ((file = RAND_file_name(rbuf, sizeof(rbuf))) == NULL);
 
     // the following is allowed to fail if seeding is not based on rand file
     // e.g. /dev/urandom is used if found on system,
     RAND_load_file(file, -1);
 
     // but still make sure random number generator is adequately seeded
-    ECE_ERR_IF (!RAND_status());
+    ENCLOUD_ERR_IF (!RAND_status());
 
     // create output file
-    ECE_ERR_IF ((out = BIO_new(BIO_s_file())) == NULL);
-    ECE_ERR_IF (BIO_write_filename(out, (char *) outfile) <= 0);
+    ENCLOUD_ERR_IF ((out = BIO_new(BIO_s_file())) == NULL);
+    ENCLOUD_ERR_IF (BIO_write_filename(out, (char *) outfile) <= 0);
 
     // run RSA keygen algo
-    ECE_ERR_IF ((bn = BN_new()) == NULL);
-    ECE_ERR_IF ((rsa = RSA_new()) == NULL);
-    ECE_ERR_IF (!BN_set_word(bn, f4));
-    ECE_ERR_IF (!RSA_generate_key_ex(rsa, nbits, bn, NULL));
-    ECE_ERR_IF (!PEM_write_bio_RSAPrivateKey(out, rsa, enc, NULL, 0, NULL, NULL));
+    ENCLOUD_ERR_IF ((bn = BN_new()) == NULL);
+    ENCLOUD_ERR_IF ((rsa = RSA_new()) == NULL);
+    ENCLOUD_ERR_IF (!BN_set_word(bn, f4));
+    ENCLOUD_ERR_IF (!RSA_generate_key_ex(rsa, nbits, bn, NULL));
+    ENCLOUD_ERR_IF (!PEM_write_bio_RSAPrivateKey(out, rsa, enc, NULL, 0, NULL, NULL));
 
     rc = 0;
 err:
@@ -111,9 +111,9 @@ err:
  *  
  *  If pbuf is defined, user owns it and must free() when finished with it.
  *
- *  Prerequisites: ece_crypto_set_name_cb() for subject name settings
+ *  Prerequisites: encloud_crypto_set_name_cb() for subject name settings
  */
-int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **pbuf, long *plen)
+int encloud_crypto_gencsr (encloud_crypto_t *ec, const char *keyfile, char **pbuf, long *plen)
 {
     int rc = ~0;
     BIO *kfile = NULL;
@@ -124,38 +124,38 @@ int ece_crypto_gencsr (ece_crypto_t *ec, const char *keyfile, char **pbuf, long 
     char *buf = NULL, *pb;
     long len = 0;
 
-    //ECE_TRACE;
+    //ENCLOUD_TRACE;
 
-    ECE_ERR_IF (keyfile == NULL);
-    ECE_ERR_IF (ec == NULL);
-    ECE_ERR_IF (ec->name_cb == NULL);
+    ENCLOUD_ERR_IF (keyfile == NULL);
+    ENCLOUD_ERR_IF (ec == NULL);
+    ENCLOUD_ERR_IF (ec->name_cb == NULL);
 
-    ECE_ERR_IF ((kfile = BIO_new(BIO_s_file())) == NULL);
-    ECE_ERR_IF (BIO_read_filename(kfile, keyfile) <= 0);
+    ENCLOUD_ERR_IF ((kfile = BIO_new(BIO_s_file())) == NULL);
+    ENCLOUD_ERR_IF (BIO_read_filename(kfile, keyfile) <= 0);
 
     // load private key
-    ECE_ERR_IF ((pkey = PEM_read_bio_PrivateKey(kfile, NULL, NULL, NULL)) == NULL);
+    ENCLOUD_ERR_IF ((pkey = PEM_read_bio_PrivateKey(kfile, NULL, NULL, NULL)) == NULL);
 
     // generate the CSR
-    ECE_ERR_IF ((req = __make_req(ec, pkey)) == NULL);
+    ENCLOUD_ERR_IF ((req = __make_req(ec, pkey)) == NULL);
 
     if (pbuf == NULL)  // output to standard output
     {
-        ECE_ERR_IF ((out = BIO_new(BIO_s_file())) == NULL);
+        ENCLOUD_ERR_IF ((out = BIO_new(BIO_s_file())) == NULL);
         BIO_set_fp(out, stdout, BIO_NOCLOSE);
 
-        ECE_ERR_IF (!PEM_write_bio_X509_REQ(out, req));
+        ENCLOUD_ERR_IF (!PEM_write_bio_X509_REQ(out, req));
     }
     else 
     {
-        ECE_ERR_IF ((out = BIO_new(BIO_s_mem())) == NULL);
+        ENCLOUD_ERR_IF ((out = BIO_new(BIO_s_mem())) == NULL);
 
-        ECE_ERR_IF (!PEM_write_bio_X509_REQ(out, req));
+        ENCLOUD_ERR_IF (!PEM_write_bio_X509_REQ(out, req));
         BIO_flush(out);
 
         // memory to buffer
-        ECE_ERR_IF ((len = BIO_get_mem_data(out, &pb)) <= 0);
-        ECE_ERR_IF ((buf = calloc(1, sizeof(char) * len)) == NULL);
+        ENCLOUD_ERR_IF ((len = BIO_get_mem_data(out, &pb)) <= 0);
+        ENCLOUD_ERR_IF ((buf = calloc(1, sizeof(char) * len)) == NULL);
         memcpy(buf, pb, len);
     }
 
@@ -180,7 +180,7 @@ err:
     return rc;
 }
 
-static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey)
+static X509_REQ *__make_req (encloud_crypto_t *ec, EVP_PKEY *pkey)
 {
     X509_REQ *req = NULL;
     X509_NAME *n = NULL;
@@ -190,21 +190,21 @@ static X509_REQ *__make_req (ece_crypto_t *ec, EVP_PKEY *pkey)
 
     EVP_MD_CTX_init(&mctx);
 
-    ECE_ERR_IF (ec == NULL);
-    ECE_ERR_IF (pkey == NULL);
-    ECE_ERR_IF (ec->name_cb == NULL);
+    ENCLOUD_ERR_IF (ec == NULL);
+    ENCLOUD_ERR_IF (pkey == NULL);
+    ENCLOUD_ERR_IF (ec->name_cb == NULL);
 
-    ECE_ERR_IF ((req = X509_REQ_new()) == NULL);
-    ECE_ERR_IF ((n = X509_NAME_new()) == NULL);
+    ENCLOUD_ERR_IF ((req = X509_REQ_new()) == NULL);
+    ENCLOUD_ERR_IF ((n = X509_NAME_new()) == NULL);
     
-    ECE_ERR_IF (ec->name_cb(n, ec->name_cb_ctx));
-    ECE_ERR_IF (!X509_REQ_set_subject_name(req, n));
-    ECE_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
+    ENCLOUD_ERR_IF (ec->name_cb(n, ec->name_cb_ctx));
+    ENCLOUD_ERR_IF (!X509_REQ_set_subject_name(req, n));
+    ENCLOUD_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
 
-    // ECE_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Non supported by the current Switchboard openssl version
-    ECE_ERR_IF ((digest = EVP_get_digestbyname(SN_sha1)) == NULL);
-    ECE_ERR_IF (!EVP_DigestSignInit(&mctx, &pkctx, digest, NULL, pkey));
-    ECE_ERR_IF (!X509_REQ_sign_ctx(req, &mctx));
+    // ENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Non supported by the current Switchboard openssl version
+    ENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha1)) == NULL);
+    ENCLOUD_ERR_IF (!EVP_DigestSignInit(&mctx, &pkctx, digest, NULL, pkey));
+    ENCLOUD_ERR_IF (!X509_REQ_sign_ctx(req, &mctx));
     EVP_MD_CTX_cleanup(&mctx);
 
     X509_NAME_free(n);
@@ -224,19 +224,19 @@ err:
  * 
  * Result string must be free()d by caller.
  */
-char *ece_crypto_md5 (ece_crypto_t *ec, char *buf, long buf_sz)
+char *encloud_crypto_md5 (encloud_crypto_t *ec, char *buf, long buf_sz)
 {
     unsigned char md5[MD5_DIGEST_LENGTH];
     char *s = NULL;
     long i;
 
-    ECE_UNUSED(ec);
+    ENCLOUD_UNUSED(ec);
 
-    ECE_ERR_IF (buf == NULL);
-    ECE_ERR_IF (buf_sz <= 0);
+    ENCLOUD_ERR_IF (buf == NULL);
+    ENCLOUD_ERR_IF (buf_sz <= 0);
 
-    ECE_ERR_IF (!EVP_Digest(buf, buf_sz, md5, NULL, EVP_md5(), NULL));
-    ECE_ERR_IF ((s = (char *) calloc(1, sizeof(char) * MD5_DIGEST_LENGTH*2 + 1)) == NULL);
+    ENCLOUD_ERR_IF (!EVP_Digest(buf, buf_sz, md5, NULL, EVP_md5(), NULL));
+    ENCLOUD_ERR_IF ((s = (char *) calloc(1, sizeof(char) * MD5_DIGEST_LENGTH*2 + 1)) == NULL);
 
     for (i = 0; i < MD5_DIGEST_LENGTH; i++)
         sprintf(s + (i*2), "%02X", md5[i]);

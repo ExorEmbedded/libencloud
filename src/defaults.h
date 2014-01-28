@@ -1,49 +1,49 @@
-#ifndef _ECE_DEFAULTS_H_
-#define _ECE_DEFAULTS_H_
+#ifndef _ENCLOUD_DEFAULTS_H_
+#define _ENCLOUD_DEFAULTS_H_
 
 /* This file should NOT be Qt-specific (used by pure C modules) */
 
-#ifndef ECE_REVISION
-#define ECE_REVISION            ""
-#define ECE_STRING              "libece v"ECE_VERSION
+#define ENCLOUD_SETTINGS_ORG        "Endian"
+#define ENCLOUD_SETTINGS_APP        "libencloud"
+#define ENCLOUD_SETTINGS_PRODUCT    ENCLOUD_SETTINGS_ORG" "ENCLOUD_SETTINGS_APP
+
+#ifndef ENCLOUD_REVISION
+#define ENCLOUD_REVISION            ""
+#define ENCLOUD_STRING              ENCLOUD_SETTINGS_APP" v"ENCLOUD_VERSION
 #else
-#define ECE_STRING              "libece v"ECE_VERSION" r"ECE_REVISION
+#define ENCLOUD_STRING              ENCLOUD_SETTINGS_APP" v"ENCLOUD_VERSION" r"ENCLOUD_REVISION
 #endif
 
-/* Timeout in ms */
-#define ECE_SB_URL              "https://sb-host/"
-#define ECE_TIMEOUT             10000
-#define ECE_URL_SZ              1024
-#define ECE_PATH_SZ             512
-#define ECE_DESC_SZ             64
-#ifndef ECE_PREFIX_PATH                             /* [overridable] */
-#define ECE_PREFIX_PATH         "/"
+#define ENCLOUD_SB_URL              "https://sb-host/"
+#define ENCLOUD_TIMEOUT             10000  /* ms */
+#define ENCLOUD_URL_SZ              1024
+#define ENCLOUD_PATH_SZ             512
+#define ENCLOUD_DESC_SZ             64
+#ifndef ENCLOUD_PREFIX_PATH                             /* [overridable] */
+#define ENCLOUD_PREFIX_PATH         "/"
 #endif
 #ifdef _WIN32
-#define ECE_ETC_PREFIX          "\\etc\\ece\\"
+#define ENCLOUD_ETC_PREFIX          "\\etc\\encloud\\"
 #else
-#define ECE_ETC_PREFIX          "/etc/ece/"
+#define ENCLOUD_ETC_PREFIX          "/etc/encloud/"
 #endif
-#define ECE_CONF_PATH           ECE_ETC_PREFIX"ece.json"
-#define ECE_SERIAL_PATH         ECE_ETC_PREFIX"serial"
-#define ECE_POI_PATH            ECE_ETC_PREFIX"poi"
-#define ECE_CSRTMPL_PATH        ECE_ETC_PREFIX"csr-tmpl.json"
-#define ECE_INIT_CA_PATH        ECE_ETC_PREFIX"init_ca.pem"
-#define ECE_INIT_CERT_PATH      ECE_ETC_PREFIX"init_cert.pem"
-#define ECE_INIT_KEY_PATH       ECE_ETC_PREFIX"init_key.pem"
-#define ECE_OP_CERT_PATH        ECE_ETC_PREFIX"op_cert.pem"
-#define ECE_OP_KEY_PATH         ECE_ETC_PREFIX"op_key.pem"
-#define ECE_RSA_BITS            1024
+#define ENCLOUD_CONF_PATH           ENCLOUD_ETC_PREFIX"encloud.json"
+#define ENCLOUD_SERIAL_PATH         ENCLOUD_ETC_PREFIX"serial"
+#define ENCLOUD_POI_PATH            ENCLOUD_ETC_PREFIX"poi"
+#define ENCLOUD_CSRTMPL_PATH        ENCLOUD_ETC_PREFIX"csr-tmpl.json"
+#define ENCLOUD_INIT_CA_PATH        ENCLOUD_ETC_PREFIX"init_ca.pem"
+#define ENCLOUD_INIT_CERT_PATH      ENCLOUD_ETC_PREFIX"init_cert.pem"
+#define ENCLOUD_INIT_KEY_PATH       ENCLOUD_ETC_PREFIX"init_key.pem"
+#define ENCLOUD_OP_CERT_PATH        ENCLOUD_ETC_PREFIX"op_cert.pem"
+#define ENCLOUD_OP_KEY_PATH         ENCLOUD_ETC_PREFIX"op_key.pem"
+#define ENCLOUD_RSA_BITS            1024
 
-#define ECE_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"
-#define ECE_CMD_GETCERT         "manage/commands/commands.access.cloud.getCertificate"
-#define ECE_CMD_GETCONFIG       "manage/commands/commands.access.cloud.getConfiguration"
+#define ENCLOUD_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"
+#define ENCLOUD_CMD_GETCERT         "manage/commands/commands.access.cloud.getCertificate"
+#define ENCLOUD_CMD_GETCONFIG       "manage/commands/commands.access.cloud.getConfiguration"
 
-#define ECE_GETCONFIG_HOSTNAME  "operation-host"
+#define ENCLOUD_GETCONFIG_HOSTNAME  "operation-host"
 
-#define ECE_SETTINGS_ORG        "com.endian"
-#define ECE_SETTINGS_APP        "ECE"
-
-#define ECE_LOG_LEV             3
+#define ENCLOUD_LOG_LEV             3
 
 #endif

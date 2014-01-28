@@ -3,7 +3,8 @@
 #include "crypto.h"
 #include "config.h"
 
-namespace EceUtils {
+namespace encloud {
+namespace utils {
 
 /** \brief Hardware info used for Subject CN which has maximum 64 chars => return an MD5 checksum! */
 QString getHwInfo (void)
@@ -20,11 +21,11 @@ QString getHwInfo (void)
             QSettings(QLatin1String("HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat).\
                 value(QLatin1String("ProcessorNameString")).toString();
 #endif
-    ECE_ERR_IF (hwInfo.isEmpty());
+    ENCLOUD_ERR_IF (hwInfo.isEmpty());
 
-    ECE_DBG("hwInfo=" << hwInfo);
+    ENCLOUD_DBG("hwInfo=" << hwInfo);
 
-    ECE_ERR_IF ((s = ece_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
+    ENCLOUD_ERR_IF ((s = encloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
 
     free(s);
@@ -42,7 +43,7 @@ QDateTime pytime2DateTime (QString pydate)
 }
 
 /* \brief Differs from addQueryItem() which does not properly handle newlines & CO */
-ECE_DLLSPEC QByteArray encodeQueryItem (QString s)
+ENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString s)
 {
     s.replace(QLatin1String("\\"), QLatin1String("\\\\"));
     s.replace(QLatin1String("\""), QLatin1String("\\\""));
@@ -55,21 +56,27 @@ ECE_DLLSPEC QByteArray encodeQueryItem (QString s)
     return qPrintable(s);
 }
 
-ECE_DLLSPEC const char *file2Data (QFileInfo fi)
+ENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 {
-    ECE_RETURN_IF (!fi.isFile(), NULL);
+    ENCLOUD_RETURN_IF (!fi.isFile(), NULL);
 
     QByteArray ba;
     QString fn = fi.absoluteFilePath();
-    ECE_DBG("fn=" << fn);
+    ENCLOUD_DBG("fn=" << fn);
     QFile f(fn);
 
-    ECE_ERR_IF (!f.open(QIODevice::ReadOnly));
-    ECE_ERR_IF ((ba = f.readAll()).isEmpty());
+    ENCLOUD_ERR_IF (!f.open(QIODevice::ReadOnly));
+    ENCLOUD_ERR_IF ((ba = f.readAll()).isEmpty());
 
     return QString(ba.trimmed()).toLocal8Bit();
 err:
     return NULL;
 }
 
-} //namespace EceUtils
+ENCLOUD_DLLSPEC char *ustrdup (const char *s)
+{
+    return (s == NULL ? NULL : strdup(s));
+}
+
+} // namespace utils
+} // namespace encloud

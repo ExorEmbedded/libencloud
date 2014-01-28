@@ -1,10 +1,16 @@
+# CONFIG options:
+#    
+#   debug       compile libraries in debug mode
+#   sece        SECE mode (default is ECE)
+# 
+
 # global defs
-PKGNAME = libece
+PKGNAME = libencloud
 # only x.x.x.x format allowed, where x is a number
 VERSION = 0.5
 QMAKE_TARGET_COMPANY = Endian
-QMAKE_TARGET_PRODUCT = libECE
-QMAKE_TARGET_DESCRIPTION = libECE
+QMAKE_TARGET_PRODUCT = libencloud
+QMAKE_TARGET_DESCRIPTION = libencloud
 QMAKE_TARGET_COPYRIGHT =
 
 QMAKE_CXXFLAGS += -g
@@ -13,19 +19,19 @@ QT += core
 QT += network
 QT -= gui
 
-# debugging: pass it from command line: qmake CONFIG+=debug
-# CONFIG += debug
+# Cloud enabler modes
+sece {
+    DEFINES += ENCLOUD_TYPE_SECE
+}
 
+# Platform-specific config and macros
 win32 {
     CONFIG += qtjson  # GPL/self-contained
 
     DEFINES += _CRT_SECURE_NO_WARNINGS
-    DEFINES += ECE_WIN32
-    # working dir is test, etc is one level up
-    DEFINES += ECE_PREFIX_PATH=\\\"..\\\"
-    DEFINES += ECE_TYPE_SECE
+    DEFINES += ENCLOUD_WIN32
 
-    system("mkdir $$(APPDATA)\\sece")
+#    system("mkdir $$(APPDATA)\\encloud")
 } else {
 
 #   This is OK on Ubuntu but TODO on Yocto
@@ -34,17 +40,17 @@ win32 {
     CONFIG += qtjson  # GPL/self-contained
 }
 
-DEFINES += ECE_VERSION=\\\"$${VERSION}\\\"
+DEFINES += ENCLOUD_VERSION=\\\"$${VERSION}\\\"
 exists(".git") {
-    DEFINES += ECE_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+    DEFINES += ENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 }
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
 # *old-style* static/compile-time logging; log level can be changed dynamically
-# by changing value of "log/lev" in /etc/ece/ece.json
-#DEFINES += ECE_LOGLEVEL=7
+# by changing value of "log/lev" in /etc/encloud/encloud.json
+#DEFINES += ENCLOUD_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include
@@ -63,17 +69,17 @@ windows{
 
 # install dirs
 windows {
-    INSTALLDIR = %ProgramFiles%/SECE
+    INSTALLDIR = %ProgramFiles%/encloud
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
-    CONFDIR = %APPDATA%/sece
+    CONFDIR = %APPDATA%/encloud
 } else {
     INSTALLDIR = /usr/local
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
-    CONFDIR = /etc/ece
+    CONFDIR = /etc/encloud
 }
 
 # keep build files separate from sources

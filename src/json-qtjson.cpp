@@ -1,4 +1,4 @@
-#include "ece.h"
+#include "encloud.h"
 #include "json.h"
 #include "qtjson.h"
 
@@ -6,7 +6,8 @@
  * QtJson-based interface (GPL/self-contained)
  */
 
-namespace EceJson {
+namespace encloud {
+namespace json {
 
 QVariant parse (const QString &str, bool &ok)
 {
@@ -18,4 +19,5 @@ QString serialize (const QVariant &json, bool &ok)
     return QtJson::serialize(json, ok);
 }
 
-} // namespace
+} // namespace json
+} // namespace encloud
