@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_MSG_H_
-#define _ENCLOUD_MSG_H_
+#ifndef _ENCLOUD_PRIV_MSG_H_
+#define _ENCLOUD_PRIV_MSG_H_
 
 #include <QDebug>
 #include <QString>
@@ -7,7 +7,7 @@
 #include <QSslCertificate>
 #include <QUrl>
 #include <QUuid>
-#include <encloud.h>
+#include <encloud/common.h>
 #include "helpers.h"
 
 namespace encloud {
@@ -26,8 +26,8 @@ class Message
 {
 public:
     Message ();
-    virtual encloud_rc_t encodeRequest (QUrl &url, QUrl &params) = 0;
-    virtual encloud_rc_t decodeResponse (QString &response, QString &errString) = 0;
+    virtual encloud_rc encodeRequest (QUrl &url, QUrl &params) = 0;
+    virtual encloud_rc decodeResponse (QString &response, QString &errString) = 0;
 
     //response outputs
     QDateTime time;
@@ -37,8 +37,8 @@ class MessageRetrInfo : public Message
 {
 public:
     MessageRetrInfo ();
-    encloud_rc_t encodeRequest (QUrl &url, QUrl &params);
-    encloud_rc_t decodeResponse (QString &response, QString &errString);
+    encloud_rc encodeRequest (QUrl &url, QUrl &params);
+    encloud_rc decodeResponse (QString &response, QString &errString);
 
     //request inputs
     QUuid license;
@@ -55,8 +55,8 @@ class MessageRetrCert : public Message
 {
 public:
     MessageRetrCert ();
-    encloud_rc_t encodeRequest (QUrl &url, QUrl &params);
-    encloud_rc_t decodeResponse (QString &response, QString &errString);
+    encloud_rc encodeRequest (QUrl &url, QUrl &params);
+    encloud_rc decodeResponse (QString &response, QString &errString);
 
     //request inputs
     QUuid license;
@@ -71,8 +71,8 @@ class MessageRetrConf : public Message
 {
 public:
     MessageRetrConf ();
-    encloud_rc_t encodeRequest (QUrl &url, QUrl &params);
-    encloud_rc_t decodeResponse (QString &response, QString &errString);
+    encloud_rc encodeRequest (QUrl &url, QUrl &params);
+    encloud_rc decodeResponse (QString &response, QString &errString);
 
     //response outputs
     QString vpnIp;
@@ -83,4 +83,4 @@ public:
 
 } // namespace encloud
 
-#endif
+#endif  /* _ENCLOUD_PRIV_HELPERS_H_ */

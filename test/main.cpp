@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QtCore>
-#include "encloud.h"
+#include <encloud/core.h>
 #include "utils.h"
 #include "test.h"
 

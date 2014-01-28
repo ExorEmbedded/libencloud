@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_CONFIG_H_
-#define _ENCLOUD_CONFIG_H_
+#ifndef _ENCLOUD_PRIV_CONFIG_H_
+#define _ENCLOUD_PRIV_CONFIG_H_
 
 #include <QDebug>
 #include <QObject>
@@ -76,4 +76,4 @@ private:
 
 extern encloud::Config *g_cfg;
 
-#endif
+#endif  /* _ENCLOUD_PRIV_CONFIG_H_ */

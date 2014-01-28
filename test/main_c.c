@@ -5,7 +5,7 @@
 
 int main (int argc, char *argv[])
 {
-    encloud_rc_t rc = ENCLOUD_RC_SUCCESS;
+    encloud_rc rc = ENCLOUD_RC_SUCCESS;
 
     encloud_t *encloud = NULL;
 

@@ -1,8 +1,9 @@
 # CONFIG options:
 #    
-#   debug       compile libraries in debug mode
+#   debug       compile libraries with debugging symbols
 #   sece        SECE mode (default is ECE)
-# 
+#   nosetup     no setup module (e.g. VPN client/manager only)
+#   nocloud     no VPN module (e.g. Switchboard setup + external client)
 
 # global defs
 PKGNAME = libencloud
@@ -13,16 +14,14 @@ QMAKE_TARGET_PRODUCT = libencloud
 QMAKE_TARGET_DESCRIPTION = libencloud
 QMAKE_TARGET_COPYRIGHT =
 
-QMAKE_CXXFLAGS += -g
-
 QT += core
 QT += network
 QT -= gui
 
-# Cloud enabler modes
-sece {
-    DEFINES += ENCLOUD_TYPE_SECE
-}
+debug       { QMAKE_CXXFLAGS += -g }
+sece        { DEFINES += ENCLOUD_TYPE_SECE }
+nosetup     { DEFINES += ENCLOUD_DISABLE_SETUP }
+nocloud     { DEFINES += ENCLOUD_DISABLE_CLOUD }
 
 # Platform-specific config and macros
 win32 {

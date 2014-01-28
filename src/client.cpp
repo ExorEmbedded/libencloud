@@ -13,7 +13,7 @@ Client::~Client ()
     ENCLOUD_TRACE;
 }
 
-encloud_rc_t Client::setConfig (encloud::Config *cfg)
+encloud_rc Client::setConfig (encloud::Config *cfg)
 {
     ENCLOUD_RETURN_IF (cfg == NULL, ENCLOUD_RC_BADPARAMS);
 
@@ -22,9 +22,9 @@ encloud_rc_t Client::setConfig (encloud::Config *cfg)
     return ENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc_t Client::run (encloud::ProtocolType protocol, encloud::Message &message)
+encloud_rc Client::run (encloud::ProtocolType protocol, encloud::Message &message)
 {
-    encloud_rc_t rc;
+    encloud_rc rc;
     QUrl serviceURL;
     QUrl params;
     QSslConfiguration config;
@@ -52,9 +52,9 @@ err:
     return rc;
 }
 
-encloud_rc_t Client::__run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response)
+encloud_rc Client::__run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response)
 {
-    encloud_rc_t rc = this->error = ENCLOUD_RC_SUCCESS;
+    encloud_rc rc = this->error = ENCLOUD_RC_SUCCESS;
 
     QNetworkAccessManager qnam;
     QNetworkRequest request(url);
@@ -200,7 +200,7 @@ void Client::finishedSlot (QNetworkReply *reply)
     ENCLOUD_TRACE; 
 }
 
-encloud_rc_t Client::__loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
+encloud_rc Client::__loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf)
 {
     encloud_config_ssl_t *sslcfg;
     

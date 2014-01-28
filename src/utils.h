@@ -1,10 +1,10 @@
-#ifndef _ENCLOUD_UTILS_H
-#define _ENCLOUD_UTILS_H
+#ifndef _ENCLOUD_PRIV_UTILS_H
+#define _ENCLOUD_PRIV_UTILS_H
 
 #include <QtCore>
 #include <QString>
 #include <QDateTime>
-#include "encloud.h"
+#include <encloud/common.h>
 
 namespace encloud {
 namespace utils {
@@ -18,4 +18,4 @@ ENCLOUD_DLLSPEC char *ustrdup (const char *s);
 } // namespace utils
 } // namespace encloud
 
-#endif
+#endif  /* _ENCLOUD_PRIV_HELPERS_H_ */

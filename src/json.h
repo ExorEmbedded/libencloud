@@ -1,8 +1,9 @@
-#ifndef _ENCLOUD_JSON_H_
-#define _ENCLOUD_JSON_H_
+#ifndef _ENCLOUD_PRIV_JSON_H_
+#define _ENCLOUD_PRIV_JSON_H_
 
 #include <QVariant>
 #include <QString>
+#include <encloud/common.h>
 #include "common.h"
 
 namespace encloud {
@@ -18,4 +19,4 @@ namespace json {
 } // namespace json
 } // namespace encloud
 
-#endif  // _ENCLOUD_JSON_H_
+#endif  /* _ENCLOUD_PRIV_HELPERS_H_ */

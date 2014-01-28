@@ -2,7 +2,6 @@
 #include <QString>
 #include <QVariant>
 #include <QDebug>
-#include "encloud.h"
 #include "helpers.h"
 #include "config.h"
 #include "json.h"

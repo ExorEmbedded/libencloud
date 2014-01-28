@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_HELPERS_H_
-#define _ENCLOUD_HELPERS_H_
+#ifndef _ENCLOUD_PRIV_HELPERS_H_
+#define _ENCLOUD_PRIV_HELPERS_H_
 
 #define ENCLOUD_UNUSED(x)   (x=x)
 
@@ -62,4 +62,4 @@
 
 #define ENCLOUD_OUT(msg) qDebug().nospace() << msg
 
-#endif
+#endif  /* _ENCLOUD_PRIV_HELPERS_H_ */

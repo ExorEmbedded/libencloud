@@ -4,12 +4,12 @@
  * Note: kept Qt-independent for possible reusage.
  */
 
-#ifndef _ENCLOUD_CRYPTO_H_
-#define _ENCLOUD_CRYPTO_H_
+#ifndef _ENCLOUD_PRIV_CRYPTO_H_
+#define _ENCLOUD_PRIV_CRYPTO_H_
 
+#include <encloud/common.h>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
-#include <encloud.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ ENCLOUD_DLLSPEC char * encloud_crypto_md5 (encloud_crypto_t *ec, char *buf, long
 }
 #endif
 
-#endif
+#endif  /* _ENCLOUD_PRIV_CRYPTO_H_ */

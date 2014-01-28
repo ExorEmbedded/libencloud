@@ -1,47 +1,12 @@
 #include <openssl/x509v3.h>
-#include <QtCore/QCoreApplication>
 #include <QUuid>
-#include <encloud.h>
-#include "client.h"
+#include <encloud/core.h>
+#include <encloud/setup.h>
+#include <encloud/vpn.h>
 #include "utils.h"
-#include "crypto.h"
-#include "config.h"
+#include "core.h"
 
 encloud::Config *g_cfg = NULL;
-
-/** \brief SB info object */
-struct encloud_sb_info_s
-{
-    bool license_valid;
-    time_t license_expiry;
-};
-
-/** \brief SB configuration object */
-struct encloud_sb_conf_s
-{
-    char vpn_ip[ENCLOUD_DESC_SZ];
-    int vpn_port;
-    char vpn_proto[ENCLOUD_DESC_SZ];
-    char vpn_type[ENCLOUD_DESC_SZ];
-};
-
-/** \brief ENCLOUD internal object */
-struct encloud_s
-{
-    QCoreApplication *app;
-
-#ifndef ENCLOUD_TYPE_SECE
-    char *serial;
-    char *poi;
-#endif
-
-    encloud::Client *client;
-    encloud::Config *cfg;
-
-    encloud_crypto_t crypto;
-    encloud_sb_info_t sb_info;
-    encloud_sb_conf_t sb_conf;
-};
 
 static int __name_cb (X509_NAME *n, void *arg);
 
@@ -53,9 +18,9 @@ static int __name_cb (X509_NAME *n, void *arg);
  * If no running instance of QCoreApplication is detected (libencloud used as a standalone library),
  * an internal application is created passing {argc, argv} command-line arguments (optional).
  */
-encloud_rc_t encloud_create (int argc, char *argv[], encloud_t **pencloud)
+encloud_rc encloud_create (int argc, char *argv[], encloud_t **pencloud)
 {
-    encloud_rc_t rc = ENCLOUD_RC_SUCCESS;
+    encloud_rc rc = ENCLOUD_RC_SUCCESS;
     encloud_t *e = NULL; 
 
     ENCLOUD_TRACE;
@@ -104,7 +69,7 @@ err:
 }
 
 /* \brief Dispose of 'encloud' object */
-encloud_rc_t encloud_destroy (encloud_t *encloud)
+encloud_rc encloud_destroy (encloud_t *encloud)
 {
     ENCLOUD_TRACE;
     ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
@@ -135,51 +100,7 @@ encloud_rc_t encloud_destroy (encloud_t *encloud)
     return ENCLOUD_RC_SUCCESS;
 }
 
-/** \brief Set license from null-terminated 'guid' string (SECE only)
- * 
- * The license is saved to a persistent Setting object ("lic" key in
- * ENCLOUD_SETTINGS_ORG:ENCLOUD_SETTINGS_APP as defined in defaults.h.
- */
-#ifdef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC encloud_rc_t encloud_set_license (encloud_t *encloud, const char *guid)
-{
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
-    ENCLOUD_RETURN_IF (guid == NULL, ENCLOUD_RC_BADPARAMS);
-
-    QString s(guid);
-    QUuid u(s);
-
-    ENCLOUD_RETURN_MSG_IF (u.isNull(), ENCLOUD_RC_BADPARAMS, "bad uuid: " << guid);
-
-    ENCLOUD_DBG("uiid=" << u << " variant=" << u.variant() << " version=" << u.version());
-
-    encloud->cfg->settings->setValue("lic", u.toString());
-    ENCLOUD_RETURN_IF (encloud->cfg->settings->status(), ENCLOUD_RC_SYSERR);
-
-    return ENCLOUD_RC_SUCCESS;
-}
-#endif
-
-/** \brief Get device's serial (ENCLOUD only) */
-#ifndef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC const char *encloud_get_serial (encloud_t *encloud)
-{
-    ENCLOUD_RETURN_IF (encloud == NULL, NULL);
-
-    return encloud->serial;
-}
-#endif
-
-/** \brief Get device's PoI (ENCLOUD only) */
-#ifndef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC const char *encloud_get_poi (encloud_t *encloud)
-{
-    ENCLOUD_RETURN_IF (encloud == NULL, NULL);
-
-    return encloud->poi;
-}
-#endif
-
+#if 0
 /**
  *  \brief Synchronous retrieval of info from SB
  *
@@ -193,13 +114,13 @@ ENCLOUD_DLLSPEC const char *encloud_get_poi (encloud_t *encloud)
  * 
  * Note: 'pinfo' points to an internal object (no memory management nencloudssary).
  */
-ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_info (encloud_t *encloud, encloud_sb_info_t **pinfo)
+ENCLOUD_DLLSPEC encloud_rc encloud_retr_info (encloud_t *encloud, encloud_info_t **pinfo)
 {
     ENCLOUD_TRACE;
     ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
     ENCLOUD_RETURN_IF (pinfo == NULL, ENCLOUD_RC_BADPARAMS);
 
-    encloud_rc_t rc = ENCLOUD_RC_GENERIC;
+    encloud_rc rc = ENCLOUD_RC_GENERIC;
     encloud::MessageRetrInfo msg;
     QString csrfn = encloud->cfg->config.csrTmplPath.absoluteFilePath();
     QFile csrf(csrfn);
@@ -217,8 +138,8 @@ ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_info (encloud_t *encloud, encloud_s
 
     ENCLOUD_ERR_RC_IF ((rc = encloud->client->run(encloud::ProtocolTypeInit, msg)), rc);
 
-    encloud->sb_info.license_valid = msg.valid;
-    encloud->sb_info.license_expiry = msg.expiry.toTime_t();
+    encloud->info.license_valid = msg.valid;
+    encloud->info.license_expiry = msg.expiry.toTime_t();
 
     // save the CSR template to file
     ENCLOUD_ERR_RC_IF (!csrf.open(QIODevice::WriteOnly), ENCLOUD_RC_SYSERR);
@@ -230,7 +151,7 @@ ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_info (encloud_t *encloud, encloud_s
     ENCLOUD_ERR_RC_IF (caf.write(msg.caCert.toPem()) == -1, ENCLOUD_RC_SYSERR);
     caf.close();
 
-    *pinfo = &encloud->sb_info;
+    *pinfo = &encloud->info;
 
     rc = ENCLOUD_RC_SUCCESS;
 err:
@@ -254,12 +175,12 @@ err:
  * 
  * Upon success, a new certificate is returned and stored internally.
  */
-ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_cert (encloud_t *encloud)
+ENCLOUD_DLLSPEC encloud_rc encloud_retr_sb_cert (encloud_t *encloud)
 {
     ENCLOUD_TRACE;
     ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
 
-    encloud_rc_t rc = ENCLOUD_RC_GENERIC;
+    encloud_rc rc = ENCLOUD_RC_GENERIC;
     encloud::MessageRetrCert msg;
     char *buf = NULL;
     long len;
@@ -311,9 +232,9 @@ err:
  * 
  * Note: 'pconf' points to an internal object (no memory management nencloudssary).
  */
-ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_conf (encloud_t *encloud, encloud_sb_conf_t **pconf)
+ENCLOUD_DLLSPEC encloud_rc encloud_retr_conf (encloud_t *encloud, encloud_vpn_conf_t **pconf)
 {
-    encloud_rc_t rc = ENCLOUD_RC_SUCCESS;
+    encloud_rc rc = ENCLOUD_RC_SUCCESS;
     encloud::MessageRetrConf msg;
 
     ENCLOUD_TRACE;
@@ -322,18 +243,18 @@ ENCLOUD_DLLSPEC encloud_rc_t encloud_retr_sb_conf (encloud_t *encloud, encloud_s
 
     ENCLOUD_RETURN_IF ((rc = encloud->client->run(encloud::ProtocolTypeOp, msg)), rc);
 
-    strcpy(encloud->sb_conf.vpn_ip, qPrintable(msg.vpnIp));
-    encloud->sb_conf.vpn_port = msg.vpnPort;
-    strcpy(encloud->sb_conf.vpn_proto, qPrintable(msg.vpnProto));
-    strcpy(encloud->sb_conf.vpn_type, qPrintable(msg.vpnType));
+    strcpy(encloud->conf.vpn_ip, qPrintable(msg.vpnIp));
+    encloud->conf.vpn_port = msg.vpnPort;
+    strcpy(encloud->conf.vpn_proto, qPrintable(msg.vpnProto));
+    strcpy(encloud->conf.vpn_type, qPrintable(msg.vpnType));
 
-    *pconf = &encloud->sb_conf;
+    *pconf = &encloud->conf;
 
     return rc;
 }
 
 /** \brief Is license valid? */
-ENCLOUD_DLLSPEC bool encloud_sb_info_get_license_valid (encloud_sb_info_t *info)
+ENCLOUD_DLLSPEC bool encloud_info_get_license_valid (encloud_info_t *info)
 {
     ENCLOUD_RETURN_IF (info == NULL, false);
 
@@ -341,44 +262,13 @@ ENCLOUD_DLLSPEC bool encloud_sb_info_get_license_valid (encloud_sb_info_t *info)
 }
 
 /** \brief Get certificate expiry - expressed in seconds since Epoch */
-ENCLOUD_DLLSPEC time_t encloud_sb_info_get_license_expiry (encloud_sb_info_t *info)
+ENCLOUD_DLLSPEC time_t encloud_info_get_license_expiry (encloud_info_t *info)
 {
     ENCLOUD_RETURN_IF (info == NULL, -1);
 
     return info->license_expiry;
 }
-
-/** \brief Get VPN IP address */
-ENCLOUD_DLLSPEC char *encloud_sb_conf_get_vpn_ip (encloud_sb_conf_t *conf)
-{
-    ENCLOUD_RETURN_IF (conf == NULL, NULL);
-
-    return conf->vpn_ip;
-}
-
-/** \brief Get VPN port */
-ENCLOUD_DLLSPEC int encloud_sb_conf_get_vpn_port (encloud_sb_conf_t *conf)
-{
-    ENCLOUD_RETURN_IF (conf == NULL, -1);
-
-    return conf->vpn_port;
-}
-
-/** \brief Get VPN protocol */
-ENCLOUD_DLLSPEC char *encloud_sb_conf_get_vpn_proto (encloud_sb_conf_t *conf)
-{
-    ENCLOUD_RETURN_IF (conf == NULL, NULL);
-
-    return conf->vpn_proto;
-}
-
-/** \brief Get VPN type */
-ENCLOUD_DLLSPEC char *encloud_sb_conf_get_vpn_type (encloud_sb_conf_t *conf)
-{
-    ENCLOUD_RETURN_IF (conf == NULL, NULL);
-
-    return conf->vpn_type;
-}
+#endif
 
 /** \brief Return ENCLOUD version string */
 ENCLOUD_DLLSPEC const char *encloud_version ()
@@ -393,7 +283,7 @@ ENCLOUD_DLLSPEC const char *encloud_revision ()
 }
 
 /** \brief Convert a return code to string representation */
-ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc_t rc)
+ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc rc)
 {
     switch (rc)
     {
@@ -461,7 +351,7 @@ static int __name_cb (X509_NAME *n, void *arg)
 #else
         // ENCLOUD: CN based on serial
         ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
-                (const unsigned char *) encloud_get_serial(encloud), -1, -1, 0));
+                (const unsigned char *) encloud_setup_get_serial(encloud), -1, -1, 0));
 #endif
     }
 

@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_DEFAULTS_H_
-#define _ENCLOUD_DEFAULTS_H_
+#ifndef _ENCLOUD_PRIV_DEFAULTS_H_
+#define _ENCLOUD_PRIV_DEFAULTS_H_
 
 /* This file should NOT be Qt-specific (used by pure C modules) */
 
@@ -46,4 +46,4 @@
 
 #define ENCLOUD_LOG_LEV             3
 
-#endif
+#endif  /* _ENCLOUD_PRIV_CRYPTO_H_ */

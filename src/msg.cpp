@@ -22,7 +22,7 @@ encloud::MessageRetrInfo::MessageRetrInfo ()
 {
 }
 
-encloud_rc_t encloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
+encloud_rc encloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
 {
     url.setPath(ENCLOUD_CMD_GETINFO);
 
@@ -36,7 +36,7 @@ encloud_rc_t encloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
     return ENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc_t encloud::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
+encloud_rc encloud::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
     QVariantMap jo = encloud::json::parse(response, ok).toMap();
@@ -71,7 +71,7 @@ encloud::MessageRetrCert::MessageRetrCert ()
 {
 }
 
-encloud_rc_t encloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
+encloud_rc encloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 {
     url.setPath(ENCLOUD_CMD_GETCERT);
 
@@ -87,7 +87,7 @@ encloud_rc_t encloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
     return ENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc_t encloud::MessageRetrCert::decodeResponse (QString &response, QString &errString)
+encloud_rc encloud::MessageRetrCert::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
     QVariantMap jo = encloud::json::parse(response, ok).toMap();
@@ -118,7 +118,7 @@ encloud::MessageRetrConf::MessageRetrConf ()
 {
 }
 
-encloud_rc_t encloud::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
+encloud_rc encloud::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
 { 
     const QUrl *p = &params;  // unused
     ENCLOUD_UNUSED(p);
@@ -130,7 +130,7 @@ encloud_rc_t encloud::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
     return ENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc_t encloud::MessageRetrConf::decodeResponse (QString &response, QString &errString)
+encloud_rc encloud::MessageRetrConf::decodeResponse (QString &response, QString &errString)
 {
     bool ok;
     QVariantMap jo = encloud::json::parse(response, ok).toMap()["vpn"].toMap();

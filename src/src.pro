@@ -12,11 +12,17 @@ win32 {
 # define used to select dllimport/dllexport attributes
 DEFINES += _ENCLOUDLIB_
 
-HEADERS += helpers.h
+HEADERS += common.h
 HEADERS += defaults.h
+HEADERS += helpers.h
 
-# encloud public header in ../include/
-SOURCES += encloud.cpp
+SOURCES += core.cpp
+HEADERS += core.h
+
+SOURCES += setup.cpp
+
+HEADERS += vpn.h
+SOURCES += vpn.cpp
 
 HEADERS += client.h
 SOURCES += client.cpp
