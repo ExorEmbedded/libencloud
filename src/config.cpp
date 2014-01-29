@@ -10,7 +10,7 @@ namespace encloud {
 Config::Config ()
     : settings(NULL)
 {
-    this->settings = new QSettings(ENCLOUD_SETTINGS_ORG, ENCLOUD_SETTINGS_APP);
+    this->settings = new QSettings(ENCLOUD_ORG, ENCLOUD_APP);
 
 #ifndef ENCLOUD_TYPE_SECE
     this->config.serialPath = QFileInfo(ENCLOUD_SERIAL_PATH);

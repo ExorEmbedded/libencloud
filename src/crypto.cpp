@@ -5,11 +5,8 @@
 #include <openssl/pem.h>
 #include <openssl/conf.h>
 #include <openssl/x509v3.h>
-#include "helpers.h"
-#include "defaults.h"
-// don't depend on Qt for debug
-#undef __ENCLOUD_MSG
-#define __ENCLOUD_MSG(lev, levstr, msg) __ENCLOUD_PRINT(lev, levstr, msg)
+#include "common.h"
+#include "config.h"
 #include "crypto.h"
 
 static X509_REQ *__make_req (encloud_crypto_t *ec, EVP_PKEY *pkey);
@@ -17,7 +14,7 @@ static X509_REQ *__make_req (encloud_crypto_t *ec, EVP_PKEY *pkey);
 /** \brief Initialize crypto context */
 int encloud_crypto_init (encloud_crypto_t *ec)
 {
-    //ENCLOUD_TRACE;
+    ENCLOUD_TRACE;
 
     if (ec == NULL)  // context is optional for now
         return 0;
@@ -32,7 +29,7 @@ int encloud_crypto_init (encloud_crypto_t *ec)
 /** \brief Release crypto context */
 int encloud_crypto_term (encloud_crypto_t *ec)
 {
-    //ENCLOUD_TRACE;
+    ENCLOUD_TRACE;
 
     ENCLOUD_UNUSED(ec);
 
@@ -68,7 +65,7 @@ int encloud_crypto_genkey (encloud_crypto_t *ec, size_t nbits, const char *outfi
     if (nbits == 0)
         nbits = 2048;
 
-    //ENCLOUD_TRACE;
+    ENCLOUD_TRACE;
 
     ENCLOUD_UNUSED(ec);
     ENCLOUD_ERR_IF (outfile == NULL);
@@ -124,7 +121,7 @@ int encloud_crypto_gencsr (encloud_crypto_t *ec, const char *keyfile, char **pbu
     char *buf = NULL, *pb;
     long len = 0;
 
-    //ENCLOUD_TRACE;
+    ENCLOUD_TRACE;
 
     ENCLOUD_ERR_IF (keyfile == NULL);
     ENCLOUD_ERR_IF (ec == NULL);
@@ -155,7 +152,7 @@ int encloud_crypto_gencsr (encloud_crypto_t *ec, const char *keyfile, char **pbu
 
         // memory to buffer
         ENCLOUD_ERR_IF ((len = BIO_get_mem_data(out, &pb)) <= 0);
-        ENCLOUD_ERR_IF ((buf = calloc(1, sizeof(char) * len)) == NULL);
+        ENCLOUD_ERR_IF ((buf = (char *) calloc(1, sizeof(char) * len)) == NULL);
         memcpy(buf, pb, len);
     }
 
@@ -201,7 +198,7 @@ static X509_REQ *__make_req (encloud_crypto_t *ec, EVP_PKEY *pkey)
     ENCLOUD_ERR_IF (!X509_REQ_set_subject_name(req, n));
     ENCLOUD_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
 
-    // ENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Non supported by the current Switchboard openssl version
+    // ENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Not supported by the current Switchboard openssl version
     ENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha1)) == NULL);
     ENCLOUD_ERR_IF (!EVP_DigestSignInit(&mctx, &pkctx, digest, NULL, pkey));
     ENCLOUD_ERR_IF (!X509_REQ_sign_ctx(req, &mctx));

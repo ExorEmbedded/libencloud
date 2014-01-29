@@ -13,11 +13,10 @@ ENCLOUD_DLLSPEC encloud_rc encloud_create (int argc, char *argv[], encloud_t **p
 ENCLOUD_DLLSPEC encloud_rc encloud_destroy (encloud_t *encloud);
 
 /* Main settings */
-ENCLOUD_DLLSPEC encloud_rc encloud_set_state_cb (encloud_t *encloud, encloud_state_cb state_cb);
+ENCLOUD_DLLSPEC encloud_rc encloud_set_state_cb (encloud_t *encloud, encloud_state_cb state_cb, void *arg);
 
 /* Main control */
 ENCLOUD_DLLSPEC encloud_rc encloud_start (encloud_t *encloud);
-ENCLOUD_DLLSPEC encloud_rc encloud_loop (encloud_t *encloud);
 ENCLOUD_DLLSPEC encloud_rc encloud_stop (encloud_t *encloud);
 
 /* Other */

@@ -1,6 +1,10 @@
 #ifndef _ENCLOUD_PRIV_HELPERS_H_
 #define _ENCLOUD_PRIV_HELPERS_H_
 
+#include <QDebug>
+#include <QDateTime>
+#include <QThread>
+
 #define ENCLOUD_UNUSED(x)   (x=x)
 
 // from <sys/syslog.h>
@@ -17,11 +21,16 @@
 #define ENCLOUD_LOGLEVEL    7
 #endif
 
+#define ENCLOUD_FREE(ptr) do { if (ptr) { free(ptr); ptr = NULL; } } while(0)
+#define ENCLOUD_DELETE(ptr) do { if (ptr) { delete ptr; ptr = NULL; } } while(0)
+
 #define __ENCLOUD_NOP do {;} while (0)
 #define __ENCLOUD_MSG(lev, levstr, msg) \
     do { \
         if (g_cfg && lev <= g_cfg->config.logLevel) { \
-            qDebug().nospace() << '[' << levstr << "] [libencloud:" << __FILE__ << ":" \
+            qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
+                    << " " << QThread::currentThreadId() \
+                    << " [" << levstr << "] [" << ENCLOUD_APP << ":" << __FILE__ << ":" \
                     << __FUNCTION__ << "():" << __LINE__ << "] " << msg; \
         } \
     } while (0);

@@ -19,6 +19,12 @@ HEADERS += helpers.h
 SOURCES += core.cpp
 HEADERS += core.h
 
+SOURCES += context.cpp
+HEADERS += context.h
+
+SOURCES += thread.cpp
+HEADERS += thread.h
+
 SOURCES += setup.cpp
 
 HEADERS += vpn.h
@@ -53,8 +59,7 @@ HEADERS += utils.h
 SOURCES += utils.cpp
 
 HEADERS += crypto.h
-SOURCES += crypto.c
-
+SOURCES += crypto.cpp
 
 target.path = $$LIBDIR
 INSTALLS += target

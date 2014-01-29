@@ -39,4 +39,5 @@ contains(CONFIG, qjson) {
 }
 
 # command to run upon 'make check'
-check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR ./test
+# ENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
+check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR $$(ENCLOUD_WRAP) ./test

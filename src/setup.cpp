@@ -6,7 +6,7 @@
 /** \brief Set license from null-terminated 'guid' string (SECE only)
  * 
  * The license is saved to a persistent Setting object ("lic" key in
- * ENCLOUD_SETTINGS_ORG:ENCLOUD_SETTINGS_APP as defined in defaults.h.
+ * ENCLOUD_ORG:ENCLOUD_APP as defined in defaults.h.
  */
 #ifdef ENCLOUD_TYPE_SECE
 ENCLOUD_DLLSPEC encloud_rc encloud_setup_set_license (encloud_t *encloud, const char *guid)
@@ -34,7 +34,7 @@ ENCLOUD_DLLSPEC const char *encloud_setup_get_serial (encloud_t *encloud)
 {
     ENCLOUD_RETURN_IF (encloud == NULL, NULL);
 
-    return encloud->serial;
+    return encloud->context->getSerial();
 }
 #endif
 
@@ -44,7 +44,7 @@ ENCLOUD_DLLSPEC const char *encloud_setup_get_poi (encloud_t *encloud)
 {
     ENCLOUD_RETURN_IF (encloud == NULL, NULL);
 
-    return encloud->poi;
+    return encloud->context->getPoi();
 }
 #endif
 

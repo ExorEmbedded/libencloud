@@ -32,6 +32,9 @@ public:
     encloud_rc setConfig (encloud::Config *cfg);
     encloud_rc run (encloud::ProtocolType protocol, encloud::Message &message);
 
+public slots:
+    void timerTimeout ();
+
 private slots:
     void proxyAuthenticationRequiredSlot (const QNetworkProxy &proxy, QAuthenticator *authenticator);
     void sslErrorsSlot (QNetworkReply *reply, const QList<QSslError> &errors);

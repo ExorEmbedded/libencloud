@@ -12,10 +12,12 @@ WITH_DISTUTILS = 1
 ifdef WITH_DISTUTILS
 all:
 	python setup.py build
-	sudo python setup.py install
 else
 all: encloud.py _encloud.so
 endif
+
+install:
+	sudo python setup.py install
 
 clean:
 	rm -rf build encloud_wrap.c encloud.py *.pyc *.o *.so
@@ -27,5 +29,5 @@ _encloud.so:
 	$(CC) $(CFLAGS) -c encloud_wrap.c -I/usr/include/python2.7 -I../include
 	$(CC) -shared -o _encloud.so encloud_wrap.o $(LDFLAGS)
 
-check: all
+check: install
 	$(WRAP) python test.py

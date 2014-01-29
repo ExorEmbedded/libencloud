@@ -248,4 +248,9 @@ encloud_rc Client::__loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSs
     return ENCLOUD_RC_SUCCESS;
 }
 
+void Client::timerTimeout ()
+{
+    ENCLOUD_TRACE;
+}
+
 } // namespace encloud

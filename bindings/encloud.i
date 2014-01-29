@@ -1,6 +1,6 @@
 %module encloud
 %{
-#include <encloud.h>
+#include <encloud/core.h>
 %}
 
 #ifndef ENCLOUD_DLLSPEC
@@ -102,6 +102,14 @@ ENCLOUD_DLLSPEC encloud_rc encloud_create (int argc, char *argv[], encloud_t **p
 %rename encloud_destroy destroy;
 ENCLOUD_DLLSPEC encloud_rc encloud_destroy (encloud_t *encloud);
 
+/* Main control */
+%rename encloud_start start;
+ENCLOUD_DLLSPEC encloud_rc encloud_start (encloud_t *encloud);
+
+%rename encloud_stop stop;
+ENCLOUD_DLLSPEC encloud_rc encloud_stop (encloud_t *encloud);
+
+#if 0
 /* Licensing */
 #ifdef ENCLOUD_TYPE_SECE
 /* SECE: Licensing */
@@ -145,6 +153,7 @@ ENCLOUD_DLLSPEC char *encloud_vpn_conf_get_vpn_proto (encloud_vpn_conf_t *conf);
 
 %rename encloud_vpn_conf_get_vpn_type sb_conf_get_vpn_type;
 ENCLOUD_DLLSPEC char *encloud_vpn_conf_get_vpn_type (encloud_vpn_conf_t *conf);
+#endif
 
 /* Other */
 %rename encloud_version version;

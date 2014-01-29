@@ -1,14 +1,4 @@
-#include <openssl/x509v3.h>
-#include <QUuid>
-#include <encloud/core.h>
-#include <encloud/setup.h>
-#include <encloud/vpn.h>
-#include "utils.h"
 #include "core.h"
-
-encloud::Config *g_cfg = NULL;
-
-static int __name_cb (X509_NAME *n, void *arg);
 
 /** 
  * \brief Create a new ENCLOUD object
@@ -21,49 +11,22 @@ static int __name_cb (X509_NAME *n, void *arg);
 encloud_rc encloud_create (int argc, char *argv[], encloud_t **pencloud)
 {
     encloud_rc rc = ENCLOUD_RC_SUCCESS;
-    encloud_t *e = NULL; 
+
+    encloud_t *encloud = NULL; 
 
     ENCLOUD_TRACE;
     ENCLOUD_RETURN_IF (pencloud == NULL, ENCLOUD_RC_BADPARAMS);
 
-    ENCLOUD_RETURN_IF ((e = (encloud_t *) calloc(1, sizeof(encloud_t))) == NULL, ENCLOUD_RC_NOMEM);
-    if (QCoreApplication::instance() == NULL) {
-        ENCLOUD_DBG ("creating internal application instance");
-        ENCLOUD_ERR_RC_IF ((e->app = new QCoreApplication(argc, argv)) == NULL, ENCLOUD_RC_NOMEM);
-    }
+    ENCLOUD_RETURN_IF ((encloud = (encloud_t *) calloc(1, sizeof(encloud_t))) == NULL, ENCLOUD_RC_NOMEM);
+    ENCLOUD_ERR_RC_IF ((encloud->context = new encloud::Context()) == NULL, ENCLOUD_RC_NOMEM);
+    ENCLOUD_ERR_RC_IF (encloud->context->init(argc, argv), ENCLOUD_RC_NOMEM);
 
-    ENCLOUD_ERR_RC_IF ((e->cfg = new encloud::Config) == NULL, ENCLOUD_RC_NOMEM);
-    ENCLOUD_ERR_RC_IF (e->cfg->loadFromFile(ENCLOUD_CONF_PATH), ENCLOUD_RC_BADCONFIG);
-
-    g_cfg = e->cfg;
-    ENCLOUD_DBG(g_cfg->dump());
-
-#ifndef ENCLOUD_TYPE_SECE
-    e->serial = encloud::utils::ustrdup(encloud::utils::file2Data(g_cfg->config.serialPath));
-    ENCLOUD_ERR_RC_IF ((e->serial == NULL), ENCLOUD_RC_BADCONFIG);
-    ENCLOUD_DBG("serial=" << QString::fromLocal8Bit(e->serial));
-
-    e->poi = encloud::utils::ustrdup(encloud::utils::file2Data(g_cfg->config.poiPath));
-    ENCLOUD_ERR_RC_IF ((e->poi == NULL), ENCLOUD_RC_BADCONFIG);
-    ENCLOUD_DBG("poi=" << QString::fromLocal8Bit(e->poi));
-#endif
-
-    ENCLOUD_ERR_RC_IF ((e->client = new encloud::Client) == NULL, ENCLOUD_RC_NOMEM);
-    ENCLOUD_ERR_IF (e->client->setConfig(e->cfg));
-
-    ENCLOUD_ERR_IF (encloud_crypto_init(&e->crypto));
-    ENCLOUD_ERR_IF (encloud_crypto_set_name_cb(&e->crypto, &__name_cb, e));
-
-    *pencloud = e;
+    *pencloud = encloud;
 
     return ENCLOUD_RC_SUCCESS;
 err:
-    if (e->cfg)
-        delete e->cfg;
-    if (e->client)
-        delete e->client;
-    if (e)
-        free(e);
+    if (encloud)
+        encloud_destroy(encloud);
 
     return (rc ? rc : ENCLOUD_RC_GENERIC);
 }
@@ -74,30 +37,35 @@ encloud_rc encloud_destroy (encloud_t *encloud)
     ENCLOUD_TRACE;
     ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
 
-    if (encloud->client)
-        delete encloud->client;
-
-    if (encloud->cfg) {
-        g_cfg = NULL;
-        delete encloud->cfg;
-    }
-
-    if (encloud->app) {
-        encloud->app->quit();
-        delete encloud->app;
-    }
-
-#ifndef ENCLOUD_TYPE_SECE 
-    if (encloud->serial)
-        free(encloud->serial);
-
-    if (encloud->poi)
-        free(encloud->poi);
-#endif
-
-    free(encloud);
+    ENCLOUD_DELETE(encloud->context);
+    ENCLOUD_FREE(encloud);
 
     return ENCLOUD_RC_SUCCESS;
+}
+
+encloud_rc encloud_set_state_cb (encloud_t *encloud, encloud_state_cb state_cb, void *arg)
+{
+    ENCLOUD_TRACE;
+    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+    ENCLOUD_RETURN_IF (state_cb == NULL, ENCLOUD_RC_BADPARAMS);
+
+    return encloud->context->setStateCb(state_cb, arg);
+}
+
+encloud_rc encloud_start (encloud_t *encloud)
+{
+    ENCLOUD_TRACE;
+    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+
+    return encloud->context->start();
+}
+
+encloud_rc encloud_stop (encloud_t *encloud)
+{
+    ENCLOUD_TRACE;
+    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+
+    return encloud->context->stop();
 }
 
 #if 0
@@ -318,44 +286,3 @@ ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc rc)
     return "<undefined>";
 }
 
-/* Subject name settings from JSON CSR template */
-static int __name_cb (X509_NAME *n, void *arg)
-{
-    ENCLOUD_RETURN_IF (n == NULL, ~0);
-    ENCLOUD_RETURN_IF (arg == NULL, ~0);
-
-    QVariant json;
-    QVariantMap map;
-    encloud_t *encloud = (encloud_t *) arg;
-    bool ok;
-
-    json = encloud::json::parseFromFile(encloud->cfg->config.csrTmplPath.absoluteFilePath(), ok);
-    ENCLOUD_ERR_IF (!ok);
-
-    map = json.toMap()["DN"].toMap();
-
-    // parse DN fields
-    for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
-    {
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, qPrintable(iter.key()), MBSTRING_UTF8, \
-                (const unsigned char *) iter.value().toString().toUtf8().data(), -1, -1, 0));
-    }
-
-    // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (ENCLOUD)
-    if (map["CN"].isNull())
-    {
-#ifdef ENCLOUD_TYPE_SECE    
-        // SECE: CN based on hw_info
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
-                (const unsigned char *) encloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));
-#else
-        // ENCLOUD: CN based on serial
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
-                (const unsigned char *) encloud_setup_get_serial(encloud), -1, -1, 0));
-#endif
-    }
-
-    return 0;
-err:
-    return ~0;
-}

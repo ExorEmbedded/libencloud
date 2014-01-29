@@ -16,6 +16,8 @@ extern "C" {
 
 #define TEST_TOUT_MINS 5
 
+static void state_cb (encloud_state state, void *arg);
+
 /**
  * Default is a "Pure C" libencloud test (no Qt objects): an internal
  * QCoreApplication is created if no instance is found!
@@ -60,6 +62,17 @@ int test_encloud (int argc, char *argv[])
     fprintf(stderr, "# poi: %s\n", encloud_setup_get_poi(encloud));
 #endif
 
+    TEST_ZERO ((rc = encloud_set_state_cb(encloud, state_cb, NULL)));
+
+    TEST_ZERO ((rc = encloud_start(encloud)));
+
+    sleep(3);
+    TEST_ZERO ((rc = encloud_stop(encloud)));
+    sleep(3);
+    TEST_ZERO ((rc = encloud_start(encloud)));
+    sleep(3);
+    TEST_ZERO ((rc = encloud_stop(encloud)));
+
 #if 0
     TEST_ZERO_RETRY ((rc = encloud_retr_sb_info(encloud, &sb_info)), TEST_TOUT_MINS);
     TEST_ZERO_RETRY ((rc = encloud_retr_sb_cert(encloud)), TEST_TOUT_MINS);
@@ -84,6 +97,11 @@ err:
     fprintf (stderr, "# libencloud error (%d): %s\n", rc, encloud_strerror(rc));
 
     return ~0;
+}
+
+static void state_cb (encloud_state state, void *arg)
+{
+    fprintf(stderr, "# [%s] state: %d\n", __FUNCTION__, state);
 }
 
 #ifdef __cplusplus

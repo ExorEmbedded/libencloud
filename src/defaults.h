@@ -3,15 +3,15 @@
 
 /* This file should NOT be Qt-specific (used by pure C modules) */
 
-#define ENCLOUD_SETTINGS_ORG        "Endian"
-#define ENCLOUD_SETTINGS_APP        "libencloud"
-#define ENCLOUD_SETTINGS_PRODUCT    ENCLOUD_SETTINGS_ORG" "ENCLOUD_SETTINGS_APP
+#define ENCLOUD_ORG                 "Endian"
+#define ENCLOUD_APP                 "libencloud"
+#define ENCLOUD_PRODUCT             ENCLOUD_ORG" "ENCLOUD_APP
 
 #ifndef ENCLOUD_REVISION
 #define ENCLOUD_REVISION            ""
-#define ENCLOUD_STRING              ENCLOUD_SETTINGS_APP" v"ENCLOUD_VERSION
+#define ENCLOUD_STRING              ENCLOUD_APP" v"ENCLOUD_VERSION
 #else
-#define ENCLOUD_STRING              ENCLOUD_SETTINGS_APP" v"ENCLOUD_VERSION" r"ENCLOUD_REVISION
+#define ENCLOUD_STRING              ENCLOUD_APP" v"ENCLOUD_VERSION" r"ENCLOUD_REVISION
 #endif
 
 #define ENCLOUD_SB_URL              "https://sb-host/"
