@@ -18,7 +18,7 @@
 /test/Makefile
 /test/build/
 /test/test
-/bindings/encloud.py
+/bindings/libencloud.py
 /bindings/*_wrap.c
 /bindings/build
 

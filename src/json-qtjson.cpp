@@ -6,7 +6,7 @@
  * QtJson-based interface (GPL/self-contained)
  */
 
-namespace encloud {
+namespace libencloud {
 namespace json {
 
 QVariant parse (const QString &str, bool &ok)
@@ -20,4 +20,4 @@ QString serialize (const QVariant &json, bool &ok)
 }
 
 } // namespace json
-} // namespace encloud
+} // namespace libencloud

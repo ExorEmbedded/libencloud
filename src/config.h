@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_PRIV_CONFIG_H_
-#define _ENCLOUD_PRIV_CONFIG_H_
+#ifndef _LIBENCLOUD_PRIV_CONFIG_H_
+#define _LIBENCLOUD_PRIV_CONFIG_H_
 
 #include <QDebug>
 #include <QObject>
@@ -14,7 +14,7 @@
 #include "defaults.h"
 #include "helpers.h"
 
-namespace encloud {
+namespace libencloud {
 
 typedef struct
 {
@@ -23,11 +23,11 @@ typedef struct
     QFileInfo certPath;
     QFileInfo keyPath;
 } 
-encloud_config_ssl_t;
+libencloud_config_ssl_t;
 
 typedef struct
 {
-#ifndef ENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_TYPE_SECE
     QFileInfo serialPath;
     QFileInfo poiPath;
 #endif
@@ -37,14 +37,14 @@ typedef struct
     QFileInfo prefix;
     QFileInfo csrTmplPath;
 
-    encloud_config_ssl_t sslInit;
-    encloud_config_ssl_t sslOp;
+    libencloud_config_ssl_t sslInit;
+    libencloud_config_ssl_t sslOp;
 
     int rsaBits;
 
     int logLevel;
 }
-encloud_config_t;
+libencloud_config_t;
 
 class Config
 {
@@ -58,7 +58,7 @@ public:
     QString dump ();
 
     /* Configuration objects are publicly accessible */
-    encloud_config_t config;
+    libencloud_config_t config;
     QSettings *settings;
 
 private:
@@ -66,14 +66,14 @@ private:
     int __parse_sb (const QVariantMap &jo);
     int __parse_sslInit (const QVariantMap &jo);
     int __parse_sslOp (const QVariantMap &jo);
-    int __parse_ssl (const QVariantMap &jo, encloud_config_ssl_t &sc);
+    int __parse_ssl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
     QString __join_paths (const QString &s1, const QString &s2);
 
     QVariant json;
 };
 
-} // namespace encloud
+} // namespace libencloud
 
-extern encloud::Config *g_cfg;
+extern libencloud::Config *g_cfg;
 
-#endif  /* _ENCLOUD_PRIV_CONFIG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_CONFIG_H_ */

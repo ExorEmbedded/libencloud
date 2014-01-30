@@ -3,15 +3,15 @@
 #include <encloud/core.h>
 %}
 
-#ifndef ENCLOUD_DLLSPEC
-#  if defined(ENCLOUD_WIN32)
-#    if defined _ENCLOUDLIB_
-#       define ENCLOUD_DLLSPEC __declspec(dllexport)
+#ifndef LIBENCLOUD_DLLSPEC
+#  if defined(LIBENCLOUD_WIN32)
+#    if defined _LIBENCLOUDLIB_
+#       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
 #    else
-#       define ENCLOUD_DLLSPEC __declspec(dllimport)
+#       define LIBENCLOUD_DLLSPEC __declspec(dllimport)
 #    endif
 #  else
-#    define ENCLOUD_DLLSPEC
+#    define LIBENCLOUD_DLLSPEC
 #  endif
 #endif
 
@@ -22,148 +22,148 @@
 extern "C" {
 #endif
 
-/* ENCLOUD return codes */
+/* LIBENCLOUD return codes */
 typedef enum
 {
-    ENCLOUD_RC_SUCCESS = 0,
-    ENCLOUD_RC_BADPARAMS,
-    ENCLOUD_RC_NOMEM,
-    ENCLOUD_RC_BADCONFIG,
-    ENCLOUD_RC_NOLICENSE,
-    ENCLOUD_RC_CONNECT,
-    ENCLOUD_RC_BADAUTH,
-    ENCLOUD_RC_TIMEOUT,
-    ENCLOUD_RC_BADRESPONSE,
-    ENCLOUD_RC_INVALIDCERT,
-    ENCLOUD_RC_FAILED,
-    ENCLOUD_RC_SYSERR,
-    ENCLOUD_RC_GENERIC
+    LIBENCLOUD_RC_SUCCESS = 0,
+    LIBENCLOUD_RC_BADPARAMS,
+    LIBENCLOUD_RC_NOMEM,
+    LIBENCLOUD_RC_BADCONFIG,
+    LIBENCLOUD_RC_NOLICENSE,
+    LIBENCLOUD_RC_CONNECT,
+    LIBENCLOUD_RC_BADAUTH,
+    LIBENCLOUD_RC_TIMEOUT,
+    LIBENCLOUD_RC_BADRESPONSE,
+    LIBENCLOUD_RC_INVALIDCERT,
+    LIBENCLOUD_RC_FAILED,
+    LIBENCLOUD_RC_SYSERR,
+    LIBENCLOUD_RC_GENERIC
 }
-encloud_rc;
+libencloud_rc;
 
-/* Main ENCLOUD structure */
-struct ENCLOUD_DLLSPEC encloud_s;
-typedef struct encloud_s encloud_t;
+/* Main LIBENCLOUD structure */
+struct LIBENCLOUD_DLLSPEC libencloud_s;
+typedef struct libencloud_s libencloud_t;
 
 /* SB Info structure */
-struct ENCLOUD_DLLSPEC encloud_sb_info_s;
-typedef struct encloud_sb_info_s encloud_sb_info_t;
+struct LIBENCLOUD_DLLSPEC libencloud_sb_info_s;
+typedef struct libencloud_sb_info_s libencloud_sb_info_t;
 
 /* SB Config structure */
-struct ENCLOUD_DLLSPEC encloud_vpn_conf_s;
-typedef struct encloud_vpn_conf_s encloud_vpn_conf_t;
+struct LIBENCLOUD_DLLSPEC libencloud_vpn_conf_s;
+typedef struct libencloud_vpn_conf_s libencloud_vpn_conf_t;
 
-/* encloud_t type remappings */
-%typemap(in, numinputs=0) encloud_t ** (encloud_t **pencloud) {
-    $1 = (encloud_t **) &pencloud;
+/* libencloud_t type remappings */
+%typemap(in, numinputs=0) libencloud_t ** (libencloud_t **plibencloud) {
+    $1 = (libencloud_t **) &plibencloud;
 }
-%typemap(argout) encloud_t ** {
+%typemap(argout) libencloud_t ** {
     char buf[128];
     if (result) {
-        snprintf(buf, sizeof(buf), "failed encloud_create() (rc=%d: %s)",
-                result, encloud_strerror(result));
+        snprintf(buf, sizeof(buf), "failed libencloud_create() (rc=%d: %s)",
+                result, libencloud_strerror(result));
         SWIG_exception_fail(0, buf);
     }
-    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_encloud_s, 0);
+    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_libencloud_s, 0);
 }
 
-/* encloud_sb_info_t type remappings */
-%typemap(in, numinputs=0) encloud_sb_info_t ** (encloud_sb_info_t **pencloud) {
-    $1 = (encloud_sb_info_t **) &pencloud;
+/* libencloud_sb_info_t type remappings */
+%typemap(in, numinputs=0) libencloud_sb_info_t ** (libencloud_sb_info_t **plibencloud) {
+    $1 = (libencloud_sb_info_t **) &plibencloud;
 }
-%typemap(argout) encloud_sb_info_t ** {
+%typemap(argout) libencloud_sb_info_t ** {
     char buf[128];
     if (result) {
-        snprintf(buf, sizeof(buf), "failed encloud_retr_sb_info() (rc=%d: %s)",
-                result, encloud_strerror(result));
+        snprintf(buf, sizeof(buf), "failed libencloud_retr_sb_info() (rc=%d: %s)",
+                result, libencloud_strerror(result));
         SWIG_exception_fail(0, buf);
     }
-    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_encloud_sb_info_s, 0);
+    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_libencloud_sb_info_s, 0);
 }
 
-/* encloud_vpn_conf_t type remappings */
-%typemap(in, numinputs=0) encloud_vpn_conf_t ** (encloud_vpn_conf_t **pencloud) {
-    $1 = (encloud_vpn_conf_t **) &pencloud;
+/* libencloud_vpn_conf_t type remappings */
+%typemap(in, numinputs=0) libencloud_vpn_conf_t ** (libencloud_vpn_conf_t **plibencloud) {
+    $1 = (libencloud_vpn_conf_t **) &plibencloud;
 }
-%typemap(argout) encloud_vpn_conf_t ** {
+%typemap(argout) libencloud_vpn_conf_t ** {
     char buf[128];
     if (result) {
-        snprintf(buf, sizeof(buf), "failed encloud_retr_sb_conf() (rc=%d: %s)",
-                result, encloud_strerror(result));
+        snprintf(buf, sizeof(buf), "failed libencloud_retr_sb_conf() (rc=%d: %s)",
+                result, libencloud_strerror(result));
         SWIG_exception_fail(0, buf);
     }
-    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_encloud_vpn_conf_s, 0);
+    $result = SWIG_NewPointerObj(*$1, SWIGTYPE_p_libencloud_vpn_conf_s, 0);
 }
 
 /* Constructor/Destructor */
-%rename encloud_create create;
-ENCLOUD_DLLSPEC encloud_rc encloud_create (int argc, char *argv[], encloud_t **pencloud);
+%rename libencloud_create create;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_create (int argc, char *argv[], libencloud_t **plibencloud);
 
-%rename encloud_destroy destroy;
-ENCLOUD_DLLSPEC encloud_rc encloud_destroy (encloud_t *encloud);
+%rename libencloud_destroy destroy;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_destroy (libencloud_t *libencloud);
 
 /* Main control */
-%rename encloud_start start;
-ENCLOUD_DLLSPEC encloud_rc encloud_start (encloud_t *encloud);
+%rename libencloud_start start;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_start (libencloud_t *libencloud);
 
-%rename encloud_stop stop;
-ENCLOUD_DLLSPEC encloud_rc encloud_stop (encloud_t *encloud);
+%rename libencloud_stop stop;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_stop (libencloud_t *libencloud);
 
 #if 0
 /* Licensing */
-#ifdef ENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_TYPE_SECE
 /* SECE: Licensing */
-%rename encloud_setup_set_license set_license;
-ENCLOUD_DLLSPEC encloud_rc encloud_setup_set_license (encloud_t *encloud, const char *guid);
+%rename libencloud_setup_set_license set_license;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *libencloud, const char *guid);
 #else
-/* ENCLOUD: Identification */
-%rename encloud_setup_get_serial get_serial;
-ENCLOUD_DLLSPEC const char *encloud_setup_get_serial (encloud_t *encloud);
+/* LIBENCLOUD: Identification */
+%rename libencloud_setup_get_serial get_serial;
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_serial (libencloud_t *libencloud);
 
-%rename encloud_setup_get_poi get_poi;
-ENCLOUD_DLLSPEC const char *encloud_setup_get_poi (encloud_t *encloud);
+%rename libencloud_setup_get_poi get_poi;
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_poi (libencloud_t *libencloud);
 #endif
 
 /* Communication */
-%rename encloud_retr_sb_info retr_sb_info;
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_sb_info (encloud_t *encloud, encloud_sb_info_t **pinfo);
+%rename libencloud_retr_sb_info retr_sb_info;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_sb_info (libencloud_t *libencloud, libencloud_sb_info_t **pinfo);
 
-%rename encloud_retr_sb_cert retr_sb_cert;
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_sb_cert (encloud_t *encloud);
+%rename libencloud_retr_sb_cert retr_sb_cert;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_sb_cert (libencloud_t *libencloud);
 
-%rename encloud_retr_sb_conf retr_sb_conf;
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_sb_conf (encloud_t *encloud, encloud_vpn_conf_t **pconf);
+%rename libencloud_retr_sb_conf retr_sb_conf;
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_sb_conf (libencloud_t *libencloud, libencloud_vpn_conf_t **pconf);
 
-/* Accessor methods - encloud_sb_info_t */
-%rename encloud_sb_info_get_license_valid sb_info_get_license_valid;
-ENCLOUD_DLLSPEC bool encloud_sb_info_get_license_valid (encloud_sb_info_t *info);
+/* Accessor methods - libencloud_sb_info_t */
+%rename libencloud_sb_info_get_license_valid sb_info_get_license_valid;
+LIBENCLOUD_DLLSPEC bool libencloud_sb_info_get_license_valid (libencloud_sb_info_t *info);
 
-%rename encloud_sb_info_get_license_expiry sb_info_get_license_expiry;
-ENCLOUD_DLLSPEC time_t encloud_sb_info_get_license_expiry (encloud_sb_info_t *info);
+%rename libencloud_sb_info_get_license_expiry sb_info_get_license_expiry;
+LIBENCLOUD_DLLSPEC time_t libencloud_sb_info_get_license_expiry (libencloud_sb_info_t *info);
 
-/* Accessor methods - encloud_vpn_conf_t */
-%rename encloud_vpn_conf_get_vpn_ip sb_conf_get_vpn_ip;
-ENCLOUD_DLLSPEC char *encloud_vpn_conf_get_vpn_ip (encloud_vpn_conf_t *conf);
+/* Accessor methods - libencloud_vpn_conf_t */
+%rename libencloud_vpn_conf_get_vpn_ip sb_conf_get_vpn_ip;
+LIBENCLOUD_DLLSPEC char *libencloud_vpn_conf_get_vpn_ip (libencloud_vpn_conf_t *conf);
 
-%rename encloud_vpn_conf_get_vpn_port sb_conf_get_vpn_port;
-ENCLOUD_DLLSPEC int encloud_vpn_conf_get_vpn_port (encloud_vpn_conf_t *conf);
+%rename libencloud_vpn_conf_get_vpn_port sb_conf_get_vpn_port;
+LIBENCLOUD_DLLSPEC int libencloud_vpn_conf_get_vpn_port (libencloud_vpn_conf_t *conf);
 
-%rename encloud_vpn_conf_get_vpn_proto sb_conf_get_vpn_proto;
-ENCLOUD_DLLSPEC char *encloud_vpn_conf_get_vpn_proto (encloud_vpn_conf_t *conf);
+%rename libencloud_vpn_conf_get_vpn_proto sb_conf_get_vpn_proto;
+LIBENCLOUD_DLLSPEC char *libencloud_vpn_conf_get_vpn_proto (libencloud_vpn_conf_t *conf);
 
-%rename encloud_vpn_conf_get_vpn_type sb_conf_get_vpn_type;
-ENCLOUD_DLLSPEC char *encloud_vpn_conf_get_vpn_type (encloud_vpn_conf_t *conf);
+%rename libencloud_vpn_conf_get_vpn_type sb_conf_get_vpn_type;
+LIBENCLOUD_DLLSPEC char *libencloud_vpn_conf_get_vpn_type (libencloud_vpn_conf_t *conf);
 #endif
 
 /* Other */
-%rename encloud_version version;
-ENCLOUD_DLLSPEC const char *encloud_version (void);
+%rename libencloud_version version;
+LIBENCLOUD_DLLSPEC const char *libencloud_version (void);
 
-%rename encloud_revision revision;
-ENCLOUD_DLLSPEC const char *encloud_revision (void);
+%rename libencloud_revision revision;
+LIBENCLOUD_DLLSPEC const char *libencloud_revision (void);
 
-%rename encloud_strerror strerror;
-ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc rc);
+%rename libencloud_strerror strerror;
+LIBENCLOUD_DLLSPEC const char *libencloud_strerror (libencloud_rc rc);
 
 #ifdef __cplusplus
 }

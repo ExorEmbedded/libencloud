@@ -3,7 +3,7 @@
 #include "crypto.h"
 #include "config.h"
 
-namespace encloud {
+namespace libencloud {
 namespace utils {
 
 /** \brief Hardware info used for Subject CN which has maximum 64 chars => return an MD5 checksum! */
@@ -21,11 +21,11 @@ QString getHwInfo (void)
             QSettings(QLatin1String("HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat).\
                 value(QLatin1String("ProcessorNameString")).toString();
 #endif
-    ENCLOUD_ERR_IF (hwInfo.isEmpty());
+    LIBENCLOUD_ERR_IF (hwInfo.isEmpty());
 
-    ENCLOUD_DBG("hwInfo=" << hwInfo);
+    LIBENCLOUD_DBG("hwInfo=" << hwInfo);
 
-    ENCLOUD_ERR_IF ((s = encloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
+    LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
 
     free(s);
@@ -43,7 +43,7 @@ QDateTime pytime2DateTime (QString pydate)
 }
 
 /* \brief Differs from addQueryItem() which does not properly handle newlines & CO */
-ENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString s)
+LIBENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString s)
 {
     s.replace(QLatin1String("\\"), QLatin1String("\\\\"));
     s.replace(QLatin1String("\""), QLatin1String("\\\""));
@@ -56,27 +56,27 @@ ENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString s)
     return qPrintable(s);
 }
 
-ENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
+LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 {
-    ENCLOUD_RETURN_IF (!fi.isFile(), NULL);
+    LIBENCLOUD_RETURN_IF (!fi.isFile(), NULL);
 
     QByteArray ba;
     QString fn = fi.absoluteFilePath();
-    ENCLOUD_DBG("fn=" << fn);
+    LIBENCLOUD_DBG("fn=" << fn);
     QFile f(fn);
 
-    ENCLOUD_ERR_IF (!f.open(QIODevice::ReadOnly));
-    ENCLOUD_ERR_IF ((ba = f.readAll()).isEmpty());
+    LIBENCLOUD_ERR_IF (!f.open(QIODevice::ReadOnly));
+    LIBENCLOUD_ERR_IF ((ba = f.readAll()).isEmpty());
 
     return QString(ba.trimmed()).toLocal8Bit();
 err:
     return NULL;
 }
 
-ENCLOUD_DLLSPEC char *ustrdup (const char *s)
+LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 {
     return (s == NULL ? NULL : strdup(s));
 }
 
 } // namespace utils
-} // namespace encloud
+} // namespace libencloud

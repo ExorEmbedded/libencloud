@@ -8,7 +8,7 @@
 # global defs
 PKGNAME = libencloud
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.5
+VERSION = 0.6
 QMAKE_TARGET_COMPANY = Endian
 QMAKE_TARGET_PRODUCT = libencloud
 QMAKE_TARGET_DESCRIPTION = libencloud
@@ -19,16 +19,16 @@ QT += network
 QT -= gui
 
 debug       { QMAKE_CXXFLAGS += -g }
-sece        { DEFINES += ENCLOUD_TYPE_SECE }
-nosetup     { DEFINES += ENCLOUD_DISABLE_SETUP }
-nocloud     { DEFINES += ENCLOUD_DISABLE_CLOUD }
+sece        { DEFINES += LIBENCLOUD_TYPE_SECE }
+nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
+nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 
 # Platform-specific config and macros
 win32 {
     CONFIG += qtjson  # GPL/self-contained
 
     DEFINES += _CRT_SECURE_NO_WARNINGS
-    DEFINES += ENCLOUD_WIN32
+    DEFINES += LIBENCLOUD_WIN32
 
 #    system("mkdir $$(APPDATA)\\encloud")
 } else {
@@ -39,17 +39,17 @@ win32 {
     CONFIG += qtjson  # GPL/self-contained
 }
 
-DEFINES += ENCLOUD_VERSION=\\\"$${VERSION}\\\"
+DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 exists(".git") {
-    DEFINES += ENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+    DEFINES += LIBENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 }
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
 # *old-style* static/compile-time logging; log level can be changed dynamically
-# by changing value of "log/lev" in /etc/encloud/encloud.json
-#DEFINES += ENCLOUD_LOGLEVEL=7
+# by changing value of "log/lev" in /etc/encloud/libencloud.json
+#DEFINES += LIBENCLOUD_LOGLEVEL=7
 
 # public API is included globally
 INCLUDEPATH += ../include

@@ -1,10 +1,10 @@
-#ifndef _ENCLOUD_PRIV_COMMON_H_
-#define _ENCLOUD_PRIV_COMMON_H_
+#ifndef _LIBENCLOUD_PRIV_COMMON_H_
+#define _LIBENCLOUD_PRIV_COMMON_H_
 
 #include "defaults.h"
 #include "helpers.h"
 
-namespace encloud {
+namespace libencloud {
 
 /* Protocol modes */
 enum ProtocolType
@@ -21,6 +21,6 @@ enum MessageType
     MessageTypeRetrConf
 };
 
-} // namespace encloud
+} // namespace libencloud
 
-#endif  /* _ENCLOUD_PRIV_COMMON_H_ */
+#endif  /* _LIBENCLOUD_PRIV_COMMON_H_ */

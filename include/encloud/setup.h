@@ -1,19 +1,19 @@
-#ifndef _ENCLOUD_SETUP_H_
-#define _ENCLOUD_SETUP_H_
+#ifndef _LIBENCLOUD_SETUP_H_
+#define _LIBENCLOUD_SETUP_H_
 
 #include <encloud/common.h>
 
-#ifndef ENCLOUD_DISABLE_SETUP
+#ifndef LIBENCLOUD_DISABLE_SETUP
 
-#ifdef ENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_TYPE_SECE
 /* SECE: Licensing */
-ENCLOUD_DLLSPEC encloud_rc encloud_setup_set_license (encloud_t *encloud, const char *guid);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *libencloud, const char *guid);
 #else
 /* ECE: Identification */
-ENCLOUD_DLLSPEC const char *encloud_setup_get_serial (encloud_t *encloud);  /* optional if CN provided in CSR template */
-ENCLOUD_DLLSPEC const char *encloud_setup_get_poi (encloud_t *encloud);
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_serial (libencloud_t *libencloud);  /* optional if CN provided in CSR template */
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_poi (libencloud_t *libencloud);
 #endif
 
-#endif /* ENCLOUD_DISABLE_SETUP */
+#endif /* LIBENCLOUD_DISABLE_SETUP */
 
-#endif /* _ENCLOUD_SETUP_H_ */
+#endif /* _LIBENCLOUD_SETUP_H_ */

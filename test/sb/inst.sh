@@ -26,10 +26,10 @@ WS2DIR="${CONFDIR}/${WS2}"
 VPNDIR="${CONFDIR}/vpnsrv"
 VPNCN="vpnsrv"
 
-#ENCLOUDDIR="${CONFDIR}/encloud"
-ENCLOUDDIR="/etc/encloud"
-ENCLOUDSERIAL="123"
-ENCLOUDPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
+#LIBENCLOUDDIR="${CONFDIR}/encloud"
+LIBENCLOUDDIR="/etc/encloud"
+LIBENCLOUDSERIAL="123"
+LIBENCLOUDPOI="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
 
 EXTRAARGS="-policy policy_anything"
 
@@ -71,23 +71,23 @@ openssl dhparam -out dh.pem 1024
 mv *.pem "${VPNDIR}"
 
 # produce SECE (Initialization)
-#rm -rf "${ENCLOUDDIR}"
-#mkdir -p "${ENCLOUDDIR}"
+#rm -rf "${LIBENCLOUDDIR}"
+#mkdir -p "${LIBENCLOUDDIR}"
 #"${CONTRIB}/produce.sh" -cn "SECE" -cadir "${CA1DIR}" ${EXTRAARGS}
-#mv key.pem "${ENCLOUDDIR}/init_key.pem"
-#mv cert.pem "${ENCLOUDDIR}/init_cert.pem"
-#mv ca.pem "${ENCLOUDDIR}/init_ca.pem"
+#mv key.pem "${LIBENCLOUDDIR}/init_key.pem"
+#mv cert.pem "${LIBENCLOUDDIR}/init_cert.pem"
+#mv ca.pem "${LIBENCLOUDDIR}/init_ca.pem"
 
-# produce ENCLOUD (Initialization)
-mkdir -p "${ENCLOUDDIR}"
-"${CONTRIB}/produce.sh" -cn "${ENCLOUDSERIAL}" -cadir "${CA1DIR}" ${EXTRAARGS}
-mv key.pem "${ENCLOUDDIR}/init_key.pem"
-mv cert.pem "${ENCLOUDDIR}/init_cert.pem"
-mv ca.pem "${ENCLOUDDIR}/init_ca.pem"
-echo "${ENCLOUDSERIAL}" > "${ENCLOUDDIR}/serial"
-echo "${ENCLOUDPOI}" > "${ENCLOUDDIR}/poi"
-sudo chmod 600 "${ENCLOUDDIR}/"*
-sudo chown -R "${USER}" "${ENCLOUDDIR}"
+# produce LIBENCLOUD (Initialization)
+mkdir -p "${LIBENCLOUDDIR}"
+"${CONTRIB}/produce.sh" -cn "${LIBENCLOUDSERIAL}" -cadir "${CA1DIR}" ${EXTRAARGS}
+mv key.pem "${LIBENCLOUDDIR}/init_key.pem"
+mv cert.pem "${LIBENCLOUDDIR}/init_cert.pem"
+mv ca.pem "${LIBENCLOUDDIR}/init_ca.pem"
+echo "${LIBENCLOUDSERIAL}" > "${LIBENCLOUDDIR}/serial"
+echo "${LIBENCLOUDPOI}" > "${LIBENCLOUDDIR}/poi"
+sudo chmod 600 "${LIBENCLOUDDIR}/"*
+sudo chown -R "${USER}" "${LIBENCLOUDDIR}"
 
 # install deps
 sudo apt-get install apache2 libapache2-mod-python

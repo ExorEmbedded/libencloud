@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_PRIV_CONTEXT_H_
-#define _ENCLOUD_PRIV_CONTEXT_H_
+#ifndef _LIBENCLOUD_PRIV_CONTEXT_H_
+#define _LIBENCLOUD_PRIV_CONTEXT_H_
 
 #include <QtCore/QCoreApplication>
 #include <QTimer>
@@ -12,17 +12,17 @@
 
 #if 0
 /** \brief SB info object */
-struct encloud_info_s
+struct libencloud_info_s
 {
     bool license_valid;
     time_t license_expiry;
 };
-typedef struct encloud_info_s encloud_info_t;
+typedef struct libencloud_info_s libencloud_info_t;
 #endif
 
-namespace encloud {
+namespace libencloud {
 
-/** \brief ENCLOUD internal object */
+/** \brief LIBENCLOUD internal object */
 class Context : public QObject
 {
     Q_OBJECT;
@@ -31,14 +31,14 @@ public:
     Context ();
     ~Context ();
 
-    encloud_rc init (int argc, char *argv[]);
+    libencloud_rc init (int argc, char *argv[]);
 
-    encloud_rc setStateCb (encloud_state_cb stateCb, void *arg);
+    libencloud_rc setStateCb (libencloud_state_cb stateCb, void *arg);
 
-    encloud_rc start ();
-    encloud_rc stop ();
+    libencloud_rc start ();
+    libencloud_rc stop ();
 
-#ifndef ENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_TYPE_SECE
     const char *getSerial () const;
     const char *getPoi () const;
 #endif
@@ -57,22 +57,22 @@ private:
     bool inited;
     QCoreApplication *app;
 
-#ifndef ENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_TYPE_SECE
     char *serial;
     char *poi;
 #endif
 
-    encloud::Client client;
-    encloud::Config cfg;
+    libencloud::Client client;
+    libencloud::Config cfg;
 
-    encloud_crypto_t crypto;
-    encloud_vpn_conf_t conf;
+    libencloud_crypto_t crypto;
+    libencloud_vpn_conf_t conf;
 
     QThread thread;
-    encloud::Worker worker;
+    libencloud::Worker worker;
     QTimer timer;
 };
 
-} // namespace encloud
+} // namespace libencloud
 
-#endif  /* _ENCLOUD_PRIV_CONTEXT_H_ */
+#endif  /* _LIBENCLOUD_PRIV_CONTEXT_H_ */

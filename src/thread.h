@@ -1,12 +1,12 @@
-#ifndef _ENCLOUD_PRIV_THREAD_H_
-#define _ENCLOUD_PRIV_THREAD_H_
+#ifndef _LIBENCLOUD_PRIV_THREAD_H_
+#define _LIBENCLOUD_PRIV_THREAD_H_
 
 #include <QThread>
 #include <QMutex>
 #include <encloud/common.h>
 #include <encloud/state.h>
 
-namespace encloud {
+namespace libencloud {
 
 class Worker : public QObject
 {
@@ -16,11 +16,11 @@ public:
     Worker();
     ~Worker();
 
-    encloud_rc setStateCb (encloud_state_cb stateCb, void *arg);
+    libencloud_rc setStateCb (libencloud_state_cb stateCb, void *arg);
 
-    encloud_rc start ();
-    encloud_rc stop ();
-    encloud_rc abort ();
+    libencloud_rc start ();
+    libencloud_rc stop ();
+    libencloud_rc abort ();
 
 signals:
     void finished ();
@@ -38,11 +38,11 @@ private:
     bool _stopped;
     bool _aborted;
 
-    encloud_state _state;
-    encloud_state_cb _stateCb;
+    libencloud_state _state;
+    libencloud_state_cb _stateCb;
     void *_stateCbArg;
 };
 
-} // namespace encloud
+} // namespace libencloud
 
-#endif  /* _ENCLOUD_PRIV_THREAD_H_ */
+#endif  /* _LIBENCLOUD_PRIV_THREAD_H_ */

@@ -1,15 +1,15 @@
-#ifndef _ENCLOUD_PRIV_CORE_H_
-#define _ENCLOUD_PRIV_CORE_H_
+#ifndef _LIBENCLOUD_PRIV_CORE_H_
+#define _LIBENCLOUD_PRIV_CORE_H_
 
 #include <encloud/common.h>
 #include "common.h"
 #include "config.h"
 #include "context.h"
 
-/** \brief ENCLOUD internal object */
-struct encloud_s
+/** \brief LIBENCLOUD internal object */
+struct libencloud_s
 {
-    encloud::Context *context;
+    libencloud::Context *context;
 };
 
-#endif  /* _ENCLOUD_PRIV_CORE_H_ */
+#endif  /* _LIBENCLOUD_PRIV_CORE_H_ */

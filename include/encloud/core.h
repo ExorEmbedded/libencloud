@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_CORE_H_
-#define _ENCLOUD_CORE_H_
+#ifndef _LIBENCLOUD_CORE_H_
+#define _LIBENCLOUD_CORE_H_
 
 #include <encloud/common.h>
 #include <encloud/state.h>
@@ -9,23 +9,23 @@ extern "C" {
 #endif
 
 /* Constructor/Destructor */
-ENCLOUD_DLLSPEC encloud_rc encloud_create (int argc, char *argv[], encloud_t **pencloud);
-ENCLOUD_DLLSPEC encloud_rc encloud_destroy (encloud_t *encloud);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_create (int argc, char *argv[], libencloud_t **plibencloud);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_destroy (libencloud_t *libencloud);
 
 /* Main settings */
-ENCLOUD_DLLSPEC encloud_rc encloud_set_state_cb (encloud_t *encloud, encloud_state_cb state_cb, void *arg);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_set_state_cb (libencloud_t *libencloud, libencloud_state_cb state_cb, void *arg);
 
 /* Main control */
-ENCLOUD_DLLSPEC encloud_rc encloud_start (encloud_t *encloud);
-ENCLOUD_DLLSPEC encloud_rc encloud_stop (encloud_t *encloud);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_start (libencloud_t *libencloud);
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_stop (libencloud_t *libencloud);
 
 /* Other */
-ENCLOUD_DLLSPEC const char *encloud_version (void);
-ENCLOUD_DLLSPEC const char *encloud_revision (void);
-ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc rc);
+LIBENCLOUD_DLLSPEC const char *libencloud_version (void);
+LIBENCLOUD_DLLSPEC const char *libencloud_revision (void);
+LIBENCLOUD_DLLSPEC const char *libencloud_strerror (libencloud_rc rc);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _ENCLOUD_CORE_H_ */
+#endif /* _LIBENCLOUD_CORE_H_ */

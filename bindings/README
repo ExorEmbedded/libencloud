@@ -1,1 +1,4 @@
+*** DEPRECATED!!! *** 
+(these bindings were for old versions of libece)
+
 sudo apt-get install swig python-dev

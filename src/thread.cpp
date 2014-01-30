@@ -2,7 +2,7 @@
 #include "config.h"
 #include "thread.h"
 
-namespace encloud {
+namespace libencloud {
 
 //
 // public methods
@@ -11,34 +11,34 @@ namespace encloud {
 Worker::Worker ()
     : _stopped(true)
     , _aborted(false)
-    , _state(ENCLOUD_ST_INITIAL)
+    , _state(LIBENCLOUD_ST_INITIAL)
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 }
 
 Worker::~Worker ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     stop();
 }
 
-encloud_rc Worker::setStateCb (encloud_state_cb stateCb, void *arg)
+libencloud_rc Worker::setStateCb (libencloud_state_cb stateCb, void *arg)
 {
     _stateCb = stateCb;
     _stateCbArg = arg;
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc Worker::start ()
+libencloud_rc Worker::start ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     if (!_stopped)
-        return ENCLOUD_RC_SUCCESS;
+        return LIBENCLOUD_RC_SUCCESS;
 
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     _mutex.lock();
     _stopped = false;
@@ -46,29 +46,29 @@ encloud_rc Worker::start ()
 
     step();
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc Worker::stop ()
+libencloud_rc Worker::stop ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     if (_stopped)
-        return ENCLOUD_RC_SUCCESS;
+        return LIBENCLOUD_RC_SUCCESS;
 
     _mutex.lock();
     _stopped = true;
     _mutex.unlock();
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc Worker::abort ()
+libencloud_rc Worker::abort ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     if (_aborted)
-        return ENCLOUD_RC_SUCCESS;
+        return LIBENCLOUD_RC_SUCCESS;
 
     _mutex.lock();
     _aborted = true;
@@ -76,7 +76,7 @@ encloud_rc Worker::abort ()
 
     emit finished();
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
 //
@@ -100,18 +100,18 @@ void Worker::aborted ()
 
 void Worker::onTimeout ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     if (_aborted) 
         return;
 
     if (_stopped)
     {
-        ENCLOUD_DBG("stopped");
+        LIBENCLOUD_DBG("stopped");
     }
     else
     {
-        ENCLOUD_DBG("running");
+        LIBENCLOUD_DBG("running");
     }
 }
 
@@ -121,18 +121,18 @@ void Worker::onTimeout ()
 
 void Worker::step ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     _stateCb(_state, _stateCbArg);
 
     switch (_state)
     {
-        case ENCLOUD_ST_INITIALISING:
-        case ENCLOUD_ST_CONNECTING:
-        case ENCLOUD_ST_CONNECTED:
+        case LIBENCLOUD_ST_INITIALISING:
+        case LIBENCLOUD_ST_CONNECTING:
+        case LIBENCLOUD_ST_CONNECTED:
         default:
             break;
     }
 }
 
-} // namespace encloud
+} // namespace libencloud

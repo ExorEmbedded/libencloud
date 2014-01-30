@@ -1,5 +1,5 @@
 libencloud X.Y (//):
-	- API: major renaming s/ece/encloud
+	- API: major renaming s/ece/libencloud
 
 libece 0.5 (27/01/2014):
 	- API: ECE-specific extensions (ECE_TYPE_SECE defined on win32)

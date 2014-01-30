@@ -1,71 +1,71 @@
 #include "core.h"
 
 /** 
- * \brief Create a new ENCLOUD object
+ * \brief Create a new LIBENCLOUD object
  *
- * The object is returned in 'pencloud' and must be destroyed by caller using encloud_destroy().
+ * The object is returned in 'plibencloud' and must be destroyed by caller using libencloud_destroy().
  *
  * If no running instance of QCoreApplication is detected (libencloud used as a standalone library),
  * an internal application is created passing {argc, argv} command-line arguments (optional).
  */
-encloud_rc encloud_create (int argc, char *argv[], encloud_t **pencloud)
+libencloud_rc libencloud_create (int argc, char *argv[], libencloud_t **plibencloud)
 {
-    encloud_rc rc = ENCLOUD_RC_SUCCESS;
+    libencloud_rc rc = LIBENCLOUD_RC_SUCCESS;
 
-    encloud_t *encloud = NULL; 
+    libencloud_t *libencloud = NULL; 
 
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (pencloud == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (plibencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    ENCLOUD_RETURN_IF ((encloud = (encloud_t *) calloc(1, sizeof(encloud_t))) == NULL, ENCLOUD_RC_NOMEM);
-    ENCLOUD_ERR_RC_IF ((encloud->context = new encloud::Context()) == NULL, ENCLOUD_RC_NOMEM);
-    ENCLOUD_ERR_RC_IF (encloud->context->init(argc, argv), ENCLOUD_RC_NOMEM);
+    LIBENCLOUD_RETURN_IF ((libencloud = (libencloud_t *) calloc(1, sizeof(libencloud_t))) == NULL, LIBENCLOUD_RC_NOMEM);
+    LIBENCLOUD_ERR_RC_IF ((libencloud->context = new libencloud::Context()) == NULL, LIBENCLOUD_RC_NOMEM);
+    LIBENCLOUD_ERR_RC_IF ((rc = libencloud->context->init(argc, argv)), rc);
 
-    *pencloud = encloud;
+    *plibencloud = libencloud;
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 err:
-    if (encloud)
-        encloud_destroy(encloud);
+    if (libencloud)
+        libencloud_destroy(libencloud);
 
-    return (rc ? rc : ENCLOUD_RC_GENERIC);
+    return (rc ? rc : LIBENCLOUD_RC_GENERIC);
 }
 
-/* \brief Dispose of 'encloud' object */
-encloud_rc encloud_destroy (encloud_t *encloud)
+/* \brief Dispose of 'libencloud' object */
+libencloud_rc libencloud_destroy (libencloud_t *libencloud)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    ENCLOUD_DELETE(encloud->context);
-    ENCLOUD_FREE(encloud);
+    LIBENCLOUD_DELETE(libencloud->context);
+    LIBENCLOUD_FREE(libencloud);
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc encloud_set_state_cb (encloud_t *encloud, encloud_state_cb state_cb, void *arg)
+libencloud_rc libencloud_set_state_cb (libencloud_t *libencloud, libencloud_state_cb state_cb, void *arg)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
-    ENCLOUD_RETURN_IF (state_cb == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_RETURN_IF (state_cb == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    return encloud->context->setStateCb(state_cb, arg);
+    return libencloud->context->setStateCb(state_cb, arg);
 }
 
-encloud_rc encloud_start (encloud_t *encloud)
+libencloud_rc libencloud_start (libencloud_t *libencloud)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    return encloud->context->start();
+    return libencloud->context->start();
 }
 
-encloud_rc encloud_stop (encloud_t *encloud)
+libencloud_rc libencloud_stop (libencloud_t *libencloud)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    return encloud->context->stop();
+    return libencloud->context->stop();
 }
 
 #if 0
@@ -80,48 +80,48 @@ encloud_rc encloud_stop (encloud_t *encloud)
  * 
  * License info is returned to the user and CSR template is stored internally.
  * 
- * Note: 'pinfo' points to an internal object (no memory management nencloudssary).
+ * Note: 'pinfo' points to an internal object (no memory management nlibencloudssary).
  */
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_info (encloud_t *encloud, encloud_info_t **pinfo)
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_info (libencloud_t *libencloud, libencloud_info_t **pinfo)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
-    ENCLOUD_RETURN_IF (pinfo == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_RETURN_IF (pinfo == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    encloud_rc rc = ENCLOUD_RC_GENERIC;
-    encloud::MessageRetrInfo msg;
-    QString csrfn = encloud->cfg->config.csrTmplPath.absoluteFilePath();
+    libencloud_rc rc = LIBENCLOUD_RC_GENERIC;
+    libencloud::MessageRetrInfo msg;
+    QString csrfn = libencloud->cfg->config.csrTmplPath.absoluteFilePath();
     QFile csrf(csrfn);
-    QString cafn = encloud->cfg->config.sslOp.caPath.absoluteFilePath();
+    QString cafn = libencloud->cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
 
     bool ok;
 
-#ifdef ENCLOUD_TYPE_SECE
-    msg.license = QUuid(encloud->cfg->settings->value("lic").toString());
-    ENCLOUD_RETURN_IF (msg.license.isNull(), ENCLOUD_RC_NOLICENSE);
+#ifdef LIBENCLOUD_TYPE_SECE
+    msg.license = QUuid(libencloud->cfg->settings->value("lic").toString());
+    LIBENCLOUD_RETURN_IF (msg.license.isNull(), LIBENCLOUD_RC_NOLICENSE);
 
-    msg.hwInfo = encloud::utils::getHwInfo();
+    msg.hwInfo = libencloud::utils::getHwInfo();
 #endif
 
-    ENCLOUD_ERR_RC_IF ((rc = encloud->client->run(encloud::ProtocolTypeInit, msg)), rc);
+    LIBENCLOUD_ERR_RC_IF ((rc = libencloud->client->run(libencloud::ProtocolTypeInit, msg)), rc);
 
-    encloud->info.license_valid = msg.valid;
-    encloud->info.license_expiry = msg.expiry.toTime_t();
+    libencloud->info.license_valid = msg.valid;
+    libencloud->info.license_expiry = msg.expiry.toTime_t();
 
     // save the CSR template to file
-    ENCLOUD_ERR_RC_IF (!csrf.open(QIODevice::WriteOnly), ENCLOUD_RC_SYSERR);
-    ENCLOUD_ERR_RC_IF (csrf.write(encloud::json::serialize(msg.csrTmpl, ok).toAscii()) == -1, ENCLOUD_RC_SYSERR);
+    LIBENCLOUD_ERR_RC_IF (!csrf.open(QIODevice::WriteOnly), LIBENCLOUD_RC_SYSERR);
+    LIBENCLOUD_ERR_RC_IF (csrf.write(libencloud::json::serialize(msg.csrTmpl, ok).toAscii()) == -1, LIBENCLOUD_RC_SYSERR);
     csrf.close();
 
     // save the Operation CA certificate to file
-    ENCLOUD_ERR_RC_IF (!caf.open(QIODevice::WriteOnly), ENCLOUD_RC_SYSERR);
-    ENCLOUD_ERR_RC_IF (caf.write(msg.caCert.toPem()) == -1, ENCLOUD_RC_SYSERR);
+    LIBENCLOUD_ERR_RC_IF (!caf.open(QIODevice::WriteOnly), LIBENCLOUD_RC_SYSERR);
+    LIBENCLOUD_ERR_RC_IF (caf.write(msg.caCert.toPem()) == -1, LIBENCLOUD_RC_SYSERR);
     caf.close();
 
-    *pinfo = &encloud->info;
+    *pinfo = &libencloud->info;
 
-    rc = ENCLOUD_RC_SUCCESS;
+    rc = LIBENCLOUD_RC_SUCCESS;
 err:
     if (rc) {
         csrf.close();
@@ -143,47 +143,47 @@ err:
  * 
  * Upon success, a new certificate is returned and stored internally.
  */
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_sb_cert (encloud_t *encloud)
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_sb_cert (libencloud_t *libencloud)
 {
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    encloud_rc rc = ENCLOUD_RC_GENERIC;
-    encloud::MessageRetrCert msg;
+    libencloud_rc rc = LIBENCLOUD_RC_GENERIC;
+    libencloud::MessageRetrCert msg;
     char *buf = NULL;
     long len;
-    QString keyfn = encloud->cfg->config.sslOp.keyPath.absoluteFilePath();
+    QString keyfn = libencloud->cfg->config.sslOp.keyPath.absoluteFilePath();
     QString tmpkeyfn = keyfn + ".tmp";
     QFile tmpkey(tmpkeyfn);
-    QString certfn = encloud->cfg->config.sslOp.certPath.absoluteFilePath();
+    QString certfn = libencloud->cfg->config.sslOp.certPath.absoluteFilePath();
     QFile certfile(certfn);
 
-#ifdef ENCLOUD_TYPE_SECE
-    msg.license = QUuid(encloud->cfg->settings->value("lic").toString());
-    ENCLOUD_RETURN_IF (msg.license.isNull(), ENCLOUD_RC_NOLICENSE);
+#ifdef LIBENCLOUD_TYPE_SECE
+    msg.license = QUuid(libencloud->cfg->settings->value("lic").toString());
+    LIBENCLOUD_RETURN_IF (msg.license.isNull(), LIBENCLOUD_RC_NOLICENSE);
 
-    msg.hwInfo = encloud::utils::getHwInfo();
+    msg.hwInfo = libencloud::utils::getHwInfo();
 #endif
 
     // generate temporary key and CSR
-    ENCLOUD_ERR_IF (encloud_crypto_genkey(&encloud->crypto, encloud->cfg->config.rsaBits, qPrintable(tmpkeyfn)));
-    ENCLOUD_ERR_IF (encloud_crypto_gencsr(&encloud->crypto, qPrintable(tmpkeyfn), &buf, &len));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_genkey(&libencloud->crypto, libencloud->cfg->config.rsaBits, qPrintable(tmpkeyfn)));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_gencsr(&libencloud->crypto, qPrintable(tmpkeyfn), &buf, &len));
 
     msg.csr = QByteArray(buf, len);
 
-    ENCLOUD_ERR_RC_IF ((rc = encloud->client->run(encloud::ProtocolTypeInit, msg)), rc);
+    LIBENCLOUD_ERR_RC_IF ((rc = libencloud->client->run(libencloud::ProtocolTypeInit, msg)), rc);
 
-    // save the rencloudived certificate
-    ENCLOUD_ERR_RC_IF (!certfile.open(QIODevice::WriteOnly), ENCLOUD_RC_SYSERR); 
-    ENCLOUD_ERR_RC_IF (certfile.write(msg.cert.toPem()) == -1, ENCLOUD_RC_SYSERR);
+    // save the rlibencloudived certificate
+    LIBENCLOUD_ERR_RC_IF (!certfile.open(QIODevice::WriteOnly), LIBENCLOUD_RC_SYSERR); 
+    LIBENCLOUD_ERR_RC_IF (certfile.write(msg.cert.toPem()) == -1, LIBENCLOUD_RC_SYSERR);
     certfile.close();
 
     // all ok - now we can commit the temporary key
     QFile::remove(keyfn);
-    ENCLOUD_RETURN_IF (!tmpkey.setPermissions(QFile::ReadOwner|QFile::WriteOwner), ENCLOUD_RC_SYSERR);
-    ENCLOUD_ERR_RC_IF (!tmpkey.rename(keyfn), ENCLOUD_RC_SYSERR);
+    LIBENCLOUD_RETURN_IF (!tmpkey.setPermissions(QFile::ReadOwner|QFile::WriteOwner), LIBENCLOUD_RC_SYSERR);
+    LIBENCLOUD_ERR_RC_IF (!tmpkey.rename(keyfn), LIBENCLOUD_RC_SYSERR);
 
-    rc = ENCLOUD_RC_SUCCESS;
+    rc = LIBENCLOUD_RC_SUCCESS;
 err:
     if (buf)
         free(buf);
@@ -194,92 +194,92 @@ err:
  *  \brief Synchronous retrieval of configuration from SB
  *
  * The request is performed upon the Operation secure channel set up using the
- * {op_key, op_cert} pair installed via encloud_retr_sb_cert().
+ * {op_key, op_cert} pair installed via libencloud_retr_sb_cert().
  *
  * Upon success, configuration info is returned to the user in 'pconf'.
  * 
- * Note: 'pconf' points to an internal object (no memory management nencloudssary).
+ * Note: 'pconf' points to an internal object (no memory management nlibencloudssary).
  */
-ENCLOUD_DLLSPEC encloud_rc encloud_retr_conf (encloud_t *encloud, encloud_vpn_conf_t **pconf)
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_retr_conf (libencloud_t *libencloud, libencloud_vpn_conf_t **pconf)
 {
-    encloud_rc rc = ENCLOUD_RC_SUCCESS;
-    encloud::MessageRetrConf msg;
+    libencloud_rc rc = LIBENCLOUD_RC_SUCCESS;
+    libencloud::MessageRetrConf msg;
 
-    ENCLOUD_TRACE;
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
-    ENCLOUD_RETURN_IF (pconf == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_RETURN_IF (pconf == NULL, LIBENCLOUD_RC_BADPARAMS);
 
-    ENCLOUD_RETURN_IF ((rc = encloud->client->run(encloud::ProtocolTypeOp, msg)), rc);
+    LIBENCLOUD_RETURN_IF ((rc = libencloud->client->run(libencloud::ProtocolTypeOp, msg)), rc);
 
-    strcpy(encloud->conf.vpn_ip, qPrintable(msg.vpnIp));
-    encloud->conf.vpn_port = msg.vpnPort;
-    strcpy(encloud->conf.vpn_proto, qPrintable(msg.vpnProto));
-    strcpy(encloud->conf.vpn_type, qPrintable(msg.vpnType));
+    strcpy(libencloud->conf.vpn_ip, qPrintable(msg.vpnIp));
+    libencloud->conf.vpn_port = msg.vpnPort;
+    strcpy(libencloud->conf.vpn_proto, qPrintable(msg.vpnProto));
+    strcpy(libencloud->conf.vpn_type, qPrintable(msg.vpnType));
 
-    *pconf = &encloud->conf;
+    *pconf = &libencloud->conf;
 
     return rc;
 }
 
 /** \brief Is license valid? */
-ENCLOUD_DLLSPEC bool encloud_info_get_license_valid (encloud_info_t *info)
+LIBENCLOUD_DLLSPEC bool libencloud_info_get_license_valid (libencloud_info_t *info)
 {
-    ENCLOUD_RETURN_IF (info == NULL, false);
+    LIBENCLOUD_RETURN_IF (info == NULL, false);
 
     return info->license_valid;
 }
 
 /** \brief Get certificate expiry - expressed in seconds since Epoch */
-ENCLOUD_DLLSPEC time_t encloud_info_get_license_expiry (encloud_info_t *info)
+LIBENCLOUD_DLLSPEC time_t libencloud_info_get_license_expiry (libencloud_info_t *info)
 {
-    ENCLOUD_RETURN_IF (info == NULL, -1);
+    LIBENCLOUD_RETURN_IF (info == NULL, -1);
 
     return info->license_expiry;
 }
 #endif
 
-/** \brief Return ENCLOUD version string */
-ENCLOUD_DLLSPEC const char *encloud_version ()
+/** \brief Return LIBENCLOUD version string */
+LIBENCLOUD_DLLSPEC const char *libencloud_version ()
 {
-    return ENCLOUD_VERSION;
+    return LIBENCLOUD_VERSION;
 }
 
-/** \brief Return ENCLOUD revision (GIT commit ID) */
-ENCLOUD_DLLSPEC const char *encloud_revision ()
+/** \brief Return LIBENCLOUD revision (GIT commit ID) */
+LIBENCLOUD_DLLSPEC const char *libencloud_revision ()
 {
-    return ENCLOUD_REVISION;
+    return LIBENCLOUD_REVISION;
 }
 
 /** \brief Convert a return code to string representation */
-ENCLOUD_DLLSPEC const char *encloud_strerror (encloud_rc rc)
+LIBENCLOUD_DLLSPEC const char *libencloud_strerror (libencloud_rc rc)
 {
     switch (rc)
     {
-        case ENCLOUD_RC_SUCCESS:
+        case LIBENCLOUD_RC_SUCCESS:
             return "Success";
-        case ENCLOUD_RC_BADPARAMS:
+        case LIBENCLOUD_RC_BADPARAMS:
             return "Bad parameters";
-        case ENCLOUD_RC_NOMEM:
+        case LIBENCLOUD_RC_NOMEM:
             return "Out of memory";
-        case ENCLOUD_RC_BADCONFIG:
+        case LIBENCLOUD_RC_BADCONFIG:
             return "Bad configuration";
-        case ENCLOUD_RC_NOLICENSE:
+        case LIBENCLOUD_RC_NOLICENSE:
             return "No license found";
-        case ENCLOUD_RC_CONNECT:
+        case LIBENCLOUD_RC_CONNECT:
             return "Connection error";
-        case ENCLOUD_RC_BADAUTH:
+        case LIBENCLOUD_RC_BADAUTH:
             return "Authentication failed";
-        case ENCLOUD_RC_TIMEOUT:
+        case LIBENCLOUD_RC_TIMEOUT:
             return "Operation timed out";
-        case ENCLOUD_RC_BADRESPONSE:
+        case LIBENCLOUD_RC_BADRESPONSE:
             return "Bad response from peer";
-        case ENCLOUD_RC_INVALIDCERT:
+        case LIBENCLOUD_RC_INVALIDCERT:
             return "Certificate validity check failed";
-        case ENCLOUD_RC_FAILED:
+        case LIBENCLOUD_RC_FAILED:
             return "Operation failed";
-        case ENCLOUD_RC_SYSERR:
+        case LIBENCLOUD_RC_SYSERR:
             return "System error";
-        case ENCLOUD_RC_GENERIC:
+        case LIBENCLOUD_RC_GENERIC:
             return "Generic error";
     }
 

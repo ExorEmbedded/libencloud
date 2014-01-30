@@ -10,7 +10,7 @@ win32 {
 }
 
 # define used to select dllimport/dllexport attributes
-DEFINES += _ENCLOUDLIB_
+DEFINES += _LIBENCLOUDLIB_
 
 HEADERS += common.h
 HEADERS += defaults.h

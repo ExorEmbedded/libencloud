@@ -6,45 +6,45 @@
 /** \brief Set license from null-terminated 'guid' string (SECE only)
  * 
  * The license is saved to a persistent Setting object ("lic" key in
- * ENCLOUD_ORG:ENCLOUD_APP as defined in defaults.h.
+ * LIBENCLOUD_ORG:LIBENCLOUD_APP as defined in defaults.h.
  */
-#ifdef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC encloud_rc encloud_setup_set_license (encloud_t *encloud, const char *guid)
+#ifdef LIBENCLOUD_TYPE_SECE
+LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *libencloud, const char *guid)
 {
-    ENCLOUD_RETURN_IF (encloud == NULL, ENCLOUD_RC_BADPARAMS);
-    ENCLOUD_RETURN_IF (guid == NULL, ENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
+    LIBENCLOUD_RETURN_IF (guid == NULL, LIBENCLOUD_RC_BADPARAMS);
 
     QString s(guid);
     QUuid u(s);
 
-    ENCLOUD_RETURN_MSG_IF (u.isNull(), ENCLOUD_RC_BADPARAMS, "bad uuid: " << guid);
+    LIBENCLOUD_RETURN_MSG_IF (u.isNull(), LIBENCLOUD_RC_BADPARAMS, "bad uuid: " << guid);
 
-    ENCLOUD_DBG("uiid=" << u << " variant=" << u.variant() << " version=" << u.version());
+    LIBENCLOUD_DBG("uiid=" << u << " variant=" << u.variant() << " version=" << u.version());
 
-    encloud->cfg->settings->setValue("lic", u.toString());
-    ENCLOUD_RETURN_IF (encloud->cfg->settings->status(), ENCLOUD_RC_SYSERR);
+    libencloud->cfg->settings->setValue("lic", u.toString());
+    LIBENCLOUD_RETURN_IF (libencloud->cfg->settings->status(), LIBENCLOUD_RC_SYSERR);
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 #endif
 
-/** \brief Get device's serial (ENCLOUD only) */
-#ifndef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC const char *encloud_setup_get_serial (encloud_t *encloud)
+/** \brief Get device's serial (LIBENCLOUD only) */
+#ifndef LIBENCLOUD_TYPE_SECE
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_serial (libencloud_t *libencloud)
 {
-    ENCLOUD_RETURN_IF (encloud == NULL, NULL);
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, NULL);
 
-    return encloud->context->getSerial();
+    return libencloud->context->getSerial();
 }
 #endif
 
-/** \brief Get device's PoI (ENCLOUD only) */
-#ifndef ENCLOUD_TYPE_SECE
-ENCLOUD_DLLSPEC const char *encloud_setup_get_poi (encloud_t *encloud)
+/** \brief Get device's PoI (LIBENCLOUD only) */
+#ifndef LIBENCLOUD_TYPE_SECE
+LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_poi (libencloud_t *libencloud)
 {
-    ENCLOUD_RETURN_IF (encloud == NULL, NULL);
+    LIBENCLOUD_RETURN_IF (libencloud == NULL, NULL);
 
-    return encloud->context->getPoi();
+    return libencloud->context->getPoi();
 }
 #endif
 

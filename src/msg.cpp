@@ -10,7 +10,7 @@
  * Message
  */
 
-encloud::Message::Message()
+libencloud::Message::Message()
 {
 }
 
@@ -18,143 +18,143 @@ encloud::Message::Message()
  * MessageRetrInfo
  */
 
-encloud::MessageRetrInfo::MessageRetrInfo ()
+libencloud::MessageRetrInfo::MessageRetrInfo ()
 {
 }
 
-encloud_rc encloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
+libencloud_rc libencloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &params)
 {
-    url.setPath(ENCLOUD_CMD_GETINFO);
+    url.setPath(LIBENCLOUD_CMD_GETINFO);
 
-#ifdef ENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_TYPE_SECE
     params.addQueryItem("lic", this->license.toString().remove('{').remove('}'));
     params.addQueryItem("hw_info", this->hwInfo);
 #endif
 
-    ENCLOUD_DBG(" ### >>>>> ### " << params.toString());
+    LIBENCLOUD_DBG(" ### >>>>> ### " << params.toString());
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc encloud::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
+libencloud_rc libencloud::MessageRetrInfo::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
-    QVariantMap jo = encloud::json::parse(response, ok).toMap();
-    ENCLOUD_ERR_IF (!ok);
+    QVariantMap jo = libencloud::json::parse(response, ok).toMap();
+    LIBENCLOUD_ERR_IF (!ok);
 
     errString = jo["error"].toString();
-    ENCLOUD_ERR_IF (!errString.isEmpty());
+    LIBENCLOUD_ERR_IF (!errString.isEmpty());
 
     this->valid = jo["valid"].toBool();
 
-    this->expiry = encloud::utils::pytime2DateTime(jo["expiry"].toString());
-    ENCLOUD_ERR_IF (!this->expiry.isValid());
+    this->expiry = libencloud::utils::pytime2DateTime(jo["expiry"].toString());
+    LIBENCLOUD_ERR_IF (!this->expiry.isValid());
 
-    this->time = encloud::utils::pytime2DateTime(jo["time"].toString());
-    ENCLOUD_ERR_IF (!this->time.isValid());
+    this->time = libencloud::utils::pytime2DateTime(jo["time"].toString());
+    LIBENCLOUD_ERR_IF (!this->time.isValid());
 
     this->csrTmpl = jo["csr_template"];
 
     this->caCert = QSslCertificate(jo["ca_cert"].toString().toAscii());
-    ENCLOUD_ERR_IF (!this->caCert.isValid());
+    LIBENCLOUD_ERR_IF (!this->caCert.isValid());
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 err:
-    return ENCLOUD_RC_BADRESPONSE;
+    return LIBENCLOUD_RC_BADRESPONSE;
 }
 
 /**
  * MessageRetrCert
  */
 
-encloud::MessageRetrCert::MessageRetrCert ()
+libencloud::MessageRetrCert::MessageRetrCert ()
 {
 }
 
-encloud_rc encloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
+libencloud_rc libencloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &params)
 {
-    url.setPath(ENCLOUD_CMD_GETCERT);
+    url.setPath(LIBENCLOUD_CMD_GETCERT);
 
-#ifdef ENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_TYPE_SECE
     params.addQueryItem("lic", this->license.toString().remove('{').remove('}'));
     params.addQueryItem("hw_info", this->hwInfo);
 #endif
 
     params.addQueryItem("certificate_request_data", this->csr);
 
-    ENCLOUD_DBG(" ### >>>>> ### " << params.toString());
+    LIBENCLOUD_DBG(" ### >>>>> ### " << params.toString());
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc encloud::MessageRetrCert::decodeResponse (QString &response, QString &errString)
+libencloud_rc libencloud::MessageRetrCert::decodeResponse (QString &response, QString &errString)
 { 
     bool ok;
-    QVariantMap jo = encloud::json::parse(response, ok).toMap();
-    ENCLOUD_ERR_IF (!ok);
+    QVariantMap jo = libencloud::json::parse(response, ok).toMap();
+    LIBENCLOUD_ERR_IF (!ok);
 
     errString = jo["error"].toString();
-    ENCLOUD_ERR_IF (!errString.isEmpty());
+    LIBENCLOUD_ERR_IF (!errString.isEmpty());
 
     this->cert = QSslCertificate(jo["certificate"].toString().toAscii());
     // "checks that the current data-time is within the date-time range during
     // which the certificate is considered valid, and checks that the
     // certificate is not in a blacklist of fraudulent certificates"
-    ENCLOUD_RETURN_IF (!this->cert.isValid(), ENCLOUD_RC_INVALIDCERT);
+    LIBENCLOUD_RETURN_IF (!this->cert.isValid(), LIBENCLOUD_RC_INVALIDCERT);
 
-    this->time = encloud::utils::pytime2DateTime(jo["time"].toString());
-    ENCLOUD_ERR_IF (!this->time.isValid());
+    this->time = libencloud::utils::pytime2DateTime(jo["time"].toString());
+    LIBENCLOUD_ERR_IF (!this->time.isValid());
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 err:
-    return ENCLOUD_RC_BADRESPONSE;
+    return LIBENCLOUD_RC_BADRESPONSE;
 }
 
 /**
  * MessageRetrConf
  */
 
-encloud::MessageRetrConf::MessageRetrConf ()
+libencloud::MessageRetrConf::MessageRetrConf ()
 {
 }
 
-encloud_rc encloud::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
+libencloud_rc libencloud::MessageRetrConf::encodeRequest (QUrl &url, QUrl &params)
 { 
     const QUrl *p = &params;  // unused
-    ENCLOUD_UNUSED(p);
+    LIBENCLOUD_UNUSED(p);
 
-    url.setPath(ENCLOUD_CMD_GETCONFIG);
+    url.setPath(LIBENCLOUD_CMD_GETCONFIG);
 
-    ENCLOUD_DBG(" ### >>>>> ### GET (no params)");
+    LIBENCLOUD_DBG(" ### >>>>> ### GET (no params)");
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 }
 
-encloud_rc encloud::MessageRetrConf::decodeResponse (QString &response, QString &errString)
+libencloud_rc libencloud::MessageRetrConf::decodeResponse (QString &response, QString &errString)
 {
     bool ok;
-    QVariantMap jo = encloud::json::parse(response, ok).toMap()["vpn"].toMap();
-    ENCLOUD_ERR_IF (!ok);
+    QVariantMap jo = libencloud::json::parse(response, ok).toMap()["vpn"].toMap();
+    LIBENCLOUD_ERR_IF (!ok);
 
     errString = jo["error"].toString();
-    ENCLOUD_ERR_IF (!errString.isEmpty());
+    LIBENCLOUD_ERR_IF (!errString.isEmpty());
 
     this->vpnIp = jo["ip"].toString();
-    ENCLOUD_ERR_IF (this->vpnIp.isEmpty());
+    LIBENCLOUD_ERR_IF (this->vpnIp.isEmpty());
 
     this->vpnPort = jo["port"].toInt();
-    ENCLOUD_ERR_IF (this->vpnPort <= 0);
+    LIBENCLOUD_ERR_IF (this->vpnPort <= 0);
 
     this->vpnProto = jo["proto"].toString();
-    ENCLOUD_ERR_IF (this->vpnProto.isEmpty());
+    LIBENCLOUD_ERR_IF (this->vpnProto.isEmpty());
 
     this->vpnType = jo["type"].toString();
-    ENCLOUD_ERR_IF (this->vpnType.isEmpty());
+    LIBENCLOUD_ERR_IF (this->vpnType.isEmpty());
 
-    this->time = encloud::utils::pytime2DateTime(jo["time"].toString());
-    ENCLOUD_ERR_IF (!this->time.isValid());
+    this->time = libencloud::utils::pytime2DateTime(jo["time"].toString());
+    LIBENCLOUD_ERR_IF (!this->time.isValid());
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 err:
-    return ENCLOUD_RC_BADRESPONSE;
+    return LIBENCLOUD_RC_BADRESPONSE;
 }

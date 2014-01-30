@@ -12,15 +12,15 @@ extern "C" {
 #endif
 
 /* Subject name settings from JSON CSR template */
-int __encloud_context_name_cb (X509_NAME *n, void *arg);
+int __libencloud_context_name_cb (X509_NAME *n, void *arg);
 
 #ifdef __cplusplus
 }
 #endif
 
-encloud::Config *g_cfg = NULL;
+libencloud::Config *g_cfg = NULL;
 
-namespace encloud {
+namespace libencloud {
 
 //
 // public methods
@@ -32,51 +32,51 @@ Context::Context ()
     , serial(NULL)
     , poi(NULL)
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 }
 
 Context::~Context ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     term();
 }
 
-encloud_rc Context::init (int argc, char *argv[])
+libencloud_rc Context::init (int argc, char *argv[])
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
-    encloud_rc rc = ENCLOUD_RC_SUCCESS;
+    libencloud_rc rc = LIBENCLOUD_RC_SUCCESS;
 
-    ENCLOUD_RETURN_IF (this->inited, rc);
+    LIBENCLOUD_RETURN_IF (this->inited, rc);
 
     // first off load configuration for logging
-    ENCLOUD_ERR_RC_IF (this->cfg.loadFromFile(ENCLOUD_CONF_PATH), ENCLOUD_RC_BADCONFIG);
+    LIBENCLOUD_ERR_RC_IF (this->cfg.loadFromFile(LIBENCLOUD_CONF_PATH), LIBENCLOUD_RC_BADCONFIG);
 
     g_cfg = &this->cfg;
-    ENCLOUD_DBG(g_cfg->dump());
+    LIBENCLOUD_DBG(g_cfg->dump());
 
     if (QCoreApplication::instance() == NULL) {
-        ENCLOUD_DBG ("creating internal application instance");
-        ENCLOUD_ERR_RC_IF ((this->app = new QCoreApplication(argc, argv)) == NULL, ENCLOUD_RC_NOMEM);
+        LIBENCLOUD_DBG ("creating internal application instance");
+        LIBENCLOUD_ERR_RC_IF ((this->app = new QCoreApplication(argc, argv)) == NULL, LIBENCLOUD_RC_NOMEM);
     } else {
-        ENCLOUD_DBG ("using existing application instance");
+        LIBENCLOUD_DBG ("using existing application instance");
     }
 
-#ifndef ENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_TYPE_SECE
     this->serial = utils::ustrdup(utils::file2Data(g_cfg->config.serialPath));
-    ENCLOUD_ERR_RC_IF ((this->serial == NULL), ENCLOUD_RC_BADCONFIG);
-    ENCLOUD_DBG("serial=" << QString::fromLocal8Bit(this->serial));
+    LIBENCLOUD_ERR_RC_IF ((this->serial == NULL), LIBENCLOUD_RC_BADCONFIG);
+    LIBENCLOUD_DBG("serial=" << QString::fromLocal8Bit(this->serial));
 
     this->poi = utils::ustrdup(utils::file2Data(g_cfg->config.poiPath));
-    ENCLOUD_ERR_RC_IF ((this->poi == NULL), ENCLOUD_RC_BADCONFIG);
-    ENCLOUD_DBG("poi=" << QString::fromLocal8Bit(this->poi));
+    LIBENCLOUD_ERR_RC_IF ((this->poi == NULL), LIBENCLOUD_RC_BADCONFIG);
+    LIBENCLOUD_DBG("poi=" << QString::fromLocal8Bit(this->poi));
 #endif
 
-    ENCLOUD_ERR_IF (this->client.setConfig(&this->cfg));
+    LIBENCLOUD_ERR_IF (this->client.setConfig(&this->cfg));
 
-    ENCLOUD_ERR_IF (encloud_crypto_init(&this->crypto));
-    ENCLOUD_ERR_IF (encloud_crypto_set_name_cb(&this->crypto, &__encloud_context_name_cb, this));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_init(&this->crypto));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_set_name_cb(&this->crypto, &__libencloud_context_name_cb, this));
 
     // setup worker thread (always running but starts in stopped state)
     QObject::connect(&this->timer, SIGNAL(timeout()), &this->worker, SLOT(onTimeout()));
@@ -92,15 +92,15 @@ encloud_rc Context::init (int argc, char *argv[])
 
     this->inited = true;
 
-    return ENCLOUD_RC_SUCCESS;
+    return LIBENCLOUD_RC_SUCCESS;
 err:
     term();
-    return (rc ? rc : ENCLOUD_RC_GENERIC);
+    return (rc ? rc : LIBENCLOUD_RC_GENERIC);
 }
 
 void Context::term ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     g_cfg = NULL;
 
@@ -110,30 +110,30 @@ void Context::term ()
 
     if (this->app) {
         this->app->quit();
-        ENCLOUD_DELETE(this->app);
+        LIBENCLOUD_DELETE(this->app);
     }
 
-#ifndef ENCLOUD_TYPE_SECE 
-    ENCLOUD_FREE(this->serial);
-    ENCLOUD_FREE(this->poi);
+#ifndef LIBENCLOUD_TYPE_SECE 
+    LIBENCLOUD_FREE(this->serial);
+    LIBENCLOUD_FREE(this->poi);
 #endif
 }
 
-encloud_rc Context::setStateCb (encloud_state_cb stateCb, void *arg)
+libencloud_rc Context::setStateCb (libencloud_state_cb stateCb, void *arg)
 {
     return this->worker.setStateCb(stateCb, arg);
 }
 
-encloud_rc Context::start ()
+libencloud_rc Context::start ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     emit started();
 }
 
-encloud_rc Context::stop ()
+libencloud_rc Context::stop ()
 {
-    ENCLOUD_TRACE;
+    LIBENCLOUD_TRACE;
 
     emit stopped();
 }
@@ -158,38 +158,38 @@ extern "C" {
 #endif
 
 /* Subject name settings from JSON CSR template */
-int __encloud_context_name_cb (X509_NAME *n, void *arg)
+int __libencloud_context_name_cb (X509_NAME *n, void *arg)
 {
-    ENCLOUD_RETURN_IF (n == NULL, ~0);
-    ENCLOUD_RETURN_IF (arg == NULL, ~0);
+    LIBENCLOUD_RETURN_IF (n == NULL, ~0);
+    LIBENCLOUD_RETURN_IF (arg == NULL, ~0);
 
     QVariant json;
     QVariantMap map;
-    encloud::Context *context = (encloud::Context *) arg;
+    libencloud::Context *context = (libencloud::Context *) arg;
     bool ok;
 
-    json = encloud::json::parseFromFile(context->getConfig()->config.csrTmplPath.absoluteFilePath(), ok);
-    ENCLOUD_ERR_IF (!ok);
+    json = libencloud::json::parseFromFile(context->getConfig()->config.csrTmplPath.absoluteFilePath(), ok);
+    LIBENCLOUD_ERR_IF (!ok);
 
     map = json.toMap()["DN"].toMap();
 
     // parse DN fields
     for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
     {
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, qPrintable(iter.key()), MBSTRING_UTF8, \
+        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, qPrintable(iter.key()), MBSTRING_UTF8, \
                 (const unsigned char *) iter.value().toString().toUtf8().data(), -1, -1, 0));
     }
 
-    // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (ENCLOUD)
+    // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (LIBENCLOUD)
     if (map["CN"].isNull())
     {
-#ifdef ENCLOUD_TYPE_SECE    
+#ifdef LIBENCLOUD_TYPE_SECE    
         // SECE: CN based on hw_info
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
-                (const unsigned char *) encloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));
+        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
+                (const unsigned char *) libencloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));
 #else
-        // ENCLOUD: CN based on serial
-        ENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
+        // LIBENCLOUD: CN based on serial
+        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
                 (const unsigned char *) context->getSerial(), -1, -1, 0));
 #endif
     }
@@ -203,4 +203,4 @@ err:
 }
 #endif
 
-} // namespace encloud
+} // namespace libencloud

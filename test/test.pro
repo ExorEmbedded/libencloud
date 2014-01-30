@@ -7,7 +7,7 @@ TARGET = test
 SOURCES += main.cpp
 SOURCES += json.cpp
 SOURCES += crypto.cpp
-SOURCES += encloud.cpp
+SOURCES += libencloud.cpp
 
 HEADERS += test.h
 
@@ -39,5 +39,5 @@ contains(CONFIG, qjson) {
 }
 
 # command to run upon 'make check'
-# ENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
-check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR $$(ENCLOUD_WRAP) ./test
+# LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
+check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR $$(LIBENCLOUD_WRAP) ./test

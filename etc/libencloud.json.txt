@@ -2,7 +2,7 @@ libencloud configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Notes: 
-    - all paths are relative to ENCLOUD_PREFIX_PATH (optionally defined in common.pri)
+    - all paths are relative to LIBENCLOUD_PREFIX_PATH (optionally defined in common.pri)
     - comments are *not* valid Json
     - prefix
 

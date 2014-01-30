@@ -5,29 +5,29 @@
 
 int main (int argc, char *argv[])
 {
-    encloud_rc rc = ENCLOUD_RC_SUCCESS;
+    libencloud_rc rc = LIBENCLOUD_RC_SUCCESS;
 
-    encloud_t *encloud = NULL;
+    libencloud_t *libencloud = NULL;
 
     fprintf(stderr, "# testing libencloud version %s (rev: %s)\n",
-            encloud_version(), encloud_revision());
+            libencloud_version(), libencloud_revision());
 
-    TEST_ZERO (rc = encloud_create(argc, argv, &encloud));
+    TEST_ZERO (rc = libencloud_create(argc, argv, &libencloud));
 
-    TEST_ZERO (rc = encloud_retr_sb_info(encloud, NULL));
-    TEST_ZERO (rc = encloud_retr_sb_cert(encloud));
+    TEST_ZERO (rc = libencloud_retr_sb_info(libencloud, NULL));
+    TEST_ZERO (rc = libencloud_retr_sb_cert(libencloud));
 
-    TEST_ZERO (rc = encloud_retr_sb_conf(encloud, NULL));
+    TEST_ZERO (rc = libencloud_retr_sb_conf(libencloud, NULL));
 
-    encloud_destroy(encloud);
+    libencloud_destroy(libencloud);
 
     return EXIT_SUCCESS;
 
 err:
-    if (encloud)
-        encloud_destroy(encloud);
+    if (libencloud)
+        libencloud_destroy(libencloud);
 
-    fprintf (stderr, "# libencloud error (%d): %s\n", rc, encloud_strerror(rc));
+    fprintf (stderr, "# libencloud error (%d): %s\n", rc, libencloud_strerror(rc));
 
     return EXIT_FAILURE;
 }

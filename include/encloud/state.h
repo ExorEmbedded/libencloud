@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_STATE_H_
-#define _ENCLOUD_STATE_H_
+#ifndef _LIBENCLOUD_STATE_H_
+#define _LIBENCLOUD_STATE_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,19 +8,19 @@ extern "C" {
 /* libencloud state */
 typedef enum
 {
-    ENCLOUD_ST_INITIALISING = 0,
-    ENCLOUD_ST_CONNECTING,
-    ENCLOUD_ST_CONNECTED,
-    ENCLOUD_ST_INITIAL = ENCLOUD_ST_INITIALISING
+    LIBENCLOUD_ST_INITIALISING = 0,
+    LIBENCLOUD_ST_CONNECTING,
+    LIBENCLOUD_ST_CONNECTED,
+    LIBENCLOUD_ST_INITIAL = LIBENCLOUD_ST_INITIALISING
 }
-encloud_state;
+libencloud_state;
 
-typedef void (*encloud_state_cb) (encloud_state state, void *arg);
+typedef void (*libencloud_state_cb) (libencloud_state state, void *arg);
 
-const char *encloud_state_string (encloud_state state);
+const char *libencloud_state_string (libencloud_state state);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _ENCLOUD_STATE_H_ */
+#endif /* _LIBENCLOUD_STATE_H_ */

@@ -1,5 +1,5 @@
-#ifndef _ENCLOUD_PRIV_CLIENT_H_
-#define _ENCLOUD_PRIV_CLIENT_H_
+#ifndef _LIBENCLOUD_PRIV_CLIENT_H_
+#define _LIBENCLOUD_PRIV_CLIENT_H_
 
 #include <QObject>
 #include <QFile>
@@ -19,7 +19,7 @@
 #include "config.h"
 #include "msg.h"
 
-namespace encloud {
+namespace libencloud {
 
 class Client : public QObject
 {
@@ -29,8 +29,8 @@ public:
     Client();
     ~Client();
 
-    encloud_rc setConfig (encloud::Config *cfg);
-    encloud_rc run (encloud::ProtocolType protocol, encloud::Message &message);
+    libencloud_rc setConfig (libencloud::Config *cfg);
+    libencloud_rc run (libencloud::ProtocolType protocol, libencloud::Message &message);
 
 public slots:
     void timerTimeout ();
@@ -43,15 +43,15 @@ private slots:
     void timeoutSlot ();
 
 private:
-    encloud_rc __run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response);
-    encloud_rc __loadSslConf (encloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf);
+    libencloud_rc __run (const QUrl &url, const QUrl &params, const QSslConfiguration &sslconf, QString &response);
+    libencloud_rc __loadSslConf (libencloud::ProtocolType protocol, QUrl &url, QSslConfiguration &sslconf);
 
-    encloud_rc error;
+    libencloud_rc error;
     Config *cfg;
     QEventLoop *loop;
     QNetworkReply *reply;
 };
 
-} // namespace encloud
+} // namespace libencloud
 
-#endif  /* _ENCLOUD_PRIV_CLIENT_H_ */
+#endif  /* _LIBENCLOUD_PRIV_CLIENT_H_ */
