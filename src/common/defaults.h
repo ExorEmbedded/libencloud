@@ -23,19 +23,19 @@
 #define LIBENCLOUD_PREFIX_PATH         "/"
 #endif
 #ifdef _WIN32
-#define LIBENCLOUD_ETC_PREFIX          "\\etc\\encloud\\"
+#define LIBENCLOUD_ETC_PREFIX          "\\etc\\"
 #else
 #define LIBENCLOUD_ETC_PREFIX          "/etc/encloud/"
 #endif
-#define LIBENCLOUD_CONF_PATH           LIBENCLOUD_ETC_PREFIX"libencloud.json"
-#define LIBENCLOUD_SERIAL_PATH         LIBENCLOUD_ETC_PREFIX"serial"
-#define LIBENCLOUD_POI_PATH            LIBENCLOUD_ETC_PREFIX"poi"
-#define LIBENCLOUD_CSRTMPL_PATH        LIBENCLOUD_ETC_PREFIX"csr-tmpl.json"
-#define LIBENCLOUD_INIT_CA_PATH        LIBENCLOUD_ETC_PREFIX"init_ca.pem"
-#define LIBENCLOUD_INIT_CERT_PATH      LIBENCLOUD_ETC_PREFIX"init_cert.pem"
-#define LIBENCLOUD_INIT_KEY_PATH       LIBENCLOUD_ETC_PREFIX"init_key.pem"
-#define LIBENCLOUD_OP_CERT_PATH        LIBENCLOUD_ETC_PREFIX"op_cert.pem"
-#define LIBENCLOUD_OP_KEY_PATH         LIBENCLOUD_ETC_PREFIX"op_key.pem"
+#define LIBENCLOUD_CONF_FILE           "libencloud.json"
+#define LIBENCLOUD_SERIAL_FILE         "serial"
+#define LIBENCLOUD_POI_FILE            "poi"
+#define LIBENCLOUD_CSRTMPL_FILE        "csr-tmpl.json"
+#define LIBENCLOUD_INIT_CA_FILE        "init_ca.pem"
+#define LIBENCLOUD_INIT_CERT_FILE      "init_cert.pem"
+#define LIBENCLOUD_INIT_KEY_FILE       "init_key.pem"
+#define LIBENCLOUD_OP_CERT_FILE        "op_cert.pem"
+#define LIBENCLOUD_OP_KEY_FILE         "op_key.pem"
 #define LIBENCLOUD_RSA_BITS            1024
 
 #define LIBENCLOUD_CMD_GETINFO         "manage/commands/commands.access.cloud.getInfo"

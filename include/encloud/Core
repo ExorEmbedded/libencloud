@@ -13,6 +13,7 @@ class Core : public QObject
 
 public:
     Core ();
+    ~Core ();
 
     int start ();
     int stop ();
@@ -21,7 +22,7 @@ private:
 
     int initConfig();
 
-//    Config _config; 
+    Config *_config; 
 };
 
 }  // namespace libencloud

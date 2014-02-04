@@ -1,8 +1,5 @@
 #include "config.h"
 #include "helpers.h"
-// don't depend on Qt for debug so we can print errors before log level is set
-#undef __LIBENCLOUD_MSG
-#define __LIBENCLOUD_MSG(lev, levstr, msg) __LIBENCLOUD_PRINT(lev, levstr, msg)
 
 namespace libencloud {
 
@@ -10,26 +7,33 @@ namespace libencloud {
 Config::Config ()
     : settings(NULL)
 {
+#ifdef Q_OS_WIN32
+    this->prefix = QString(qgetenv("ProgramFiles")) + QString("/") + QString(Q4IC_PRODUCT);
+#else
+    this->prefix = LIBENCLOUD_PREFIX_PATH;
+#endif
+    this->confPrefix = this->prefix + LIBENCLOUD_ETC_PREFIX;
+    this->filePath = QFileInfo(this->confPrefix + QString("/") + QString(LIBENCLOUD_CONF_FILE));
+
     this->settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
 
 #ifndef LIBENCLOUD_TYPE_SECE
-    this->config.serialPath = QFileInfo(LIBENCLOUD_SERIAL_PATH);
-    this->config.poiPath = QFileInfo(LIBENCLOUD_POI_PATH);
+    this->config.serialPath = QFileInfo(this->confPrefix + LIBENCLOUD_SERIAL_FILE);
+    this->config.poiPath = QFileInfo(this->confPrefix + LIBENCLOUD_POI_FILE);
 #endif
 
     this->config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
     this->config.timeout = LIBENCLOUD_TIMEOUT;
-    this->config.prefix = QFileInfo(LIBENCLOUD_PREFIX_PATH);
 
-    this->config.csrTmplPath = QFileInfo(LIBENCLOUD_CSRTMPL_PATH);
+    this->config.csrTmplPath = QFileInfo(this->confPrefix + LIBENCLOUD_CSRTMPL_FILE);
 
-    this->config.sslInit.caPath = QFileInfo(LIBENCLOUD_INIT_CA_PATH);
-    this->config.sslInit.certPath = QFileInfo(LIBENCLOUD_INIT_CERT_PATH);
-    this->config.sslInit.keyPath = QFileInfo(LIBENCLOUD_INIT_KEY_PATH);
+    this->config.sslInit.caPath = QFileInfo(this->confPrefix + LIBENCLOUD_INIT_CA_FILE);
+    this->config.sslInit.certPath = QFileInfo(this->confPrefix + LIBENCLOUD_INIT_CERT_FILE);
+    this->config.sslInit.keyPath = QFileInfo(this->confPrefix + LIBENCLOUD_INIT_KEY_FILE);
 
-    this->config.sslOp.caPath = QFileInfo(LIBENCLOUD_INIT_CA_PATH);
-    this->config.sslOp.certPath = QFileInfo(LIBENCLOUD_OP_CERT_PATH);
-    this->config.sslOp.keyPath = QFileInfo(LIBENCLOUD_OP_KEY_PATH);
+    this->config.sslOp.caPath = QFileInfo(this->confPrefix + LIBENCLOUD_INIT_CA_FILE);
+    this->config.sslOp.certPath = QFileInfo(this->confPrefix + LIBENCLOUD_OP_CERT_FILE);
+    this->config.sslOp.keyPath = QFileInfo(this->confPrefix + LIBENCLOUD_OP_KEY_FILE);
 
     this->config.rsaBits = LIBENCLOUD_RSA_BITS;
 
@@ -51,7 +55,7 @@ QString Config::dump ()
     ts << "dumping configuration:";
     ts << endl;
 
-    ts << "prefix=" << LIBENCLOUD_PREFIX_PATH << endl;
+    ts << "prefix=" << this->prefix << endl;
     ts << "settings=" << this->settings->fileName() << endl;
 
     ts << libencloud::json::serialize(this->json, ok);
@@ -60,14 +64,16 @@ QString Config::dump ()
 }
 
 /* Read config from file */
-int Config::loadFromFile (QString filename)
+int Config::loadFromFile ()
 {
     bool ok;
 
-    QString fn = __join_paths(QString(LIBENCLOUD_PREFIX_PATH), filename);
-
-    this->json = libencloud::json::parseFromFile(fn, ok);
-    LIBENCLOUD_ERR_IF (!ok);
+    this->json = libencloud::json::parseFromFile(this->filePath.absoluteFilePath(), ok);
+    if (!ok || this->json.isNull())
+    {
+        LIBENCLOUD_DBG("Failed parsing config file: " << this->filePath.absoluteFilePath());
+        goto err;
+    }
 
     LIBENCLOUD_ERR_IF (__parse(this->json.toMap()));
 
@@ -80,11 +86,11 @@ int Config::__parse (const QVariantMap &jo)
 {
 #ifndef LIBENCLOUD_TYPE_SECE
     if (!jo["serial"].isNull())
-        this->config.serialPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+        this->config.serialPath = __join_paths(this->confPrefix, \
                 jo["serial"].toString());
 
     if (!jo["poi"].isNull())
-        this->config.poiPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+        this->config.poiPath = __join_paths(this->confPrefix, \
                 jo["poi"].toString());
 #endif
 
@@ -92,7 +98,7 @@ int Config::__parse (const QVariantMap &jo)
         this->config.timeout = jo["timeout"].toInt();
 
     if (!jo["csr"].toMap()["tmpl"].isNull())
-        this->config.csrTmplPath = __join_paths(this->config.prefix.absoluteFilePath(), \
+        this->config.csrTmplPath = __join_paths(this->confPrefix, \
                 jo["csr"].toMap()["tmpl"].toString());
 
     if (!jo["sb"].isNull())
@@ -144,13 +150,13 @@ int Config::__parse_sslOp (const QVariantMap &jo)
 int Config::__parse_ssl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 {
     if (!jo["ca"].isNull())
-        sc.caPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["ca"].toString());
+        sc.caPath = __join_paths(this->confPrefix, jo["ca"].toString());
 
     if (!jo["cert"].isNull())
-        sc.certPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["cert"].toString());
+        sc.certPath = __join_paths(this->confPrefix, jo["cert"].toString());
 
     if (!jo["key"].isNull())
-        sc.keyPath = __join_paths(this->config.prefix.absoluteFilePath(), jo["key"].toString());
+        sc.keyPath = __join_paths(this->confPrefix, jo["key"].toString());
 
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())

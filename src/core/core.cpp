@@ -12,14 +12,24 @@ err:
     return;
 }
 
+Core::~Core ()
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_DELETE(_config);
+}
+
 int Core::initConfig ()
 {
     LIBENCLOUD_TRACE;
 
-    //LIBENCLOUD_ERR_IF (_config.filePath.abs);
+    _config = new Config();
+    LIBENCLOUD_ERR_IF (_config == NULL);
 
-    //g_cfg = &_config;
-    //LIBENCLOUD_DBG(g_cfg->dump());
+    LIBENCLOUD_ERR_IF (_config->loadFromFile());
+
+    g_cfg = _config;
+    LIBENCLOUD_DBG(g_cfg->dump());
 
     return 0;
 err:

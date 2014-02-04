@@ -34,7 +34,6 @@ typedef struct
     
     QUrl sbUrl;
     int timeout;
-    QFileInfo prefix;
     QFileInfo csrTmplPath;
 
     libencloud_config_ssl_t sslInit;
@@ -53,13 +52,15 @@ public:
     ~Config ();
 
     /* Configuration loading */
-    int loadFromFile (QString filename);
+    int loadFromFile ();
     static QVariantMap fileToJson (QString filename);
     QString dump ();
 
     /* Configuration objects are publicly accessible */
     libencloud_config_t config;
     QSettings *settings;
+
+    QFileInfo filePath;
 
 private:
     int __parse (const QVariantMap &jo);
@@ -70,6 +71,9 @@ private:
     QString __join_paths (const QString &s1, const QString &s2);
 
     QVariant json;
+
+    QString prefix;
+    QString confPrefix;
 };
 
 } // namespace libencloud
