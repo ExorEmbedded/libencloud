@@ -12,7 +12,7 @@
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
 #include <QtNetwork/QNetworkAccessManager>
-#include <encloud/core.h>
+common.h>/core.h>
 #include "common.h"
 #include "helpers.h"
 #include "defaults.h"

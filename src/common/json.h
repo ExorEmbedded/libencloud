@@ -3,7 +3,7 @@
 
 #include <QVariant>
 #include <QString>
-#include <encloud/common.h>
+#include <encloud/Common>
 #include "common.h"
 
 namespace libencloud {

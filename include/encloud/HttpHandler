@@ -1,0 +1,21 @@
+#ifndef _LIBENCLOUD_HTTP_HANDLER_H_
+#define _LIBENCLOUD_HTTP_HANDLER_H_
+
+#include <encloud/HttpAbstractHandler>
+
+namespace libencloud {
+
+class HttpHandler : public HttpAbstractHandler
+{
+
+public:
+
+    HttpHandler ();
+    ~HttpHandler ();
+
+    int handle (const HttpRequest &request, HttpResponse &response);
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_HANDLER_H_

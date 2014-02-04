@@ -5,9 +5,9 @@
 #include <QUuid>
 #include <stdio.h>
 #include <stdlib.h>
-#include <encloud/core.h>
-#include <encloud/setup.h>
-#include <encloud/vpn.h>
+common.h>/core.h>
+common.h>/setup.h>
+common.h>/vpn.h>
 #include "test.h"
 
 #ifdef __cplusplus

@@ -7,7 +7,7 @@
 #include <QSslCertificate>
 #include <QUrl>
 #include <QUuid>
-#include <encloud/common.h>
+common.h>/common.h>
 #include "helpers.h"
 
 namespace libencloud {

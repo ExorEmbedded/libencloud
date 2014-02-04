@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QString>
 #include <QDateTime>
-#include <encloud/common.h>
+#include <encloud/Common>
 
 namespace libencloud {
 namespace utils {

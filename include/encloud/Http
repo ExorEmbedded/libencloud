@@ -1,0 +1,16 @@
+#ifndef _LIBENCLOUD_HTTP_HTTP_H_
+#define _LIBENCLOUD_HTTP_HTTP_H_
+
+#include <QString>
+
+namespace libencloud {
+
+typedef enum {
+    LIBENCLOUD_HTTP_RC_OK = 200
+} HttpStatus;
+
+QString httpStatusString (HttpStatus status);
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_HTTP_H_

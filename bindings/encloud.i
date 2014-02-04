@@ -1,6 +1,6 @@
 %module encloud
 %{
-#include <encloud/core.h>
+#include <encloud/Common>
 %}
 
 #ifndef LIBENCLOUD_DLLSPEC

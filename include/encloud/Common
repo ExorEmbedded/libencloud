@@ -1,0 +1,39 @@
+#ifndef _LIBENCLOUD_COMMON_H_
+#define _LIBENCLOUD_COMMON_H_
+
+#ifndef LIBENCLOUD_DLLSPEC
+#  if defined(LIBENCLOUD_WIN32)
+#    if defined _LIBENCLOUDLIB_
+#       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
+#    else
+#       define LIBENCLOUD_DLLSPEC __declspec(dllimport)
+#    endif
+#  else
+#    define LIBENCLOUD_DLLSPEC
+#  endif
+#endif
+
+namespace libencloud {
+
+/* libencloud return codes */
+typedef enum
+{
+    RC_SUCCESS = 0,
+    RC_BADPARAMS,
+    RC_NOMEM,
+    RC_BADCONFIG,
+    RC_NOLICENSE,
+    RC_CONNECT,
+    RC_BADAUTH,
+    RC_TIMEOUT,
+    RC_BADRESPONSE,
+    RC_INVALIDCERT,
+    RC_FAILED,
+    RC_SYSERR,
+    RC_GENERIC
+}
+Rc;
+
+} // namespace libencloud
+
+#endif /* _LIBENCLOUD_COMMON_H_ */

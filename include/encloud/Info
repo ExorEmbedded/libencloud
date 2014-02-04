@@ -1,0 +1,20 @@
+#ifndef _LIBENCLOUD_UTILS_H_
+#define _LIBENCLOUD_UTILS_H_
+
+#include <QString>
+#include "common.h"
+
+namespace libencloud {
+namespace info {
+
+QString org ();
+QString app ();
+QString version ();
+QString revision ();
+QString versionTag ();
+QString versionInfo ();
+
+}  // namespace info
+}  // namespace libencloud
+
+#endif

@@ -1,7 +1,49 @@
+#include <encloud/Core>
+#include "config.h"
+
+namespace libencloud {
+
+Core::Core ()
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (initConfig());
+err:
+    return;
+}
+
+int Core::initConfig ()
+{
+    LIBENCLOUD_TRACE;
+
+    //LIBENCLOUD_ERR_IF (_config.filePath.abs);
+
+    //g_cfg = &_config;
+    //LIBENCLOUD_DBG(g_cfg->dump());
+
+    return 0;
+err:
+    return ~0;
+}
+
+int Core::start ()
+{
+    LIBENCLOUD_TRACE;
+
+    return 0;
+}
+
+int Core::stop ()
+{
+    LIBENCLOUD_TRACE;
+
+    return 0;
+}
+
+} // namespace libencloud
+
+#if 0
 #include <openssl/x509v3.h>
-#include <encloud/core.h>
-#include <encloud/setup.h>
-#include <encloud/vpn.h>
 #include "common.h"
 #include "config.h"
 #include "utils.h"
@@ -17,8 +59,6 @@ int __libencloud_context_name_cb (X509_NAME *n, void *arg);
 #ifdef __cplusplus
 }
 #endif
-
-libencloud::Config *g_cfg = NULL;
 
 namespace libencloud {
 
@@ -204,3 +244,4 @@ err:
 #endif
 
 } // namespace libencloud
+#endif

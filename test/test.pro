@@ -5,9 +5,9 @@ CONFIG += console
 TARGET = test
 
 SOURCES += main.cpp
-SOURCES += json.cpp
-SOURCES += crypto.cpp
-SOURCES += libencloud.cpp
+#SOURCES += json.cpp
+#SOURCES += crypto.cpp
+#SOURCES += libencloud.cpp
 
 HEADERS += test.h
 
@@ -16,8 +16,8 @@ windows {
     SOURCES += $$OPENSSLPATH\\include\\openssl\\applink.c
 }
 
-
-INCLUDEPATH += ../src
+INCLUDEPATH += ../src/common
+DEPENDPATH += ../src/common
 
 # libencloud
 win32 {

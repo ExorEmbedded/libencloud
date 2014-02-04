@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <encloud.h>
+common.h>.h>
 #include "test.h"
 
 int main (int argc, char *argv[])

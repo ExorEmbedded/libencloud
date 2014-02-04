@@ -1,0 +1,29 @@
+#ifndef _LIBENCLOUD_HTTP_REQUEST_H_
+#define _LIBENCLOUD_HTTP_REQUEST_H_
+
+#include <encloud/HttpHeaders>
+
+namespace libencloud {
+
+class HttpRequest
+{
+public:
+    HttpRequest ();
+    ~HttpRequest ();
+
+    int decode (const QByteArray &data);
+
+    QString getMethod () const;
+    QString getUrl () const;
+    QString getVersion () const;
+
+private:
+    QString _method;
+    QString _url;
+    QString _version;
+    HttpHeaders _headers;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_REQUEST_H_

@@ -1,0 +1,29 @@
+#ifndef _LIBENCLOUD_CORE_H_
+#define _LIBENCLOUD_CORE_H_
+
+#include <QObject>
+
+namespace libencloud {
+
+class Config;
+
+class Core : public QObject
+{
+    Q_OBJECT
+
+public:
+    Core ();
+
+    int start ();
+    int stop ();
+
+private:
+
+    int initConfig();
+
+//    Config _config; 
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_CORE_H_

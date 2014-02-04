@@ -2,15 +2,16 @@ include(../common.pri)
 
 TEMPLATE = subdirs
 
-HEADERS += encloud/common.h
-HEADERS += encloud/core.h
-HEADERS += encloud/setup.h
-HEADERS += encloud/state.h
-HEADERS += encloud/vpn.h
-
-win32 {
-    HEADERS += encloud/stdbool.h
-}
+HEADERS += encloud/Info
+HEADERS += encloud/Common
+HEADERS += encloud/Core
+HEADERS += encloud/Http
+HEADERS += encloud/HttpAbstractHandler
+HEADERS += encloud/HttpHandler
+HEADERS += encloud/HttpHeaders
+HEADERS += encloud/HttpRequest
+HEADERS += encloud/HttpResponse
+HEADERS += encloud/HttpServer
 
 # header installation
 headers.path = $${INCDIR}/encloud

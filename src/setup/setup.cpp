@@ -1,4 +1,4 @@
-#include <encloud/setup.h>
+common.h>/setup.h>
 #include "core.h"
 #include "common.h"
 #include "config.h"

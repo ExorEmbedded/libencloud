@@ -1,0 +1,28 @@
+#ifndef _LIBENCLOUD_HTTP_HEADERS_H_
+#define _LIBENCLOUD_HTTP_HEADERS_H_
+
+#include <QStringList>
+#include <QMap>
+
+namespace libencloud {
+
+class HttpHeaders
+{
+public:
+    HttpHeaders ();
+    ~HttpHeaders ();
+
+    int decode (QStringList lines);
+
+    QString get (const QString &key);
+    void set (const QString &key, const QString &value);
+
+    QMap<QString, QString> *getMap();
+
+private:
+    QMap<QString, QString> _map;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_HEADERS_H_

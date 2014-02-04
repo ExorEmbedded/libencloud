@@ -7,9 +7,9 @@
 #ifndef _LIBENCLOUD_PRIV_CRYPTO_H_
 #define _LIBENCLOUD_PRIV_CRYPTO_H_
 
-#include <encloud/common.h>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
+#include <encloud/Common>
 
 #ifdef __cplusplus
 extern "C" {

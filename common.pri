@@ -9,6 +9,7 @@
 PKGNAME = libencloud
 # only x.x.x.x format allowed, where x is a number
 VERSION = 0.6
+VERSION_TAG = Wip  # Dev version - comment this for official release!
 QMAKE_TARGET_COMPANY = Endian
 QMAKE_TARGET_PRODUCT = libencloud
 QMAKE_TARGET_DESCRIPTION = libencloud
@@ -40,19 +41,16 @@ win32 {
 }
 
 DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
+!isEmpty(VERSION_TAG) {
+    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$$VERSION_TAG\\\"
+}
 exists(".git") {
     DEFINES += LIBENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 }
+DEFINES += LIBENCLOUD_PKGNAME=\\\"$$PKGNAME\\\"
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
-
-# *old-style* static/compile-time logging; log level can be changed dynamically
-# by changing value of "log/lev" in /etc/encloud/libencloud.json
-#DEFINES += LIBENCLOUD_LOGLEVEL=7
-
-# public API is included globally
-INCLUDEPATH += ../include
 
 # openssl
 OPENSSLPATH = $$(OPENSSL_INSTALLPATH)
@@ -65,6 +63,17 @@ windows{
 } else {
     LIBS += -lssl -lcrypto
 }
+
+#
+# build settings
+# 
+
+SRCBASEDIR = $$PWD
+
+# public API and common headers are included globally
+INCLUDEPATH += $$SRCBASEDIR/include
+INCLUDEPATH += $$SRCBASEDIR/src/common
+DEPENDPATH += $$INCLUDEPATH
 
 # install dirs
 windows {

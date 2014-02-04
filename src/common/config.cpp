@@ -169,3 +169,5 @@ QString Config::__join_paths (const QString &s1, const QString &s2)
 }
 
 } // namespace libencloud
+
+libencloud::Config *g_cfg = NULL;
