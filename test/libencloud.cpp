@@ -41,7 +41,7 @@ int test_libencloud (int argc, char *argv[])
 
     TEST_ZERO ((rc = libencloud_create(argc, argv, &libencloud)));
 
-#ifdef LIBENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_MODE_SECE
     fprintf(stderr, "# type: SECE\n");
 
     // bad value - must fail

@@ -111,7 +111,7 @@ LIBENCLOUD_DLLSPEC libencloud_rc libencloud_stop (libencloud_t *libencloud);
 
 #if 0
 /* Licensing */
-#ifdef LIBENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_MODE_SECE
 /* SECE: Licensing */
 %rename libencloud_setup_set_license set_license;
 LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *libencloud, const char *guid);

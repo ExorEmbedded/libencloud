@@ -1,14 +1,28 @@
-common.h>/setup.h>
+#include <common/common.h>
+#include <common/config.h>
+#include "setup.h"
+
+namespace libencloud {
+
+SetupInterface::SetupInterface () 
+{
+    LIBENCLOUD_TRACE;
+}
+
+} // namespace libencloud
+
+#if 0
 #include "core.h"
 #include "common.h"
 #include "config.h"
+#include "setup.h"
 
 /** \brief Set license from null-terminated 'guid' string (SECE only)
  * 
  * The license is saved to a persistent Setting object ("lic" key in
  * LIBENCLOUD_ORG:LIBENCLOUD_APP as defined in defaults.h.
  */
-#ifdef LIBENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_MODE_SECE
 LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *libencloud, const char *guid)
 {
     LIBENCLOUD_RETURN_IF (libencloud == NULL, LIBENCLOUD_RC_BADPARAMS);
@@ -29,7 +43,7 @@ LIBENCLOUD_DLLSPEC libencloud_rc libencloud_setup_set_license (libencloud_t *lib
 #endif
 
 /** \brief Get device's serial (LIBENCLOUD only) */
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
 LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_serial (libencloud_t *libencloud)
 {
     LIBENCLOUD_RETURN_IF (libencloud == NULL, NULL);
@@ -39,7 +53,7 @@ LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_serial (libencloud_t *libenc
 #endif
 
 /** \brief Get device's PoI (LIBENCLOUD only) */
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
 LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_poi (libencloud_t *libencloud)
 {
     LIBENCLOUD_RETURN_IF (libencloud == NULL, NULL);
@@ -47,4 +61,4 @@ LIBENCLOUD_DLLSPEC const char *libencloud_setup_get_poi (libencloud_t *libenclou
     return libencloud->context->getPoi();
 }
 #endif
-
+#endif

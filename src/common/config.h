@@ -27,7 +27,7 @@ libencloud_config_ssl_t;
 
 typedef struct
 {
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
     QFileInfo serialPath;
     QFileInfo poiPath;
 #endif

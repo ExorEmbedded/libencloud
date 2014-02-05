@@ -1,0 +1,9 @@
+
+[ECE]               [Encloud]           [libencloud]
+
+GET  poi               =>                   getPoi
+
+[SECE]              [Encloud]           [libencloud]
+
+POST license           =>                   setLicense
+

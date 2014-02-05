@@ -1,13 +1,28 @@
 #include <encloud/Core>
-#include "config.h"
+#include <common/config.h>
+#include <setup/4icsetup.h>
+#include <setup/ecesetup.h>
+#include <cloud/cloud.h>
 
 namespace libencloud {
 
 Core::Core ()
+    : _config(NULL)
+    , _setup(NULL)
+    , _cloud(NULL)
 {
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (initConfig());
+
+#ifndef LIBENCLOUD_DISABLE_SETUP
+    LIBENCLOUD_ERR_IF (initSetup());
+#endif
+
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    LIBENCLOUD_ERR_IF (initCloud());
+#endif
+
 err:
     return;
 }
@@ -17,6 +32,7 @@ Core::~Core ()
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_DELETE(_config);
+    LIBENCLOUD_DELETE(_setup);
 }
 
 int Core::initConfig ()
@@ -36,11 +52,52 @@ err:
     return ~0;
 }
 
+int Core::initSetup ()
+{
+    LIBENCLOUD_TRACE;
+
+#if defined(LIBENCLOUD_MODE_4IC)
+    _setup = new Q4icSetup();
+#elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
+    _setup = new EceSetup();
+#endif
+    LIBENCLOUD_ERR_IF (_setup == NULL);
+
+    connect(dynamic_cast<QObject*>(_setup), SIGNAL(stateChanged(QString)),
+            this, SIGNAL(stateChanged(QString)));
+
+    return 0;
+err:
+    return ~0;
+}
+
+int Core::initCloud ()
+{
+    LIBENCLOUD_TRACE;
+
+    _cloud = new Cloud();
+    LIBENCLOUD_ERR_IF (_cloud == NULL);
+
+    return 0;
+err:
+    return ~0;
+}
+
 int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
+    // TODO outer fsm
+    LIBENCLOUD_ERR_IF (_setup->start());
+
     return 0;
+err:
+    return ~0;
+}
+
+void Core::timeout ()
+{
+    LIBENCLOUD_TRACE;
 }
 
 int Core::stop ()
@@ -113,7 +170,7 @@ libencloud_rc Context::init (int argc, char *argv[])
         LIBENCLOUD_DBG ("using existing application instance");
     }
 
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
     this->serial = utils::ustrdup(utils::file2Data(g_cfg->config.serialPath));
     LIBENCLOUD_ERR_RC_IF ((this->serial == NULL), LIBENCLOUD_RC_BADCONFIG);
     LIBENCLOUD_DBG("serial=" << QString::fromLocal8Bit(this->serial));
@@ -163,7 +220,7 @@ void Context::term ()
         LIBENCLOUD_DELETE(this->app);
     }
 
-#ifndef LIBENCLOUD_TYPE_SECE 
+#ifndef LIBENCLOUD_MODE_SECE 
     LIBENCLOUD_FREE(this->serial);
     LIBENCLOUD_FREE(this->poi);
 #endif
@@ -233,7 +290,7 @@ int __libencloud_context_name_cb (X509_NAME *n, void *arg)
     // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (LIBENCLOUD)
     if (map["CN"].isNull())
     {
-#ifdef LIBENCLOUD_TYPE_SECE    
+#ifdef LIBENCLOUD_MODE_SECE    
         // SECE: CN based on hw_info
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
                 (const unsigned char *) libencloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));

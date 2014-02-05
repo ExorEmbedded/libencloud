@@ -2,27 +2,42 @@
 #define _LIBENCLOUD_CORE_H_
 
 #include <QObject>
+#include <QString>
 
 namespace libencloud {
 
 class Config;
+class SetupInterface;
+class Cloud;
 
 class Core : public QObject
 {
     Q_OBJECT
 
 public:
+
     Core ();
     ~Core ();
 
     int start ();
     int stop ();
 
+signals:
+    void stateChanged (const QString &state);
+
+private slots:
+
+    void timeout ();
+
 private:
 
-    int initConfig();
+    int initConfig ();
+    int initSetup ();
+    int initCloud ();
 
-    Config *_config; 
+    Config *_config;
+    SetupInterface *_setup;
+    Cloud *_cloud;
 };
 
 }  // namespace libencloud

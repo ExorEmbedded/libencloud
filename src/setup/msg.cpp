@@ -26,7 +26,7 @@ libencloud_rc libencloud::MessageRetrInfo::encodeRequest (QUrl &url, QUrl &param
 {
     url.setPath(LIBENCLOUD_CMD_GETINFO);
 
-#ifdef LIBENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_MODE_SECE
     params.addQueryItem("lic", this->license.toString().remove('{').remove('}'));
     params.addQueryItem("hw_info", this->hwInfo);
 #endif
@@ -75,7 +75,7 @@ libencloud_rc libencloud::MessageRetrCert::encodeRequest (QUrl &url, QUrl &param
 {
     url.setPath(LIBENCLOUD_CMD_GETCERT);
 
-#ifdef LIBENCLOUD_TYPE_SECE
+#ifdef LIBENCLOUD_MODE_SECE
     params.addQueryItem("lic", this->license.toString().remove('{').remove('}'));
     params.addQueryItem("hw_info", this->hwInfo);
 #endif

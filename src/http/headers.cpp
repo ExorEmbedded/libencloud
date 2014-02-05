@@ -1,6 +1,6 @@
 #include <encloud/HttpHeaders>
-#include "config.h"
-#include "common.h"
+#include <common/common.h>
+#include <common/config.h>
 
 namespace libencloud 
 {
@@ -40,8 +40,6 @@ int HttpHeaders::decode (QStringList lines)
     LIBENCLOUD_DBG("headers: " << _map);
 
     return 0;
-err:
-    return ~0;
 }
 
 QString HttpHeaders::get (const QString &key)

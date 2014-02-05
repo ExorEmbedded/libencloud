@@ -3,8 +3,8 @@
 #include <QRegExp>
 #include <encloud/HttpRequest>
 #include <encloud/HttpServer>
-#include "config.h"
-#include "common.h"
+#include <common/common.h>
+#include <common/config.h>
 
 #define LIBENCLOUD_SRV_LISTEN          "127.0.0.1"
 

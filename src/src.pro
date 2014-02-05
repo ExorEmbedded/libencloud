@@ -20,7 +20,7 @@ HEADERS += common/common.h
 HEADERS += common/defaults.h
 HEADERS += common/helpers.h
 
-HEADERS += common/info.h
+HEADERS += $$SRCBASEDIR/include/encloud/Info
 SOURCES += common/info.cpp
 
 HEADERS += common/config.h
@@ -56,13 +56,39 @@ HEADERS += $$SRCBASEDIR/include/encloud/Core
 SOURCES += core/core.cpp
 
 #
+# setup sources
+# 
+
+!nosetup {
+    HEADERS += setup/setup.h
+    SOURCES += setup/setup.cpp
+    mode4ic {
+        HEADERS += setup/4icsetup.h
+        SOURCES += setup/4icsetup.cpp
+    }
+    modeece | modesece {
+        HEADERS += setup/ecesetup.h
+        SOURCES += setup/ecesetup.cpp
+    }
+}
+
+#
+# cloud sources
+# 
+
+!nocloud {
+    HEADERS += cloud/cloud.h
+    SOURCES += cloud/cloud.cpp
+}
+
+#
 # http sources
 # 
 
 HEADERS += $$SRCBASEDIR/include/encloud/Http
 SOURCES += http/http.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Handler
+HEADERS += $$SRCBASEDIR/include/encloud/HttpHandler
 HEADERS += $$SRCBASEDIR/include/encloud/HttpAbstractHandler
 SOURCES += http/handler.cpp
 

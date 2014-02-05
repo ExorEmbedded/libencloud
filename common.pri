@@ -1,7 +1,9 @@
 # CONFIG options:
 #    
 #   debug       compile libraries with debugging symbols
-#   sece        SECE mode (default is ECE)
+#   mode4ic     Endian 4i Connect mode
+#   modeece     Endian Cloud Enabler mode
+#   modesece    Software Endian Cloud Enabler mode
 #   nosetup     no setup module (e.g. VPN client/manager only)
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 
@@ -20,7 +22,12 @@ QT += network
 QT -= gui
 
 debug       { QMAKE_CXXFLAGS += -g }
-sece        { DEFINES += LIBENCLOUD_TYPE_SECE }
+
+mode4ic         { DEFINES += LIBENCLOUD_MODE_4IC } 
+else:modeece    { DEFINES += LIBENCLOUD_MODE_ECE }
+else:modesece   { DEFINES += LIBENCLOUD_MODE_SECE }
+else            { error("a mode must must be defined (CONFIG += mode4ic|modeece|modesece)!") }
+
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 
@@ -70,9 +77,9 @@ windows{
 
 SRCBASEDIR = $$PWD
 
-# public API and common headers are included globally
+# public API and headers are included globally
 INCLUDEPATH += $$SRCBASEDIR/include
-INCLUDEPATH += $$SRCBASEDIR/src/common
+INCLUDEPATH += $$SRCBASEDIR/
 DEPENDPATH += $$INCLUDEPATH
 
 # install dirs

@@ -1,7 +1,7 @@
 #include <QByteArray>
 #include <encloud/HttpRequest>
-#include "config.h"
-#include "common.h"
+#include <common/common.h>
+#include <common/config.h>
 
 namespace libencloud 
 {

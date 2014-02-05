@@ -17,7 +17,7 @@ Config::Config ()
 
     this->settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
 
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
     this->config.serialPath = QFileInfo(this->confPrefix + LIBENCLOUD_SERIAL_FILE);
     this->config.poiPath = QFileInfo(this->confPrefix + LIBENCLOUD_POI_FILE);
 #endif
@@ -84,7 +84,7 @@ err:
 
 int Config::__parse (const QVariantMap &jo)
 {
-#ifndef LIBENCLOUD_TYPE_SECE
+#ifndef LIBENCLOUD_MODE_SECE
     if (!jo["serial"].isNull())
         this->config.serialPath = __join_paths(this->confPrefix, \
                 jo["serial"].toString());

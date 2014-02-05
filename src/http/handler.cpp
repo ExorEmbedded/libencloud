@@ -1,8 +1,8 @@
 #include <QDir>
 #include <QRegExp>
 #include <encloud/HttpHandler>
-#include "config.h"
-#include "common.h"
+#include <common/common.h>
+#include <common/config.h>
 
 #if 0
 #define LIBENCLOUD_HANDLER_VERSION             1

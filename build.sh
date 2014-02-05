@@ -3,7 +3,7 @@
 # WARNING: cleans untracked files!!!
 
 git clean -fdx . && \
-qmake && \
+qmake CONFIG+=modeece && \
 make check
 
 if [ $? -ne 0 ]; then
