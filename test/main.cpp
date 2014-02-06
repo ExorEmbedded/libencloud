@@ -35,10 +35,10 @@ int main (int argc, char *argv[])
 #endif
 
     qDebug() << "# hw_info: " << libencloud::utils::getHwInfo();
-#if 0
 
     TEST_ZERO (test_json());
     TEST_ZERO (test_crypto());
+#if 0
     TEST_ZERO (test_libencloud(argc, argv));
 #endif
 

@@ -22,20 +22,18 @@ public:
     int start ();
     int stop ();
 
+    Config *getConfig () const;
+
 signals:
     void stateChanged (const QString &state);
 
-private slots:
-
-    void timeout ();
-
 private:
+    int _initConfig ();
+    int _initCrypto ();
+    int _initSetup ();
+    int _initCloud ();
 
-    int initConfig ();
-    int initSetup ();
-    int initCloud ();
-
-    Config *_config;
+    Config *_cfg;
     SetupInterface *_setup;
     Cloud *_cloud;
 };

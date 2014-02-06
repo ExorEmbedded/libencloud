@@ -54,7 +54,6 @@ int HttpServer::start ()
 {
     LIBENCLOUD_SVC_TRACE;
 
-    /* TODO listen also VPN tap interface once connected! */
     LIBENCLOUD_ERR_IF(!listen(QHostAddress(LIBENCLOUD_SRV_LISTEN), 
                 LIBENCLOUD_SRV_PORT_DFT));  
     return 0;
@@ -155,7 +154,6 @@ QByteArray HttpServer::handleMessage (QByteArray message)
 
     return outMessage;
 err:
-//TODO 404
     return "{ \"error\" : \"bad error\" }";
 }
 

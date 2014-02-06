@@ -10,13 +10,18 @@ namespace libencloud {
 class SetupInterface
 {
 public:
-    SetupInterface ();
     virtual ~SetupInterface () {};
+
+    void setConfig (Config *cfg);
+    virtual int init () = 0;
 
     virtual int start () = 0;
 
 signals:
     virtual void stateChanged (const QString &state) = 0;
+
+protected:
+    Config *_cfg;
 };
 
 } // namespace libencloud

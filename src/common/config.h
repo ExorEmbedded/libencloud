@@ -13,6 +13,7 @@
 #include "json.h"
 #include "defaults.h"
 #include "helpers.h"
+#include "crypto.h"
 
 namespace libencloud {
 
@@ -59,6 +60,7 @@ public:
     /* Configuration objects are publicly accessible */
     libencloud_config_t config;
     QSettings *settings;
+    libencloud_crypto_t crypto;
 
     QFileInfo filePath;
 
@@ -70,10 +72,10 @@ private:
     int __parse_ssl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
     QString __join_paths (const QString &s1, const QString &s2);
 
-    QVariant json;
+    QVariant _json;
 
-    QString prefix;
-    QString confPrefix;
+    QString _prefix;
+    QString _confPrefix;
 };
 
 } // namespace libencloud

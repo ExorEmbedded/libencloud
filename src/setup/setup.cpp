@@ -4,9 +4,9 @@
 
 namespace libencloud {
 
-SetupInterface::SetupInterface () 
+void SetupInterface::setConfig (Config *cfg) 
 {
-    LIBENCLOUD_TRACE;
+    _cfg = cfg;
 }
 
 } // namespace libencloud

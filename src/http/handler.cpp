@@ -28,10 +28,12 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
-/* TODO forward request to liblibencloud */
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 {
     LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_UNUSED(request);
+    LIBENCLOUD_UNUSED(response);
 
 #if 0
     bool ok;
@@ -83,8 +85,8 @@ int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 #endif
 
     return 0;
-err:
-    return ~0;
+//err:
+//    return ~0;
 }
 
 #if 0

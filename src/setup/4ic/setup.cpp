@@ -1,6 +1,6 @@
 #include <common/common.h>
 #include <common/config.h>
-#include "4icsetup.h"
+#include "setup.h"
 
 namespace libencloud {
 

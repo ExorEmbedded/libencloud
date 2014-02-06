@@ -5,8 +5,8 @@ CONFIG += console
 TARGET = test
 
 SOURCES += main.cpp
-#SOURCES += json.cpp
-#SOURCES += crypto.cpp
+SOURCES += json.cpp
+SOURCES += crypto.cpp
 #SOURCES += libencloud.cpp
 
 HEADERS += test.h

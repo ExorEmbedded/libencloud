@@ -1,3 +1,10 @@
 - new async APIs
+- setup: ece/4ic
+- fsm: outer + inner
 - cloud module
-- handle cert expiry/renewal
+- server: listen on tap interface once connected; error handling
+- cert expiry/renewal (data from retrinfomsg)
+- HttpHandler: handle()
+- backoff: test recovery
+- conf: move generated stuff from etc to persistent cache
+- test: ece, sece, 4ic

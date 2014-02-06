@@ -8,6 +8,7 @@
 *.so.*
 *.pyc
 *.tar.gz
+moc_*.cpp
 
 # build-generated files
 Makefile

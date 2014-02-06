@@ -98,8 +98,12 @@ windows {
 }
 
 # keep build files separate from sources
-UI_DIR = build/uics
-MOC_DIR = build/mocs
-OBJECTS_DIR = build/objs
-Release:DESTDIR = release
-Debug:DESTDIR = debug
+#UI_DIR = build/uics
+#MOC_DIR = build/mocs
+#OBJECTS_DIR = build/objs
+#Release:DESTDIR = release
+#Debug:DESTDIR = debug
+
+# allow objects with same name
+# in Qt5 can be replaced with object_parallel_to_source
+CONFIG += object_with_source

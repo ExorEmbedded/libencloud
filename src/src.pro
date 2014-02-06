@@ -26,6 +26,12 @@ SOURCES += common/info.cpp
 HEADERS += common/config.h
 SOURCES += common/config.cpp
 
+HEADERS += common/message.h
+SOURCES += common/message.cpp
+
+HEADERS += common/client.h
+SOURCES += common/client.cpp
+
 HEADERS += common/json.h
 SOURCES += common/json.cpp
 
@@ -63,12 +69,12 @@ SOURCES += core/core.cpp
     HEADERS += setup/setup.h
     SOURCES += setup/setup.cpp
     mode4ic {
-        HEADERS += setup/4icsetup.h
-        SOURCES += setup/4icsetup.cpp
+        HEADERS += setup/4ic/*.h
+        SOURCES += setup/4ic/*.cpp
     }
     modeece | modesece {
-        HEADERS += setup/ecesetup.h
-        SOURCES += setup/ecesetup.cpp
+        HEADERS += setup/ece/*.h
+        SOURCES += setup/ece/*.cpp
     }
 }
 
