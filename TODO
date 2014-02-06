@@ -3,7 +3,7 @@
 - fsm: outer + inner
 - cloud module
 - server: listen on tap interface once connected; error handling
-- cert expiry/renewal (data from retrinfomsg)
+- cert expiry/renewal in ece/setup (data from retrinfomsg)
 - HttpHandler: handle()
 - backoff: test recovery
 - conf: move generated stuff from etc to persistent cache

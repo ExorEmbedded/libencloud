@@ -27,6 +27,9 @@ public:
 signals:
     void stateChanged (const QString &state);
 
+private slots:
+    void _setupCompleted ();
+
 private:
     int _initConfig ();
     int _initCrypto ();

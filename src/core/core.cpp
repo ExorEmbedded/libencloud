@@ -74,6 +74,8 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
+    QObject *setupObj;
+
 #if defined(LIBENCLOUD_MODE_4IC)
     _setup = new Q4icSetup();
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
@@ -83,8 +85,11 @@ int Core::_initSetup ()
     _setup->setConfig(_cfg);
     _setup->init();
 
-    connect(dynamic_cast<QObject*>(_setup), SIGNAL(stateChanged(QString)),
-            this, SIGNAL(stateChanged(QString)));
+    setupObj = dynamic_cast<QObject *>(_setup);
+    LIBENCLOUD_ERR_IF (setupObj == NULL);
+
+    connect(setupObj, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
+    connect(setupObj, SIGNAL(completed()), this, SLOT(_setupCompleted()));
 
     return 0;
 err:
@@ -126,7 +131,24 @@ Config *Core::getConfig () const
     return _cfg;
 }
 
+//
+// private slots
+// 
+
+void Core::_setupCompleted ()
+{
+    LIBENCLOUD_TRACE;
+}
+
+//
+// private methods
+// 
+
 } // namespace libencloud
+
+//
+// static methods
+// 
 
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg)

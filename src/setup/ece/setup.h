@@ -27,6 +27,7 @@ public:
 signals:
     void stateChanged (const QString &state);
     void retry ();
+    void completed ();
 
 private slots:
     void _stateEntered ();
@@ -35,7 +36,8 @@ private slots:
     void _onRetryTimeout ();
 
 private:
-    int initMsg (MessageInterface &msg);
+    int _initMsg (MessageInterface &msg);
+    QString _stateStr (QState *state);
 
     int retrSbInfo ();
 
@@ -43,21 +45,24 @@ private:
     Client _client;
 
     QState *_initialState;
+    QState *_completedState;
     QState *_previousState;
-    QState _errorState;
-    bool _error;
-    int _backoff;
 
-    RetrInfoMsg _retrInfoMsg;  // initial state
-    QState _retrInfoState;
+    QState _errorSt, *_errorState;
+
+    RetrInfoMsg _retrInfoMsg;
+    QState _retrInfoSt, *_retrInfoState;
 
     RetrCertMsg _retrCertMsg;
-    QState _retrCertState;
+    QState _retrCertSt, *_retrCertState;
 
     RetrConfMsg _retrConfMsg;
-    QState _retrConfState;
+    QState _retrConfSt, *_retrConfState;
 
-    QState _checkExpiryState;
+    QState _checkExpirySt, *_checkExpiryState;
+
+    bool _error;
+    int _backoff;
 };
 
 } // namespace libencloud
