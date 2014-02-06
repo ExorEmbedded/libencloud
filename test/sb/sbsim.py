@@ -135,7 +135,7 @@ def handler_csr (req):
     # request certificate from CA based on CSR and without prompts
     rc = os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' -policy policy_anything');
     if rc:
-        req.write(json.dumps({ 'error' : 'opeensl failure', 'rc:' : rc }))
+        req.write(json.dumps({ 'error' : 'openssl failure', 'rc:' : rc }))
         return apache.DECLINED
 
     """

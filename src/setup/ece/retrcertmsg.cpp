@@ -14,9 +14,6 @@ int RetrCertMsg::init ()
 {
     LIBENCLOUD_TRACE;
 
-    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
-    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
-
     return 0;
 }
 
@@ -32,15 +29,19 @@ void RetrCertMsg::process ()
     QUrl params;
     QSslConfiguration config;
 
-    SIGNAL_ERR_IF (_cfg == NULL);
-    SIGNAL_ERR_IF (_client == NULL);
+    EMIT_ERROR_ERR_IF (_cfg == NULL);
+    EMIT_ERROR_ERR_IF (_client == NULL);
 
-    SIGNAL_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
+    EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
 
-    SIGNAL_ERR_IF (_packRequest());
-    SIGNAL_ERR_IF (_encodeRequest(url, params));
+    EMIT_ERROR_ERR_IF (_packRequest());
+    EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
-    _client->run(url, params, config);
+    // listen to signals from client
+    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
+    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+
+    _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 
 err:
     return;
@@ -51,8 +52,11 @@ err:
 // 
 void RetrCertMsg::_clientComplete (const QString &response)
 {
-    SIGNAL_ERR_IF (_decodeResponse(response));
-    SIGNAL_ERR_IF (_unpackResponse());
+    // stop listening to signals from client
+    disconnect(_client, 0, this, 0);
+
+    EMIT_ERROR_ERR_IF (_decodeResponse(response));
+    EMIT_ERROR_ERR_IF (_unpackResponse());
 
     emit processed();
 err:
@@ -111,6 +115,11 @@ int RetrCertMsg::_decodeResponse (const QString &response)
     QVariantMap jo = json::parse(response, ok).toMap();
     LIBENCLOUD_ERR_IF (!ok);
 
+    // <TEST> failure
+#if 0
+    LIBENCLOUD_ERR_IF (1);
+#endif
+
     errString = jo["error"].toString();
     if (!errString.isEmpty())
     {
@@ -119,6 +128,8 @@ int RetrCertMsg::_decodeResponse (const QString &response)
     }
 
     _cert = QSslCertificate(jo["certificate"].toString().toAscii());
+    LIBENCLOUD_ERR_IF (_cert.isNull());
+
     // "checks that the current data-time is within the date-time range during
     // which the certificate is considered valid, and checks that the
     // certificate is not in a blacklist of fraudulent certificates"

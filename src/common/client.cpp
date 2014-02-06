@@ -2,7 +2,8 @@
 #include <common/config.h>
 #include <common/client.h>
 
-#define SIGNAL_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR LIBENCLOUD_EMIT(error())
+#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
 
 namespace libencloud {
 
@@ -16,7 +17,8 @@ Client::Client ()
             SLOT(_finished(QNetworkReply *)));
 }
 
-void Client::run (const QUrl &url, const QUrl &params, const QSslConfiguration &conf)
+void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
+        const QSslConfiguration &conf)
 {
     LIBENCLOUD_DBG("url: " << url.toString());
     LIBENCLOUD_DBG(" ### >>>>> ### " << params.toString());
@@ -28,8 +30,9 @@ void Client::run (const QUrl &url, const QUrl &params, const QSslConfiguration &
     request.setRawHeader("User-Agent", LIBENCLOUD_STRING);
     request.setRawHeader("X-Custom-User-Agent", LIBENCLOUD_STRING);
 
-    if (url.path().compare(LIBENCLOUD_CMD_GETCONFIG) == 0)
-        request.setRawHeader("Host", LIBENCLOUD_GETCONFIG_HOSTNAME);
+    // override with passed custom headers
+    for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
+        request.setRawHeader(mi.key(), mi.value());
 
     if (params.isEmpty())
     {
@@ -59,7 +62,7 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
 
     LIBENCLOUD_ERR(""); 
 
-    emit error();
+    EMIT_ERROR;
 }
 
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
@@ -75,7 +78,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
         return;
     }
 
-    emit error();
+    EMIT_ERROR;
 
     foreach (QSslError err, errors) 
     {
@@ -91,7 +94,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
     LIBENCLOUD_ERR("NetworkError (" << err << ")");
 
-    emit error();
+    EMIT_ERROR;
 }
 
 /**
@@ -124,7 +127,6 @@ void Client::_finished (QNetworkReply *reply)
     return;
 err:
     reply->deleteLater();
-    emit error();
 }
 
 } // namespace libencloud

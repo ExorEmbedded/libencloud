@@ -1,14 +1,13 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_ECE_RETRCERTMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_ECE_RETRCERTMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_ECE_RETRCONFMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_ECE_RETRCONFMSG_H_
 
-#include <QUuid>
-#include <QSslCertificate>
+#include <QDateTime>
 #include <QString>
 #include <common/message.h>
 
 namespace libencloud {
 
-class RetrCertMsg : public QObject, public MessageInterface
+class RetrConfMsg : public QObject, public MessageInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
@@ -33,15 +32,15 @@ private:
     int _unpackResponse ();
 
     //request inputs
-    QUuid _license;
-    QString _hwInfo;
-    QString _csr;
 
     //response outputs
     QDateTime _time;
-    QSslCertificate _cert;
+    QString _vpnIp;
+    int _vpnPort;
+    QString _vpnProto;
+    QString _vpnType;
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_ECE_RETRCERTMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_ECE_RETRCONFMSG_H_ */

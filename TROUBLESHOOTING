@@ -1,0 +1,9 @@
+* "Error downloading https://initialization-host/manage/commands/commands.access.cloud.getConfiguration - server replied: Bad Request"
+    => Apache logs
+    [Thu Feb 06 12:35:33 2014] [error] Hostname initialization-host provided via SNI and hostname operation-host provided via HTTP are different
+
+HTTP request header field "Host" must match hostname used in request url.
+
+* Failure on LIBENCLOUD_ERR_IF (!_caCert.isValid());
+
+Make sure issuer CN of received op_cert.pem matches op_ca.pem's CN

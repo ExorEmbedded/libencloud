@@ -5,7 +5,7 @@
 #include <setup/ece/retrinfomsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
-#define SIGNAL_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
 
 namespace libencloud {
 
@@ -16,9 +16,6 @@ namespace libencloud {
 int RetrInfoMsg::init ()
 {
     LIBENCLOUD_TRACE;
-
-    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
-    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     return 0;
 }
@@ -35,15 +32,19 @@ void RetrInfoMsg::process ()
     QUrl params;
     QSslConfiguration config;
 
-    SIGNAL_ERR_IF (_cfg == NULL);
-    SIGNAL_ERR_IF (_client == NULL);
+    EMIT_ERROR_ERR_IF (_cfg == NULL);
+    EMIT_ERROR_ERR_IF (_client == NULL);
 
-    SIGNAL_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
+    EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
 
-    SIGNAL_ERR_IF (_packRequest());
-    SIGNAL_ERR_IF (_encodeRequest(url, params));
+    EMIT_ERROR_ERR_IF (_packRequest());
+    EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
-    _client->run(url, params, config);
+    // setup signals from client
+    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
+    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+
+    _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 
 err:
     return;
@@ -54,8 +55,11 @@ err:
 // 
 void RetrInfoMsg::_clientComplete (const QString &response)
 {
-    SIGNAL_ERR_IF (_decodeResponse(response));
-    SIGNAL_ERR_IF (_unpackResponse());
+    // stop listening to signals from client
+    disconnect(_client, 0, this, 0);
+
+    EMIT_ERROR_ERR_IF (_decodeResponse(response));
+    EMIT_ERROR_ERR_IF (_unpackResponse());
 
     emit processed();
 err:
@@ -97,7 +101,12 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     QString errString;
 
     QVariantMap jo = json::parse(response, ok).toMap();
-    LIBENCLOUD_ERR_IF (!ok);
+    LIBENCLOUD_ERR_IF (!ok || jo.isEmpty());
+
+    // <TEST> failure
+#if 0
+    LIBENCLOUD_ERR_IF (1);
+#endif
 
     errString = jo["error"].toString();
     if (!errString.isEmpty())
@@ -115,6 +124,7 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     LIBENCLOUD_ERR_IF (!_expiry.isValid());
 
     _csrTmpl = jo["csr_template"];
+    LIBENCLOUD_ERR_IF (_csrTmpl.isNull());
 
     _caCert = QSslCertificate(jo["ca_cert"].toString().toAscii());
     LIBENCLOUD_ERR_IF (!_caCert.isValid());

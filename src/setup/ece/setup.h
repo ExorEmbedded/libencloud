@@ -2,15 +2,15 @@
 #define _LIBENCLOUD_PRIV_SETUP_ECE_H_
 
 #include <QStateMachine>
-#include <QHistoryState>
 #include <QtPlugin>
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/ece/retrinfomsg.h>
 #include <setup/ece/retrcertmsg.h>
+#include <setup/ece/retrconfmsg.h>
 
 // initial timeout for retry (in seconds) - grows exponentially
-#define LIBENCLOUD_RETRY_TIMEOUT    5
+#define LIBENCLOUD_RETRY_TIMEOUT    3
 
 namespace libencloud {
 
@@ -54,10 +54,10 @@ private:
     RetrCertMsg _retrCertMsg;
     QState _retrCertState;
 
-#if 0
     RetrConfMsg _retrConfMsg;
     QState _retrConfState;
-#endif
+
+    QState _checkExpiryState;
 };
 
 } // namespace libencloud

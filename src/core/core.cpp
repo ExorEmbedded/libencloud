@@ -6,16 +6,8 @@
 #include <setup/ece/setup.h>
 #include <cloud/cloud.h>
 
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
-
-//#ifdef __cplusplus
-//}
-//#endif
 
 namespace libencloud {
 
@@ -167,7 +159,7 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
                 (const unsigned char *) libencloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));
 #else
-        // now CN for ECE should be part of template and will use (unique) label given by user
+        // now CN for ECE should be part of template and will use (unique) label given by user!
 #if 0
         // LIBENCLOUD: CN based on serial
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
@@ -181,5 +173,3 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
 err:
     return ~0;
 };
-
-//#endif

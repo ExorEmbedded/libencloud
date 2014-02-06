@@ -18,7 +18,8 @@ class Client : public QObject
 
 public:
     Client ();
-    void run (const QUrl &url, const QUrl &params, const QSslConfiguration &conf);
+    void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers, 
+            const QSslConfiguration &conf);
 
 signals:
     void error ();

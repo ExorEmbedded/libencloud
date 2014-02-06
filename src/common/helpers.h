@@ -70,6 +70,7 @@
 #endif
 
 // New Qt-specific macros
+#define LIBENCLOUD_EMIT(sig) do { LIBENCLOUD_ERR("emitting " << #sig); emit(sig); } while (0)
 #define LIBENCLOUD_EMIT_ERR(sig) do { LIBENCLOUD_ERR(""); emit(sig); goto err; } while (0)
 #define LIBENCLOUD_EMIT_RETURN_IF(cond, sig, rc) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); return rc; } } while (0)
 #define LIBENCLOUD_EMIT_RETURN_MSG_IF(cond, sig, msg, rc) do { if (cond) { LIBENCLOUD_ERR(msg); emit(sig); return rc; } } while (0)
