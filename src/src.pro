@@ -54,6 +54,11 @@ SOURCES += common/utils.cpp
 HEADERS += common/crypto.h
 SOURCES += common/crypto.cpp
 
+!nocloud {
+    HEADERS += common/vpn/*.h
+    SOURCES += common/vpn/*.cpp
+}
+
 #
 # core sources
 # 

@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_CORE_H_
 
 #include <QObject>
+#include <QStateMachine>
 #include <QString>
 
 namespace libencloud {
@@ -26,19 +27,35 @@ public:
 
 signals:
     void stateChanged (const QString &state);
+    void authRequest ();
+    void proxyAuthRequest ();
 
 private slots:
+    void _stopped ();
+    void _stateEntered ();
+    void _stateExited ();
     void _setupCompleted ();
 
 private:
+    void _onError ();
     int _initConfig ();
     int _initCrypto ();
     int _initSetup ();
     int _initCloud ();
+    int _initFsm ();
+    int _startCloud ();
+    QString _stateStr (QState *state);
 
     Config *_cfg;
     SetupInterface *_setup;
+    QObject *_setupObj;
     Cloud *_cloud;
+
+    QStateMachine _fsm;
+    QState *_initialState;
+    QState *_previousState;
+    QState _setupSt, *_setupState;
+    QState _cloudSt, *_cloudState;
 };
 
 }  // namespace libencloud

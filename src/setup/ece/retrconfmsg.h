@@ -4,7 +4,7 @@
 #include <QDateTime>
 #include <QString>
 #include <common/message.h>
-#include <cloud/vpnconfig.h>
+#include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
 

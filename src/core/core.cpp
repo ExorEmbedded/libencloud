@@ -2,8 +2,8 @@
 #include <encloud/Core>
 #include <common/config.h>
 #include <common/crypto.h>
-#include <setup/4ic/setup.h>
-#include <setup/ece/setup.h>
+#include <setup/4ic/4icsetup.h>
+#include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
 
 /* Subject name settings from JSON CSR template */
@@ -19,19 +19,23 @@ Core::Core ()
     : _cfg(NULL)
     , _setup(NULL)
     , _cloud(NULL)
+    , _setupState(&_setupSt)
+    , _cloudState(&_cloudSt)
 {
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
-#ifndef LIBENCLOUD_DISABLE_SETUP
+#if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_ERR_IF (_initSetup());
 #endif
 
-#ifndef LIBENCLOUD_DISABLE_CLOUD
+#if !defined(LIBENCLOUD_DISABLE_CLOUD)
     LIBENCLOUD_ERR_IF (_initCloud());
 #endif
+
+    LIBENCLOUD_ERR_IF (_initFsm());
 
 err:
     return;
@@ -43,7 +47,79 @@ Core::~Core ()
 
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
+    LIBENCLOUD_DELETE(_cloud);
 }
+
+int Core::start ()
+{
+    LIBENCLOUD_TRACE;
+
+    _fsm.start();
+
+    return 0;
+}
+
+int Core::stop ()
+{
+    LIBENCLOUD_TRACE;
+
+    _fsm.stop();
+
+    return 0;
+}
+
+Config *Core::getConfig () const
+{
+    return _cfg;
+}
+
+//
+// private slots
+// 
+
+void Core::_stopped ()
+{
+    LIBENCLOUD_TRACE;
+
+    _cloud->stop();
+    _setup->stop();
+}
+
+void Core::_stateEntered ()
+{
+    QState *state = qobject_cast<QState *>(sender());
+
+    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
+
+	if (state == _setupState)
+		_setup->start();
+	else if (state == _cloudState)
+		_cloud->start();
+}
+
+void Core::_stateExited ()
+{
+    QState *state = qobject_cast<QState *>(sender());
+
+    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
+}
+
+void Core::_setupCompleted ()
+{
+    LIBENCLOUD_TRACE;
+
+    const VpnConfig *vpnConfig = _setup->getVpnConfig();
+
+    // write retrieved configuration to file
+    LIBENCLOUD_ERR_IF (vpnConfig->toFile(_cfg->config.vpnConfPath.absoluteFilePath()));
+
+err:
+    return;
+}
+
+//
+// private methods
+// 
 
 int Core::_initConfig ()
 {
@@ -74,22 +150,20 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
-    QObject *setupObj;
-
 #if defined(LIBENCLOUD_MODE_4IC)
-    _setup = new Q4icSetup();
+    _setup = new Q4icSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
-    _setup = new EceSetup();
+    _setup = new EceSetup(_cfg);
 #endif
     LIBENCLOUD_ERR_IF (_setup == NULL);
-    _setup->setConfig(_cfg);
-    _setup->init();
 
-    setupObj = dynamic_cast<QObject *>(_setup);
-    LIBENCLOUD_ERR_IF (setupObj == NULL);
+    _setupObj = dynamic_cast<QObject *>(_setup);
+    LIBENCLOUD_ERR_IF (_setupObj == NULL);
 
-    connect(setupObj, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
-    connect(setupObj, SIGNAL(completed()), this, SLOT(_setupCompleted()));
+    // state change signal forwarding
+    connect(_setupObj, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
+
+    connect(_setupObj, SIGNAL(completed()), this, SLOT(_setupCompleted()));
 
     return 0;
 err:
@@ -100,55 +174,63 @@ int Core::_initCloud ()
 {
     LIBENCLOUD_TRACE;
 
-    _cloud = new Cloud();
+    _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
 
-    return 0;
-err:
-    return ~0;
-}
+    // state change signal forwarding
+    connect(_cloud, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
 
-int Core::start ()
-{
-    LIBENCLOUD_TRACE;
-
-    LIBENCLOUD_ERR_IF (_setup->start());
+    // authentication request forwarding
+    connect(_cloud, SIGNAL(authRequest()), this, SIGNAL(authRequest()));
+    connect(_cloud, SIGNAL(proxyAuthRequest()), this, SIGNAL(proxyAuthRequest()));
 
     return 0;
 err:
     return ~0;
 }
 
-int Core::stop ()
+int Core::_initFsm ()
 {
     LIBENCLOUD_TRACE;
+    
+#if !defined(LIBENCLOUD_DISABLE_SETUP)
+    LIBENCLOUD_DBG("setupState: " << _setupState);
+    _initialState = _setupState;
+    connect(_setupState, SIGNAL(entered()), this, SLOT(_stateEntered()));
+    connect(_setupState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    _fsm.addState(_setupState);
+#endif
+
+#if !defined(LIBENCLOUD_DISABLE_CLOUD)
+    LIBENCLOUD_DBG("cloudState: " << _cloudState);
+#if defined(LIBENCLOUD_DISABLE_SETUP)
+    _initialState = _cloudState;
+#endif
+    connect(_cloudState, SIGNAL(entered()), this, SLOT(_stateEntered()));
+    connect(_cloudState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    _fsm.addState(_cloudState);
+#endif
+
+#if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_CLOUD)
+    _setupState->addTransition(_setupObj, SIGNAL(completed()), _cloudState);
+#endif
+
+    _fsm.setInitialState(_initialState);
+
+    connect(&_fsm, SIGNAL(stopped()), this, SLOT(_stopped()));
 
     return 0;
 }
 
-Config *Core::getConfig () const
+QString Core::_stateStr (QState *state)
 {
-    return _cfg;
+    if (state == _setupState)
+        return tr("Running Setup Module");
+    else if (state == _cloudState)
+        return tr("Running Cloud Enabler");
+    else
+        return "";
 }
-
-//
-// private slots
-// 
-
-void Core::_setupCompleted ()
-{
-    LIBENCLOUD_TRACE;
-
-    const VpnConfig *vpnConfig = _setup->getVpnConfig();
-
-    //LIBENCLOUD_ERR_IF (vpnConfig->toFile("/tmp/vpnconfig"));
-err:
-    return;
-}
-
-//
-// private methods
-// 
 
 } // namespace libencloud
 
@@ -182,7 +264,7 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
     // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (LIBENCLOUD)
     if (map["CN"].isNull())
     {
-#ifdef LIBENCLOUD_MODE_SECE    
+#if defined(LIBENCLOUD_MODE_SECE)
         // SECE: CN based on hw_info
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
                 (const unsigned char *) libencloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));

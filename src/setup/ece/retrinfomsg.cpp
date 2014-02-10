@@ -1,7 +1,7 @@
 #include <common/common.h>
 #include <common/config.h>
 #include <common/utils.h>
-#include <setup/ece/common.h>
+#include <setup/ece/ececommon.h>
 #include <setup/ece/retrinfomsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted

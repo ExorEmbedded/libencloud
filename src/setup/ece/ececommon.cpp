@@ -1,7 +1,7 @@
 #include <QSslKey>
 #include <common/common.h>
 #include <common/config.h>
-#include <setup/ece/common.h>
+#include <setup/ece/ececommon.h>
 
 namespace libencloud {
 namespace setupece {

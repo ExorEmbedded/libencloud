@@ -20,9 +20,9 @@ class EceSetup : public QObject, public SetupInterface
     Q_INTERFACES (libencloud::SetupInterface)
 
 public:
-    EceSetup ();
-    int init ();
+    EceSetup (Config *cfg);
     int start ();
+    int stop ();
 
     const VpnConfig *getVpnConfig ();
 
@@ -38,6 +38,7 @@ private slots:
     void _onRetryTimeout ();
 
 private:
+    int _initFsm ();
     int _initMsg (MessageInterface &msg);
     QString _stateStr (QState *state);
 

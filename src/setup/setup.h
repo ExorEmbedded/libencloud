@@ -4,19 +4,18 @@
 #include <QObject>
 #include <QString>
 #include <QtPlugin>
-#include <cloud/vpnconfig.h>
+#include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
 
 class SetupInterface
 {
 public:
+    SetupInterface (Config *cfg);
     virtual ~SetupInterface () {};
 
-    void setConfig (Config *cfg);
-    virtual int init () = 0;
-
     virtual int start () = 0;
+    virtual int stop () = 0;
     virtual const VpnConfig *getVpnConfig () = 0;
 
 signals:

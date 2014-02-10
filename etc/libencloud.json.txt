@@ -9,8 +9,8 @@ libencloud configuration
 * Sample:
 
 {
-  "serial" : "/etc/encloud/serial",             # serial number (ECE only)
-  "poi" : "/etc/encloud/poi",                   # Proof of Identity (ECE only)
+  "serial" : "serial",                          # serial number (ECE only)
+  "poi" : "poi",                                # Proof of Identity (ECE only)
 
   "sb" : {                                      # global SB settings 
     "url" : "https://sb-host"
@@ -19,29 +19,34 @@ libencloud configuration
   "timeout" : 10000,                            # timeout in ms for net operations
 
   "csr" : {                                     # certificate Request template
-    "tmpl" : "/etc/encloud/csr-tmpl.json"
+    "tmpl" : "csr-tmpl.json"              
   },
 
   "ssl_init" : {                                # initialization channel setup
     "sb" : {
       "url" : "https://initialization-host/"    # override sb host
     },
-    "ca" : "/etc/encloud/init_ca.pem",
-    "cert" : "/etc/encloud/init_cert.pem",
-    "key" : "/etc/encloud/init_key.pem"
+    "ca" : "init_ca.pem",              
+    "cert" : "init_cert.pem",
+    "key" : "init_key.pem"
   },
 
   "ssl_op" : {                                  # operation channel setup
     "sb" : {
       "url" : "https://operation-host/"         # override sb host
     },
-    "ca" : "/etc/encloud/op_ca.pem",
-    "cert" : "/etc/encloud/op_cert.pem",
-    "key" : "/etc/encloud/op_key.pem"
+    "ca" : "op_ca.pem",
+    "cert" : "op_cert.pem",
+    "key" : "op_key.pem"
   },
 
   "rsa" : {                                     # key size for generated RSA keys
     "bits" : 2048
+  },
+
+  "vpn" : {                                     # OpenVPN configuration file
+    "exe" : "openvpn",           
+    "conf" : "openvpn.conf"
   },
 
   "log" : {

@@ -1,7 +1,7 @@
 #include <common/common.h>
 #include <common/config.h>
 #include <common/utils.h>
-#include <setup/ece/common.h>
+#include <setup/ece/ececommon.h>
 #include <setup/ece/retrconfmsg.h>
 
 namespace libencloud {

@@ -1,6 +1,6 @@
 #include <common/common.h>
 #include <common/config.h>
-#include <cloud/vpnconfig.h>
+#include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
 

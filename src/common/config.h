@@ -42,6 +42,12 @@ typedef struct
 
     int rsaBits;
 
+    QFileInfo vpnExePath;
+    QFileInfo vpnConfPath;
+    int vpnMgmtPort;
+    int vpnVerbosity;
+    QString vpnArgs;
+
     int logLevel;
 }
 libencloud_config_t;
@@ -65,17 +71,19 @@ public:
     QFileInfo filePath;
 
 private:
-    int __parse (const QVariantMap &jo);
-    int __parse_sb (const QVariantMap &jo);
-    int __parse_sslInit (const QVariantMap &jo);
-    int __parse_sslOp (const QVariantMap &jo);
-    int __parse_ssl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
-    QString __join_paths (const QString &s1, const QString &s2);
+    int _parse (const QVariantMap &jo);
+    int _parseSb (const QVariantMap &jo);
+    int _parseSslInit (const QVariantMap &jo);
+    int _parseSslOp (const QVariantMap &jo);
+    int _parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
+    int _parseVpn (const QVariantMap &jo);
+    QString _joinPaths (const QString &s1, const QString &s2);
 
     QVariant _json;
 
     QString _prefix;
     QString _confPrefix;
+    QString _sbinPrefix;
 };
 
 } // namespace libencloud

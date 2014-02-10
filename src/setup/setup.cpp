@@ -4,7 +4,7 @@
 
 namespace libencloud {
 
-void SetupInterface::setConfig (Config *cfg) 
+SetupInterface::SetupInterface (Config *cfg)
 {
     _cfg = cfg;
 }

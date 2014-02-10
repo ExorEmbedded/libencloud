@@ -1,7 +1,7 @@
 - new async APIs
-- setup: ece/4ic
-- fsm: outer + inner
-- cloud module
+- setup: 4ic
+- fsm: outer + inner, stop handling
+- cloud module: 4ic / auth requests and supply via http
 - server: listen on tap interface once connected; error handling
 - cert expiry/renewal in ece/setup (data from retrinfomsg)
 - HttpHandler: handle()
