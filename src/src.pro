@@ -83,8 +83,8 @@ SOURCES += core/core.cpp
 # 
 
 !nocloud {
-    HEADERS += cloud/cloud.h
-    SOURCES += cloud/cloud.cpp
+    HEADERS += cloud/*.h
+    SOURCES += cloud/*.cpp
 }
 
 #

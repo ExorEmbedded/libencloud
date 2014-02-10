@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QtPlugin>
+#include <cloud/vpnconfig.h>
 
 namespace libencloud {
 
@@ -16,9 +17,11 @@ public:
     virtual int init () = 0;
 
     virtual int start () = 0;
+    virtual const VpnConfig *getVpnConfig () = 0;
 
 signals:
     virtual void stateChanged (const QString &state) = 0;
+    virtual void completed () = 0;
 
 protected:
     Config *_cfg;

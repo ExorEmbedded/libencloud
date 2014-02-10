@@ -7,3 +7,16 @@ GET  poi               =>                   getPoi
 
 POST license           =>                   setLicense
 
+
+
+Setup Finite State Machine (ECE)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+                                                            ^ completed()
+                                                            | 
+     retrInfoState -> retrCertState -> retrConfState -> checkExpiryState
+            |               |               |               |
+            V               V               V               V error()
+            +---------------+---------------+---------------+   
+                            |
+                            V        RETRY_TIMEOUT * backoff
+                        errorState  --------------------------> previousState

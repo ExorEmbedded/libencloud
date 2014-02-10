@@ -138,6 +138,12 @@ Config *Core::getConfig () const
 void Core::_setupCompleted ()
 {
     LIBENCLOUD_TRACE;
+
+    const VpnConfig *vpnConfig = _setup->getVpnConfig();
+
+    //LIBENCLOUD_ERR_IF (vpnConfig->toFile("/tmp/vpnconfig"));
+err:
+    return;
 }
 
 //

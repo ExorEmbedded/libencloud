@@ -24,6 +24,8 @@ public:
     int init ();
     int start ();
 
+    const VpnConfig *getVpnConfig ();
+
 signals:
     void stateChanged (const QString &state);
     void retry ();
@@ -38,8 +40,6 @@ private slots:
 private:
     int _initMsg (MessageInterface &msg);
     QString _stateStr (QState *state);
-
-    int retrSbInfo ();
 
     QStateMachine _fsm;
     Client _client;

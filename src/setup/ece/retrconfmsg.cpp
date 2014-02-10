@@ -17,6 +17,11 @@ int RetrConfMsg::init ()
     return 0;
 }
 
+const VpnConfig *RetrConfMsg::getVpnConfig ()
+{
+    return &_vpnConfig;
+}
+
 //
 // public slots
 //
@@ -108,20 +113,11 @@ int RetrConfMsg::_decodeResponse (const QString &response)
     jo = jo["vpn"].toMap();
     LIBENCLOUD_ERR_IF (jo.isEmpty());
 
-    _vpnIp = jo["ip"].toString();
-    LIBENCLOUD_ERR_IF (_vpnIp.isEmpty());
-
-    _vpnPort = jo["port"].toInt();
-    LIBENCLOUD_ERR_IF (_vpnPort <= 0);
-
-    _vpnProto = jo["proto"].toString();
-    LIBENCLOUD_ERR_IF (_vpnProto.isEmpty());
-
-    _vpnType = jo["type"].toString();
-    LIBENCLOUD_ERR_IF (_vpnType.isEmpty());
-
     _time = utils::pytime2DateTime(jo["time"].toString());
     LIBENCLOUD_ERR_IF (!_time.isValid());
+
+    _vpnConfig = VpnConfig(jo, _cfg);
+    LIBENCLOUD_ERR_IF (!_vpnConfig.isValid());
 
     return 0;
 err:
@@ -130,8 +126,7 @@ err:
 
 int RetrConfMsg::_unpackResponse ()
 {
-    LIBENCLOUD_DBG("ip: " << _vpnIp << " port: " << QString::number(_vpnPort) <<
-            " proto: " << _vpnProto << " type: " << _vpnType);
+    LIBENCLOUD_DBG(_vpnConfig.toString());
 
     return 0;
 }

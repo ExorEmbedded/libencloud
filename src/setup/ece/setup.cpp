@@ -4,21 +4,13 @@
 #include <common/config.h>
 #include <setup/ece/setup.h>
 
+
 namespace libencloud {
 
-/**
- * Setup Finite State Machine
- * ^^^^^^^^^^^^^^^^^^^^^^^^^^
- *                                                          ^ completed()
- *                                                          | 
- *   retrInfoState -> retrCertState -> retrConfState -> checkExpiryState
- *          |               |               |               |
- *          V               V               V               V error()
- *          +---------------+---------------+---------------+   
- *                          |
- *                          V        RETRY_TIMEOUT * backoff
- *                      errorState  --------------------------> previousState
- */
+//
+// public methods
+//
+
 EceSetup::EceSetup ()
     : _initialState(&_retrInfoSt)
     , _completedState(&_checkExpirySt)
@@ -84,17 +76,14 @@ int EceSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
-    //retrSbInfo();
     _fsm.start();
 
     return 0;
 }
 
-int EceSetup::retrSbInfo ()
+const VpnConfig *EceSetup::getVpnConfig ()
 {
-    LIBENCLOUD_TRACE;
-
-    return 0;
+    return _retrConfMsg.getVpnConfig();
 }
 
 //

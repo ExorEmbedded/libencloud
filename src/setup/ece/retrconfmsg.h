@@ -4,6 +4,7 @@
 #include <QDateTime>
 #include <QString>
 #include <common/message.h>
+#include <cloud/vpnconfig.h>
 
 namespace libencloud {
 
@@ -14,6 +15,7 @@ class RetrConfMsg : public QObject, public MessageInterface
 
 public:
     int init ();
+    const VpnConfig *getVpnConfig ();
 
 signals:
     void error ();
@@ -35,10 +37,7 @@ private:
 
     //response outputs
     QDateTime _time;
-    QString _vpnIp;
-    int _vpnPort;
-    QString _vpnProto;
-    QString _vpnType;
+    VpnConfig _vpnConfig;
 };
 
 } // namespace libencloud
