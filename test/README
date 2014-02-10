@@ -2,6 +2,9 @@
 
 Prerequisites: 
     - add appropriate "initialization-host" "operation-host" definitions to /etc/hosts
+    - to generate OpenVPN server correctly, add the following to openssl.conf:
+        [ server ]
+        nsCertType            = server
 
 $ cd sb
 $ ./inst.sh

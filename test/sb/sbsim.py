@@ -166,7 +166,7 @@ def handler_conf (req):
                     'ip' : 'localhost', 
                     'port' : '1194',
                     'proto' : 'tcp',
-                    'type' : 'null'
+                    'type' : 'tun'
                     }
                 }))
     

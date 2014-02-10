@@ -12,12 +12,16 @@ VpnConfig::VpnConfig ()
     : _valid(true)
 {
     LIBENCLOUD_TRACE;
+
+    init();
 }
 
 VpnConfig::VpnConfig (const QVariantMap &vm, Config *cfg)
     : _valid(true)
 {
     LIBENCLOUD_TRACE;
+
+    init();
 
     LIBENCLOUD_ERR_IF (fromMap(vm));
 
@@ -82,6 +86,7 @@ QString VpnConfig::toString () const
     QString s;
     QTextStream out(&s);
 
+    out << "mode: " << _mode << ", ";
     out << "host: " << _host << ", ";
     out << "port: " << QString::number(_port) << ", ";
     out << "proto: " << _proto << ", ";
@@ -99,12 +104,13 @@ int VpnConfig::toFile (const QString &path) const
     QTextStream out(&s);
     QFile configFile(path);
 
+    out << _mode << endl;
     out << "remote" << ' ' << _host << endl;
     out << "port" << ' ' << QString::number(_port) << endl;
     if (_proto != "null")
         out << "proto" << ' ' << _proto << endl;
     if (_type != "null")
-        out << "type" << ' ' << _type << endl;
+        out << "dev" << ' ' << _type << endl;
     if (_caPath != "")
         out << "ca" << ' ' << '"' << _caPath << '"' << endl;
     if (_certPath != "")
@@ -120,6 +126,17 @@ int VpnConfig::toFile (const QString &path) const
 err:
     configFile.close();
     return ~0;
+}
+
+//
+// private methods
+//
+
+int VpnConfig::init ()
+{
+    _mode = "client";
+
+    return 0;
 }
 
 } // namespace libencloud

@@ -25,8 +25,11 @@ public:
     int toFile (const QString &path) const;
     
 private:
+    int init ();
+
     bool _valid;
 
+    QString _mode;
     QString _host;
     int _port;
     QString _proto;
