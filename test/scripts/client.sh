@@ -3,7 +3,11 @@
 [ $# -lt 1 ] && echo "Usage: $0 <action>" && exit 1
 
 HOST=localhost
+URL=/test
 PORT=8081
 ACTION=$1
 
-echo '{ "action" : "'${ACTION}'" }' | nc -q 3 ${HOST} ${PORT}
+wget -O - ${HOST}:${PORT}/${URL} 2>/dev/null
+[ $? -ne 0 ] && echo "error contacting server!"
+
+exit 0

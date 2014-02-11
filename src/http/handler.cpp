@@ -28,12 +28,16 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
+// JSONP support (bypass same-origin policy)
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 {
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_UNUSED(request);
     LIBENCLOUD_UNUSED(response);
+
+    response.getHeaders()->set("Content-Type", "application/json");
+    response.setContent("jsonpCallback({ 'state' : '" + _coreState +  "' })");
 
 #if 0
     bool ok;
