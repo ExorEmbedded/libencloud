@@ -89,12 +89,14 @@ int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 //    return ~0;
 }
 
-#if 0
-int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
-{
+//
+// private slots
+//
 
+void HttpHandler::_coreStateChanged (const QString &state)
+{
+    _coreState = state;
 }
-#endif
 
 //
 // private methods

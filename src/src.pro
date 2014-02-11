@@ -97,23 +97,13 @@ SOURCES += core/core.cpp
 # 
 
 HEADERS += $$SRCBASEDIR/include/encloud/Http
-SOURCES += http/http.cpp
-
 HEADERS += $$SRCBASEDIR/include/encloud/HttpHandler
 HEADERS += $$SRCBASEDIR/include/encloud/HttpAbstractHandler
-SOURCES += http/handler.cpp
-
 HEADERS += $$SRCBASEDIR/include/encloud/HttpRequest
-SOURCES += http/request.cpp
-
 HEADERS += $$SRCBASEDIR/include/encloud/HttpResponse
-SOURCES += http/response.cpp
-
 HEADERS += $$SRCBASEDIR/include/encloud/HttpHeaders
-SOURCES += http/headers.cpp
-
 HEADERS += $$SRCBASEDIR/include/encloud/HttpServer
-SOURCES += http/server.cpp
+SOURCES += http/*.cpp
 
 target.path = $$LIBDIR
 INSTALLS += target

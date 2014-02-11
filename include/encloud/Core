@@ -7,9 +7,10 @@
 
 namespace libencloud {
 
-class Config;
-class SetupInterface;
 class Cloud;
+class Config;
+class HttpHandler;
+class SetupInterface;
 
 class Core : public QObject
 {
@@ -24,6 +25,7 @@ public:
     int stop ();
 
     Config *getConfig () const;
+    int setHttpHandler (HttpHandler *handler);
 
 signals:
     void stateChanged (const QString &state);

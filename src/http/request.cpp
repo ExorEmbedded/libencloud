@@ -30,6 +30,8 @@ int HttpRequest::decode (const QByteArray &data)
     lines = QString(data).split("\r\n");
     LIBENCLOUD_ERR_IF (lines.count() == 0);
 
+    //LIBENCLOUD_DBG("lines: " << lines);
+
     fields = lines[0].split(' ');
     LIBENCLOUD_ERR_IF (fields.count() < 3);
 

@@ -73,6 +73,18 @@ Config *Core::getConfig () const
     return _cfg;
 }
 
+int Core::setHttpHandler (HttpHandler *handler)
+{
+    LIBENCLOUD_ERR_IF (handler == NULL);
+
+    connect(this, SIGNAL(stateChanged(QString)), 
+            (QObject *) handler, SLOT(_coreStateChanged(QString)));
+
+    return 0;
+err:
+    return ~0;
+}
+
 //
 // private slots
 // 

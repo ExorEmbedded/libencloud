@@ -1,12 +1,15 @@
 #ifndef _LIBENCLOUD_HTTP_HANDLER_H_
 #define _LIBENCLOUD_HTTP_HANDLER_H_
 
+#include <QObject>
+#include <QString>
 #include <encloud/HttpAbstractHandler>
 
 namespace libencloud {
 
-class HttpHandler : public HttpAbstractHandler
+class HttpHandler : public QObject, public HttpAbstractHandler
 {
+    Q_OBJECT;
 
 public:
 
@@ -14,6 +17,13 @@ public:
     ~HttpHandler ();
 
     int handle (const HttpRequest &request, HttpResponse &response);
+
+private slots:
+    void _coreStateChanged (const QString &state);
+
+private:
+    QString _coreState;
+
 };
 
 }  // namespace libencloud
