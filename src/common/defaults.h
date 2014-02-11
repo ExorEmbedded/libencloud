@@ -42,7 +42,7 @@
 #define LIBENCLOUD_VPN_CONF_FILE        "openvpn.conf"
 #define LIBENCLOUD_VPN_MGMT_HOST        "localhost"
 #define LIBENCLOUD_VPN_MGMT_PORT        1195
-#define LIBENCLOUD_VPN_VERBOSITY        3
+#define LIBENCLOUD_VPN_VERBOSITY        2
 #define LIBENCLOUD_RSA_BITS             1024
 
 #define LIBENCLOUD_CMD_GETINFO          "manage/commands/commands.access.cloud.getInfo"
