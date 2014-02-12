@@ -17,20 +17,26 @@
  */
 
 var statusUrl = "http://localhost:8081/test";
-var statusTimer = 3000;
-var statusTimeout = 5000;
+var statusTimer = 5000;
+var statusTimeout = 3000;  // must be < statusTimer, otherwise queue fills up
 var defaultState = "unknown (could not connect to Encloud Service)";
 
 function jsonpCallback(data) {
-    $("#msgid").html(data.state);
+
+    console.log("jsonpCallback() st: " + data.state);
+
+    $("#encloudState").html(
+            "state: " + data.state + "<br>" +
+            "need: " + data.need 
+    );
 }
 
 function jsonpError(x, t, m) {
 
-    console.log("jsonpError: " + t);
+    console.log("jsonpError() err: " + t);
 
     if (t === "timeout")
-        $("#msgid").html(defaultState);
+        $("#encloudState").html(defaultState);
 }
 
 function jsonpRequest() {
@@ -53,7 +59,7 @@ $(document).ready(onReady);
 
 </script>
 
-<div id="msgid">
+<div id="encloudState">
 <script>document.write(defaultState)</script>
 </div>
 
