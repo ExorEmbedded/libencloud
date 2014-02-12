@@ -74,7 +74,7 @@ int RetrInfoMsg::_packRequest ()
 {
 #ifdef LIBENCLOUD_MODE_SECE
     _license = QUuid(_cfg->settings->value("lic").toString());
-    LIBENCLOUD_RETURN_IF (_license.isNull(), ~0);
+    LIBENCLOUD_EMIT_RETURN_IF (_license.isNull(), need("license"), ~0);
 
     _hwInfo = utils::getHwInfo();
 #endif

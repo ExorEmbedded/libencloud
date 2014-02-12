@@ -78,7 +78,7 @@ int RetrCertMsg::_packRequest ()
     _license = QUuid(_cfg->settings->value("lic").toString());
     LIBENCLOUD_ERR_IF (_license.isNull());
 
-    _hwInfo = EceUtils::getHwInfo();
+    _hwInfo = utils::getHwInfo();
 #endif
 
     // generate temporary key and CSR

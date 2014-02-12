@@ -7,6 +7,17 @@
 
 namespace libencloud {
 
+// keep me aligned with _versionToApiHandler() factory method
+typedef enum {
+    API_VERSION_1 = 1,
+    // future extensions here
+
+    API_VERSION_CURRENT = API_VERSION_1  // set to current version
+} 
+ApiVersion;
+
+class ApiHandler;
+
 class HttpHandler : public QObject, public HttpAbstractHandler
 {
     Q_OBJECT;
@@ -16,14 +27,24 @@ public:
     HttpHandler ();
     ~HttpHandler ();
 
+    // top-level concrete handler
     int handle (const HttpRequest &request, HttpResponse &response);
+
+    // attributes used by API handlers
+    QString getCoreState() const;
+    QString getNeed() const;
 
 private slots:
     void _coreStateChanged (const QString &state);
+    void _needReceived (const QString &what);
 
 private:
-    QString _coreState;
+    HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
 
+    ApiHandler *api;
+
+    QString _coreState;
+    QString _need;
 };
 
 }  // namespace libencloud

@@ -20,6 +20,7 @@ public:
 
 signals:
     virtual void stateChanged (const QString &state) = 0;
+    virtual void need (const QString &what) = 0;
     virtual void completed () = 0;
 
 protected:

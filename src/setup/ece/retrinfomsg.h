@@ -20,6 +20,7 @@ public:
 
 signals:
     void error ();
+    void need (const QString &what);
     void processed ();
 
 public slots:

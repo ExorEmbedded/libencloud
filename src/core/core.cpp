@@ -79,6 +79,8 @@ int Core::setHttpHandler (HttpHandler *handler)
 
     connect(this, SIGNAL(stateChanged(QString)), 
             (QObject *) handler, SLOT(_coreStateChanged(QString)));
+    connect(this, SIGNAL(need(QString)), 
+            (QObject *) handler, SLOT(_needReceived(QString)));
 
     return 0;
 err:
@@ -175,6 +177,10 @@ int Core::_initSetup ()
     // state change signal forwarding
     connect(_setupObj, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
 
+    // need message signal forwarding
+    connect(_setupObj, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
+
+    // setup completion handling
     connect(_setupObj, SIGNAL(completed()), this, SLOT(_setupCompleted()));
 
     return 0;

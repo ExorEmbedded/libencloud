@@ -15,8 +15,8 @@ HttpResponse::HttpResponse ()
     LIBENCLOUD_TRACE;
 
     // set defaults
-    _version = "HTTP/1.0";
-    _status = LIBENCLOUD_HTTP_RC_OK;
+    _version = "HTTP/1.1";
+    _status = LIBENCLOUD_HTTP_STATUS_OK;
     _headers.set("Content-Type", "text/html");
 }
 
@@ -35,12 +35,17 @@ void HttpResponse::setContent (const QString &content)
     _content = content;
 }
 
+void HttpResponse::setStatus (HttpStatus status)
+{
+    _status = status;  
+}
+
 int HttpResponse::encode (QByteArray &data)
 {
     LIBENCLOUD_TRACE;
 
     data.append(_version + " " + QString::number(_status) + " " +
-            httpStatusString(_status) + "\r\n");
+            httpStatusToString(_status) + "\r\n");
 
     _headers.set("Content-Length", QString::number(_content.size()));
 

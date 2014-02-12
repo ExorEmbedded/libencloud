@@ -3,14 +3,7 @@
 #include <encloud/HttpHandler>
 #include <common/common.h>
 #include <common/config.h>
-
-#if 0
-#define LIBENCLOUD_HANDLER_VERSION             1
-#define LIBENCLOUD_HANDLER_PREFIX              "/api_v"LIBENCLOUD_HANDLER_VERSION
-#define LIBENCLOUD_HANDLER_STATUS_PATH         LIBENCLOUD_HANDLER_PREFIX"/manage/status"
-#define LIBENCLOUD_HANDLER_GUI_PATH            LIBENCLOUD_HANDLER_PREFIX"/manage/gui"
-#define LIBENCLOUD_HANDLER_SWITCHBOARD_PATH    LIBENCLOUD_HANDLER_PREFIX"/manage/access"
-#endif
+#include <http/handler.h>
 
 namespace libencloud {
 
@@ -28,69 +21,53 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
+QString HttpHandler::getCoreState () const
+{
+    return _coreState;
+}
+
+QString HttpHandler::getNeed () const
+{
+    return _need;
+}
+
 // JSONP support (bypass same-origin policy)
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 {
+    HttpAbstractHandler *apiHandler = NULL;
+    QString path;
+    QString version;
+    QRegExp versionRx(LIBENCLOUD_HANDLER_PATH_REGEX);
+    QString action;
+
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_UNUSED(request);
     LIBENCLOUD_UNUSED(response);
 
-    response.getHeaders()->set("Content-Type", "application/json");
-    response.setContent("jsonpCallback({ 'state' : '" + _coreState +  "' })");
+    path = QDir(request.getUrl()).absolutePath();
 
-#if 0
-    bool ok;
-    QVariant inJson;
-    QVariant outJson;
-#endif
-
-#if 0
-    QString method = request.getMethod();
-    QString path = QDir(request.getUrl()).absolutePath();
-
-    LIBENCLOUD_DBG("method: " << method);
     LIBENCLOUD_DBG("path: " << path);
 
-    QRegExp versionRx("/api_v(\\d+)(/.*)");
+    LIBENCLOUD_ERR_IF (path.indexOf(versionRx) < 0);
 
-    if (path.indexOf(versionRx) < 0)
-        response = _handle_error(, method);
+    version = versionRx.cap(1);
+    action = versionRx.cap(2);
 
-    QString version = versionRx.cap(1);
-    QString path = versionRx.cap(2);
+    LIBENCLOUD_DBG("version: " << version);
+    LIBENCLOUD_DBG("action: " << action);
 
-    ApiHandler apiHandler(version);
+    apiHandler = _versionToApiHandler((ApiVersion) version.toInt());
+    LIBENCLOUD_ERR_IF (apiHandler == NULL);
+    LIBENCLOUD_ERR_IF (apiHandler->handle(request, response));
 
-    response = apiHandler.handle(path, method);
-#endif
-
-#if 0
-    if (path.startsWith(LIBENCLOUD_HANDLER_STATUS_PATH))
-        response = _handle_status(path, method);
-
-    if (path.startsWith(LIBENCLOUD_HANDLER_STATUS_PATH))
-        response = _handle_status(path, method);
-    else if (path.startsWith(LIBENCLOUD_HANDLER_GUI_PATH))
-        response = _handle_gui(path, method);
-    else if (path.startsWith(LIBENCLOUD_HANDLER_SWITCHBOARD_PATH))
-        response = _handle_switchboard(path, method);
-    else
-        response = _handle_error(path, method);
-#endif
-
-#if 0
-    response.setContent("this is the body 123");
-    inJson = json::parse(message, ok);
-    LIBENCLOUD_ERR_IF (inJson.isNull() || !ok);
-    outJson = handleJson(inJson);
-    outMessage = json::serialize(outJson, ok).toAscii();
-    LIBENCLOUD_ERR_IF (outJson.isNull() || !ok);
-#endif
+    LIBENCLOUD_DELETE(apiHandler);
 
     return 0;
-//err:
-//    return ~0;
+err:
+    response.setStatus(LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+    LIBENCLOUD_DELETE(apiHandler);
+    return ~0;
 }
 
 //
@@ -102,8 +79,28 @@ void HttpHandler::_coreStateChanged (const QString &state)
     _coreState = state;
 }
 
+void HttpHandler::_needReceived (const QString &what)
+{
+    if (!_need.contains(what))
+        _need += " " + what;
+}
+
 //
 // private methods
 //
+
+// return new instance of specific api handler given version - delete when finished
+HttpAbstractHandler *HttpHandler::_versionToApiHandler (ApiVersion version)
+{
+    switch (version)
+    {
+        case API_VERSION_1:
+            return new ApiHandler1(this);
+
+        // future extensions here
+    }
+
+    return NULL;
+}
 
 }  // namespace libencloud

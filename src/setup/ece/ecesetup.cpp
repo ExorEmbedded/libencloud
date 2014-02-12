@@ -127,6 +127,7 @@ int EceSetup::_initFsm ()
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onError()));
 
     _initMsg(_retrInfoMsg);
+    connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));  // forward need message
     connect(_retrInfoState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrInfoState, SIGNAL(entered()), &_retrInfoMsg, SLOT(process()));
     connect(_retrInfoState, SIGNAL(exited()), this, SLOT(_stateExited()));

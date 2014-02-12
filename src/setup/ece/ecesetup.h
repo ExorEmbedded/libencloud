@@ -28,6 +28,7 @@ public:
 
 signals:
     void stateChanged (const QString &state);
+    void need (const QString &what);
     void retry ();
     void completed ();
 

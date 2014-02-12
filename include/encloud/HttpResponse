@@ -15,6 +15,7 @@ public:
 
     HttpHeaders *getHeaders  ();
     void setContent (const QString &content);
+    void setStatus (HttpStatus status);
 
     int encode (QByteArray &data);
 

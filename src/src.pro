@@ -103,6 +103,7 @@ HEADERS += $$SRCBASEDIR/include/encloud/HttpRequest
 HEADERS += $$SRCBASEDIR/include/encloud/HttpResponse
 HEADERS += $$SRCBASEDIR/include/encloud/HttpHeaders
 HEADERS += $$SRCBASEDIR/include/encloud/HttpServer
+HEADERS += http/*.h
 SOURCES += http/*.cpp
 
 target.path = $$LIBDIR
