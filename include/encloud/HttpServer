@@ -7,7 +7,7 @@
 #include <encloud/HttpAbstractHandler>
 
 // default port in case nothing is written to registry
-#define LIBENCLOUD_SRV_PORT_DFT 8081
+#define LIBENCLOUD_SRV_PORT_DFT 4884
 
 namespace libencloud {
 
