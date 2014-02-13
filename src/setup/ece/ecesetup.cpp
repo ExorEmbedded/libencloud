@@ -53,6 +53,10 @@ const VpnConfig *EceSetup::getVpnConfig ()
 }
 
 //
+// public slots
+//
+
+//
 // private slots
 //
 
@@ -127,7 +131,11 @@ int EceSetup::_initFsm ()
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onError()));
 
     _initMsg(_retrInfoMsg);
-    connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));  // forward need message
+    // only SECE needs external input (license), which is received via setup module
+#ifdef LIBENCLOUD_MODE_SECE
+    connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
+    connect(this, SIGNAL(licenseForward(QUuid)), &_retrInfoMsg, SLOT(licenseReceived(QUuid)));
+#endif
     connect(_retrInfoState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrInfoState, SIGNAL(entered()), &_retrInfoMsg, SLOT(process()));
     connect(_retrInfoState, SIGNAL(exited()), this, SLOT(_stateExited()));

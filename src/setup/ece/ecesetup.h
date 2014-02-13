@@ -3,6 +3,7 @@
 
 #include <QStateMachine>
 #include <QtPlugin>
+#include <QUuid>
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/ece/retrinfomsg.h>
@@ -27,10 +28,16 @@ public:
     const VpnConfig *getVpnConfig ();
 
 signals:
+
     void stateChanged (const QString &state);
-    void need (const QString &what);
     void retry ();
     void completed ();
+
+#ifdef LIBENCLOUD_MODE_SECE
+    void need (const QString &what);
+
+    void licenseForward (QUuid uuid);
+#endif
 
 private slots:
     void _stateEntered ();

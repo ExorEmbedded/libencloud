@@ -37,7 +37,17 @@ void RetrInfoMsg::process ()
 
     EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
 
-    EMIT_ERROR_ERR_IF (_packRequest());
+    switch (_packRequest())
+    {
+        case 0:  // ok - continue on
+            break;
+        case 1:  // data needed - emit a silent error
+            emit error();
+            goto err;
+        default:  // otherwise emit a nonsilent error
+            EMIT_ERROR_ERR_IF (1);
+    }
+
     EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
     // setup signals from client
@@ -49,6 +59,17 @@ void RetrInfoMsg::process ()
 err:
     return;
 }
+
+#ifdef LIBENCLOUD_MODE_SECE
+void RetrInfoMsg::licenseReceived (QUuid uuid)
+{
+    QString license = uuid.toString();
+
+    LIBENCLOUD_DBG("uuid: " << license);
+
+    _cfg->settings->setValue("lic", license);
+}
+#endif
 
 //
 // private slots
@@ -74,7 +95,12 @@ int RetrInfoMsg::_packRequest ()
 {
 #ifdef LIBENCLOUD_MODE_SECE
     _license = QUuid(_cfg->settings->value("lic").toString());
-    LIBENCLOUD_EMIT_RETURN_IF (_license.isNull(), need("license"), ~0);
+
+    if (_license.isNull()) 
+    { 
+        emit need("license");
+        return 1;
+    }
 
     _hwInfo = utils::getHwInfo();
 #endif

@@ -1,10 +1,10 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_ECE_RETRINFOMSG_H_
 #define _LIBENCLOUD_PRIV_SETUP_ECE_RETRINFOMSG_H_
 
-#include <QString>
-#include <QUuid>
 #include <QDateTime>
 #include <QSslCertificate>
+#include <QString>
+#include <QUuid>
 #include <common/client.h>
 #include <common/message.h>
 
@@ -25,6 +25,10 @@ signals:
 
 public slots:
     void process ();
+
+#ifdef LIBENCLOUD_MODE_SECE
+    void licenseReceived (QUuid uuid);
+#endif
 
 private slots:
     void _clientComplete (const QString &response);

@@ -2,9 +2,11 @@
 - setup: 4ic
 - fsm: outer + inner, stop handling
 - cloud module: 4ic / auth requests and supply via http
-- server: listen on tap interface once connected; error handling
+- server: listen on tap interface once connected; error handling;
+    check Content-Length
 - cert expiry/renewal in ece/setup (data from retrinfomsg)
 - HttpHandler: handle()
 - backoff: test recovery
 - conf: move generated stuff from etc to persistent cache
+- sece: persistent license and handle expiry
 - test: ece, sece, 4ic

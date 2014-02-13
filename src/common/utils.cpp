@@ -73,6 +73,11 @@ err:
     return NULL;
 }
 
+LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
+{
+    return uuid.toString().remove('{').remove('}');
+}
+
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 {
     return (s == NULL ? NULL : strdup(s));

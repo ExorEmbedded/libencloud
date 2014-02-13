@@ -17,6 +17,10 @@
 // cloud operations: POST actions (open, close, syncRoutes)
 #define LIBENCLOUD_HANDLER_CLOUD_PATH          "cloud"
 
+// disable heavy tracing
+#undef LIBENCLOUD_TRACE 
+#define LIBENCLOUD_TRACE do {} while(0)
+
 namespace libencloud {
 
 //
@@ -26,7 +30,7 @@ namespace libencloud {
 ApiHandler1::ApiHandler1 (HttpHandler *parent)
     : _parent(parent)
 {
-
+    LIBENCLOUD_TRACE;
 }
 
 int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
@@ -55,11 +59,11 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
     else if (action == LIBENCLOUD_HANDLER_CLOUD_PATH)
         return _handle_cloud(request, response);
     else 
-        response.setStatus(LIBENCLOUD_HTTP_STATUS_NOTFOUND);
+        LIBENCLOUD_HANDLER_STATUS(LIBENCLOUD_HTTP_STATUS_NOTFOUND);
 
     return 0;
 err:
-    response.setStatus(LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+    LIBENCLOUD_HANDLER_STATUS(LIBENCLOUD_HTTP_STATUS_BADREQUEST);
     return ~0;
 }
 
@@ -72,27 +76,77 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
     switch (httpMethodFromString(request.getMethod()))
     {
         case LIBENCLOUD_HTTP_METHOD_GET:
+
             response.setContent(
                     "jsonpCallback({"\
                         "'state' : '" + _parent->getCoreState() +  "', "\
                         "'need' : '" + _parent->getNeed() +  "'"\
                     "})");
+
             break;
         default:
-            response.setStatus(LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-            break;
+            LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }
 
+    // only reach here upon success
+    LIBENCLOUD_HANDLER_OK;
     return 0;
+err:
+    return ~0;
 }
 
 int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &response)
 {
+    LIBENCLOUD_TRACE;
+
+    switch (httpMethodFromString(request.getMethod()))
+    {
+
+#ifdef LIBENCLOUD_MODE_ECE
+        case LIBENCLOUD_HTTP_METHOD_GET:
+
+            response.setContent(
+                    "jsonpCallback({"\
+                        "'need' : '" + utils::uuid2String(_parent->getPoi()) +  "'"\
+                    "})");
+
+            break;
+#endif
+
+#ifdef LIBENCLOUD_MODE_SECE
+        case LIBENCLOUD_HTTP_METHOD_POST:
+        {
+            QUrl url;
+            QString val;
+
+            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
+                        "application/x-www-form-urlencoded",
+                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+            url.setEncodedQuery((*request.getContent()).toAscii());
+
+            if ((val = url.queryItemValue("license")) != "")
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+        }
+        break;
+#endif
+        default:
+            LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+    }
+
+    // only reach here upon success
+    LIBENCLOUD_HANDLER_OK;
     return 0;
+err:
+    return ~0;
 }
 
 int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &response)
 {
+    LIBENCLOUD_TRACE;
+
+    // only reach here upon success
+    LIBENCLOUD_HANDLER_OK;
     return 0;
 }
 

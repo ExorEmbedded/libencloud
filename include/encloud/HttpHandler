@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QUuid>
 #include <encloud/HttpAbstractHandler>
 
 namespace libencloud {
@@ -30,9 +31,20 @@ public:
     // top-level concrete handler
     int handle (const HttpRequest &request, HttpResponse &response);
 
-    // attributes used by API handlers
-    QString getCoreState() const;
-    QString getNeed() const;
+    // attributes used by HTTP API handlers
+    QString getCoreState () const;
+    QString getNeed () const;
+
+#ifdef LIBENCLOUD_MODE_ECE
+    QUuid getPoi () const;
+#endif
+
+#ifdef LIBENCLOUD_MODE_SECE
+    int setLicense (const QString &);
+#endif
+
+signals:
+    void licenseSend (QUuid uuid);
 
 private slots:
     void _coreStateChanged (const QString &state);
@@ -45,6 +57,10 @@ private:
 
     QString _coreState;
     QString _need;
+
+#ifdef LIBENCLOUD_MODE_ECE
+    QUuid _poi;
+#endif
 };
 
 }  // namespace libencloud

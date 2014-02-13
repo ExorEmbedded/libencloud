@@ -1,4 +1,5 @@
 #include <openssl/x509v3.h>
+#include <QUuid>
 #include <encloud/Core>
 #include <common/config.h>
 #include <common/crypto.h>
@@ -75,12 +76,18 @@ Config *Core::getConfig () const
 
 int Core::setHttpHandler (HttpHandler *handler)
 {
+    QObject *handlerObj = (QObject *) handler;
+
     LIBENCLOUD_ERR_IF (handler == NULL);
 
     connect(this, SIGNAL(stateChanged(QString)), 
-            (QObject *) handler, SLOT(_coreStateChanged(QString)));
+            handlerObj, SLOT(_coreStateChanged(QString)));
     connect(this, SIGNAL(need(QString)), 
-            (QObject *) handler, SLOT(_needReceived(QString)));
+            handlerObj, SLOT(_needReceived(QString)));
+
+#ifdef LIBENCLOUD_MODE_SECE
+    connect(handlerObj, SIGNAL(licenseSend(QUuid)), _setupObj, SIGNAL(licenseForward(QUuid)));
+#endif
 
     return 0;
 err:

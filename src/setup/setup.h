@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <QtPlugin>
+#include <QUuid>
 #include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
@@ -19,9 +20,16 @@ public:
     virtual const VpnConfig *getVpnConfig () = 0;
 
 signals:
+    // this -> other
     virtual void stateChanged (const QString &state) = 0;
-    virtual void need (const QString &what) = 0;
     virtual void completed () = 0;
+
+#ifdef LIBENCLOUD_MODE_SECE
+    virtual void need (const QString &what) = 0;
+
+    // other -> this
+    virtual void licenseForward (QUuid uuid) = 0;
+#endif
 
 protected:
     Config *_cfg;

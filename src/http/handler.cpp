@@ -25,15 +25,29 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
-QString HttpHandler::getCoreState () const
-{
-    return _coreState;
-}
+QString HttpHandler::getCoreState () const      { return _coreState; }
+QString HttpHandler::getNeed () const           { return _need; }
 
-QString HttpHandler::getNeed () const
+#ifdef LIBENCLOUD_MODE_ECE
+QUuid HttpHandler::getPoi  () const             { return _poi; }
+#endif
+
+#ifdef LIBENCLOUD_MODE_SECE
+int HttpHandler::setLicense (const QString &license)
 {
-    return _need;
+    LIBENCLOUD_TRACE;
+
+    QUuid uuid = QUuid(license);
+    LIBENCLOUD_ERR_MSG_IF (uuid.isNull(), "invalid license received: "
+            << license);
+
+    emit licenseSend(uuid);
+
+    return 0;
+err:
+    return ~0;
 }
+#endif
 
 // JSONP support (bypass same-origin policy)
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
@@ -51,15 +65,13 @@ int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 
     path = QDir(request.getUrl()).absolutePath();
 
-    LIBENCLOUD_DBG("path: " << path);
-
     LIBENCLOUD_ERR_IF (path.indexOf(versionRx) < 0);
 
     version = versionRx.cap(1);
     action = versionRx.cap(2);
 
-    LIBENCLOUD_DBG("version: " << version);
-    LIBENCLOUD_DBG("action: " << action);
+    LIBENCLOUD_DBG("path: " << path << ", version: " << version <<
+            ", action: " << action);
 
     apiHandler = _versionToApiHandler((ApiVersion) version.toInt());
     LIBENCLOUD_ERR_IF (apiHandler == NULL);
@@ -80,11 +92,15 @@ err:
 
 void HttpHandler::_coreStateChanged (const QString &state)
 {
+    LIBENCLOUD_TRACE;
+
     _coreState = state;
 }
 
 void HttpHandler::_needReceived (const QString &what)
 {
+    LIBENCLOUD_TRACE;
+
     if (!_need.contains(what))
         _need += " " + what;
 }
@@ -93,7 +109,8 @@ void HttpHandler::_needReceived (const QString &what)
 // private methods
 //
 
-// return new instance of specific api handler given version - delete when finished
+// return new instance of specific api handler given version 
+// delete when finished
 HttpAbstractHandler *HttpHandler::_versionToApiHandler (ApiVersion version)
 {
     switch (version)
