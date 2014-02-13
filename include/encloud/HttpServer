@@ -11,6 +11,13 @@
 
 namespace libencloud {
 
+typedef struct
+{
+    QByteArray data;
+    qint64 bytesExpected;
+} 
+http_context_t;
+
 class HttpServer : public QTcpServer
 {
     Q_OBJECT
@@ -37,6 +44,7 @@ private:
     QVariant handleJson (QVariant json);
 
     QTcpSocket *_socket;
+    QMap<QTcpSocket *, http_context_t> _contexts;
     HttpAbstractHandler *_handler;
 };
 

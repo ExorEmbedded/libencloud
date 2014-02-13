@@ -13,7 +13,7 @@ public:
     HttpResponse ();
     ~HttpResponse ();
 
-    HttpHeaders *getHeaders  ();
+    HttpHeaders *getHeaders ();
     void setContent (const QString &content);
     void setStatus (HttpStatus status);
 

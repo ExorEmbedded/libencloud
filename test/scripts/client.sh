@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 
 [ $# -lt 1 ] && echo "Usage: $0 <action>" && exit 1
 

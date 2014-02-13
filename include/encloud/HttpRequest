@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_HTTP_REQUEST_H_
 #define _LIBENCLOUD_HTTP_REQUEST_H_
 
+#include <encloud/Http>
 #include <encloud/HttpHeaders>
 
 namespace libencloud {
@@ -17,11 +18,12 @@ public:
     QString getUrl () const;
     QString getVersion () const;
 
+    const HttpHeaders *getHeaders () const;
+    const QString *getContent () const;
+
 private:
-    QString _method;
-    QString _url;
-    QString _version;
     HttpHeaders _headers;
+    QString _content;
 };
 
 }  // namespace libencloud

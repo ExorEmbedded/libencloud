@@ -18,6 +18,10 @@
 //#  include "service.h"
 //#endif
 
+// disable heavy tracing
+#undef LIBENCLOUD_SVC_TRACE 
+#define LIBENCLOUD_SVC_TRACE do {} while(0)
+
 namespace libencloud 
 {
 
@@ -93,26 +97,43 @@ err:
 
 void HttpServer::readyRead ()
 {
-    LIBENCLOUD_SVC_TRACE;
-
-    enum { MAX_MSG = 1024 * 10 };
     QTcpSocket* socket = (QTcpSocket*)sender();
     QByteArray inData;
     QByteArray outData;
 
-    if (!socket->canReadLine())
-        return;
-    
+    LIBENCLOUD_SVC_DBG("bytesAvailable: " << QString::number(socket->bytesAvailable()));
+
     inData = socket->readAll();
     LIBENCLOUD_ERR_IF (inData.isEmpty());
 
-    outData = handleMessage(inData);
-    LIBENCLOUD_ERR_IF (outData.isEmpty());
+    LIBENCLOUD_DBG("<<<" << QString(inData).replace(LIBENCLOUD_HTTP_NL, " | "));
 
-    LIBENCLOUD_DBG("<<<" << inData);
-    LIBENCLOUD_DBG(">>>" << outData);
+    // if nothing has been received yet we need a header
+    if (_contexts[socket].data.isEmpty())
+    {
+        HttpHeaders headers;
+        LIBENCLOUD_ERR_IF (headers.decode(inData));
 
-    socket->write(outData);
+        LIBENCLOUD_DBG("header size: " << headers.getSize() << 
+                ", content-length: " << headers.get("content-length"));
+        
+        _contexts[socket].bytesExpected = headers.getSize() + headers.get("content-Length").toInt();
+    }
+
+    _contexts[socket].data.append(inData);
+
+    // check if message is complete
+    if (_contexts[socket].data.size() >= _contexts[socket].bytesExpected)
+    {
+        outData = handleMessage(_contexts[socket].data);
+        LIBENCLOUD_ERR_IF (outData.isEmpty());
+
+        LIBENCLOUD_DBG(">>>" << QString(outData).replace(LIBENCLOUD_HTTP_NL, " | "));
+
+        socket->write(outData);
+        _contexts[socket].data.clear();
+    }
+
 err:
     return;
 }
@@ -149,28 +170,12 @@ QByteArray HttpServer::handleMessage (QByteArray message)
 
     LIBENCLOUD_ERR_IF (_handler == NULL);
     LIBENCLOUD_ERR_IF (request.decode(message));
-    LIBENCLOUD_ERR_IF (_handler->handle(request, response));
+    _handler->handle(request, response);
     LIBENCLOUD_ERR_IF (response.encode(outMessage));
 
     return outMessage;
 err:
-    return "{ \"error\" : \"bad error\" }";
-}
-
-QVariant HttpServer::handleJson (QVariant json)
-{
-    QVariantMap jm = json.toMap();
-    QVariant outJson;
-    bool ok;
-
-    QString action = jm["action"].toString();
-
-    outJson = json::parse("{ \"error\" : \"none\", \"action\" : \"" + action + "\" }", ok);
-    LIBENCLOUD_ERR_IF (outJson.isNull() || !ok);
-
-    return outJson;
-err:
-    return "{ \"error\" : \"bad error\" }";
+    return "";
 }
 
 }  // namespace libencloud

@@ -3,6 +3,10 @@
 #include <common/common.h>
 #include <common/config.h>
 
+// disable heavy tracing
+#undef LIBENCLOUD_TRACE 
+#define LIBENCLOUD_TRACE do {} while(0)
+
 namespace libencloud 
 {
 
@@ -16,8 +20,12 @@ HttpResponse::HttpResponse ()
 
     // set defaults
     _version = "HTTP/1.1";
-    _status = LIBENCLOUD_HTTP_STATUS_OK;
-    _headers.set("Content-Type", "text/html");
+
+    // consider status not being set an internal error
+    _status = LIBENCLOUD_HTTP_STATUS_INTERNALERROR;
+
+    // default for errors is no content
+    //_headers.set("Content-Type", "text/html");
 }
 
 HttpResponse::~HttpResponse ()
@@ -25,10 +33,7 @@ HttpResponse::~HttpResponse ()
     LIBENCLOUD_TRACE;
 }
 
-HttpHeaders *HttpResponse::getHeaders ()
-{
-    return &_headers;
-}
+HttpHeaders *HttpResponse::getHeaders () { return &_headers; }
 
 void HttpResponse::setContent (const QString &content)
 {

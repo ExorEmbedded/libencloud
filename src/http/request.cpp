@@ -1,7 +1,12 @@
 #include <QByteArray>
-#include <encloud/HttpRequest>
 #include <common/common.h>
 #include <common/config.h>
+#include <encloud/HttpHeaders>
+#include <encloud/HttpRequest>
+
+// disable heavy tracing
+#undef LIBENCLOUD_TRACE 
+#define LIBENCLOUD_TRACE do {} while(0)
 
 namespace libencloud 
 {
@@ -25,31 +30,24 @@ int HttpRequest::decode (const QByteArray &data)
     LIBENCLOUD_TRACE;
 
     QStringList lines;
-    QStringList fields;
 
-    lines = QString(data).split("\r\n");
+    LIBENCLOUD_ERR_IF (_headers.decode(data));
+
+    lines = QString(data).split(LIBENCLOUD_HTTP_NL);
     LIBENCLOUD_ERR_IF (lines.count() == 0);
-
-    //LIBENCLOUD_DBG("lines: " << lines);
-
-    fields = lines[0].split(' ');
-    LIBENCLOUD_ERR_IF (fields.count() < 3);
-
-    _method = fields[0];
-    _url = fields[1];
-    _version = fields[2];
 
     lines.removeFirst(); 
-    LIBENCLOUD_ERR_IF (lines.count() == 0);
-    LIBENCLOUD_ERR_IF (_headers.decode(lines));
+    _content = lines.takeLast();
 
     return 0;
 err:
     return ~0;
 }
 
-QString HttpRequest::getMethod() const      { return _method; }
-QString HttpRequest::getUrl() const         { return _url; }
-QString HttpRequest::getVersion () const    { return _version; }
+QString HttpRequest::getMethod() const      { return _headers.getMethod(); }
+QString HttpRequest::getUrl() const         { return _headers.getUrl(); }
+QString HttpRequest::getVersion () const    { return _headers.getVersion(); }
+const HttpHeaders *HttpRequest::getHeaders () const  { return &_headers; }
+const QString *HttpRequest::getContent () const  { return &_content; }
 
 }  // namespace libencloud

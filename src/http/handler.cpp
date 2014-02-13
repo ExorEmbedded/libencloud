@@ -5,6 +5,10 @@
 #include <common/config.h>
 #include <http/handler.h>
 
+// disable heavy tracing
+#undef LIBENCLOUD_TRACE 
+#define LIBENCLOUD_TRACE do {} while(0)
+
 namespace libencloud {
 
 //

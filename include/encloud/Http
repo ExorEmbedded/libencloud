@@ -3,6 +3,8 @@
 
 #include <QString>
 
+#define LIBENCLOUD_HTTP_NL "\r\n"
+
 namespace libencloud {
 
 //
