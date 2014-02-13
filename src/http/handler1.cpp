@@ -46,7 +46,7 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
 
     action = versionRx.cap(2);
 
-    response.getHeaders()->set("Content-Type", "application/json");
+    response.getHeaders()->set("Content-Type", "application/javascript");
 
     if (action == LIBENCLOUD_HANDLER_STATUS_PATH)
         return _handle_status(request, response);
