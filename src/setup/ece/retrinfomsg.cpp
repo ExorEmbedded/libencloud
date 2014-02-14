@@ -68,6 +68,11 @@ void RetrInfoMsg::licenseReceived (QUuid uuid)
     LIBENCLOUD_DBG("uuid: " << license);
 
     _cfg->settings->setValue("lic", license);
+    _cfg->settings->sync();
+    LIBENCLOUD_ERR_MSG_IF (_cfg->settings->status() != QSettings::NoError, 
+            "could not write configuration to file - check permissions!");
+err:
+    return;
 }
 #endif
 
