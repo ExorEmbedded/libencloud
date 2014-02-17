@@ -112,7 +112,7 @@ void VpnClient::setState (VpnClient::State st)
 
 bool VpnClient::checkState (VpnClient::State state)
 {
-    return (state >= VpnClient::StateIdle && state <= VpnClient::StateMax);
+    return (state >= VpnClient::StateIdle && state <= VpnClient::StateLast);
 }
 
 // These values override configuration received from Switchboard

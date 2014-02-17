@@ -25,7 +25,9 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
-QString HttpHandler::getCoreState () const      { return _coreState; }
+QString HttpHandler::getCoreError () const      { return _coreError; }
+State HttpHandler::getCoreState () const        { return _coreState; }
+Progress HttpHandler::getCoreProgress () const  { return _coreProgress; }
 QString HttpHandler::getNeed () const           { return _need; }
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -90,11 +92,27 @@ err:
 // private slots
 //
 
-void HttpHandler::_coreStateChanged (const QString &state)
+void HttpHandler::_coreErrorReceived (const QString &msg)
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_DBG("msg: " << msg);
+
+    _coreError = msg;
+}
+
+void HttpHandler::_coreStateChanged (State state)
 {
     LIBENCLOUD_TRACE;
 
     _coreState = state;
+}
+
+void HttpHandler::_coreProgressReceived (const Progress &progress)
+{
+    LIBENCLOUD_TRACE;
+
+    _coreProgress = progress;
 }
 
 void HttpHandler::_needReceived (const QString &what)

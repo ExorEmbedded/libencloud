@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 [ $# -lt 1 ] && echo "Usage: $0 <action>" && exit 1
 
@@ -21,5 +21,8 @@ esac
 
 wget -O - ${ARGS} ${HOST}:${PORT}/${URL} 2>/dev/null
 [ $? -ne 0 ] && echo "error contacting server!"
+
+# in case content has no newline
+echo
 
 exit 0

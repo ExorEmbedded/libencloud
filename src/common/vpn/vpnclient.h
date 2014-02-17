@@ -43,7 +43,9 @@ public:
         StateConnectingAddingRoutes,
         StateConnected,
         StateExiting,
-        StateMax = StateExiting
+
+        StateFirst = StateConfigured,
+        StateLast = StateExiting
     }
     State;
 

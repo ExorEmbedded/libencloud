@@ -186,7 +186,7 @@ void VpnManager::parseLine (QByteArray line)
     }
     else
     {
-            parseLineState(line);
+        parseLineState(line);
     }
 err:
     return;
@@ -251,6 +251,12 @@ void VpnManager::parseLineState (QByteArray line)
     else if (qstrcmp(state, "ASSIGN_IP") == 0)
     {
         this->client->setState(VpnClient::StateConnectingAssigningIP);
+
+        if (words[3] != this->assignedIp)
+        {
+            this->assignedIp = words[3];
+            emit ipAssigned(this->assignedIp);
+        }
     }
     else if (qstrcmp(state, "ADD_ROUTES") == 0)
     {
@@ -259,6 +265,12 @@ void VpnManager::parseLineState (QByteArray line)
     else if (qstrcmp(state, "CONNECTED") == 0)
     {
         this->client->setState(VpnClient::StateConnected);
+
+        if (words[3] != this->assignedIp)
+        {
+            this->assignedIp = words[3];
+            emit ipAssigned(this->assignedIp);
+        }
     }
     else if (qstrcmp(state, "EXITING") == 0)
     {

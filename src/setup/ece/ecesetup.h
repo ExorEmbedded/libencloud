@@ -20,22 +20,40 @@ class EceSetup : public QObject, public SetupInterface
     Q_OBJECT
     Q_INTERFACES (libencloud::SetupInterface)
 
+    typedef enum {
+        StateInvalid = -1,
+        StateError = 0,
+
+        // used for steps
+        StateRetrInfo = 1,
+        StateRetrCert,
+        StateRetrConf,
+        StateCheckExpiry,
+
+        // used for total count
+        StateFirst = StateRetrInfo,
+        StateLast = StateCheckExpiry
+    } State;
+
 public:
     EceSetup (Config *cfg);
+
     int start ();
     int stop ();
 
     const VpnConfig *getVpnConfig ();
 
-signals:
+    int getTotalSteps() const;
 
-    void stateChanged (const QString &state);
+signals:
+    void error (QString msg = "");
+    void progress (const Progress &progress);
     void retry ();
     void completed ();
 
-#ifdef LIBENCLOUD_MODE_SECE
     void need (const QString &what);
 
+#ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (QUuid uuid);
 #endif
 
@@ -48,7 +66,7 @@ private slots:
 private:
     int _initFsm ();
     int _initMsg (MessageInterface &msg);
-    QString _stateStr (QState *state);
+    Progress _stateToProgress (QState *state);
 
     QStateMachine _fsm;
     Client _client;

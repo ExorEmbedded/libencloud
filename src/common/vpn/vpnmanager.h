@@ -55,6 +55,7 @@ public:
 signals:
     void authRequest ();
     void proxyAuthRequest ();
+    void ipAssigned (const QString &ip);
     void sigError (VpnManager::Error err, QString msg = "");
 
 public slots:
@@ -89,6 +90,7 @@ private:
     int port;
 
     QTimer *stateTimer;
+    QString assignedIp;
 };
 
 }  // namespace libencloud

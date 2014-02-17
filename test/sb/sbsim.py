@@ -87,7 +87,7 @@ def handler_info (req):
                         'C' : 'AU',
                         'ST' : 'Some-State',
                         'O' : 'Internet Widgits Pty Ltd',
-                        'CN' : 'label from SB 123'
+                        'CN' : 'label from SB 123'   #  ECE-only
                         }
                     },
                 # note: cert could be run through 'openssl x509' to get PEM-only part

@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QString>
 #include <QUuid>
+#include <encloud/State>
+#include <encloud/Progress>
 #include <encloud/HttpAbstractHandler>
 
 namespace libencloud {
@@ -32,7 +34,9 @@ public:
     int handle (const HttpRequest &request, HttpResponse &response);
 
     // attributes used by HTTP API handlers
-    QString getCoreState () const;
+    QString getCoreError () const;
+    State getCoreState () const;
+    Progress getCoreProgress () const;
     QString getNeed () const;
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -47,7 +51,9 @@ signals:
     void licenseSend (QUuid uuid);
 
 private slots:
-    void _coreStateChanged (const QString &state);
+    void _coreErrorReceived (const QString &msg);
+    void _coreStateChanged (State state);
+    void _coreProgressReceived (const Progress &progress);
     void _needReceived (const QString &what);
 
 private:
@@ -55,7 +61,9 @@ private:
 
     ApiHandler *api;
 
-    QString _coreState;
+    QString _coreError;
+    State _coreState;
+    Progress _coreProgress;
     QString _need;
 
 #ifdef LIBENCLOUD_MODE_ECE

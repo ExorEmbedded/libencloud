@@ -123,7 +123,7 @@ int RetrCertMsg::_decodeResponse (const QString &response)
     errString = jo["error"].toString();
     if (!errString.isEmpty())
     {
-        LIBENCLOUD_DBG ("SB error: " << errString);
+        LIBENCLOUD_ERR ("SB error: " << errString);
         goto err;
     }
 

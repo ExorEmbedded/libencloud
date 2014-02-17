@@ -33,8 +33,10 @@ int loadSslConfig (ProtocolType proto, Config *cfg, QUrl &url, QSslConfiguration
     LIBENCLOUD_RETURN_MSG_IF (cas.empty(), ~0, "missing CA cert!");
 
     //log disabled by default due to small leak in QSslCertificate::subjectInfo()
-    //LIBENCLOUD_DBG("CaCert subj_CN=" << cas.first().subjectInfo(QSslCertificate::CommonName) << \
-    //        " issuer_O=" << cas.first().issuerInfo(QSslCertificate::Organization));
+#if 0
+    LIBENCLOUD_DBG("CaCert subj_CN=" << cas.first().subjectInfo(QSslCertificate::CommonName) << \
+            " issuer_O=" << cas.first().issuerInfo(QSslCertificate::Organization));
+#endif
 
     // get local cert(s)
     QSslCertificate cert;
@@ -42,8 +44,10 @@ int loadSslConfig (ProtocolType proto, Config *cfg, QUrl &url, QSslConfiguration
     LIBENCLOUD_RETURN_MSG_IF (certs.empty(), ~0, "missing cert!");
 
     //log disabled by default due to small leak in QSslCertificate::subjectInfo()
-    //LIBENCLOUD_DBG("Cert subj_CN=" << certs.first().subjectInfo(QSslCertificate::CommonName) << \
-    //        " issuer_O=" << certs.first().issuerInfo(QSslCertificate::Organization));
+#if 0
+    LIBENCLOUD_DBG("Cert subj_CN=" << certs.first().subjectInfo(QSslCertificate::CommonName) << \
+            " issuer_O=" << certs.first().issuerInfo(QSslCertificate::Organization));
+#endif
 
     // get local key
     QFile kfile(sslconfig->keyPath.absoluteFilePath());

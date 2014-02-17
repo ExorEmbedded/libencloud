@@ -1,6 +1,8 @@
 #include <encloud/HttpHandler>
 #include <common/common.h>
 #include <common/config.h>
+#include <common/utils.h>
+#include <common/json.h>
 #include <http/handler.h>
 #include <http/handler1.h>
 
@@ -76,14 +78,30 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
     switch (httpMethodFromString(request.getMethod()))
     {
         case LIBENCLOUD_HTTP_METHOD_GET:
+        {
+            Progress progress = _parent->getCoreProgress();
+            QVariantMap j;
+            QVariantMap jProg;
+            bool ok;
 
-            response.setContent(
-                    "jsonpCallback({"\
-                        "'state' : '" + _parent->getCoreState() +  "', "\
-                        "'need' : '" + _parent->getNeed() +  "'"\
-                    "})");
+            j["state"] = _parent->getCoreState();
+            if (_parent->getCoreState() == StateError)
+                j["error"] = _parent->getCoreError();
+
+            jProg["desc"] = progress.getDesc();
+            jProg["step"] = progress.getStep();
+            jProg["total"] = progress.getTotal();
+            j["progress"] = jProg;
+
+            j["need"] = _parent->getNeed();
+
+            QString content = json::serialize(j, ok);
+            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+
+            response.setContent("jsonpCallback(" + content + ")");
 
             break;
+        }
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }

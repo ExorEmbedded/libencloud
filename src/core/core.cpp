@@ -1,6 +1,8 @@
 #include <openssl/x509v3.h>
 #include <QUuid>
 #include <encloud/Core>
+#include <encloud/Progress>
+#include <encloud/HttpServer>
 #include <common/config.h>
 #include <common/crypto.h>
 #include <setup/4ic/4icsetup.h>
@@ -74,19 +76,32 @@ Config *Core::getConfig () const
     return _cfg;
 }
 
-int Core::setHttpHandler (HttpHandler *handler)
+int Core::setServer (HttpServer *server)
 {
-    QObject *handlerObj = (QObject *) handler;
+    QObject *obj;
 
-    LIBENCLOUD_ERR_IF (handler == NULL);
+    LIBENCLOUD_ERR_IF (server == NULL);
 
-    connect(this, SIGNAL(stateChanged(QString)), 
-            handlerObj, SLOT(_coreStateChanged(QString)));
+    obj = dynamic_cast<QObject *> (server);
+
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    connect(_cloud, SIGNAL(ipAssigned(QString)), 
+            obj, SLOT(vpnIpAssigned(QString)));
+#endif
+
+    obj = dynamic_cast<QObject *> (server->getHandler());
+
+    connect(this, SIGNAL(error(QString)), 
+            obj, SLOT(_coreErrorReceived(QString)));
+    connect(this, SIGNAL(stateChanged(State)), 
+            obj, SLOT(_coreStateChanged(State)));
+    connect(this, SIGNAL(progress(Progress)), 
+            obj, SLOT(_coreProgressReceived(Progress)));
     connect(this, SIGNAL(need(QString)), 
-            handlerObj, SLOT(_needReceived(QString)));
+            obj, SLOT(_needReceived(QString)));
 
 #ifdef LIBENCLOUD_MODE_SECE
-    connect(handlerObj, SIGNAL(licenseSend(QUuid)), _setupObj, SIGNAL(licenseForward(QUuid)));
+    connect(obj, SIGNAL(licenseSend(QUuid)), _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
 
     return 0;
@@ -102,8 +117,13 @@ void Core::_stopped ()
 {
     LIBENCLOUD_TRACE;
 
+#ifndef LIBENCLOUD_DISABLE_CLOUD
     _cloud->stop();
+#endif
+
+#ifndef LIBENCLOUD_DISABLE_SETUP
     _setup->stop();
+#endif
 }
 
 void Core::_stateEntered ()
@@ -136,6 +156,35 @@ void Core::_setupCompleted ()
 
 err:
     return;
+}
+
+// Forward error state and message to http handler
+void Core::_errorReceived (const QString &msg)
+{
+    emit stateChanged(StateError);
+    emit error(msg);
+}
+
+// Remap step/nsteps and forward signal for http handler
+void Core::_progressReceived (const Progress &p)
+{
+    Progress pt(p);
+
+    // only need remapping for cloud if both setup and cloud are enabled
+#if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_SETUP)
+    if (sender() == _cloud)
+    {
+        int totalSetup = _setup->getTotalSteps();
+        pt.setStep(p.getStep() + totalSetup);
+        pt.setTotal(p.getStep() + totalSetup);
+    }
+#endif
+
+    LIBENCLOUD_DBG("descr: " << pt.getDesc() <<
+                   " step: " << pt.getStep() <<
+                   " total: " << pt.getTotal());
+
+    emit progress(pt);
 }
 
 //
@@ -181,8 +230,11 @@ int Core::_initSetup ()
     _setupObj = dynamic_cast<QObject *>(_setup);
     LIBENCLOUD_ERR_IF (_setupObj == NULL);
 
-    // state change signal forwarding
-    connect(_setupObj, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
+    // error signal handling
+    connect(_setupObj, SIGNAL(error(QString)), this, SLOT(_errorReceived(QString)));
+
+    // progress signal handling
+    connect(_setupObj, SIGNAL(progress(Progress)), this, SLOT(_progressReceived(Progress)));
 
     // need message signal forwarding
     connect(_setupObj, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
@@ -202,8 +254,11 @@ int Core::_initCloud ()
     _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
 
-    // state change signal forwarding
-    connect(_cloud, SIGNAL(stateChanged(QString)), this, SIGNAL(stateChanged(QString)));
+    // error signal handling
+    connect(_cloud, SIGNAL(error(QString)), this, SLOT(_errorReceived(QString)));
+
+    // progress signal handling
+    connect(_cloud, SIGNAL(progress(Progress)), this, SLOT(_progressReceived(Progress)));
 
     // authentication request forwarding
     connect(_cloud, SIGNAL(authRequest()), this, SIGNAL(authRequest()));

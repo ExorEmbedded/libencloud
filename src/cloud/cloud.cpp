@@ -1,6 +1,7 @@
 #include <common/common.h>
 #include <common/config.h>
-#include "cloud.h"
+#include <encloud/Progress>
+#include <cloud/cloud.h>
 
 namespace libencloud {
 
@@ -22,11 +23,16 @@ Cloud::Cloud (Config *cfg)
     LIBENCLOUD_ERR_IF (_vpnManager == NULL);
 
     // state change signals handled locally then routed
-    connect(_vpnClient, SIGNAL(stateChanged(VpnClient::State)), this, SLOT(_vpnStateChanged(VpnClient::State)));
+    connect(_vpnClient, SIGNAL(stateChanged(VpnClient::State)),
+            this, SLOT(_vpnStateChanged(VpnClient::State)));
 
-    // authentication requests routed from manager
-    connect(_vpnManager, SIGNAL(authRequest()), this, SIGNAL(authRequest()));
-    connect(_vpnManager, SIGNAL(proxyAuthRequest()), this, SIGNAL(proxyAuthRequest()));
+    // ip assignment and gauthentication requests routed from manager
+    connect(_vpnManager, SIGNAL(ipAssigned(QString)),
+            this, SIGNAL(ipAssigned(QString)));
+    connect(_vpnManager, SIGNAL(authRequest()),
+            this, SIGNAL(authRequest()));
+    connect(_vpnManager, SIGNAL(proxyAuthRequest()),
+            this, SIGNAL(proxyAuthRequest()));
 
     // local error handling
     connect(_vpnClient, SIGNAL(sigError(VpnClient::Error, QString)), 
@@ -75,15 +81,18 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
 
     LIBENCLOUD_DBG("state: " << stateStr);
 
-    switch (VpnClient::StateStarted)
+    switch (state)
     {
         case VpnClient::StateStarted:
             _vpnManager->attach(_vpnClient, LIBENCLOUD_VPN_MGMT_HOST,
                     _cfg->config.vpnMgmtPort);
             break;
+        default:
+            break;
     }
 
-    emit stateChanged(stateStr);
+    emit progress(Progress(stateStr, state, 
+                VpnClient::StateLast - VpnClient::StateFirst + 1));
 }
 
 void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)

@@ -5,6 +5,8 @@
 #include <QString>
 #include <QtPlugin>
 #include <QUuid>
+#include <encloud/Progress>
+#include <encloud/State>
 #include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
@@ -17,17 +19,21 @@ public:
 
     virtual int start () = 0;
     virtual int stop () = 0;
+
     virtual const VpnConfig *getVpnConfig () = 0;
+
+    virtual int getTotalSteps() const = 0;
 
 signals:
     // this -> other
-    virtual void stateChanged (const QString &state) = 0;
+    virtual void error (QString msg = "") = 0;
+    virtual void progress (const Progress &progress) = 0;
     virtual void completed () = 0;
 
-#ifdef LIBENCLOUD_MODE_SECE
     virtual void need (const QString &what) = 0;
 
     // other -> this
+#ifdef LIBENCLOUD_MODE_SECE
     virtual void licenseForward (QUuid uuid) = 0;
 #endif
 

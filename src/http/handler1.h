@@ -19,7 +19,13 @@
  * GET /api_v1/status
  * 
  *      => "jsonpCallback({
- *              'state' : 'Bad state',          # string representation of state
+ *              'state' : 1,                    # string representation of state
+ *              'error' : 'Some error',         # OPTIONAL: defined only if state == 1 (StateError)
+ *              'progress' {
+ *                  'desc: 'step description',  # string representation of step
+ *                  'step': 2,                  # current step number 
+ *                  'step': 5                   # total number of steps
+ *              },
  *              'need' : 'license auth'         # LIST of space-separated "need" strings
  *          })"                                   to be fulfilled via API
  * 

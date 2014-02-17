@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QString>
+#include <encloud/State>
+#include <encloud/Progress>
 #include <common/config.h>
 #include <common/vpn/vpnclient.h>
 #include <common/vpn/vpnmanager.h>
@@ -21,7 +23,9 @@ public:
 	int stop ();
 
 signals:
-    void stateChanged (const QString &state);
+    void error (QString msg = "");
+    void progress (const Progress &progress);
+    void ipAssigned (const QString &ip);
     void authRequest ();
     void proxyAuthRequest ();
 

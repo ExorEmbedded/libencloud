@@ -23,6 +23,12 @@ HEADERS += common/helpers.h
 HEADERS += $$SRCBASEDIR/include/encloud/Info
 SOURCES += common/info.cpp
 
+HEADERS += $$SRCBASEDIR/include/encloud/State
+SOURCES += common/state.cpp
+
+HEADERS += $$SRCBASEDIR/include/encloud/Progress
+SOURCES += common/progress.cpp
+
 HEADERS += common/config.h
 SOURCES += common/config.cpp
 

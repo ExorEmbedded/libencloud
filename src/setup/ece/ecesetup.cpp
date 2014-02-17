@@ -52,6 +52,11 @@ const VpnConfig *EceSetup::getVpnConfig ()
     return _retrConfMsg.getVpnConfig();
 }
 
+int EceSetup::getTotalSteps() const
+{
+    return StateLast - StateFirst + 1;
+}
+
 //
 // public slots
 //
@@ -63,8 +68,9 @@ const VpnConfig *EceSetup::getVpnConfig ()
 void EceSetup::_stateEntered ()
 {
     QState *state = qobject_cast<QState *>(sender());
+    Progress p = _stateToProgress(state);
 
-    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ") " <<
+    LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ") " <<
             " previousState: " << _previousState);
 
     if (!_error)
@@ -72,7 +78,7 @@ void EceSetup::_stateEntered ()
 
     _previousState = state;
 
-    emit stateChanged(_stateStr(state));
+    emit progress(p);
 
     if (state == _completedState)
         emit completed();
@@ -81,8 +87,9 @@ void EceSetup::_stateEntered ()
 void EceSetup::_stateExited ()
 {
     QState *state = qobject_cast<QState *>(sender());
+    Progress p = _stateToProgress(state);
 
-    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
+    LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ")");
 
     _error = false;
 }
@@ -101,7 +108,7 @@ void EceSetup::_onError ()
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);
 
-    emit stateChanged(_stateStr(state));
+    emit error();
 }
 
 void EceSetup::_onRetryTimeout ()
@@ -131,9 +138,9 @@ int EceSetup::_initFsm ()
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onError()));
 
     _initMsg(_retrInfoMsg);
-    // only SECE needs external input (license), which is received via setup module
-#ifdef LIBENCLOUD_MODE_SECE
     connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
+    // only SECE needs license, which is received via setup module
+#ifdef LIBENCLOUD_MODE_SECE
     connect(this, SIGNAL(licenseForward(QUuid)), &_retrInfoMsg, SLOT(licenseReceived(QUuid)));
 #endif
     connect(_retrInfoState, SIGNAL(entered()), this, SLOT(_stateEntered()));
@@ -179,20 +186,43 @@ int EceSetup::_initMsg (MessageInterface &msg)
     return 0;
 }
 
-QString EceSetup::_stateStr (QState *state)
+Progress EceSetup::_stateToProgress (QState *state)
 {
+    Progress p;
+
+    p.setTotal(getTotalSteps());
+
     if (state == _errorState)
-        return tr("Setup Error State");
+    {
+        p.setStep(-1);
+        p.setDesc("Setup Error State");
+    }
     else if (state == _retrInfoState)
-        return tr("Retrieving Info from Switchboard");
+    {
+        p.setStep(StateRetrInfo);
+        p.setDesc("Retrieving Info from Switchboard");
+    }
     else if (state == _retrCertState)
-        return tr("Retrieving Certificate from Switchboard");
+    {
+        p.setStep(StateRetrCert);
+        p.setDesc("Retrieving Certificate from Switchboard");
+    }
     else if (state == _retrConfState)
-        return tr("Retrieving Configuration from Switchboard");
+    {
+        p.setStep(StateRetrConf);
+        p.setDesc("Retrieving Configuration from Switchboard");
+    }
     else if (state == _checkExpiryState)
-        return tr("Checking Certificate/License Expiry");
+    {
+        p.setStep(StateCheckExpiry);
+        p.setDesc("Checking Certificate/License Expiry");
+    }
     else
-        return "";
+    {
+        p.setStep(StateInvalid);
+    }
+
+    return p;
 }
 
 } // namespace libencloud

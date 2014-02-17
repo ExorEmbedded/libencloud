@@ -1,12 +1,12 @@
-- new async APIs
-- setup: 4ic
+- setup: 4ic (msg, ip, pages)
 - fsm: outer + inner, stop handling
 - cloud module: 4ic / auth requests and supply via http
-- server: listen on tap interface once connected; error handling;
+- new error handling
+- server: listen on tap interface once connected!;
     check Content-Length
 - cert expiry/renewal in ece/setup (data from retrinfomsg)
-- HttpHandler: handle()
 - backoff: test recovery
 - conf: move generated stuff from etc to persistent cache
 - sece: persistent license and handle expiry
+- build: qmake PRODUCT variable for component placement 
 - test: ece, sece, 4ic

@@ -5,6 +5,7 @@
 #include <encloud/HttpServer>
 #include <common/common.h>
 #include <common/config.h>
+#include <http/server.h>
 
 #define LIBENCLOUD_SRV_LISTEN          "127.0.0.1"
 
@@ -22,32 +23,41 @@
 #undef LIBENCLOUD_SVC_TRACE 
 #define LIBENCLOUD_SVC_TRACE do {} while(0)
 
-namespace libencloud 
-{
+namespace libencloud {
 
 //
 // public methods
 //
-
+    
 HttpServer::HttpServer (QObject *parent)
-    : QTcpServer(parent)
+    : _localServer(NULL)
+    , _cloudServer(NULL)
+    , _handler(NULL)
 {
     LIBENCLOUD_SVC_TRACE;
+
+    _localServer = new HttpServerPriv(parent); 
+    _cloudServer = new HttpServerPriv(parent); 
 }
 
 HttpServer::~HttpServer ()
 {
     LIBENCLOUD_SVC_TRACE;
 
-    LIBENCLOUD_DELETE(_socket);
-    close();
+    LIBENCLOUD_DELETE(_localServer);
+    LIBENCLOUD_DELETE(_cloudServer);
 }
+
+HttpAbstractHandler *HttpServer::getHandler () { return _handler; }
 
 int HttpServer::setHandler (HttpAbstractHandler *handler)
 {
-    LIBENCLOUD_ERR_IF (handler == NULL);
+    LIBENCLOUD_SVC_ERR_IF (handler == NULL);
 
     _handler = handler;
+
+    _localServer->setHandler(handler);
+    _cloudServer->setHandler(handler);
 
     return 0;
 err:
@@ -58,14 +68,74 @@ int HttpServer::start ()
 {
     LIBENCLOUD_SVC_TRACE;
 
-    LIBENCLOUD_ERR_IF(!listen(QHostAddress(LIBENCLOUD_SRV_LISTEN), 
-                LIBENCLOUD_SRV_PORT_DFT));  
+    // initially listens only on local interface
+    _localServer->start(QHostAddress(LIBENCLOUD_SRV_LISTEN), LIBENCLOUD_SRV_PORT_DFT);
+
+    return 0;
+}
+
+int HttpServer::stop ()
+{
+    LIBENCLOUD_SVC_TRACE;
+
+    _localServer->stop();
+    _cloudServer->stop();
+
+    return 0;
+}
+
+//
+// public slots
+//
+
+void HttpServer::vpnIpAssigned (const QString &ip)
+{
+    LIBENCLOUD_SVC_DBG ("ip: " << ip);
+
+    if (ip != "")
+        _cloudServer->start(QHostAddress(ip), LIBENCLOUD_SRV_PORT_DFT);
+}
+
+//
+// public methods
+//
+
+HttpServerPriv::HttpServerPriv (QObject *parent)
+    : QTcpServer(parent)
+{
+    LIBENCLOUD_SVC_TRACE;
+}
+
+HttpServerPriv::~HttpServerPriv ()
+{
+    LIBENCLOUD_SVC_TRACE;
+
+    close();
+}
+
+int HttpServerPriv::setHandler (HttpAbstractHandler *handler)
+{
+    LIBENCLOUD_ERR_IF (handler == NULL);
+
+    _handler = handler;
+
     return 0;
 err:
     return ~0;
 }
 
-int HttpServer::stop ()
+int HttpServerPriv::start (const QHostAddress &address, quint16 port)
+{
+    LIBENCLOUD_SVC_TRACE;
+
+    LIBENCLOUD_ERR_IF (!listen(address, port));
+
+    return 0;
+err:
+    return ~0;
+}
+
+int HttpServerPriv::stop ()
 {
     LIBENCLOUD_SVC_TRACE;
     
@@ -74,18 +144,18 @@ int HttpServer::stop ()
     return 0;
 }
 
-void HttpServer::incomingConnection (int sd)
+void HttpServerPriv::incomingConnection (int sd)
 {
     LIBENCLOUD_SVC_TRACE;
 
-    _socket = new QTcpSocket(this); 
-    LIBENCLOUD_SVC_ERR_IF (_socket == NULL);
+    QTcpSocket *socket = new QTcpSocket(this); 
+    LIBENCLOUD_SVC_ERR_IF (socket == NULL);
 
-    connect(_socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
-    connect(_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(_socket, SIGNAL(error(QAbstractSocket::SocketError)), 
+    connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    connect(socket, SIGNAL(error(QAbstractSocket::SocketError)), 
             this, SLOT(error(QAbstractSocket::SocketError)));
-    _socket->setSocketDescriptor(sd);
+    socket->setSocketDescriptor(sd);
 
 err:
     return;
@@ -95,7 +165,7 @@ err:
 // private slots
 //
 
-void HttpServer::readyRead ()
+void HttpServerPriv::readyRead ()
 {
     QTcpSocket* socket = (QTcpSocket*)sender();
     QByteArray inData;
@@ -138,7 +208,7 @@ err:
     return;
 }
 
-void HttpServer::disconnected ()
+void HttpServerPriv::disconnected ()
 {
     LIBENCLOUD_SVC_TRACE;
 
@@ -146,7 +216,7 @@ void HttpServer::disconnected ()
     socket->deleteLater();
 }
 
-void HttpServer::error (QAbstractSocket::SocketError socketError)
+void HttpServerPriv::error (QAbstractSocket::SocketError socketError)
 {
     Q_UNUSED(socketError);
 
@@ -160,7 +230,7 @@ void HttpServer::error (QAbstractSocket::SocketError socketError)
 // private methods
 //
 
-QByteArray HttpServer::handleMessage (QByteArray message)
+QByteArray HttpServerPriv::handleMessage (QByteArray message)
 {
     LIBENCLOUD_SVC_TRACE;
 

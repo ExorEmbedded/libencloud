@@ -1,0 +1,33 @@
+#ifndef _LIBENCLOUD_PROGRESS_H_
+#define _LIBENCLOUD_PROGRESS_H_
+
+#include <QString>
+
+namespace libencloud 
+{
+
+class Progress
+{
+public:
+
+    Progress ();
+    Progress (QString desc, int step, int total);
+
+    QString getDesc () const;
+    void setDesc (const QString &desc);
+
+    int getStep () const;
+    void setStep (int step);
+
+    int getTotal () const;
+    void setTotal (int total);
+
+private:
+    QString _desc;
+    int _step;
+    int _total;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_PROGRESS_H_

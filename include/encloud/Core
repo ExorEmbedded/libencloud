@@ -4,12 +4,14 @@
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
+#include <encloud/State>
+#include <encloud/Progress>
 
 namespace libencloud {
 
 class Cloud;
 class Config;
-class HttpHandler;
+class HttpServer;
 class SetupInterface;
 
 class Core : public QObject
@@ -25,10 +27,12 @@ public:
     int stop ();
 
     Config *getConfig () const;
-    int setHttpHandler (HttpHandler *handler);
+    int setServer (HttpServer *server);
 
 signals:
-    void stateChanged (const QString &state);
+    void error (const QString &msg);
+    void stateChanged (State state);
+    void progress (const Progress &p);
     void need (const QString &what);
     void authRequest ();
     void proxyAuthRequest ();
@@ -38,9 +42,10 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
+    void _errorReceived (const QString &msg);
+    void _progressReceived (const Progress &p);
 
 private:
-    void _onError ();
     int _initConfig ();
     int _initCrypto ();
     int _initSetup ();
