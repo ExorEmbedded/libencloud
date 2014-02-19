@@ -124,7 +124,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
     switch (httpMethodFromString(request.getMethod()))
     {
 
-#ifdef LIBENCLOUD_MODE_4IC
+#ifdef LIBENCLOUD_MODE_QIC
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QUrl url;

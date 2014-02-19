@@ -10,7 +10,7 @@
 # 
 # Note: mode selection has implications on both behaviour and packaging!
 #
-#   mode4ic     Endian 4i Connect mode
+#   modeqic     Endian 4i Connect / Exor JMConnect mode
 #   modeece     Endian Cloud Enabler mode
 #   modesece    Software Endian Cloud Enabler mode
 #
@@ -24,7 +24,7 @@
 #
 PKGNAME = libencloud
 
-PRODUCT_4IC="4iConnect"
+PRODUCT_QIC="4iConnect"
 PRODUCT_JMC="JMConnect"
 PRODUCT_ENCLOUD="Encloud"
 PRODUCT_SECE="SECE"  # FIXME
@@ -57,10 +57,10 @@ debug {
     QMAKE_CXXFLAGS += -g 
 }
 
-mode4ic {
-    DEFINES += LIBENCLOUD_MODE_4IC
+modeqic {
+    DEFINES += LIBENCLOUD_MODE_QIC
     Endian {
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_4IC}\\\"
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_QIC}\\\"
     } else {
         DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
     }
@@ -71,7 +71,7 @@ mode4ic {
     DEFINES += LIBENCLOUD_MODE_SECE
     DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_SECE}\\\"
 } else {
-    error("a mode must be defined (CONFIG += mode4ic|modeece|modesece)!")
+    error("a mode must be defined (CONFIG += modeqic|modeece|modesece)!")
 }
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }

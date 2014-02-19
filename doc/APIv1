@@ -35,7 +35,7 @@
 
 [ Authentication/Login API ]
 
-* POST /api_v1/auth                    [ Note: 4IC only! ]
+* POST /api_v1/auth                    [ Note: QIC only! ]
 
     Def 'type'          type of authentication: 'sb','sb_proxy','cloud','cloud_proxy'
     Def 'url'           OPTIONAL destination url for login authentication
@@ -56,7 +56,7 @@
                  'poi' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
              })"
 
-* GET /api_v1/setup                    [ Note: 4IC only! ]                              [[TODO]]
+* GET /api_v1/setup                    [ Note: QIC only! ]                              [[TODO]]
 
     e.g.    "jsonpCallback({
                  'server ' : {

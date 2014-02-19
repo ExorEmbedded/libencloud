@@ -1,11 +1,11 @@
 #include <QTimer>
 #include <common/common.h>
 #include <common/config.h>
-#include <setup/4ic/4icsetup.h>
+#include <setup/qic/qicsetup.h>
 
 namespace libencloud {
 
-Q4icSetup::Q4icSetup (Config *cfg)
+QicSetup::QicSetup (Config *cfg)
     : SetupInterface(cfg)
     , _backoff(1)
 {
@@ -24,7 +24,7 @@ Q4icSetup::Q4icSetup (Config *cfg)
             &_setupMsg, SLOT(authSupplied(Auth)));
 }
 
-int Q4icSetup::start ()
+int QicSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
@@ -36,19 +36,19 @@ int Q4icSetup::start ()
 }
 
 // TODO
-int Q4icSetup::stop ()
+int QicSetup::stop ()
 {
     LIBENCLOUD_TRACE;
 
     return 0;
 }
 
-const VpnConfig *Q4icSetup::getVpnConfig ()
+const VpnConfig *QicSetup::getVpnConfig ()
 {
     return _setupMsg.getVpnConfig();
 }
 
-int Q4icSetup::getTotalSteps() const
+int QicSetup::getTotalSteps() const
 {
     return StateLast - StateFirst + 1;
 }
@@ -57,7 +57,7 @@ int Q4icSetup::getTotalSteps() const
 // private slots
 //
 
-void Q4icSetup::_onError (QString msg)
+void QicSetup::_onError (QString msg)
 {
     LIBENCLOUD_DBG("backoff: " << QString::number(_backoff));
 
@@ -68,14 +68,14 @@ void Q4icSetup::_onError (QString msg)
     emit error(msg);
 }
 
-void Q4icSetup::_onProcessed ()
+void QicSetup::_onProcessed ()
 {
     _backoff = 1;
 
     emit completed();
 }
 
-void Q4icSetup::_onRetryTimeout ()
+void QicSetup::_onRetryTimeout ()
 {
     LIBENCLOUD_TRACE;
 
@@ -87,7 +87,7 @@ void Q4icSetup::_onRetryTimeout ()
 // private methods
 //
 
-int Q4icSetup::_initMsg (MessageInterface &msg)
+int QicSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
     msg.setClient(&_client);

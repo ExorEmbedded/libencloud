@@ -32,7 +32,7 @@ err:
     return ;
 }
 
-// From 4IC-style string with overrides from local configuration
+// From QIC-style string with overrides from local configuration
 VpnConfig::VpnConfig (const QString &s, Config *cfg)
     : _valid(true)
 {

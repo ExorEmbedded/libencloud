@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_
 
 #include <QString>
 #include <encloud/Auth>
@@ -7,7 +7,7 @@
 #include <common/message.h>
 #include <common/vpn/vpnconfig.h>
 
-#define LIBENCLOUD_SETUP_4IC_CONFIG_URL        "/manage/status/status.access.config/"
+#define LIBENCLOUD_SETUP_QIC_CONFIG_URL        "/manage/status/status.access.config/"
 
 namespace libencloud {
 
@@ -47,4 +47,4 @@ private:
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_ */

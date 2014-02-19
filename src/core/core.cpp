@@ -6,7 +6,7 @@
 #include <encloud/HttpServer>
 #include <common/config.h>
 #include <common/crypto.h>
-#include <setup/4ic/4icsetup.h>
+#include <setup/qic/qicsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
 
@@ -239,8 +239,8 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
-#if defined(LIBENCLOUD_MODE_4IC)
-    _setup = new Q4icSetup(_cfg);
+#if defined(LIBENCLOUD_MODE_QIC)
+    _setup = new QicSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
     _setup = new EceSetup(_cfg);
 #endif

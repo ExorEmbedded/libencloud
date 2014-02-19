@@ -7,7 +7,7 @@ git clean -fdx .
 qmake CONFIG+="endian modesece"
 
 #qmake CONFIG+=modeece
-#qmake CONFIG+=mode4ic
+#qmake CONFIG+=modeqic
 
 make check
 

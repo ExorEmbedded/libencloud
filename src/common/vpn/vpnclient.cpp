@@ -135,7 +135,7 @@ QStringList VpnClient::getArgs (void)
     args << "--management-forget-disconnect";
     args << "--management-query-passwords";
 
-#ifdef LIBENCLOUD_MODE_4IC
+#ifdef LIBENCLOUD_MODE_QIC
     args << "--auth-user-pass";
 #endif
 

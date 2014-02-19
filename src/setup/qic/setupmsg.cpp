@@ -2,7 +2,7 @@
 #include <common/common.h>
 #include <common/config.h>
 #include <common/utils.h>
-#include <setup/4ic/setupmsg.h>
+#include <setup/qic/setupmsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
 #define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
@@ -45,12 +45,12 @@ void SetupMsg::process ()
     EMIT_ERROR_ERR_IF (_client == NULL);
 
     url.setUrl(_auth.getUrl());
-    url.setPath(LIBENCLOUD_SETUP_4IC_CONFIG_URL);
+    url.setPath(LIBENCLOUD_SETUP_QIC_CONFIG_URL);
 
     LIBENCLOUD_DBG("url: " << url);
 
     // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_4IC;
+    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QIC;
     headers["Authorization"] =  headerData.toLocal8Bit();
 
     // setup signals from client
@@ -128,7 +128,7 @@ int SetupMsg::_decodeResponse (const QString &response)
             json["openvpn_cert"].isNull(),
             error(tr("Error parsing SB configuration")));
 
-    // most fields not used locally (retrieved by 4IC via API)
+    // most fields not used locally (retrieved by QIC via API)
     // for now we're only interested in VPN configuration,
     _vpnConfig = VpnConfig(json["openvpn_conf"].toString(), _cfg);
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
