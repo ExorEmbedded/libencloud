@@ -16,7 +16,7 @@ libencloud configuration
     "url" : "https://sb-host"
   },
 
-  "timeout" : 10000,                            # timeout in ms for net operations
+  "timeout" : 3,                                # exponential base for retry in seconds
 
   "csr" : {                                     # certificate Request template
     "tmpl" : "csr-tmpl.json"              

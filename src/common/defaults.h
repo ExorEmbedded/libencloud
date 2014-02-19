@@ -14,7 +14,14 @@
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP" v"LIBENCLOUD_VERSION" r"LIBENCLOUD_REVISION
 #endif
 
+#define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
+#define LIBENCLOUD_USERAGENT_4IC        "Endian 4i Connect "LIBENCLOUD_VERSION
+
 #define LIBENCLOUD_SB_URL               "https://sb-host/"
+
+// initial timeout for retry (in seconds) - grows exponentially
+#define LIBENCLOUD_RETRY_TIMEOUT        3
+
 #define LIBENCLOUD_TIMEOUT              10000  /* ms */
 #define LIBENCLOUD_URL_SZ               1024
 #define LIBENCLOUD_PATH_SZ              512

@@ -13,11 +13,8 @@ class RetrCertMsg : public QObject, public MessageInterface
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
 
-public:
-    int init ();
-
 signals:
-    void error ();
+    void error (QString msg = "");
     void processed ();
 
 public slots:

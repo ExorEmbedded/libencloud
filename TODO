@@ -1,12 +1,14 @@
 - setup: 4ic (msg, ip, pages)
 - fsm: outer + inner, stop handling
-- cloud module: 4ic / auth requests and supply via http
+- ssl: CA support/check
+- cloud module, sb: 4ic / auth requests and supply via http
+- vpn: validation of sb config
+- 4ic: listen port to registry and notification to Switchboard
 - new error handling
 - server: listen on tap interface once connected!;
     check Content-Length
-- cert expiry/renewal in ece/setup (data from retrinfomsg)
+- cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - backoff: test recovery
 - conf: move generated stuff from etc to persistent cache
-- sece: persistent license and handle expiry
-- build: qmake PRODUCT variable for component placement 
+- build: qmake PRODUCT variable for component placement, split by org
 - test: ece, sece, 4ic

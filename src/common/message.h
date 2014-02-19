@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_MESSAGE_H_
 #define _LIBENCLOUD_PRIV_MESSAGE_H_
 
+#include <QString>
 #include <QtPlugin>
 #include <common/config.h>
 #include <common/client.h>
@@ -15,11 +16,10 @@ class MessageInterface
 public:
     void setConfig (Config *cfg);
     void setClient (Client *client);
-    virtual int init () = 0;
 
 signals:
     // an error occurred
-    virtual void error () = 0;
+    virtual void error (QString msg = "") = 0;
 
     // message processing COMPLETED ()
     virtual void processed () = 0;

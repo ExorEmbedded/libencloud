@@ -10,13 +10,6 @@ namespace libencloud {
 // public methods
 //
 
-int RetrConfMsg::init ()
-{
-    LIBENCLOUD_TRACE;
-
-    return 0;
-}
-
 const VpnConfig *RetrConfMsg::getVpnConfig ()
 {
     return &_vpnConfig;
@@ -44,7 +37,8 @@ void RetrConfMsg::process ()
     EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
     // setup signals from client
-    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
+    disconnect(_client, 0, this, 0);
+    connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     // for SNI, Host field in header must match name of operation-host

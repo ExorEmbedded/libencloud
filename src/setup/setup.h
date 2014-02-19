@@ -5,6 +5,7 @@
 #include <QString>
 #include <QtPlugin>
 #include <QUuid>
+#include <encloud/Auth>
 #include <encloud/Progress>
 #include <encloud/State>
 #include <common/vpn/vpnconfig.h>
@@ -28,11 +29,11 @@ signals:
     // this -> other
     virtual void error (QString msg = "") = 0;
     virtual void progress (const Progress &progress) = 0;
+    virtual void need (const QString &what) = 0;
     virtual void completed () = 0;
 
-    virtual void need (const QString &what) = 0;
-
-    // other -> this
+    // other -> this (optional overrides)
+    void authSupplied (const Auth &auth);  
 #ifdef LIBENCLOUD_MODE_SECE
     virtual void licenseForward (QUuid uuid) = 0;
 #endif

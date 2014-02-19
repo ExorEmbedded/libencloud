@@ -1,0 +1,32 @@
+#ifndef _LIBENCLOUD_AUTH_H_
+#define _LIBENCLOUD_AUTH_H_
+
+#include <QString>
+
+namespace libencloud 
+{
+
+class Auth
+{
+public:
+    Auth ();
+    Auth (const QString &type, const QString &url, 
+            const QString &user, const QString &pass);
+
+    bool isValid () const;
+    const QString &getType () const;
+    const QString &getUrl () const;
+    const QString &getUser () const;
+    const QString &getPass () const;
+
+protected:
+    bool _valid;
+    QString _type;
+    QString _url;
+    QString _user;
+    QString _pass;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_AUTH_H_

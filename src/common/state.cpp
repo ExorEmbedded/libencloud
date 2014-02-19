@@ -10,14 +10,14 @@ QString stateToString (State state)
     {
         case StateIdle:
             return "Idle";
+        case StateError:
+            return "Error";
         case StateSetup:
             return "Setting Up";
         case StateConnect:
             return "Connecting";
         case StateCloud:
             return "Connected";
-        case StateError:
-            return "Error";
     }
     return "";
 }

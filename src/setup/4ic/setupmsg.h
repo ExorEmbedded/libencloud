@@ -1,19 +1,23 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_ECE_RETRINFOMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_ECE_RETRINFOMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_
 
-#include <QDateTime>
-#include <QSslCertificate>
 #include <QString>
-#include <QUuid>
+#include <encloud/Auth>
 #include <common/client.h>
 #include <common/message.h>
+#include <common/vpn/vpnconfig.h>
+
+#define LIBENCLOUD_SETUP_4IC_CONFIG_URL        "/manage/status/status.access.config/"
 
 namespace libencloud {
 
-class RetrInfoMsg : public QObject, public MessageInterface
+class SetupMsg : public QObject, public MessageInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
+
+public:
+    const VpnConfig *getVpnConfig ();
 
 signals:
     void error (QString msg = "");
@@ -22,10 +26,7 @@ signals:
 
 public slots:
     void process ();
-
-#ifdef LIBENCLOUD_MODE_SECE
-    void licenseReceived (QUuid uuid);
-#endif
+    void authSupplied (const Auth &auth);
 
 private slots:
     void _clientComplete (const QString &response);
@@ -37,17 +38,13 @@ private:
     int _unpackResponse ();
 
     //request inputs
-    QUuid _license;
-    QString _hwInfo;
+    Auth _auth;
 
     //response outputs
-    QDateTime _time;
-    bool _valid;
-    QDateTime _expiry;
-    QVariant _csrTmpl;
+    VpnConfig _vpnConfig;
     QSslCertificate _caCert;
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_ECE_RETRINFOMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_4IC_SETUPMSG_H_ */

@@ -4,9 +4,10 @@
 #include <QObject>
 #include <QString>
 #include <QUuid>
+#include <encloud/Auth>
+#include <encloud/HttpAbstractHandler>
 #include <encloud/State>
 #include <encloud/Progress>
-#include <encloud/HttpAbstractHandler>
 
 namespace libencloud {
 
@@ -35,9 +36,13 @@ public:
 
     // attributes used by HTTP API handlers
     QString getCoreError () const;
+
     State getCoreState () const;
+
     Progress getCoreProgress () const;
+
     QString getNeed () const;
+    void removeNeed (const QString &what);
 
 #ifdef LIBENCLOUD_MODE_ECE
     QUuid getPoi () const;
@@ -47,8 +52,11 @@ public:
     int setLicense (const QString &);
 #endif
 
+    int setAuth (const Auth &auth);
+
 signals:
     void licenseSend (QUuid uuid);
+    void authSupplied (const Auth &auth);
 
 private slots:
     void _coreErrorReceived (const QString &msg);

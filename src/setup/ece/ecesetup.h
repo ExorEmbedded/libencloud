@@ -4,14 +4,12 @@
 #include <QStateMachine>
 #include <QtPlugin>
 #include <QUuid>
+#include <common/client.h>
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/ece/retrinfomsg.h>
 #include <setup/ece/retrcertmsg.h>
 #include <setup/ece/retrconfmsg.h>
-
-// initial timeout for retry (in seconds) - grows exponentially
-#define LIBENCLOUD_RETRY_TIMEOUT    3
 
 namespace libencloud {
 
@@ -25,13 +23,14 @@ class EceSetup : public QObject, public SetupInterface
         StateError = 0,
 
         // used for steps
-        StateRetrInfo = 1,
+        StateInit = 1,
+        StateRetrInfo,
         StateRetrCert,
         StateRetrConf,
         StateCheckExpiry,
 
         // used for total count
-        StateFirst = StateRetrInfo,
+        StateFirst = StateInit,
         StateLast = StateCheckExpiry
     } State;
 
@@ -48,10 +47,9 @@ public:
 signals:
     void error (QString msg = "");
     void progress (const Progress &progress);
+    void need (const QString &what);
     void retry ();
     void completed ();
-
-    void need (const QString &what);
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (QUuid uuid);
@@ -60,7 +58,7 @@ signals:
 private slots:
     void _stateEntered ();
     void _stateExited ();
-    void _onError ();
+    void _onError (QString msg = "");
     void _onRetryTimeout ();
 
 private:

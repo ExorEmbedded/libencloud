@@ -13,6 +13,13 @@
  *      handling to bypass same-origin policy), so the returned Content-Type is
  *      application/javascript, not application/json.
  * 
+ * [ Definitions ]
+ *
+ *  'state'      0      Idle            (grey)
+ *               1      Error           (red)
+ *               2      Setting Up      (yellow)
+ *               3      Connecting      (orange)
+ *               4      Connected       (green)
  * 
  * [ State Retrieval ]
  * 
@@ -26,11 +33,21 @@
  *                  'step': 2,                  # current step number 
  *                  'step': 5                   # total number of steps
  *              },
- *              'need' : 'license auth'         # LIST of space-separated "need" strings
+ *              'need' : 'license auth'         # OPTIONAL list of space-separated "need" strings
  *          })"                                   to be fulfilled via API
  * 
  * 
- * [ Setup Operations ]
+ * [ Authentication/Login API ]
+ *
+ * POST /api_v1/auth                    [ Note: 4IC only! ] (?)
+ * 
+ *      params:     'type=auth&url=myurl&user=myuser&pass=mypass'   # set auth parameters 
+ *                                                                    (url is OPTIONAL and can be used for login)
+ * 
+ *      params:     'type=proxy_auth&user=myuser&pass=mypass'       # set proxy_auth parameters
+ * 
+ * 
+ * [ Setup API ]             
  *
  * GET /api_v1/setup                    [ Note: ECE only! ]
  *
@@ -43,7 +60,7 @@
  *      params:     'license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'  # license supplied
  * 
  * 
- * [ Cloud Operations ]
+ * [ Cloud API ]
  *
  * POST /api_v1/cloud
  * 
@@ -53,7 +70,9 @@
  * 
  *      params:     'action=syncRoutes&ips[]=192.168.1.100'   # add routes to given IPs
  * 
- * 
+ *
+ * [ Error Handling ]
+ *
  * Upon error, the following two scenarios are possible:
  *    - if the error is at transport level, a standard HTTP status code is
  *      returned (generally with no content)
@@ -72,6 +91,9 @@
 
 namespace libencloud {
 
+class HttpHandler;
+
+// Not a QObject because Handler object is used externally
 class ApiHandler1 : public HttpAbstractHandler 
 {
 public:
@@ -80,6 +102,7 @@ public:
 
 private:
     int _handle_status (const HttpRequest &request, HttpResponse &response);
+    int _handle_auth (const HttpRequest &request, HttpResponse &response);
     int _handle_setup (const HttpRequest &request, HttpResponse &response);
     int _handle_cloud (const HttpRequest &request, HttpResponse &response);
 

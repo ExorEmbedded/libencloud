@@ -5,6 +5,10 @@
 
 namespace libencloud {
 
+//
+// public methods
+//
+
 void MessageInterface::setConfig (Config *cfg)
 {
     _cfg = cfg;

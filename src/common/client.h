@@ -22,7 +22,7 @@ public:
             const QSslConfiguration &conf);
 
 signals:
-    void error ();
+    void error (const QString &msg);
     void complete (const QString &reponse);
 
 protected slots:

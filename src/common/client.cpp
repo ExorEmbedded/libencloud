@@ -2,8 +2,8 @@
 #include <common/config.h>
 #include <common/client.h>
 
-#define EMIT_ERROR LIBENCLOUD_EMIT(error())
-#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR(msg) LIBENCLOUD_EMIT(error(msg))
+#define EMIT_ERROR_ERR_IF(cond, msg) LIBENCLOUD_EMIT_ERR_IF(cond, error(msg))
 
 namespace libencloud {
 
@@ -27,8 +27,8 @@ void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QB
     QNetworkReply *reply = NULL;
 
     request.setSslConfiguration(conf);
-    request.setRawHeader("User-Agent", LIBENCLOUD_STRING);
-    request.setRawHeader("X-Custom-User-Agent", LIBENCLOUD_STRING);
+    request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
+    request.setRawHeader("X-Custom-User-Agent", LIBENCLOUD_USERAGENT);
 
     // override with passed custom headers
     for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
@@ -36,12 +36,14 @@ void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QB
 
     if (params.isEmpty())
     {
-        LIBENCLOUD_ERR_IF ((reply = _qnam.get(request)) == NULL);
+        EMIT_ERROR_ERR_IF ((reply = _qnam.get(request)) == NULL,
+                tr("Client failed creating GET request"));
     }
     else
     {
         request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-        LIBENCLOUD_ERR_IF ((reply = _qnam.post(request, params.encodedQuery())) == NULL);
+        EMIT_ERROR_ERR_IF ((reply = _qnam.post(request, params.encodedQuery())) == NULL,
+                tr("Client falied creating POST request"));
     }
 
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
@@ -60,41 +62,47 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
     const QNetworkProxy *p = &proxy;  //unused
     LIBENCLOUD_UNUSED(p);
 
-    LIBENCLOUD_ERR(""); 
-
-    EMIT_ERROR;
+    EMIT_ERROR(tr("Proxy Authentication Required"));
 }
 
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
 { 
-    LIBENCLOUD_UNUSED(reply);
-    
-    LIBENCLOUD_ERR(""); 
-
-    // Ignore the SslError 22 "The host name did not match any of the valid hosts for this certificate"
-    if ((errors.size() == 1) && (errors.first().error() == QSslError::HostNameMismatch)) {
-        LIBENCLOUD_DBG("The host name did not match any of the valid hosts for this certificate");
-        reply->ignoreSslErrors(errors);
-        return;
-    }
-
-    EMIT_ERROR;
+    QList<QSslError> ignoreErrors;
 
     foreach (QSslError err, errors) 
     {
-        LIBENCLOUD_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
-        LIBENCLOUD_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
-                " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
+        switch (err.error())
+        {
+            case QSslError::SelfSignedCertificateInChain:
+            case QSslError::HostNameMismatch:
+                LIBENCLOUD_DBG("IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                ignoreErrors.append(err);
+                break;
+            default:
+                LIBENCLOUD_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                break;
+
+#if 0
+            LIBENCLOUD_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
+                    " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
+#endif
+        }
     }
+
+    reply->ignoreSslErrors(ignoreErrors);
+
+    // Don't emit anything here - remainings error are caught in _networkError()
 }
 
 void Client::_networkError (QNetworkReply::NetworkError err)
-{ 
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply *> (sender());
+
     LIBENCLOUD_UNUSED(err);
 
-    LIBENCLOUD_ERR("NetworkError (" << err << ")");
-
-    EMIT_ERROR;
+    EMIT_ERROR(reply->errorString());
+    
+    reply->deleteLater();
 }
 
 /**
@@ -104,8 +112,6 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  */
 void Client::_finished (QNetworkReply *reply) 
 { 
-    LIBENCLOUD_TRACE; 
-
     QString response;
 
     // Possible error code remappings (if required because they should not

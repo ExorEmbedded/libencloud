@@ -200,11 +200,11 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else if (qstrcmp(rest, "Need 'Auth' username/password") == 0)
     {
-        emit authRequest();
+        emit need("auth");
     }
     else if (qstrcmp(rest, "Need 'HTTP Proxy' username/password") == 0)
     {
-        emit proxyAuthRequest();
+        emit need("proxy_auth");
     }
     else
     {
@@ -223,7 +223,7 @@ void VpnManager::parseLineState (QByteArray line)
     QByteArray desc;
 
     words = line.split(',');
-    LIBENCLOUD_RETURN_IF (words.size() < 2, );
+    LIBENCLOUD_ERR_MSG_IF (words.size() < 2, line);
 
     state = words[1];
 
@@ -276,6 +276,9 @@ void VpnManager::parseLineState (QByteArray line)
     {
         this->client->setState(VpnClient::StateExiting);
     }
+
+err:
+    return;
 }
 
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
@@ -296,14 +299,12 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 // public slots
 //
 
-void VpnManager::authSupply (QString user, QString pass)
+void VpnManager::authSupplied (const Auth &auth)
 {
-    sendAuth("Auth", user, pass);
-}
-
-void VpnManager::proxyAuthSupply (QString user, QString pass)
-{
-    sendAuth("HTTP Proxy", user, pass);
+    if (auth.getType() == "auth")
+        sendAuth("Auth", auth.getUser(), auth.getPass());
+    else if (auth.getType() == "proxy_auth")
+        sendAuth("HTTP Proxy", auth.getUser(), auth.getPass());
 }
 
 //

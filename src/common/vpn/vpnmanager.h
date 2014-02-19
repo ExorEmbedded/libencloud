@@ -5,6 +5,7 @@
 #include <QString>
 #include <QTcpSocket>
 #include <QTimer>
+#include <encloud/Auth>
 #include <common/vpn/vpnconfig.h>
 #include <common/vpn/vpnclient.h>
 
@@ -53,14 +54,13 @@ public:
     void detach ();
 
 signals:
-    void authRequest ();
-    void proxyAuthRequest ();
+    void need (const QString &what);  // auth, proxy_auth
     void ipAssigned (const QString &ip);
     void sigError (VpnManager::Error err, QString msg = "");
 
 public slots:
-    void authSupply (QString user, QString pass);
-    void proxyAuthSupply (QString user, QString pass);
+
+    void authSupplied (const Auth &auth);
 
 private slots:
     void retryAttach ();

@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
+#include <encloud/Auth>
 #include <encloud/State>
 #include <encloud/Progress>
 
@@ -27,15 +28,17 @@ public:
     int stop ();
 
     Config *getConfig () const;
-    int setServer (HttpServer *server);
+    int attachServer (HttpServer *server);
+
+    // Note: the following signals are for internal usage - clients
+    // should use HTTP API for status monitoring and providing data
 
 signals:
     void error (const QString &msg);
     void stateChanged (State state);
     void progress (const Progress &p);
     void need (const QString &what);
-    void authRequest ();
-    void proxyAuthRequest ();
+    void authSupplied (const Auth &auth);
 
 private slots:
     void _stopped ();

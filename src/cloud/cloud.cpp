@@ -26,19 +26,21 @@ Cloud::Cloud (Config *cfg)
     connect(_vpnClient, SIGNAL(stateChanged(VpnClient::State)),
             this, SLOT(_vpnStateChanged(VpnClient::State)));
 
-    // ip assignment and gauthentication requests routed from manager
+    // ip assignment and need requests (e.g. auth) routed from manager
     connect(_vpnManager, SIGNAL(ipAssigned(QString)),
             this, SIGNAL(ipAssigned(QString)));
-    connect(_vpnManager, SIGNAL(authRequest()),
-            this, SIGNAL(authRequest()));
-    connect(_vpnManager, SIGNAL(proxyAuthRequest()),
-            this, SIGNAL(proxyAuthRequest()));
+    connect(_vpnManager, SIGNAL(need(QString)),
+            this, SIGNAL(need(QString)));
 
     // local error handling
     connect(_vpnClient, SIGNAL(sigError(VpnClient::Error, QString)), 
             this, SLOT(_vpnClientErr(VpnClient::Error, QString)));
     connect(_vpnManager, SIGNAL(sigError(VpnManager::Error, QString)), 
             this, SLOT(_vpnManagerErr(VpnManager::Error, QString)));
+
+    // authentication forwarding to manager
+    connect(this, SIGNAL(authSupplied(Auth)), 
+            _vpnManager, SLOT(authSupplied(Auth)));
 
 err:
     return;
@@ -87,6 +89,12 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
             _vpnManager->attach(_vpnClient, LIBENCLOUD_VPN_MGMT_HOST,
                     _cfg->config.vpnMgmtPort);
             break;
+        case VpnClient::StateConnecting:
+            emit stateChanged(StateConnect);
+            break;
+        case VpnClient::StateConnected:
+            emit stateChanged(StateCloud);
+            break;
         default:
             break;
     }
@@ -97,12 +105,16 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
 
 void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
 {
-    LIBENCLOUD_DBG("err: " << VpnClient::errorString(err) << " msg: " << errMsg);
+    LIBENCLOUD_UNUSED(errMsg);
+
+    emit error(VpnClient::errorString(err));
 }
 
 void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
 {
-    LIBENCLOUD_DBG("err: " << VpnManager::errorString(err) << " msg: " << errMsg);
+    LIBENCLOUD_UNUSED(errMsg);
+
+    emit error(VpnManager::errorString(err));
 }
 
 } // namespace libencloud

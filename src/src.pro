@@ -20,6 +20,9 @@ HEADERS += common/common.h
 HEADERS += common/defaults.h
 HEADERS += common/helpers.h
 
+HEADERS += $$SRCBASEDIR/include/encloud/Auth
+SOURCES += common/auth.cpp
+
 HEADERS += $$SRCBASEDIR/include/encloud/Info
 SOURCES += common/info.cpp
 

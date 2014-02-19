@@ -10,13 +10,6 @@ namespace libencloud {
 // public methods
 //
 
-int RetrCertMsg::init ()
-{
-    LIBENCLOUD_TRACE;
-
-    return 0;
-}
-
 //
 // public slots
 //
@@ -38,7 +31,8 @@ void RetrCertMsg::process ()
     EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
     // listen to signals from client
-    connect(_client, SIGNAL(error()), this, SIGNAL(error()));
+    disconnect(_client, 0, this, 0);
+    connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <encloud/Auth>
 #include <encloud/State>
 #include <encloud/Progress>
 #include <common/config.h>
@@ -24,10 +25,11 @@ public:
 
 signals:
     void error (QString msg = "");
+    void stateChanged (State state);
     void progress (const Progress &progress);
     void ipAssigned (const QString &ip);
-    void authRequest ();
-    void proxyAuthRequest ();
+    void need (const QString &what);
+    void authSupplied (const Auth &auth);
 
 private slots:
     void _vpnStateChanged (VpnClient::State state);

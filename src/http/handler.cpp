@@ -30,6 +30,13 @@ State HttpHandler::getCoreState () const        { return _coreState; }
 Progress HttpHandler::getCoreProgress () const  { return _coreProgress; }
 QString HttpHandler::getNeed () const           { return _need; }
 
+void HttpHandler::removeNeed (const QString &what)
+{
+    LIBENCLOUD_TRACE;
+
+    _need = _need.remove(what).trimmed();
+}
+
 #ifdef LIBENCLOUD_MODE_ECE
 QUuid HttpHandler::getPoi  () const             { return _poi; }
 #endif
@@ -50,6 +57,15 @@ err:
     return ~0;
 }
 #endif
+
+int HttpHandler::setAuth (const Auth &auth)
+{
+    LIBENCLOUD_TRACE;
+
+    emit authSupplied(auth);
+
+    return 0;
+}
 
 // JSONP support (bypass same-origin policy)
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
@@ -94,11 +110,12 @@ err:
 
 void HttpHandler::_coreErrorReceived (const QString &msg)
 {
-    LIBENCLOUD_TRACE;
-
     LIBENCLOUD_DBG("msg: " << msg);
 
-    _coreError = msg;
+    if (msg == "")
+        _coreError = "<Undefined>";
+    else
+        _coreError = msg;
 }
 
 void HttpHandler::_coreStateChanged (State state)
@@ -117,10 +134,14 @@ void HttpHandler::_coreProgressReceived (const Progress &progress)
 
 void HttpHandler::_needReceived (const QString &what)
 {
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("what: " << what);
 
     if (!_need.contains(what))
-        _need += " " + what;
+    {
+        if (_need != "")
+            _need += " ";
+        _need += what;
+    }
 }
 
 //

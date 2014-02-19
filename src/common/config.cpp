@@ -25,7 +25,7 @@ Config::Config ()
 #endif
 
     config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
-    config.timeout = LIBENCLOUD_TIMEOUT;
+    config.timeout = LIBENCLOUD_RETRY_TIMEOUT;
 
     config.csrTmplPath = QFileInfo(_confPrefix + LIBENCLOUD_CSRTMPL_FILE);
 

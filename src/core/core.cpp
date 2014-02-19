@@ -76,18 +76,27 @@ Config *Core::getConfig () const
     return _cfg;
 }
 
-int Core::setServer (HttpServer *server)
+int Core::attachServer (HttpServer *server)
 {
     QObject *obj;
 
     LIBENCLOUD_ERR_IF (server == NULL);
 
+    //
+    // server connections
+    // 
+
     obj = dynamic_cast<QObject *> (server);
 
 #ifndef LIBENCLOUD_DISABLE_CLOUD
+    // ip assignments from cloud module to server
     connect(_cloud, SIGNAL(ipAssigned(QString)), 
             obj, SLOT(vpnIpAssigned(QString)));
 #endif
+
+    //
+    // handler connections
+    // 
 
     obj = dynamic_cast<QObject *> (server->getHandler());
 
@@ -101,8 +110,13 @@ int Core::setServer (HttpServer *server)
             obj, SLOT(_needReceived(QString)));
 
 #ifdef LIBENCLOUD_MODE_SECE
-    connect(obj, SIGNAL(licenseSend(QUuid)), _setupObj, SIGNAL(licenseForward(QUuid)));
+    connect(obj, SIGNAL(licenseSend(QUuid)), 
+            _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
+
+    // authentication requests from handler are reemitted by core
+    connect(obj, SIGNAL(authSupplied(Auth)), 
+           this, SIGNAL(authSupplied(Auth)));
 
     return 0;
 err:
@@ -150,10 +164,12 @@ void Core::_setupCompleted ()
     LIBENCLOUD_TRACE;
 
     const VpnConfig *vpnConfig = _setup->getVpnConfig();
+    LIBENCLOUD_EMIT_ERR_IF (vpnConfig == NULL, 
+            error(tr("No Cloud configuration from Setup Module")));
 
     // write retrieved configuration to file
-    LIBENCLOUD_ERR_IF (vpnConfig->toFile(_cfg->config.vpnConfPath.absoluteFilePath()));
-
+    LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(_cfg->config.vpnConfPath.absoluteFilePath()),
+            error(tr("Failed writing configuration to file")));
 err:
     return;
 }
@@ -231,16 +247,24 @@ int Core::_initSetup ()
     LIBENCLOUD_ERR_IF (_setupObj == NULL);
 
     // error signal handling
-    connect(_setupObj, SIGNAL(error(QString)), this, SLOT(_errorReceived(QString)));
+    connect(_setupObj, SIGNAL(error(QString)), 
+            this, SLOT(_errorReceived(QString)));
 
     // progress signal handling
-    connect(_setupObj, SIGNAL(progress(Progress)), this, SLOT(_progressReceived(Progress)));
+    connect(_setupObj, SIGNAL(progress(Progress)), 
+            this, SLOT(_progressReceived(Progress)));
 
     // need message signal forwarding
-    connect(_setupObj, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
+    connect(_setupObj, SIGNAL(need(QString)), 
+            this, SIGNAL(need(QString)));
 
     // setup completion handling
-    connect(_setupObj, SIGNAL(completed()), this, SLOT(_setupCompleted()));
+    connect(_setupObj, SIGNAL(completed()), 
+            this, SLOT(_setupCompleted()));
+
+    // authentication forwarding to setup
+    connect(this, SIGNAL(authSupplied(Auth)), 
+            _setupObj, SIGNAL(authSupplied(Auth)));
 
     return 0;
 err:
@@ -255,14 +279,24 @@ int Core::_initCloud ()
     LIBENCLOUD_ERR_IF (_cloud == NULL);
 
     // error signal handling
-    connect(_cloud, SIGNAL(error(QString)), this, SLOT(_errorReceived(QString)));
+    connect(_cloud, SIGNAL(error(QString)), 
+            this, SLOT(_errorReceived(QString)));
+
+    // state changes forwarding for connecting/connected states
+    connect(_cloud, SIGNAL(stateChanged(State)), 
+            this, SIGNAL(stateChanged(State)));
 
     // progress signal handling
-    connect(_cloud, SIGNAL(progress(Progress)), this, SLOT(_progressReceived(Progress)));
+    connect(_cloud, SIGNAL(progress(Progress)), 
+            this, SLOT(_progressReceived(Progress)));
 
-    // authentication request forwarding
-    connect(_cloud, SIGNAL(authRequest()), this, SIGNAL(authRequest()));
-    connect(_cloud, SIGNAL(proxyAuthRequest()), this, SIGNAL(proxyAuthRequest()));
+    // need message signal forwarding
+    connect(_cloud, SIGNAL(need(QString)), 
+            this, SIGNAL(need(QString)));
+
+    // authentication forwarding to cloud
+    connect(this, SIGNAL(authSupplied(Auth)), 
+            _cloud, SIGNAL(authSupplied(Auth)));
 
     return 0;
 err:
@@ -276,8 +310,10 @@ int Core::_initFsm ()
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_DBG("setupState: " << _setupState);
     _initialState = _setupState;
-    connect(_setupState, SIGNAL(entered()), this, SLOT(_stateEntered()));
-    connect(_setupState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    connect(_setupState, SIGNAL(entered()), 
+            this, SLOT(_stateEntered()));
+    connect(_setupState, SIGNAL(exited()), 
+            this, SLOT(_stateExited()));
     _fsm.addState(_setupState);
 #endif
 
@@ -286,8 +322,10 @@ int Core::_initFsm ()
 #if defined(LIBENCLOUD_DISABLE_SETUP)
     _initialState = _cloudState;
 #endif
-    connect(_cloudState, SIGNAL(entered()), this, SLOT(_stateEntered()));
-    connect(_cloudState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    connect(_cloudState, SIGNAL(entered()), 
+            this, SLOT(_stateEntered()));
+    connect(_cloudState, SIGNAL(exited()), 
+            this, SLOT(_stateExited()));
     _fsm.addState(_cloudState);
 #endif
 
@@ -297,7 +335,8 @@ int Core::_initFsm ()
 
     _fsm.setInitialState(_initialState);
 
-    connect(&_fsm, SIGNAL(stopped()), this, SLOT(_stopped()));
+    connect(&_fsm, SIGNAL(stopped()), 
+            this, SLOT(_stopped()));
 
     return 0;
 }
@@ -329,27 +368,36 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
     libencloud::Core *core = (libencloud::Core *) arg;
     bool ok;
 
-    json = libencloud::json::parseFromFile(core->getConfig()->config.csrTmplPath.absoluteFilePath(), ok);
+    json = libencloud::json::parseFromFile(core->getConfig()->
+            config.csrTmplPath.absoluteFilePath(), ok);
     LIBENCLOUD_ERR_IF (!ok);
 
     map = json.toMap()["DN"].toMap();
 
     // parse DN fields
-    for(QVariantMap::const_iterator iter = map.begin(); iter != map.end(); ++iter)
+    for(QVariantMap::const_iterator iter = map.begin(); 
+            iter != map.end(); ++iter)
     {
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, qPrintable(iter.key()), MBSTRING_UTF8, \
-                (const unsigned char *) iter.value().toString().toUtf8().data(), -1, -1, 0));
+        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, 
+                    qPrintable(iter.key()), MBSTRING_UTF8,
+                    (const unsigned char *)
+                    iter.value().toString().toUtf8().data(),
+                    -1, -1, 0));
     }
 
-    // if CN is provided in template use it, otherwise fall back to hwinfo (SECE) or serial (LIBENCLOUD)
+    // if CN is provided in template use it, otherwise fall back to hwinfo
+    // (SECE) or serial (LIBENCLOUD)
     if (map["CN"].isNull())
     {
 #if defined(LIBENCLOUD_MODE_SECE)
         // SECE: CN based on hw_info
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8, \
-                (const unsigned char *) libencloud::utils::getHwInfo().toUtf8().data(), -1, -1, 0));
+        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8,
+                (const unsigned char *)
+                libencloud::utils::getHwInfo().toUtf8().data(), 
+                -1, -1, 0));
 #else
-        // now CN for ECE should be part of template and will use (unique) label given by user!
+        // now CN for ECE should be part of template and will use (unique)
+        // label given by user!
 #if 0
         // LIBENCLOUD: CN based on serial
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \

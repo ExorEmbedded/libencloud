@@ -75,7 +75,6 @@
 #define LIBENCLOUD_EMIT_RETURN_IF(cond, sig, rc) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); return rc; } } while (0)
 #define LIBENCLOUD_EMIT_RETURN_MSG_IF(cond, sig, msg, rc) do { if (cond) { LIBENCLOUD_ERR(msg); emit(sig); return rc; } } while (0)
 #define LIBENCLOUD_EMIT_ERR_IF(cond, sig) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); goto err; } } while (0)
-#define LIBENCLOUD_EMIT_ERROR_ERR_IF(cond, sig) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); goto err; } } while (0)
 #define LIBENCLOUD_EMIT_ERR_MSG_IF(cond, sig, msg) do { if (cond) { LIBENCLOUD_ERR(msg); emit(sig); goto err; } } while (0)
 
 #define LIBENCLOUD_OUT(msg) qDebug().nospace() << msg

@@ -14,11 +14,10 @@ class RetrConfMsg : public QObject, public MessageInterface
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
-    int init ();
     const VpnConfig *getVpnConfig ();
 
 signals:
-    void error ();
+    void error (QString msg = "");
     void processed ();
 
 public slots:

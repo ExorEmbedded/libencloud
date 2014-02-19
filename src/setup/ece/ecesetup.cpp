@@ -25,6 +25,8 @@ EceSetup::EceSetup (Config *cfg)
 {
     LIBENCLOUD_TRACE;
 
+    emit progress(Progress(tr("Initialising ECE Setup Module"), StateInit, getTotalSteps()));
+
     _initFsm();
 }
 
@@ -108,7 +110,7 @@ void EceSetup::_onError ()
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);
 
-    emit error();
+    emit error(msg);
 }
 
 void EceSetup::_onRetryTimeout ()
@@ -146,21 +148,21 @@ int EceSetup::_initFsm ()
     connect(_retrInfoState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrInfoState, SIGNAL(entered()), &_retrInfoMsg, SLOT(process()));
     connect(_retrInfoState, SIGNAL(exited()), this, SLOT(_stateExited()));
-    _retrInfoState->addTransition(&_retrInfoMsg, SIGNAL(error()), _errorState);
+    _retrInfoState->addTransition(&_retrInfoMsg, SIGNAL(error(QString)), _errorState);
     _retrInfoState->addTransition(&_retrInfoMsg, SIGNAL(processed()), _retrCertState);
 
     _initMsg(_retrCertMsg);
     connect(_retrCertState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrCertState, SIGNAL(entered()), &_retrCertMsg, SLOT(process()));
     connect(_retrCertState, SIGNAL(exited()), this, SLOT(_stateExited()));
-    _retrCertState->addTransition(&_retrCertMsg, SIGNAL(error()), _errorState);
+    _retrCertState->addTransition(&_retrCertMsg, SIGNAL(error(QString)), _errorState);
     _retrCertState->addTransition(&_retrCertMsg, SIGNAL(processed()), _retrConfState);
 
     _initMsg(_retrConfMsg);
     connect(_retrConfState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrConfState, SIGNAL(entered()), &_retrConfMsg, SLOT(process()));
     connect(_retrConfState, SIGNAL(exited()), this, SLOT(_stateExited()));
-    _retrConfState->addTransition(&_retrConfMsg, SIGNAL(error()), _errorState);
+    _retrConfState->addTransition(&_retrConfMsg, SIGNAL(error(QString)), _errorState);
     _retrConfState->addTransition(&_retrConfMsg, SIGNAL(processed()), _checkExpiryState);
 
     connect(_checkExpiryState, SIGNAL(entered()), this, SLOT(_stateEntered()));
@@ -181,7 +183,6 @@ int EceSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
     msg.setClient(&_client);
-    msg.init();
 
     return 0;
 }

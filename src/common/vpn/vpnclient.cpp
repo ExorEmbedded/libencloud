@@ -140,7 +140,6 @@ QStringList VpnClient::getArgs (void)
 #endif
 
 	caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
-
     args << "--ca" << caCertPath;
 
     switch (proxy.type())

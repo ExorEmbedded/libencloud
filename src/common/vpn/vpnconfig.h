@@ -11,12 +11,15 @@ class VpnConfig
 public:
     VpnConfig ();
     VpnConfig (const QVariantMap &vm, Config *cfg = NULL);
+    VpnConfig (const QString &s, Config *cfg = NULL);
 
     // use compiler-default
     //VpnConfig &operator=(const VpnConfig vc);
 
     bool isValid () const;
     int fromMap (const QVariantMap &vm);
+    int fromString (const QString &s);
+    int fromCfg (Config *cfg);
 
     void setCaPath (const QString &path);
     void setCertPath (const QString &path);
@@ -29,6 +32,7 @@ private:
     int init ();
 
     bool _valid;
+    QString _string;
 
     QString _mode;
     QString _host;

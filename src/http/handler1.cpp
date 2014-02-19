@@ -10,14 +10,10 @@
 // defines
 //
 
-// path to GET info: "state", and "need" (license, auth)
-#define LIBENCLOUD_HANDLER_STATUS_PATH         "status"
-
-// setup operations: SET license (SECE), GET PoI (ECE)
-#define LIBENCLOUD_HANDLER_SETUP_PATH          "setup"
-
-// cloud operations: POST actions (open, close, syncRoutes)
-#define LIBENCLOUD_HANDLER_CLOUD_PATH          "cloud"
+#define LIBENCLOUD_HANDLER_STATUS_PATH  "status"
+#define LIBENCLOUD_HANDLER_AUTH_PATH    "auth"
+#define LIBENCLOUD_HANDLER_SETUP_PATH   "setup"
+#define LIBENCLOUD_HANDLER_CLOUD_PATH   "cloud"
 
 // disable heavy tracing
 #undef LIBENCLOUD_TRACE 
@@ -52,10 +48,14 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
 
     action = versionRx.cap(2);
 
+    // jsonp handling
+    //response.getHeaders()->set("Content-Type", "application/json");
     response.getHeaders()->set("Content-Type", "application/javascript");
 
     if (action == LIBENCLOUD_HANDLER_STATUS_PATH)
         return _handle_status(request, response);
+    else if (action == LIBENCLOUD_HANDLER_AUTH_PATH)
+        return _handle_auth(request, response);
     else if (action == LIBENCLOUD_HANDLER_SETUP_PATH)
         return _handle_setup(request, response);
     else if (action == LIBENCLOUD_HANDLER_CLOUD_PATH)
@@ -85,7 +85,10 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
             bool ok;
 
             j["state"] = _parent->getCoreState();
-            if (_parent->getCoreState() == StateError)
+
+            // avoid "need" showing up as error
+            if (_parent->getCoreState() == StateError &&
+                _parent->getCoreError() != "")
                 j["error"] = _parent->getCoreError();
 
             jProg["desc"] = progress.getDesc();
@@ -93,7 +96,8 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
             jProg["total"] = progress.getTotal();
             j["progress"] = jProg;
 
-            j["need"] = _parent->getNeed();
+            if (_parent->getNeed() != "")
+                j["need"] = _parent->getNeed();
 
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
@@ -102,6 +106,51 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
 
             break;
         }
+        default:
+            LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+    }
+
+    // only reach here upon success
+    LIBENCLOUD_HANDLER_OK;
+    return 0;
+err:
+    return ~0;
+}
+
+int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &response)
+{
+    LIBENCLOUD_TRACE;
+
+    switch (httpMethodFromString(request.getMethod()))
+    {
+
+#ifdef LIBENCLOUD_MODE_4IC
+        case LIBENCLOUD_HTTP_METHOD_POST:
+        {
+            QUrl url;
+            QString type, user, pass, aurl;
+
+            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
+                        "application/x-www-form-urlencoded",
+                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+            url.setEncodedQuery((*request.getContent()).toAscii());
+
+            LIBENCLOUD_HANDLER_ERR_IF (
+                    ((type = url.queryItemValue("type")) == "") ||
+                    ((user = url.queryItemValue("user")) == "") ||
+                    ((pass = url.queryItemValue("pass")) == ""),
+                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
+            aurl = url.queryItemValue("url");
+
+            LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(Auth(type, aurl, user, pass)), 
+                    LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+
+            // reset need state
+            _parent->removeNeed(type);
+        }
+        break;
+#endif
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }
@@ -122,12 +171,12 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 
 #ifdef LIBENCLOUD_MODE_ECE
         case LIBENCLOUD_HTTP_METHOD_GET:
-
+  
             response.setContent(
                     "jsonpCallback({"\
-                        "'need' : '" + utils::uuid2String(_parent->getPoi()) +  "'"\
+                        "'poi' : '" + utils::uuid2String(_parent->getPoi()) +  "'"\
                     "})");
-
+  
             break;
 #endif
 
