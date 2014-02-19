@@ -96,7 +96,7 @@ void EceSetup::_stateExited ()
     _error = false;
 }
 
-void EceSetup::_onError ()
+void EceSetup::_onError (QString msg)
 {
     QState *state = qobject_cast<QState *>(sender());
 
