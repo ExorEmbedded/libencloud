@@ -2,8 +2,12 @@
 #
 # WARNING: cleans untracked files!!!
 
-git clean -fdx . && \
-qmake CONFIG+=modeece && \
+git clean -fdx .
+
+qmake CONFIG+=modesece
+#qmake CONFIG+=modeece
+#qmake CONFIG+=mode4ic
+
 make check
 
 if [ $? -ne 0 ]; then

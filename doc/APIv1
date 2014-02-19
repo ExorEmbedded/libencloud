@@ -1,0 +1,87 @@
+
+==================
+| Encloud API v1 |
+==================
+
+[ Special Notes ]
+
+     - responses return json wrapped in a javascript function (JSONP
+     handling to bypass same-origin policy), so the returned Content-Type is
+     application/javascript, not application/json.
+
+
+[ Definitions ]
+
+ 'state'      0      Idle            (grey)
+              1      Error           (red)
+              2      Setting Up      (yellow)
+              3      Connecting      (orange)
+              4      Connected       (green)
+
+
+[ State Retrieval ]
+
+GET /api_v1/status
+
+     => "jsonpCallback({
+             'state' : 1,                    # string representation of state
+             'error' : 'Some error',         # OPTIONAL: defined if state == 1 (StateError)
+             'progress' {
+                 'desc: 'step description',  # string representation of step
+                 'step': 2,                  # current step number 
+                 'step': 5                   # total number of steps
+             },
+             'need' : 'license auth'         # OPTIONAL list of space-separated "need" strings
+         })"                                   to be fulfilled via API
+
+
+[ Authentication/Login API ]
+
+POST /api_v1/auth                    [ Note: 4IC only! ] (?)
+
+     params:     'type=auth&url=myurl&user=myuser&pass=mypass'   # set auth parameters 
+                                                                   (url is OPTIONAL and can be used for login)
+
+     params:     'type=proxy_auth&user=myuser&pass=mypass'       # set proxy_auth parameters
+
+
+[ Setup API ]             
+
+GET /api_v1/setup                    [ Note: ECE only! ]
+
+     => "jsonpCallback({
+             'poi' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'      # proof of identity
+         })"
+
+POST /api_v1/setup                   [ Note: SECE only! ]
+
+     params:     'license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'  # license supplied
+
+
+[ Cloud API ]
+
+POST /api_v1/cloud
+
+     params:     'action=start' | 'action=stop'      # start or stop Encloud service         [[TODO]] [[?]]
+
+POST /api_v1/cloud
+
+     params:     'action=syncRoutes&ips[]=192.168.1.100'   # add routes to given IPs         [[TODO]] => proper?
+
+
+[ Error Handling ]
+
+Upon error, the following two scenarios are possible:
+   - if the error is at transport level, a standard HTTP status code is                     [[?]] 
+     returned (generally with no content)
+     HTTP Statuses returned in this version:
+         - LIBENCLOUD_HTTP_STATUS_OK
+         - LIBENCLOUD_HTTP_STATUS_BADMETHOD
+         - LIBENCLOUD_HTTP_STATUS_BADREQUEST
+         - LIBENCLOUD_HTTP_STATUS_NOTFOUND
+   - if the failure is at application level, an 'error' field will be                       [[TODO]]
+     returned in the json message with appropriate description.
+
+     => "jsonpCallback({
+             'error' : 'Some nasty error'
+         })"
