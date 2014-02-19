@@ -3,76 +3,91 @@
 | Encloud API v1 |
 ==================
 
-[ Special Notes ]
 
-     - responses return json wrapped in a javascript function (JSONP
-     handling to bypass same-origin policy), so the returned Content-Type is
+[ Important Notes ]
+
+     - responses return json wrapped in a javascript function (JSONP handling
+     to bypass same-origin policy), so the returned Content-Type is
      application/javascript, not application/json.
-
-
-[ Definitions ]
-
- 'state'      0      Idle            (grey)
-              1      Error           (red)
-              2      Setting Up      (yellow)
-              3      Connecting      (orange)
-              4      Connected       (green)
 
 
 [ State Retrieval ]
 
-GET /api_v1/status
+* GET /api_v1/status
 
-     => "jsonpCallback({
-             'state' : 1,                    # string representation of state
-             'error' : 'Some error',         # OPTIONAL: defined if state == 1 (StateError)
-             'progress' {
-                 'desc: 'step description',  # string representation of step
-                 'step': 2,                  # current step number 
-                 'step': 5                   # total number of steps
-             },
-             'need' : 'license auth'         # OPTIONAL list of space-separated "need" strings
-         })"                                   to be fulfilled via API
+    Def 'state'         0      Idle            (grey)
+                        1      Error           (red)
+                        2      Setting Up      (yellow)
+                        3      Connecting      (orange)
+                        4      Connected       (green)
+
+    e.g.    "jsonpCallback({
+                'state' : 1,                    # string representation of state
+                'error' : 'Some error',         # OPTIONAL: defined if state == 1 (StateError)
+                'progress' {
+                    'desc: 'Step description',  # string representation of step
+                    'step': 2,                  # current step number 
+                    'step': 5                   # total number of steps
+                },
+                'need' : 'license sb_auth'      # OPTIONAL list of space-separated "need" strings
+            })"                                   to be fulfilled via API
 
 
 [ Authentication/Login API ]
 
-POST /api_v1/auth                    [ Note: 4IC only! ] (?)
+* POST /api_v1/auth                    [ Note: 4IC only! ]
 
-     params:     'type=auth&url=myurl&user=myuser&pass=mypass'   # set auth parameters 
-                                                                   (url is OPTIONAL and can be used for login)
+    Def 'type'          type of authentication: 'sb','sb_proxy','cloud','cloud_proxy'
+    Def 'url'           OPTIONAL destination url for login authentication
+    Def 'user'          user for authentication
+    Def 'pass'          password for authentication
 
-     params:     'type=proxy_auth&user=myuser&pass=mypass'       # set proxy_auth parameters
+    e.g. 1              type=sb&url=myurl&user=myuser&pass=mypass
+    e.g. 2              type=cloud_proxy&user=myuser&pass=mypass
 
 
 [ Setup API ]             
 
-GET /api_v1/setup                    [ Note: ECE only! ]
+* GET /api_v1/setup                    [ Note: ECE only! ]
 
-     => "jsonpCallback({
-             'poi' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'      # proof of identity
-         })"
+    Def 'poi'           proof of identity returned by ECE for Switchboard association
 
-POST /api_v1/setup                   [ Note: SECE only! ]
+    e.g.    "jsonpCallback({
+                 'poi' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+             })"
 
-     params:     'license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'  # license supplied
+* GET /api_v1/setup                    [ Note: 4IC only! ]                              [[TODO]]
+
+    e.g.    "jsonpCallback({
+                 'server ' : {
+                     'uuid' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+                     'external_ip' : '77.88.99.100',
+                     'internal_ip' : '192.168.50.1'
+                     'available_pages' : { 'settings' : '/manage/accecess/settings/standalone/',      # [...]
+                 }
+             })"
+
+* POST /api_v1/setup                   [ Note: SECE only! ]
+
+    Def 'license'       license entered by user to activate SECE
+
+    e.g.                license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
 
 [ Cloud API ]
 
-POST /api_v1/cloud
+* POST /api_v1/cloud
 
-     params:     'action=start' | 'action=stop'      # start or stop Encloud service         [[TODO]] [[?]]
+    Def 'action'        operation to be performed: 'start','stop','syncRoutes'
 
-POST /api_v1/cloud
-
-     params:     'action=syncRoutes&ips[]=192.168.1.100'   # add routes to given IPs         [[TODO]] => proper?
+    e.g. 1              action=start                                                    [[TODO]] [[?]]
+    e.g. 2              action=syncRoutes&ips[]=192.168.1.100&ips[]=192.168.1.101       [[TODO]]
 
 
 [ Error Handling ]
 
 Upon error, the following two scenarios are possible:
-   - if the error is at transport level, a standard HTTP status code is                     [[?]] 
+   - if the error is at transport level, a standard HTTP status code is                     [[avoid?]]
      returned (generally with no content)
      HTTP Statuses returned in this version:
          - LIBENCLOUD_HTTP_STATUS_OK

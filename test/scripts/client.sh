@@ -7,10 +7,10 @@ URL="api_v1"
 PORT="4884"
 ACTION="$1"
 LICENSE="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
-LOGINURL="$2"
-AUTHTYPE="auth"
-USER="$3"
-PASS="$4"
+LOGINURL="$3"
+AUTHTYPE="$2"
+USER="$4"
+PASS="$5"
 ARGS=
 
 case ${ACTION} in

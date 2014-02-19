@@ -141,13 +141,20 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
                     ((pass = url.queryItemValue("pass")) == ""),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
 
+            LIBENCLOUD_HANDLER_ERR_IF (
+                    type != "sb" &&
+                    type != "sb_proxy" &&
+                    type != "cloud" &&
+                    type != "cloud_proxy",
+                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
             aurl = url.queryItemValue("url");
 
             LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(Auth(type, aurl, user, pass)), 
                     LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
 
             // reset need state
-            _parent->removeNeed(type);
+            _parent->removeNeed(type + "_auth");
         }
         break;
 #endif

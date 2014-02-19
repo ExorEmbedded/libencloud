@@ -3,8 +3,8 @@
 - ssl: CA support/check
 - vpn: validation of sb config
 - 4ic: listen port to registry and notification to Switchboard;
-  setup config retrieval
-  action commands (open,close,syncRoutes)
+  setup config retrieval; proxies;
+  action commands (open,close,syncRoutes);
 - new error handling                                                    [2]
 - server: check Content-Length
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)

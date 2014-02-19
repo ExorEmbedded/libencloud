@@ -200,11 +200,11 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else if (qstrcmp(rest, "Need 'Auth' username/password") == 0)
     {
-        emit need("auth");
+        emit need("cloud_auth");
     }
     else if (qstrcmp(rest, "Need 'HTTP Proxy' username/password") == 0)
     {
-        emit need("proxy_auth");
+        emit need("cloud_proxy_auth");
     }
     else
     {
@@ -299,11 +299,12 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 // public slots
 //
 
+// Only catch auth signals for Cloud
 void VpnManager::authSupplied (const Auth &auth)
 {
-    if (auth.getType() == "auth")
+    if (auth.getType() == "cloud")
         sendAuth("Auth", auth.getUser(), auth.getPass());
-    else if (auth.getType() == "proxy_auth")
+    else if (auth.getType() == "cloud_proxy")
         sendAuth("HTTP Proxy", auth.getUser(), auth.getPass());
 }
 

@@ -33,7 +33,7 @@ void SetupMsg::process ()
 
     if (!_auth.isValid())
     {
-        emit need ("auth");
+        emit need ("sb_auth");
         return;
     }
 
@@ -64,9 +64,13 @@ err:
     return;
 }
 
+// Only catch auth signals for SB
 void SetupMsg::authSupplied (const Auth &auth)
 {
     LIBENCLOUD_TRACE;
+
+    if (auth.getType() != "sb")
+        return;
 
     _auth = auth;
 
