@@ -1,5 +1,6 @@
 #include <openssl/x509v3.h>
 #include <QUuid>
+#include <encloud/Info>
 #include <encloud/Core>
 #include <encloud/Progress>
 #include <encloud/HttpServer>
@@ -26,6 +27,8 @@ Core::Core ()
     , _cloudState(&_cloudSt)
 {
     LIBENCLOUD_TRACE;
+
+    qDebug() << "Starting " << info::versionInfo();
 
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());

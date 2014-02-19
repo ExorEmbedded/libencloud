@@ -2,12 +2,12 @@
 #define _LIBENCLOUD_UTILS_H_
 
 #include <QString>
-#include "common.h"
 
 namespace libencloud {
 namespace info {
 
 QString org ();
+QString product ();
 QString app ();
 QString version ();
 QString revision ();

@@ -13,27 +13,4 @@
 #  endif
 #endif
 
-namespace libencloud {
-
-/* libencloud return codes */
-typedef enum
-{
-    RC_SUCCESS = 0,
-    RC_BADPARAMS,
-    RC_NOMEM,
-    RC_BADCONFIG,
-    RC_NOLICENSE,
-    RC_CONNECT,
-    RC_BADAUTH,
-    RC_TIMEOUT,
-    RC_BADRESPONSE,
-    RC_INVALIDCERT,
-    RC_FAILED,
-    RC_SYSERR,
-    RC_GENERIC
-}
-Rc;
-
-} // namespace libencloud
-
 #endif /* _LIBENCLOUD_COMMON_H_ */

@@ -1,8 +1,8 @@
 #ifndef _LIBENCLOUD_PRIV_COMMON_H_
 #define _LIBENCLOUD_PRIV_COMMON_H_
 
-#include "defaults.h"
-#include "helpers.h"
+#include <common/defaults.h>
+#include <common/helpers.h>
 
 namespace libencloud {
 

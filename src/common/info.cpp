@@ -1,4 +1,4 @@
-#include "common.h"
+#include <common/common.h>
 
 namespace libencloud {
 namespace info {
@@ -6,6 +6,11 @@ namespace info {
 QString org () 
 { 
     return LIBENCLOUD_ORG;
+}
+
+QString product () 
+{ 
+    return LIBENCLOUD_PRODUCT; 
 }
 
 QString app () 
@@ -33,6 +38,10 @@ QString versionInfo ()
     QString info;
 
     info += org() + " ";
+
+    if (product() != "")
+        info += product() + " ";
+
     info += app() + " v" + version();
 
     // revision is printed only to logs (not very user-friendly)

@@ -16,8 +16,8 @@ windows {
     SOURCES += $$OPENSSLPATH\\include\\openssl\\applink.c
 }
 
-INCLUDEPATH += ../src/common
-DEPENDPATH += ../src/common
+INCLUDEPATH += ../src/
+DEPENDPATH += ../src/
 
 # libencloud
 win32 {

@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <QtCore>
 #include <encloud/Common>
-#include "utils.h"
+#include <common/utils.h>
+#include <common/config.h>
 #include "test.h"
-#include "config.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,6 +20,9 @@ int test_libencloud (int argc, char *argv[]);
 
 int main (int argc, char *argv[])
 {
+    LIBENCLOUD_UNUSED(argc);
+    LIBENCLOUD_UNUSED(argv);
+
 #if 0
     qDebug() << "#";
     qDebug() << "# testing libencloud version: " << libencloud_version() << " (rev: " << libencloud_revision() <<  ")";

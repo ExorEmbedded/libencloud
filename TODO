@@ -9,6 +9,7 @@
 - server: check Content-Length
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - backoff: test recovery
-- conf: move generated stuff from etc to persistent cache
+- conf: move generated stuff from etc to persistent cache path (/var/lib/encloud?)
 - build: qmake PRODUCT variable for component placement, split by org   [1]
+    check Exor, QSettings split?
 - test: ece, sece, 4ic, proxy

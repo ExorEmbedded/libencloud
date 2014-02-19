@@ -7,40 +7,59 @@ namespace libencloud {
 Config::Config ()
     : settings(NULL)
 {
-#ifdef Q_OS_WIN32
-    _prefix = QString(qgetenv("ProgramFiles")) + QString("/") + QString(LIBENCLOUD_PRODUCT);
-#else
-    _prefix = LIBENCLOUD_PREFIX_PATH;
-#endif
-    _confPrefix = _prefix + LIBENCLOUD_ETC_PREFIX;
-    filePath = QFileInfo(_confPrefix + QString("/") + QString(LIBENCLOUD_CONF_FILE));
+    QString sep = "/";
 
-    _sbinPrefix = _prefix + LIBENCLOUD_SBIN_PREFIX;
+#ifdef Q_OS_WIN32  // relative paths
+    QString progFiles = QString(qgetenv("ProgramFiles"));
+    QString appData = QString(qgetenv("AppData"));
+
+    // main prefix and binaries are product-specific (e.g. 4iConnect)
+    _prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
+    _sbinPrefix = _prefix + sep + LIBENCLOUD_SBIN_PREFIX;
+
+    // configuration is package-specific (e.g. 4iConnect\libencloud) under %ProgramFiles%
+    _confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
+            sep + LIBENCLOUD_ETC_PREFIX;
+
+    // data is package-specific (4iConnect\libencloud) under %AppData%
+    _dataPrefix = appData + sep + QString(LIBENCLOUD_INSTALLDIR) +
+            sep + QString(LIBENCLOUD_DATA_PREFIX);
+
+#else  // Linux - absolute paths
+    _prefix = LIBENCLOUD_PREFIX_PATH;
+    _confPrefix = LIBENCLOUD_ETC_PREFIX;
+    _sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
+    _dataPrefix = LIBENCLOUD_DATA_PREFIX;
+#endif
+
+    filePath = QFileInfo(_confPrefix + sep + QString(LIBENCLOUD_CONF_FILE));
+
+    // data are package-specific on win
 
     settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
 
 #ifndef LIBENCLOUD_MODE_SECE
-    config.serialPath = QFileInfo(_confPrefix + LIBENCLOUD_SERIAL_FILE);
-    config.poiPath = QFileInfo(_confPrefix + LIBENCLOUD_POI_FILE);
+    config.serialPath = QFileInfo(_dataPrefix + LIBENCLOUD_SERIAL_FILE);
+    config.poiPath = QFileInfo(_dataPrefix + LIBENCLOUD_POI_FILE);
 #endif
 
     config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
     config.timeout = LIBENCLOUD_RETRY_TIMEOUT;
 
-    config.csrTmplPath = QFileInfo(_confPrefix + LIBENCLOUD_CSRTMPL_FILE);
+    config.csrTmplPath = QFileInfo(_dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
 
-    config.sslInit.caPath = QFileInfo(_confPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslInit.certPath = QFileInfo(_confPrefix + LIBENCLOUD_INIT_CERT_FILE);
-    config.sslInit.keyPath = QFileInfo(_confPrefix + LIBENCLOUD_INIT_KEY_FILE);
+    config.sslInit.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
+    config.sslInit.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
+    config.sslInit.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
 
-    config.sslOp.caPath = QFileInfo(_confPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslOp.certPath = QFileInfo(_confPrefix + LIBENCLOUD_OP_CERT_FILE);
-    config.sslOp.keyPath = QFileInfo(_confPrefix + LIBENCLOUD_OP_KEY_FILE);
+    config.sslOp.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
+    config.sslOp.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_CERT_FILE);
+    config.sslOp.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_KEY_FILE);
 
     config.rsaBits = LIBENCLOUD_RSA_BITS;
 
     config.vpnExePath = QFileInfo(_sbinPrefix + LIBENCLOUD_VPN_EXE_FILE);
-    config.vpnConfPath = QFileInfo(_confPrefix + LIBENCLOUD_VPN_CONF_FILE);
+    config.vpnConfPath = QFileInfo(_dataPrefix + LIBENCLOUD_VPN_CONF_FILE);
     config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
 
@@ -62,6 +81,9 @@ QString Config::dump ()
     ts << endl;
 
     ts << "prefix=" << _prefix << endl;
+    ts << "confPrefix=" << _confPrefix << endl;
+    ts << "sbinPrefix=" << _sbinPrefix << endl;
+    ts << "dataPrefix=" << _dataPrefix << endl;
     ts << "settings=" << settings->fileName() << endl;
 
     ts << libencloud::json::serialize(_json, ok);
@@ -92,11 +114,11 @@ int Config::_parse (const QVariantMap &jo)
 {
 #ifndef LIBENCLOUD_MODE_SECE
     if (!jo["serial"].isNull())
-        config.serialPath = _joinPaths(_confPrefix, \
+        config.serialPath = _joinPaths(_dataPrefix, \
                 jo["serial"].toString());
 
     if (!jo["poi"].isNull())
-        config.poiPath = _joinPaths(_confPrefix, \
+        config.poiPath = _joinPaths(_dataPrefix, \
                 jo["poi"].toString());
 #endif
 
@@ -104,7 +126,7 @@ int Config::_parse (const QVariantMap &jo)
         config.timeout = jo["timeout"].toInt();
 
     if (!jo["csr"].toMap()["tmpl"].isNull())
-        config.csrTmplPath = _joinPaths(_confPrefix, \
+        config.csrTmplPath = _joinPaths(_dataPrefix, \
                 jo["csr"].toMap()["tmpl"].toString());
 
     if (!jo["sb"].isNull())
@@ -159,13 +181,13 @@ int Config::_parseSslOp (const QVariantMap &jo)
 int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 {
     if (!jo["ca"].isNull())
-        sc.caPath = _joinPaths(_confPrefix, jo["ca"].toString());
+        sc.caPath = _joinPaths(_dataPrefix, jo["ca"].toString());
 
     if (!jo["cert"].isNull())
-        sc.certPath = _joinPaths(_confPrefix, jo["cert"].toString());
+        sc.certPath = _joinPaths(_dataPrefix, jo["cert"].toString());
 
     if (!jo["key"].isNull())
-        sc.keyPath = _joinPaths(_confPrefix, jo["key"].toString());
+        sc.keyPath = _joinPaths(_dataPrefix, jo["key"].toString());
 
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
@@ -184,7 +206,7 @@ int Config::_parseVpn (const QVariantMap &jo)
         config.vpnExePath = _joinPaths(_sbinPrefix, jo["path"].toString());
 
     if (!jo["conf"].isNull())
-        config.vpnConfPath = _joinPaths(_confPrefix, jo["conf"].toString());
+        config.vpnConfPath = _joinPaths(_dataPrefix, jo["conf"].toString());
 
     if (!jo["mgmt"].toMap()["port"].isNull())
         config.vpnMgmtPort = jo["mgmt"].toMap()["port"].toInt();

@@ -1,5 +1,5 @@
+#include <common/json.h>
 #include "test.h"
-#include "json.h"
 
 #ifdef __cplusplus
 extern "C" {

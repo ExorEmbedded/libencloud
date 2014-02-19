@@ -1,32 +1,78 @@
 # CONFIG options:
 #    
+# [ General ]
+#
+#   endian      Endian build
+#   exor        Exor build
 #   debug       compile libraries with debugging symbols
+#
+# [ Modes ]
+# 
+# Note: mode selection has implications on both behaviour and packaging!
+#
 #   mode4ic     Endian 4i Connect mode
 #   modeece     Endian Cloud Enabler mode
 #   modesece    Software Endian Cloud Enabler mode
+#
+# [ Feature Disabling ]
+#
 #   nosetup     no setup module (e.g. VPN client/manager only)
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 
+#
 # global defs
+#
 PKGNAME = libencloud
+
+PRODUCT_4IC="4iConnect"
+PRODUCT_JMC="JMConnect"
+PRODUCT_ENCLOUD="Encloud"
+PRODUCT_SECE="SECE"  # FIXME
+
 # only x.x.x.x format allowed, where x is a number
 VERSION = 0.6
 VERSION_TAG = Wip  # Dev version - comment this for official release!
-QMAKE_TARGET_COMPANY = Endian
-QMAKE_TARGET_PRODUCT = libencloud
-QMAKE_TARGET_DESCRIPTION = libencloud
-QMAKE_TARGET_COPYRIGHT =
+
+endian {
+    ORG = Endian
+} else:exor {
+    ORG = Exor
+} else {
+    error("organisation must be defined (CONFIG += endian|exor)!")
+}
+
+#
+# Qt Configuration
+#
 
 QT += core
 QT += network
 QT -= gui
 
-debug       { QMAKE_CXXFLAGS += -g }
+#
+# Build config options
+#
 
-mode4ic         { DEFINES += LIBENCLOUD_MODE_4IC } 
-else:modeece    { DEFINES += LIBENCLOUD_MODE_ECE }
-else:modesece   { DEFINES += LIBENCLOUD_MODE_SECE }
-else            { error("a mode must must be defined (CONFIG += mode4ic|modeece|modesece)!") }
+debug { 
+    QMAKE_CXXFLAGS += -g 
+}
+
+mode4ic {
+    DEFINES += LIBENCLOUD_MODE_4IC
+    Endian {
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_4IC}\\\"
+    } else {
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
+    }
+} else:modeece {
+    DEFINES += LIBENCLOUD_MODE_ECE
+    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_ENCLOUD}\\\"
+} else:modesece {
+    DEFINES += LIBENCLOUD_MODE_SECE
+    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_SECE}\\\"
+} else {
+    error("a mode must be defined (CONFIG += mode4ic|modeece|modesece)!")
+}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
@@ -34,33 +80,28 @@ nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 # Platform-specific config and macros
 win32 {
     CONFIG += qtjson  # GPL/self-contained
-
     DEFINES += _CRT_SECURE_NO_WARNINGS
-    DEFINES += LIBENCLOUD_WIN32
-
-#    system("mkdir $$(APPDATA)\\encloud")
 } else {
-
 #   This is OK on Ubuntu but TODO on Yocto
 #   CONFIG += qjson   # LGPL/external
-
     CONFIG += qtjson  # GPL/self-contained
 }
 
 DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 !isEmpty(VERSION_TAG) {
-    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$$VERSION_TAG\\\"
+    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
 }
 exists(".git") {
     DEFINES += LIBENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
 }
-DEFINES += LIBENCLOUD_PKGNAME=\\\"$$PKGNAME\\\"
+DEFINES += LIBENCLOUD_PKGNAME=\\\"$${PKGNAME}\\\"
+DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
 
 # openssl
-OPENSSLPATH = $$(OPENSSL_INSTALLPATH)
+OPENSSLPATH = $${OPENSSL_INSTALLPATH}
 windows{
     isEmpty(OPENSSLPATH){
         OPENSSLPATH="c:\\openssl"
@@ -75,21 +116,22 @@ windows{
 # build settings
 # 
 
-SRCBASEDIR = $$PWD
+SRCBASEDIR = $${PWD}
 
 # public API and headers are included globally
-INCLUDEPATH += $$SRCBASEDIR/include
-INCLUDEPATH += $$SRCBASEDIR/
-DEPENDPATH += $$INCLUDEPATH
+INCLUDEPATH += $${SRCBASEDIR}/include
+INCLUDEPATH += $${SRCBASEDIR}/
+DEPENDPATH += $${INCLUDEPATH}
 
 # install dirs
-windows {
+windows {  # used only for dev - installer handles positioning on target
+           # and runtime paths are defined in src/common/defaults.h
     INSTALLDIR = %ProgramFiles%/encloud
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
     CONFDIR = %APPDATA%/encloud
-} else {
+} else {  # used for dev and production
     INSTALLDIR = /usr/local
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin

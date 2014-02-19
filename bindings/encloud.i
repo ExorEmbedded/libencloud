@@ -4,7 +4,7 @@
 %}
 
 #ifndef LIBENCLOUD_DLLSPEC
-#  if defined(LIBENCLOUD_WIN32)
+#  if defined(Q_OS_WIN32)
 #    if defined _LIBENCLOUDLIB_
 #       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
 #    else

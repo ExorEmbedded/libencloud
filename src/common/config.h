@@ -68,6 +68,7 @@ public:
     QSettings *settings;
     libencloud_crypto_t crypto;
 
+    /* Path to configuration file */
     QFileInfo filePath;
 
 private:
@@ -84,6 +85,7 @@ private:
     QString _prefix;
     QString _confPrefix;
     QString _sbinPrefix;
+    QString _dataPrefix;
 };
 
 } // namespace libencloud

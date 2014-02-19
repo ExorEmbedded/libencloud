@@ -1,21 +1,25 @@
 #ifndef _LIBENCLOUD_PRIV_DEFAULTS_H_
 #define _LIBENCLOUD_PRIV_DEFAULTS_H_
 
-/* This file should NOT be Qt-specific (used by pure C modules) */
+#define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
 
-#define LIBENCLOUD_ORG                  "Endian"
-#define LIBENCLOUD_APP                  "libencloud"
-#define LIBENCLOUD_PRODUCT              LIBENCLOUD_ORG" "LIBENCLOUD_APP
+// e.g Endian/4iConnect, Exor/JMConnect
+#define LIBENCLOUD_PRODUCTDIR           LIBENCLOUD_ORG "/" LIBENCLOUD_PRODUCT
+
+// e.g Endian/4iConnect/libencloud | Exor/JMConnect/libencloud
+#define LIBENCLOUD_INSTALLDIR           LIBENCLOUD_PRODUCTDIR "/" LIBENCLOUD_APP
 
 #ifndef LIBENCLOUD_REVISION
 #  define LIBENCLOUD_REVISION           ""
-#  define LIBENCLOUD_STRING             LIBENCLOUD_APP" v"LIBENCLOUD_VERSION
+#  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION
 #else
-#  define LIBENCLOUD_STRING             LIBENCLOUD_APP" v"LIBENCLOUD_VERSION" r"LIBENCLOUD_REVISION
+#  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " r" LIBENCLOUD_REVISION
 #endif
 
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
-#define LIBENCLOUD_USERAGENT_4IC        "Endian 4i Connect "LIBENCLOUD_VERSION
+
+// do not change this - Switchboard relies on it!
+#define LIBENCLOUD_USERAGENT_4IC        "Endian 4i Connect " LIBENCLOUD_VERSION
 
 #define LIBENCLOUD_SB_URL               "https://sb-host/"
 
@@ -29,14 +33,16 @@
 #ifndef LIBENCLOUD_PREFIX_PATH                             /* [overridable] */
 #define LIBENCLOUD_PREFIX_PATH          "/"
 #endif
-#ifdef _WIN32
-#  define LIBENCLOUD_ETC_PREFIX        "\\etc\\"
-#  define LIBENCLOUD_SBIN_PREFIX        "\\bin\\"
-#else
+#ifdef Q_OS_WIN32  // relative paths - refer to src/common/config.cpp
+#  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR
+#  define LIBENCLOUD_SBIN_PREFIX        "\\sbin\\"  // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR
+#  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#else  // absolute paths
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
+#  define LIBENCLOUD_DATA_PREFIX        "/var/lib/encloud/"
 #endif
-#define LIBENCLOUD_CONF_FILE            "libencloud.json"
+#define LIBENCLOUD_CONF_FILE            LIBENCLOUD_APP ".json"
 #define LIBENCLOUD_SERIAL_FILE          "serial"
 #define LIBENCLOUD_POI_FILE             "poi"
 #define LIBENCLOUD_CSRTMPL_FILE         "csr-tmpl.json"

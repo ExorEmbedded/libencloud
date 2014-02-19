@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <common/crypto.h>
 #include "test.h"
-#include "crypto.h"
 
 #ifdef Q_OS_WIN
 #define TEST_CRYPTO_OUTFILE "c:\\temp\\libencloud-test-key.pem"

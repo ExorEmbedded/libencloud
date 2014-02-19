@@ -2,9 +2,8 @@
 #define _LIBENCLOUD_TEST_H_
 
 #include <stdio.h>
-
-#include "helpers.h"
-#include "config.h"
+#include <common/helpers.h>
+#include <common/config.h>
 
 // if compiling with gcc, don't depend on Qt for debug
 #ifndef __cplusplus
