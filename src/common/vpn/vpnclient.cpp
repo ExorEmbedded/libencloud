@@ -3,6 +3,7 @@
 #include <common/vpn/vpnclient.h>
 #include <common/common.h>
 #include <common/config.h>
+#include <common/utils.h>
 
 namespace libencloud {
 
@@ -330,7 +331,7 @@ void VpnClient::processFinished (int exitCode, QProcess::ExitStatus exitStatus)
 void VpnClient::enableTap()
 {
 #ifdef Q_OS_WIN
-    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_INSTALLDIR + "/bin/TapSetup.exe";
+    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
     QStringList args;
     QString out;
 
@@ -345,7 +346,7 @@ err:
 void VpnClient::disableTap()
 {
 #ifdef Q_OS_WIN
-    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_INSTALLDIR + "/bin/TapSetup.exe";
+    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
     QStringList args;
     QString out;
 

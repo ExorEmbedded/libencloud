@@ -4,7 +4,9 @@
 libencloud is a simplified Switchboard communication library which provides
 functionality to handle:
  - request and renewal of Operation certificates
- - retrieval of license info and VPN connection configuration
+ - setup: retrieval of license info and VPN connection configuration
+ - VPN client and manager components
+ - HTTP-based API for Switchboard/GUI management
 
 , whilst hiding internal Qt-based C++ implementation including a
 JSON-over-HTTPS communication channel, PKI management and licensing details.
@@ -13,6 +15,7 @@ JSON-over-HTTPS communication channel, PKI management and licensing details.
                                                 Tested version (s)
                                                 ^^^^^^^^^^^^^^
 Linux                                           Ubuntu 12.04
+=====
 
 Install dependencies:
 
@@ -28,21 +31,16 @@ $ qmake
 $ make 
 $ sudo make install
 
-*Important Notes*:
-    - configuration files *must not* be readable by other users
-        e.g. Linux: sudo chmod 600 /etc/encloud/*
-    - configuration drectory and files *must* be writable by the user/process calling libencloud!
-        e.g. Linux: sudo chown -R my_user /etc/encloud
-    - different paths for files and keys can be configured in /etc/encloud/libencloud.json
-
 Run tests with:
 
 $ make check  # Note: requires Switchboard or simulator.
 
 Windows
+=======
 
 Install qt 4.8 (MinGW or VS2008 version) and qtcreator (or sdk) from here http://qt-project.org/downloads/
 Install openssl 1.0.1e from here http://slproweb.com/download/Win32OpenSSL-1_0_1e.exe
+	, choosing DLLs installed to OpenSSL bin dir (not system)
 
 Open the project file with qtcreator and select the kit (MinGW or VS2008).
 

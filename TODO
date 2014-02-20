@@ -10,6 +10,7 @@
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - backoff: test recovery
 - conf: move generated stuff from etc to persistent cache path (/var/lib/encloud?)
+- deps: qjson build
 - build: qmake PRODUCT variable for component placement, split by org   [1]
     check Exor, QSettings split?
 - test: ece, sece, qic, proxy

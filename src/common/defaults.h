@@ -16,9 +16,12 @@
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " r" LIBENCLOUD_REVISION
 #endif
 
+// tap device - MUST match name defined in CheckTap
+#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_PRODUCT
+
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
 
-// do not change this - Switchboard relies on it!
+// do NOT change this - Switchboard relies on it!
 #define LIBENCLOUD_USERAGENT_QIC        "Endian 4i Connect " LIBENCLOUD_VERSION
 
 #define LIBENCLOUD_SB_URL               "https://sb-host/"

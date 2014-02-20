@@ -9,10 +9,16 @@
 *.pyc
 *.tar.gz
 moc_*.cpp
+*.rc
+*.pdb
+*.pro.user
 
 # build-generated files
 Makefile
+Makefile.Debug
+Makefile.Release
 build/
+/src/debug/
 /test/test
 /bindings/libencloud.py
 /bindings/*_wrap.c

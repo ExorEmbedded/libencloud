@@ -16,6 +16,7 @@ LIBENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString pydate);
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi);
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid);
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
+LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out);
 
 } // namespace utils
 } // namespace libencloud

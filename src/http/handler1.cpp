@@ -204,6 +204,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
         }
         break;
 #endif
+        case true:
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }

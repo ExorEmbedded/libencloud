@@ -53,7 +53,7 @@ QT -= gui
 # Build config options
 #
 
-debug { 
+debug:unix { 
     QMAKE_CXXFLAGS += -g 
 }
 
@@ -120,7 +120,7 @@ SRCBASEDIR = $${PWD}
 
 # public API and headers are included globally
 INCLUDEPATH += $${SRCBASEDIR}/include
-INCLUDEPATH += $${SRCBASEDIR}/
+INCLUDEPATH += $${SRCBASEDIR}/src
 DEPENDPATH += $${INCLUDEPATH}
 
 # install dirs

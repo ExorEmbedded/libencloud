@@ -80,7 +80,34 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 {
-    return (s == NULL ? NULL : strdup(s));
+    return (s == NULL ? NULL :
+#ifdef Q_OS_WIN32
+                        // avoid ISO C++ warning
+                        _strdup(s)
+#else
+                        strdup(s)
+#endif
+                        );
+}
+
+int execute (QString path, QStringList args, QString &out)
+{
+    QProcess p;
+
+    LIBENCLOUD_DBG("path: " << path << " args: " << args);
+
+    p.start(path, args);
+
+    p.waitForFinished(-1);  // failure not critical
+    LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit);
+
+    out = p.readAll();
+
+    LIBENCLOUD_DBG("out: " << out);
+
+    return 0;
+err:
+    return ~0;
 }
 
 } // namespace utils
