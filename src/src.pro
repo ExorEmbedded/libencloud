@@ -115,5 +115,6 @@ HEADERS += $$SRCBASEDIR/include/encloud/HttpServer
 HEADERS += http/*.h
 SOURCES += http/*.cpp
 
+# installation
 target.path = $$LIBDIR
 INSTALLS += target

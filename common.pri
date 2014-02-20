@@ -60,8 +60,10 @@ debug:unix {
 modeqic {
     DEFINES += LIBENCLOUD_MODE_QIC
     endian {
+        PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_4IC}
         DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_4IC}\\\"
     } else {
+        PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_JMC}
         DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
     }
 } else:modeece {
@@ -127,11 +129,8 @@ DEPENDPATH += $${INCLUDEPATH}
 # install dirs
 windows {  # used only for dev - installer handles positioning on target
            # and runtime paths are defined in src/common/defaults.h
-    INSTALLDIR = %ProgramFiles%/encloud
-    LIBDIR = $${INSTALLDIR}/lib
-    BINDIR = $${INSTALLDIR}/bin
-    INCDIR = $${INSTALLDIR}/include
-    CONFDIR = %APPDATA%/encloud
+    INSTALLDIR = $${PROGDIR}
+    LIBDIR = $${INSTALLDIR}/bin
 } else {  # used for dev and production
     INSTALLDIR = /usr/local
     LIBDIR = $${INSTALLDIR}/lib
