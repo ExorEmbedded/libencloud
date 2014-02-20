@@ -20,7 +20,8 @@ namespace libencloud {
 //
 
 Core::Core ()
-    : _cfg(NULL)
+    : _isValid(false)
+    , _cfg(NULL)
     , _setup(NULL)
     , _cloud(NULL)
     , _setupState(&_setupSt)
@@ -43,6 +44,8 @@ Core::Core ()
 
     LIBENCLOUD_ERR_IF (_initFsm());
 
+    _isValid = true;
+
 err:
     return;
 }
@@ -54,6 +57,11 @@ Core::~Core ()
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
     LIBENCLOUD_DELETE(_cloud);
+}
+
+bool Core::isValid ()
+{
+    return _isValid;
 }
 
 int Core::start ()

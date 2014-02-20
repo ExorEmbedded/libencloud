@@ -25,6 +25,8 @@ public:
     Core ();
     ~Core ();
 
+    bool isValid();
+
     int start ();
     int stop ();
 
@@ -57,6 +59,8 @@ private:
     int _initFsm ();
     int _startCloud ();
     QString _stateStr (QState *state);
+
+    bool _isValid;
 
     Config *_cfg;
     SetupInterface *_setup;
