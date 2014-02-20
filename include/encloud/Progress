@@ -2,11 +2,12 @@
 #define _LIBENCLOUD_PROGRESS_H_
 
 #include <QString>
+#include <encloud/Common>
 
 namespace libencloud 
 {
 
-class Progress
+class LIBENCLOUD_DLLSPEC Progress
 {
 public:
 

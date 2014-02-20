@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_HTTP_SERVER_H_
 
 #include <QObject>
+#include <encloud/Common>
 #include <encloud/HttpAbstractHandler>
 
 // default port in case nothing is written to registry
@@ -11,7 +12,7 @@ namespace libencloud {
 
 class HttpServerPriv;
 
-class HttpServer : public QObject
+class LIBENCLOUD_DLLSPEC HttpServer : public QObject
 {
     Q_OBJECT;
 

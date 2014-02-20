@@ -2,14 +2,14 @@ include(../common.pri)
 
 TEMPLATE = lib
 
-CONFIG += shared
-
 TARGET = encloud
 
 win32 {
     CONFIG += dll
     # disable number in mingw output (libencloud0.dll vs libencloud.dll)
     TARGET_EXT = .dll
+} else {
+    CONFIG += shared
 }
 
 #

@@ -24,7 +24,7 @@
 #
 PKGNAME = libencloud
 
-PRODUCT_QIC="4iConnect"
+PRODUCT_4IC="4iConnect"
 PRODUCT_JMC="JMConnect"
 PRODUCT_ENCLOUD="Encloud"
 PRODUCT_SECE="SECE"  # FIXME
@@ -59,8 +59,8 @@ debug:unix {
 
 modeqic {
     DEFINES += LIBENCLOUD_MODE_QIC
-    Endian {
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_QIC}\\\"
+    endian {
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_4IC}\\\"
     } else {
         DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
     }
@@ -81,6 +81,7 @@ nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 win32 {
     CONFIG += qtjson  # GPL/self-contained
     DEFINES += _CRT_SECURE_NO_WARNINGS
+    DEFINES += _LIBENCLOUD_LIB_  # for dll exports
 } else {
 #   This is OK on Ubuntu but TODO on Yocto
 #   CONFIG += qjson   # LGPL/external

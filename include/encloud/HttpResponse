@@ -1,12 +1,13 @@
 #ifndef _LIBENCLOUD_HTTP_RESPONSE_H_
 #define _LIBENCLOUD_HTTP_RESPONSE_H_
 
+#include <encloud/Common>
 #include <encloud/Http>
 #include <encloud/HttpHeaders>
 
 namespace libencloud {
 
-class HttpResponse
+class LIBENCLOUD_DLLSPEC HttpResponse
 {
 
 public:

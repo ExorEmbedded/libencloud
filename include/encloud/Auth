@@ -2,11 +2,12 @@
 #define _LIBENCLOUD_AUTH_H_
 
 #include <QString>
+#include <encloud/Common>
 
 namespace libencloud 
 {
 
-class Auth
+class LIBENCLOUD_DLLSPEC Auth
 {
 public:
     Auth ();

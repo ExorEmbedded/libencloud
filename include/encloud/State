@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_STATE_H_
 
 #include <QString>
+#include <encloud/Common>
 
 namespace libencloud 
 {
@@ -23,7 +24,7 @@ typedef enum
 }
 State;
 
-QString stateToString (State state);
+LIBENCLOUD_DLLSPEC QString stateToString (State state);
 
 }  // namespace libencloud
 

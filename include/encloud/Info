@@ -2,17 +2,18 @@
 #define _LIBENCLOUD_UTILS_H_
 
 #include <QString>
+#include <encloud/Common>
 
 namespace libencloud {
 namespace info {
 
-QString org ();
-QString product ();
-QString app ();
-QString version ();
-QString revision ();
-QString versionTag ();
-QString versionInfo ();
+LIBENCLOUD_DLLSPEC QString org ();
+LIBENCLOUD_DLLSPEC QString product ();
+LIBENCLOUD_DLLSPEC QString app ();
+LIBENCLOUD_DLLSPEC QString version ();
+LIBENCLOUD_DLLSPEC QString revision ();
+LIBENCLOUD_DLLSPEC QString versionTag ();
+LIBENCLOUD_DLLSPEC QString versionInfo ();
 
 }  // namespace info
 }  // namespace libencloud

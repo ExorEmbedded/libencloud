@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
+#include <encloud/Common>
 #include <encloud/Auth>
 #include <encloud/State>
 #include <encloud/Progress>
@@ -15,7 +16,7 @@ class Config;
 class HttpServer;
 class SetupInterface;
 
-class Core : public QObject
+class LIBENCLOUD_DLLSPEC Core : public QObject
 {
     Q_OBJECT
 

@@ -2,8 +2,8 @@
 #define _LIBENCLOUD_COMMON_H_
 
 #ifndef LIBENCLOUD_DLLSPEC
-#  if defined(LIBENCLOUD_WIN32)
-#    if defined _LIBENCLOUDLIB_
+#  if defined(Q_OS_WIN32)
+#    if defined(_LIBENCLOUD_LIB_)
 #       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
 #    else
 #       define LIBENCLOUD_DLLSPEC __declspec(dllimport)

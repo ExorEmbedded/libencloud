@@ -3,11 +3,12 @@
 
 #include <QMap>
 #include <QStringList>
+#include <encloud/Common>
 #include <encloud/Http>
 
 namespace libencloud {
 
-class HttpHeaders
+class LIBENCLOUD_DLLSPEC HttpHeaders
 {
 public:
     HttpHeaders ();

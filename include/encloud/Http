@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_HTTP_HTTP_H_
 
 #include <QString>
+#include <encloud/Common>
 
 #define LIBENCLOUD_HTTP_NL "\r\n"
 
@@ -79,8 +80,8 @@ typedef enum {
     LIBENCLOUD_HTTP_STATUS_BADVERSION =     505
 } HttpStatus;
 
-HttpMethod httpMethodFromString (QString method);
-QString httpStatusToString (HttpStatus status);
+LIBENCLOUD_DLLSPEC HttpMethod httpMethodFromString (QString method);
+LIBENCLOUD_DLLSPEC QString httpStatusToString (HttpStatus status);
 
 }  // namespace libencloud
 

@@ -1,12 +1,13 @@
 #ifndef _LIBENCLOUD_HTTP_ABSTRACT_HANDLER_H_
 #define _LIBENCLOUD_HTTP_ABSTRACT_HANDLER_H_
 
+#include <encloud/Common>
 #include <encloud/HttpRequest>
 #include <encloud/HttpResponse>
 
 namespace libencloud {
 
-class HttpAbstractHandler
+class LIBENCLOUD_DLLSPEC HttpAbstractHandler
 {
 public:
     virtual ~HttpAbstractHandler() {};

@@ -5,6 +5,7 @@
 #include <QString>
 #include <QUuid>
 #include <encloud/Auth>
+#include <encloud/Common>
 #include <encloud/HttpAbstractHandler>
 #include <encloud/State>
 #include <encloud/Progress>
@@ -22,7 +23,7 @@ ApiVersion;
 
 class ApiHandler;
 
-class HttpHandler : public QObject, public HttpAbstractHandler
+class LIBENCLOUD_DLLSPEC HttpHandler : public QObject, public HttpAbstractHandler
 {
     Q_OBJECT;
 
