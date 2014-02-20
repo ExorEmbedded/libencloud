@@ -131,6 +131,7 @@ windows {  # used only for dev - installer handles positioning on target
            # and runtime paths are defined in src/common/defaults.h
     INSTALLDIR = $${PROGDIR}
     LIBDIR = $${INSTALLDIR}/bin
+    CONFDIR = $${INSTALLDIR}/$${PKGNAME}/etc
 } else {  # used for dev and production
     INSTALLDIR = /usr/local
     LIBDIR = $${INSTALLDIR}/lib
