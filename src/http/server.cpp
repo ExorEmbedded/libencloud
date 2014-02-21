@@ -69,8 +69,19 @@ int HttpServer::start ()
 {
     LIBENCLOUD_SVC_TRACE;
 
-    // initially listens only on local interface
-    _localServer->start(QHostAddress(LIBENCLOUD_SRV_LISTEN), LIBENCLOUD_SRV_PORT_DFT);
+    // initially listens only on local interface, unless configured differently
+    if (_cfg && _cfg->config.bind == "all")
+    {
+        LIBENCLOUD_SVC_DBG("Binding to all interfaces");
+        _localServer->start(QHostAddress::Any,
+            LIBENCLOUD_SRV_PORT_DFT);
+    }
+    else
+    {
+        LIBENCLOUD_SVC_DBG("Binding only to local interface");
+        _localServer->start(QHostAddress(LIBENCLOUD_SRV_LISTEN), 
+            LIBENCLOUD_SRV_PORT_DFT);
+    }
 
     return 0;
 }
@@ -97,6 +108,9 @@ bool HttpServer::isListening ()
 void HttpServer::vpnIpAssigned (const QString &ip)
 {
     LIBENCLOUD_SVC_DBG ("ip: " << ip);
+
+    if (_cfg && _cfg->config.bind == "all")
+        return;
 
     if (ip != "")
         _cloudServer->start(QHostAddress(ip), LIBENCLOUD_SRV_PORT_DFT);

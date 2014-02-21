@@ -1,0 +1,27 @@
+{
+
+  "bind" : "all",
+
+  "ssl_init" : {
+    "sb" : {
+      "url" : "https://initialization-host/"
+    },
+    "ca" : "init_ca.pem",
+    "cert" : "init_cert.pem",
+    "key" : "init_key.pem"
+  },
+
+  "ssl_op" : {
+    "sb" : {
+      "url" : "https://operation-host/"
+    },
+    "ca" : "op_ca.pem",
+    "cert" : "op_cert.pem",
+    "key" : "op_key.pem"
+  },
+
+  "log" : {
+    "to" : "file",
+    "lev" : 7
+  }
+}

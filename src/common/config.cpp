@@ -114,6 +114,9 @@ err:
 
 int Config::_parse (const QVariantMap &jo)
 {
+    if (!jo["bind"].isNull())
+        config.bind = jo["bind"].toString();
+
 #ifndef LIBENCLOUD_MODE_SECE
     if (!jo["serial"].isNull())
         config.serialPath = _joinPaths(_dataPrefix, \

@@ -2,13 +2,15 @@ libencloud configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Notes: 
-    - all paths are relative to LIBENCLOUD_PREFIX_PATH (optionally defined in common.pri)
+    - basically all fields are optional
     - comments are *not* valid Json
-    - prefix
 
 * Sample:
 
 {
+  "bind" : "all",                               # bind to all interfaces (testing)
+                                                # otherwise binds only to localhost and tap interface
+
   "serial" : "serial",                          # serial number (ECE only)
   "poi" : "poi",                                # Proof of Identity (ECE only)
 
@@ -50,6 +52,7 @@ libencloud configuration
   },
 
   "log" : {
-    "lev" : 3       # log level: 0 = min .. 7 = max
+    "to" : "file",      # log to file ("%AppData%/$PRODUCT/libencloud-log.txt)
+    "lev" : 3           # log level: 0 = min .. 7 = max
   }
 }
