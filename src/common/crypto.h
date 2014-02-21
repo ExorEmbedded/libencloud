@@ -1,6 +1,6 @@
 /** 
  * Helper crypto lib.
- * 
+ *
  * Note: kept Qt-independent for possible reusage.
  */
 
@@ -9,7 +9,6 @@
 
 #include <openssl/bio.h>
 #include <openssl/md5.h>
-#include <encloud/Common>
 
 #ifdef __cplusplus
 extern "C" {

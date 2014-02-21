@@ -1,6 +1,8 @@
 #include "config.h"
 #include "helpers.h"
 
+void _msgHandler(QtMsgType type, const char *msg);
+
 namespace libencloud {
 
 /* Set defaults from defaults.h definitions */
@@ -148,12 +150,8 @@ int Config::_parse (const QVariantMap &jo)
     if (!jo["vpn"].isNull())
         LIBENCLOUD_ERR_IF (_parseVpn(jo["vpn"].toMap()));
 
-    if (!jo["log"].toMap()["lev"].isNull())
-    {
-        config.logLevel = jo["log"].toMap()["lev"].toInt();
-        LIBENCLOUD_ERR_MSG_IF ((config.logLevel < 0 || config.logLevel > 7),
-                "log level must be between 0 and 7!");
-    }
+    if (!jo["log"].isNull())
+        LIBENCLOUD_ERR_IF (_parseLog(jo["log"].toMap()));
 
     return 0;
 err:
@@ -220,6 +218,35 @@ int Config::_parseVpn (const QVariantMap &jo)
     return 0;
 }
 
+int Config::_parseLog (const QVariantMap &jo)
+{
+    if (!jo["lev"].isNull())
+    {
+        config.logLevel = jo["lev"].toInt();
+        LIBENCLOUD_ERR_MSG_IF ((config.logLevel < 0 || config.logLevel > 7),
+                "log level must be between 0 and 7!");
+    }
+
+    if (!jo["to"].isNull())
+    {
+        config.logTo = jo["to"].toString();
+        LIBENCLOUD_ERR_MSG_IF (config.logTo != "file",
+                "only file logging supported!");
+
+        QDir dir;
+        dir.mkpath(_dataPrefix);
+        config.logFile.setFileName(_dataPrefix + "/" + LIBENCLOUD_PRODUCT + "_log.txt");
+        LIBENCLOUD_ERR_IF (!config.logFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        config.logText.setDevice(&config.logFile);
+
+        qInstallMsgHandler(_msgHandler);
+    }
+
+    return 0;
+err:
+    return ~0;
+}
+
 QString Config::_joinPaths (const QString &s1, const QString &s2)
 {
     return QDir::cleanPath(s1 + QDir::separator() + s2);
@@ -228,3 +255,13 @@ QString Config::_joinPaths (const QString &s1, const QString &s2)
 } // namespace libencloud
 
 libencloud::Config *g_cfg = NULL;
+
+void _msgHandler(QtMsgType type, const char *msg)
+{
+    Q_UNUSED(type);
+
+    if (g_cfg == NULL || msg == NULL)
+        return;
+
+    g_cfg->config.logText << msg << endl;
+}

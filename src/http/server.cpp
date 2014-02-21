@@ -30,7 +30,8 @@ namespace libencloud {
 //
     
 HttpServer::HttpServer (QObject *parent)
-    : _localServer(NULL)
+    : _cfg(NULL)
+    , _localServer(NULL)
     , _cloudServer(NULL)
     , _handler(NULL)
 {
@@ -82,6 +83,11 @@ int HttpServer::stop ()
     _cloudServer->stop();
 
     return 0;
+}
+
+bool HttpServer::isListening ()
+{
+    return _localServer->isListening();
 }
 
 //

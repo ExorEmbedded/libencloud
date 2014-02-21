@@ -8,6 +8,7 @@
 #include "common.h"
 #include "config.h"
 #include "crypto.h"
+#include <encloud/Common>
 
 static X509_REQ *__make_req (libencloud_crypto_t *ec, EVP_PKEY *pkey);
 

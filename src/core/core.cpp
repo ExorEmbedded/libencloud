@@ -29,7 +29,7 @@ Core::Core ()
 {
     LIBENCLOUD_TRACE;
 
-    qDebug() << "Starting " << info::versionInfo();
+    qDebug() << "Starting " << qPrintable(info::versionInfo());
 
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
@@ -128,6 +128,9 @@ int Core::attachServer (HttpServer *server)
     // authentication requests from handler are reemitted by core
     connect(obj, SIGNAL(authSupplied(Auth)), 
            this, SIGNAL(authSupplied(Auth)));
+
+    // attach core configuration
+    server->_cfg = _cfg;
 
     return 0;
 err:

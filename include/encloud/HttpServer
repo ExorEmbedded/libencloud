@@ -10,11 +10,14 @@
 
 namespace libencloud {
 
+class Config;
 class HttpServerPriv;
 
 class LIBENCLOUD_DLLSPEC HttpServer : public QObject
 {
     Q_OBJECT;
+
+    friend class Core;
 
 public:
     HttpServer (QObject *parent = 0);
@@ -25,11 +28,13 @@ public:
 
     int start ();
     int stop ();
+    bool isListening ();
 
 public slots:
     void vpnIpAssigned (const QString &ip);
 
 private:
+    Config *_cfg;
     HttpServerPriv *_localServer;
     HttpServerPriv *_cloudServer;
     HttpAbstractHandler *_handler;

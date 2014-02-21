@@ -13,4 +13,13 @@
 #  endif
 #endif
 
+namespace libencloud {
+
+    class Config;
+
+} // namespace libencloud
+
+// global exported configuration object - used for logging
+LIBENCLOUD_DLLSPEC extern libencloud::Config *g_cfg;
+
 #endif /* _LIBENCLOUD_COMMON_H_ */
