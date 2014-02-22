@@ -14,6 +14,9 @@ HEADERS += encloud/HttpResponse
 HEADERS += encloud/HttpServer
 
 # header installation
-headers.path = $${INCDIR}/encloud
-headers.files = $${HEADERS}
-INSTALLS += headers
+unix {
+    headers.path = $${INCDIR}/encloud
+    headers.files = $${HEADERS}
+    INSTALLS += headers
+
+} # win32 uses relative paths - headers not installed
