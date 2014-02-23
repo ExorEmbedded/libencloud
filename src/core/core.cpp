@@ -132,6 +132,8 @@ int Core::attachServer (HttpServer *server)
     // attach core configuration
     server->_cfg = _cfg;
 
+    emit stateChanged(StateIdle);
+
     return 0;
 err:
     return ~0;
@@ -160,10 +162,17 @@ void Core::_stateEntered ()
 
     LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
 
-	if (state == _setupState)
-		_setup->start();
-	else if (state == _cloudState)
-		_cloud->start();
+    if (state == _setupState)
+    {
+        emit stateChanged(StateSetup);
+        _setup->start();
+    }
+    else if (state == _cloudState)
+    {
+        // VPN states emitted by cloud
+        //emit stateChanged(StateConnect);
+        _cloud->start();
+    }
 }
 
 void Core::_stateExited ()

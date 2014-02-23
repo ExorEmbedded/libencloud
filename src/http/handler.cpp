@@ -16,6 +16,7 @@ namespace libencloud {
 //
 
 HttpHandler::HttpHandler ()
+    : _coreState(StateNone)
 {
     LIBENCLOUD_TRACE;
 }
