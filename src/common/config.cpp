@@ -1,7 +1,7 @@
 #include "config.h"
 #include "helpers.h"
 
-void _msgHandler(QtMsgType type, const char *msg);
+//static void __msgHandler (QtMsgType type, const char *msg);
 
 namespace libencloud {
 
@@ -13,7 +13,6 @@ Config::Config ()
 
 #ifdef Q_OS_WIN32  // relative paths
     QString progFiles = QString(qgetenv("ProgramFiles"));
-    QString appData = QString(qgetenv("AppData"));
 
     // main prefix and binaries are product-specific (e.g. 4iConnect)
     _prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
@@ -23,16 +22,13 @@ Config::Config ()
     _confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
 
-    // data is package-specific (4iConnect\libencloud) under %AppData%
-    _dataPrefix = appData + sep + QString(LIBENCLOUD_INSTALLDIR) +
-            sep + QString(LIBENCLOUD_DATA_PREFIX);
-
 #else  // Linux - absolute paths
     _prefix = LIBENCLOUD_PREFIX_PATH;
     _confPrefix = LIBENCLOUD_ETC_PREFIX;
     _sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
-    _dataPrefix = LIBENCLOUD_DATA_PREFIX;
 #endif
+
+    _dataPrefix = getCommonAppDataDir();
 
     filePath = QFileInfo(_confPrefix + sep + QString(LIBENCLOUD_CONF_FILE));
 
@@ -236,13 +232,8 @@ int Config::_parseLog (const QVariantMap &jo)
         LIBENCLOUD_ERR_MSG_IF (config.logTo != "file",
                 "only file logging supported!");
 
-        QDir dir;
-        dir.mkpath(_dataPrefix);
-        config.logFile.setFileName(_dataPrefix + "/" + LIBENCLOUD_PRODUCT + "_log.txt");
-        LIBENCLOUD_ERR_IF (!config.logFile.open(QIODevice::WriteOnly | QIODevice::Text));
-        config.logText.setDevice(&config.logFile);
-
-        qInstallMsgHandler(_msgHandler);
+        config.logger.setPath(_dataPrefix + "/" + LIBENCLOUD_PKGNAME + "-log.txt");
+        config.logger.open();
     }
 
     return 0;
@@ -258,13 +249,3 @@ QString Config::_joinPaths (const QString &s1, const QString &s2)
 } // namespace libencloud
 
 libencloud::Config *g_cfg = NULL;
-
-void _msgHandler(QtMsgType type, const char *msg)
-{
-    Q_UNUSED(type);
-
-    if (g_cfg == NULL || msg == NULL)
-        return;
-
-    g_cfg->config.logText << msg << endl;
-}

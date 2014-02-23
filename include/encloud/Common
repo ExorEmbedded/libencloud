@@ -1,6 +1,8 @@
 #ifndef _LIBENCLOUD_COMMON_H_
 #define _LIBENCLOUD_COMMON_H_
 
+#include <QString>
+
 #ifndef LIBENCLOUD_DLLSPEC
 #  if defined(Q_OS_WIN32)
 #    if defined(_LIBENCLOUD_LIB_)
@@ -15,7 +17,11 @@
 
 namespace libencloud {
 
-    class Config;
+class Config;
+
+// win32: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
+// unix: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
+LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
 
 } // namespace libencloud
 

@@ -16,15 +16,20 @@ win32 {
 # common sources
 # 
 
-HEADERS += common/common.h
 HEADERS += common/defaults.h
 HEADERS += common/helpers.h
+
+HEADERS += common/common.h
+SOURCES += common/common.cpp
 
 HEADERS += $$SRCBASEDIR/include/encloud/Auth
 SOURCES += common/auth.cpp
 
 HEADERS += $$SRCBASEDIR/include/encloud/Info
 SOURCES += common/info.cpp
+
+HEADERS += $$SRCBASEDIR/include/encloud/Logger
+SOURCES += common/logger.cpp
 
 HEADERS += $$SRCBASEDIR/include/encloud/State
 SOURCES += common/state.cpp
@@ -114,6 +119,11 @@ HEADERS += $$SRCBASEDIR/include/encloud/HttpHeaders
 HEADERS += $$SRCBASEDIR/include/encloud/HttpServer
 HEADERS += http/*.h
 SOURCES += http/*.cpp
+
+# for SHGetFolderPath()
+win32 {
+    LIBS += -lshfolder
+}
 
 # installation
 target.path = $$LIBDIR

@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_PRIV_DEFAULTS_H_
 
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
+#define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
 
 // e.g Endian/4iConnect, Exor/JMConnect
 #define LIBENCLOUD_PRODUCTDIR           LIBENCLOUD_ORG "/" LIBENCLOUD_PRODUCT
@@ -37,8 +38,8 @@
 #define LIBENCLOUD_PREFIX_PATH          "/"
 #endif
 #ifdef Q_OS_WIN32  // relative paths - refer to src/common/config.cpp
-#  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR
-#  define LIBENCLOUD_SBIN_PREFIX        "\\sbin\\"  // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR
+#  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
+#  define LIBENCLOUD_SBIN_PREFIX        "\\bin\\"  // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
 #  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
 #else  // absolute paths
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"

@@ -8,9 +8,9 @@
 #include <QObject>
 #include <QSettings>
 #include <QString>
-#include <QTextStream>
 #include <QUrl>
 #include <encloud/Common>
+#include <encloud/Logger>
 #include "crypto.h"
 #include "defaults.h"
 #include "helpers.h"
@@ -52,9 +52,8 @@ typedef struct
     QString vpnArgs;
 
     int logLevel;
+    Logger logger;
     QString logTo;
-    QFile logFile;
-    QTextStream logText;
 }
 libencloud_config_t;
 
