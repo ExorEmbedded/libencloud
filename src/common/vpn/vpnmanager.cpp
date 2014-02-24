@@ -302,6 +302,8 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 // Only catch auth signals for Cloud
 void VpnManager::authSupplied (const Auth &auth)
 {
+    LIBENCLOUD_DBG("type: " << auth.getType());
+
     if (auth.getType() == "sb")
         sendAuth("Auth", auth.getUser(), auth.getPass());
     else if (auth.getType() == "proxy")

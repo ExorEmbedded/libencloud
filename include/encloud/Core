@@ -62,6 +62,7 @@ private:
     int _initCloud ();
     int _initFsm ();
     int _startCloud ();
+    void _supplyAuthTo (QObject *dest, const Auth &auth);
     QString _stateStr (QState *state);
 
     bool _isValid;
@@ -77,6 +78,7 @@ private:
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
 
+    Auth _lastAuth;
     QMap<QString,AuthSession *> _authSessions;
 };
 

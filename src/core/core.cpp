@@ -62,6 +62,7 @@ Core::~Core ()
 {
     LIBENCLOUD_TRACE;
 
+    g_cfg = NULL;
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
     LIBENCLOUD_DELETE(_cloud);
@@ -242,6 +243,18 @@ void Core::_authRequired (const QString &type)
     QString source;
     AuthSession *session = NULL;
 
+    LIBENCLOUD_DBG("type: " << type);
+
+    // FIXME causes fsm loops
+#if 0
+    // reuse last credentials if of same type
+    if (_lastAuth.isValid() && _lastAuth.getType() == type)
+    {
+        _supplyAuthTo(sender(), _lastAuth);
+        return;
+    }
+#endif
+
     if (sender() == _setupObj)
         source = "setup";
     else 
@@ -280,6 +293,7 @@ void Core::_authSupplied (const QUuid &uuid, const Auth &auth)
     QString id = utils::uuid2String(uuid);
     AuthSession *session;
     QObject *destination; 
+    Auth newAuth(auth);
 
     LIBENCLOUD_DBG ("retrieving session: " << id);
 
@@ -293,17 +307,16 @@ void Core::_authSupplied (const QUuid &uuid, const Auth &auth)
     else
         destination = _cloud;
 
-    // connect temporarily only to emit signal
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            destination, SIGNAL(authSupplied(Auth)));
-    emit authSupplied(auth);
-    disconnect(this, SIGNAL(authSupplied(Auth)), 
-            destination, SIGNAL(authSupplied(Auth)));
+    // get type from session
+    newAuth.setType(session->type);
+
+    _supplyAuthTo(destination, newAuth);
 
     LIBENCLOUD_DELETE(_authSessions[id]);
 
     LIBENCLOUD_ERR_IF (_authSessions.remove(id) == 0);
 
+    _lastAuth = newAuth;
 err:
     return;
 }
@@ -444,6 +457,16 @@ int Core::_initFsm ()
             this, SLOT(_stopped()));
 
     return 0;
+}
+
+void Core::_supplyAuthTo (QObject *dest, const Auth &auth)
+{
+    // connect temporarily only to emit signal to proper destination
+    connect(this, SIGNAL(authSupplied(Auth)), 
+            dest, SIGNAL(authSupplied(Auth)));
+    emit authSupplied(auth);
+    disconnect(this, SIGNAL(authSupplied(Auth)), 
+            dest, SIGNAL(authSupplied(Auth)));
 }
 
 QString Core::_stateStr (QState *state)
