@@ -1,16 +1,16 @@
 #!/bin/sh
 
-[ $# -lt 1 ] && echo "Usage: $0 <action>" && exit 1
+[ $# -lt 2 ] && echo "Usage: $0 HOST ACTION [UUID] [URL] [USER] [PASS]" && exit 1
 
-HOST="localhost"
+HOST="$1"
 URL="api_v1"
 PORT="4884"
-ACTION="$1"
+ACTION="$2"
 LICENSE="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
-LOGINURL="$3"
-AUTHTYPE="$2"
-USER="$4"
-PASS="$5"
+UUID="$3"
+LOGINURL="$4"
+USER="$5"
+PASS="$6"
 ARGS=
 
 case ${ACTION} in
@@ -23,7 +23,7 @@ case ${ACTION} in
         ;;
     auth)
         URL=${URL}/auth
-        ARGS="--post-data type=${AUTHTYPE}&url=${LOGINURL}&user=${USER}&pass=${PASS}"
+        ARGS="--post-data id=${UUID}&url=${LOGINURL}&user=${USER}&pass=${PASS}"
         ;;
     *)
         echo "Invalid command: '${ACTION}'!"

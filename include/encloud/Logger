@@ -6,12 +6,17 @@
 #include <QTextStream>
 #include <encloud/Common>
 
+// defaults
+#ifdef Q_OS_WIN32
+#  define LIBENCLOUD_LOGGER_PATH  "c:/" LIBENCLOUD_PKGNAME "-log.txt"
+#else
+#  define LIBENCLOUD_LOGGER_PATH  "/tmp/" LIBENCLOUD_PKGNAME "-log.txt"
+#endif
+
 /**
  * Sets up log handler for qDebug(), etc
  */
 namespace libencloud {
-
-static const char *defaultPath = "c:/default-log.txt";
 
 class LIBENCLOUD_DLLSPEC Logger
 {
@@ -21,7 +26,7 @@ public:
 
 public:
 
-    // default is defaultPath
+    // default is LIBENCLOUD_LOGGER_PATH
     int setPath (const QString &path);
 
     // default is WriteOnly | Text

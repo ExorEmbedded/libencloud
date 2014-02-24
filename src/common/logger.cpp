@@ -16,7 +16,7 @@ Logger::Logger ()
     LIBENCLOUD_TRACE;
 
     // set defaults
-    _path = defaultPath;
+    _path = LIBENCLOUD_LOGGER_PATH;
     _extraMode = QFile::NotOpen;
 }
 

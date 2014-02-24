@@ -8,6 +8,8 @@ QString stateToString (State state)
 {
     switch (state)
     {
+        case StateNone:
+            return "<None>";
         case StateIdle:
             return "Idle";
         case StateError:

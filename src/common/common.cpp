@@ -10,8 +10,9 @@ namespace libencloud {
 
 LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 {
-#ifdef Q_OS_WIN32
     const QString sep = "/";
+
+#ifdef Q_OS_WIN32
     QString s;
     char szPath[MAX_PATH];
 
@@ -28,11 +29,14 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
     s += sep;
 
     return s;
-#else 
-    return QString(LIBENCLOUD_DATA_PREFIX);
-#endif
 err:
     return QString();
+
+#else  // Q_OS_UNIX
+    LIBENCLOUD_UNUSED(package);
+
+    return QString(LIBENCLOUD_DATA_PREFIX);
+#endif
 }
 
 }  // namespace libencloud

@@ -212,12 +212,17 @@ err:
     return ~0;
 }
 
+// TODO
 int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &response)
 {
     LIBENCLOUD_TRACE;
 
+    LIBENCLOUD_UNUSED(request);
+    LIBENCLOUD_UNUSED(response);
+
     // only reach here upon success
     LIBENCLOUD_HANDLER_OK;
+
     return 0;
 }
 

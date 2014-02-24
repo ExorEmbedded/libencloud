@@ -1,12 +1,11 @@
 /** 
  * Helper crypto lib.
- *
- * Note: kept Qt-independent for possible reusage.
  */
 
 #ifndef _LIBENCLOUD_PRIV_CRYPTO_H_
 #define _LIBENCLOUD_PRIV_CRYPTO_H_
 
+#include <encloud/Common>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
 
