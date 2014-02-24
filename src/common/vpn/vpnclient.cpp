@@ -124,8 +124,9 @@ QStringList VpnClient::getArgs (void)
     QString caCertPath;
     QNetworkProxy proxy = QNetworkProxy::applicationProxy();
 
-	configPath = _cfg->config.vpnConfPath.absoluteFilePath();
+    args << "--log" << getCommonAppDataDir() + "openvpn.log";
 
+    configPath = _cfg->config.vpnConfPath.absoluteFilePath();
     args << "--config" << configPath;
 
     //
@@ -140,7 +141,7 @@ QStringList VpnClient::getArgs (void)
     args << "--auth-user-pass";
 #endif
 
-	caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
+    caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
     args << "--ca" << caCertPath;
 
     switch (proxy.type())
@@ -200,6 +201,8 @@ void VpnClient::start (void)
 
     args = getArgs();
     path = _cfg->config.vpnExePath.absoluteFilePath();
+
+    LIBENCLOUD_DBG("path: " << path);
 
     file = QFileInfo(path);
     LIBENCLOUD_EMIT_ERR_IF (!file.isFile() || !file.isExecutable(),
@@ -330,7 +333,9 @@ void VpnClient::processFinished (int exitCode, QProcess::ExitStatus exitStatus)
 
 void VpnClient::enableTap()
 {
+    // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
+#ifdef LIBENCLOUD_MODE_QIC
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
     QStringList args;
     QString out;
@@ -339,13 +344,16 @@ void VpnClient::enableTap()
 
     LIBENCLOUD_ERR_IF (utils::execute(path, args, out));
 err:
-#endif
+#endif  // LIBENCLOUD_MODE_QIC
+#endif  // Q_OS_WIN
     return;
 }
 
 void VpnClient::disableTap()
 {
+    // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
+#ifdef LIBENCLOUD_MODE_QIC  
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
     QStringList args;
     QString out;
@@ -354,7 +362,8 @@ void VpnClient::disableTap()
 
     LIBENCLOUD_ERR_IF (utils::execute(path, args, out));
 err:
-#endif
+#endif  // LIBENCLOUD_MODE_QIC
+#endif  // Q_OS_WIN
     return;
 }
 

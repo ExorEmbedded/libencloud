@@ -55,7 +55,7 @@ err:
 }
 
 #ifdef LIBENCLOUD_MODE_SECE
-void RetrInfoMsg::licenseReceived (QUuid uuid)
+void RetrInfoMsg::licenseReceived (const QUuid &uuid)
 {
     QString license = uuid.toString();
 

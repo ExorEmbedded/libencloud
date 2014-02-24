@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QUuid>
 #include <encloud/Auth>
 #include <encloud/Common>
@@ -53,11 +54,11 @@ public:
     int setLicense (const QString &);
 #endif
 
-    int setAuth (const Auth &auth);
+    int setAuth (const QUuid &uuid, const Auth &auth);
 
 signals:
-    void licenseSend (QUuid uuid);
-    void authSupplied (const Auth &auth);
+    void licenseSend (const QUuid &uuid);
+    void authSupplied (const QUuid &uuid, const Auth &auth);
 
 private slots:
     void _coreErrorReceived (const QString &msg);
@@ -73,7 +74,7 @@ private:
     QString _coreError;
     State _coreState;
     Progress _coreProgress;
-    QString _need;
+    QStringList _needs;
 
 #ifdef LIBENCLOUD_MODE_ECE
     QUuid _poi;

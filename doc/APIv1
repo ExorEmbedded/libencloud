@@ -11,11 +11,17 @@
      application/javascript, not application/json.
 
 
+[  Type definitions ]
+
+     <uuid>    e.g.  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+
+
 [ State Retrieval ]
 
 * GET /api_v1/status
 
-    Def 'state'         0      Idle            (grey)
+    Def 'state'        -1      None
+                        0      Idle            (grey)
                         1      Error           (red)
                         2      Setting Up      (yellow)
                         3      Connecting      (orange)
@@ -29,21 +35,23 @@
                     'step': 2,                  # current step number 
                     'step': 5                   # total number of steps
                 },
-                'need' : 'license sb_auth'      # OPTIONAL list of space-separated "need" strings
-            })"                                   to be fulfilled via API
+                'need' : 'license sb_auth=<uuid>'   # OPTIONAL list of space-separated "need" strings
+            })"                                     jo be fulfilled via API. Possible values:
+                                                    'license', 'sb_auth', 'proxy_auth'
+                                                    <uuid> is an authentication identifier token
 
 
 [ Authentication/Login API ]
 
 * POST /api_v1/auth                    [ Note: QIC only! ]
 
-    Def 'type'          type of authentication: 'sb','sb_proxy','cloud','cloud_proxy'
-    Def 'url'           OPTIONAL destination url for login authentication
+    Def 'id'            authentication session identifier
+    Def 'url'           OPTIONAL destination url (for Switchboard login)
     Def 'user'          user for authentication
     Def 'pass'          password for authentication
 
-    e.g. 1              type=sb&url=myurl&user=myuser&pass=mypass
-    e.g. 2              type=cloud_proxy&user=myuser&pass=mypass
+    e.g. 1              id=<uuid>&url=myurl&user=myuser&pass=mypass
+    e.g. 2              id=<uuid>&user=myuser&pass=mypass
 
 
 [ Setup API ]             
@@ -53,14 +61,14 @@
     Def 'poi'           proof of identity returned by ECE for Switchboard association
 
     e.g.    "jsonpCallback({
-                 'poi' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+                 'poi' : '<uuid>'
              })"
 
 * GET /api_v1/setup                    [ Note: QIC only! ]                              [[TODO]]
 
     e.g.    "jsonpCallback({
                  'server ' : {
-                     'uuid' : 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
+                     'uuid' : '<uuid>',
                      'external_ip' : '77.88.99.100',
                      'internal_ip' : '192.168.50.1'
                      'available_pages' : { 'settings' : '/manage/accecess/settings/standalone/',      # [...]
@@ -71,17 +79,22 @@
 
     Def 'license'       license entered by user to activate SECE
 
-    e.g.                license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+    e.g.                license=<uuid>
 
 
 [ Cloud API ]
 
-* POST /api_v1/cloud
+* POST /api_v1/cloud                                                                        [[TODO]]
 
-    Def 'action'        operation to be performed: 'start','stop','syncRoutes'
+    Def 'action'        operation:                  controller:
 
-    e.g. 1              action=start                                                    [[TODO]] [[?]]
-    e.g. 2              action=syncRoutes&ips[]=192.168.1.100&ips[]=192.168.1.101       [[TODO]]
+                        'start','stop'              GUI/browser
+                        'syncRoutes'                Switchboard
+                        'open','close'              Switchboard
+
+    e.g. 1              action=start
+    e.g. 2              action=syncRoutes&ips[]=192.168.1.100&ips[]=192.168.1.101
+    e.g. 3              action=open&prog=myRdpApp&args=param1%20param2                      #uuid?
 
 
 [ Error Handling ]

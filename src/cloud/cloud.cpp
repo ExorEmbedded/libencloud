@@ -29,8 +29,6 @@ Cloud::Cloud (Config *cfg)
     // ip assignment and need requests (e.g. auth) routed from manager
     connect(_vpnManager, SIGNAL(ipAssigned(QString)),
             this, SIGNAL(ipAssigned(QString)));
-    connect(_vpnManager, SIGNAL(need(QString)),
-            this, SIGNAL(need(QString)));
 
     // local error handling
     connect(_vpnClient, SIGNAL(sigError(VpnClient::Error, QString)), 
@@ -38,7 +36,9 @@ Cloud::Cloud (Config *cfg)
     connect(_vpnManager, SIGNAL(sigError(VpnManager::Error, QString)), 
             this, SLOT(_vpnManagerErr(VpnManager::Error, QString)));
 
-    // authentication forwarding to manager
+    // authentication forwarding to and from manager
+    connect(_vpnManager, SIGNAL(authRequired(QString)), 
+            this, SIGNAL(authRequired(QString)));
     connect(this, SIGNAL(authSupplied(Auth)), 
             _vpnManager, SLOT(authSupplied(Auth)));
 

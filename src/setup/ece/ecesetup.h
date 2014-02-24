@@ -48,11 +48,12 @@ signals:
     void error (QString msg = "");
     void progress (const Progress &progress);
     void need (const QString &what);
+    void authRequired (const QString &type);
     void retry ();
     void completed ();
 
 #ifdef LIBENCLOUD_MODE_SECE
-    void licenseForward (QUuid uuid);
+    void licenseForward (const QUuid &uuid);
 #endif
 
 private slots:

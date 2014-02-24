@@ -33,7 +33,7 @@ void SetupMsg::process ()
 
     if (!_auth.isValid())
     {
-        emit need ("sb_auth");
+        emit authRequired("sb");
         return;
     }
 
@@ -64,13 +64,10 @@ err:
     return;
 }
 
-// Only catch auth signals for SB
+// TODO handle proxy
 void SetupMsg::authSupplied (const Auth &auth)
 {
     LIBENCLOUD_TRACE;
-
-    if (auth.getType() != "sb")
-        return;
 
     _auth = auth;
 
@@ -87,7 +84,7 @@ void SetupMsg::_clientComplete (const QString &response)
     // stop listening to signals from client
     disconnect(_client, 0, this, 0);
 
-    EMIT_ERROR_ERR_IF (_decodeResponse(response));
+    LIBENCLOUD_ERR_IF (_decodeResponse(response));
     EMIT_ERROR_ERR_IF (_unpackResponse());
 
     emit processed();
@@ -119,8 +116,20 @@ int SetupMsg::_decodeResponse (const QString &response)
 
     json = json::parse(response, ok).toMap();
 
+    LIBENCLOUD_EMIT_ERR_IF (!ok,
+            error(tr("Error parsing SB response")));
+
+    // bubble Switchboard errors
+    if (ok && !json["error"].isNull())
+    {
+        emit authRequired("sb");
+
+        LIBENCLOUD_EMIT_ERR (error(tr("Switchboard error: ") +
+                    json["error"].toString()));
+    }
+
     // field validity check
-    LIBENCLOUD_EMIT_ERR_IF (!ok ||
+    LIBENCLOUD_EMIT_ERR_IF (
             json["uuid"].isNull() ||
             json["vpn_server_ip"].isNull() ||
             json["openvpn_conf"].isNull() ||
@@ -139,7 +148,7 @@ int SetupMsg::_decodeResponse (const QString &response)
     LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
             error(tr("CA Certificate from Switchboard not valid")));
 
-    // TODO emit message with whole config for API
+    // TODO emit signal with whole config for API
 
     return 0;
 err:

@@ -6,6 +6,7 @@
 #include <encloud/HttpServer>
 #include <common/config.h>
 #include <common/crypto.h>
+#include <common/utils.h>
 #include <setup/qic/qicsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
@@ -14,6 +15,13 @@
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
 
 namespace libencloud {
+
+class AuthSession 
+{
+public:
+    QString source;     // "setup" | "cloud"
+    QString type;       // "sb" | "proxy"
+};
 
 //
 // public methods
@@ -125,9 +133,9 @@ int Core::attachServer (HttpServer *server)
             _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
 
-    // authentication requests from handler are reemitted by core
-    connect(obj, SIGNAL(authSupplied(Auth)), 
-           this, SIGNAL(authSupplied(Auth)));
+    // handle authentication received via handler
+    connect(obj, SIGNAL(authSupplied(QUuid, Auth)), 
+           this, SLOT(_authSupplied(QUuid, Auth)));
 
     // attach core configuration
     server->_cfg = _cfg;
@@ -226,6 +234,80 @@ void Core::_progressReceived (const Progress &p)
     emit progress(pt);
 }
 
+// Create new auth session and emit need request for handler
+void Core::_authRequired (const QString &type)
+{
+    QUuid uuid = QUuid::createUuid();
+    QString id = utils::uuid2String(uuid);
+    QString source;
+    AuthSession *session = NULL;
+
+    if (sender() == _setupObj)
+        source = "setup";
+    else 
+        source = "cloud";
+
+    // check on same id
+    LIBENCLOUD_ERR_IF (_authSessions.contains(id));
+
+    // also check that we don't already have a pending request 
+    // with given source + type
+    foreach (session, _authSessions)
+        if (session->source == source &&
+                session->type == type)
+            return;
+
+    LIBENCLOUD_DBG ("adding session: " << id);
+
+    session = new AuthSession();
+    LIBENCLOUD_ERR_IF (session == NULL);
+
+    session->source = source;
+    session->type = type;
+
+    _authSessions[id] = session;
+
+    emit need(type + "_auth=" + id);
+
+    return;
+err:
+    LIBENCLOUD_DELETE(session);
+    return;
+}
+
+void Core::_authSupplied (const QUuid &uuid, const Auth &auth)
+{
+    QString id = utils::uuid2String(uuid);
+    AuthSession *session;
+    QObject *destination; 
+
+    LIBENCLOUD_DBG ("retrieving session: " << id);
+
+    LIBENCLOUD_ERR_IF (!_authSessions.contains(id));
+
+    session = _authSessions[id];
+    LIBENCLOUD_ERR_IF (session == NULL);
+
+    if (session->source == "setup")
+        destination = _setupObj;
+    else
+        destination = _cloud;
+
+    // connect temporarily only to emit signal
+    connect(this, SIGNAL(authSupplied(Auth)), 
+            destination, SIGNAL(authSupplied(Auth)));
+    emit authSupplied(auth);
+    disconnect(this, SIGNAL(authSupplied(Auth)), 
+            destination, SIGNAL(authSupplied(Auth)));
+
+    LIBENCLOUD_DELETE(_authSessions[id]);
+
+    LIBENCLOUD_ERR_IF (_authSessions.remove(id) == 0);
+
+err:
+    return;
+}
+
 //
 // private methods
 // 
@@ -285,9 +367,9 @@ int Core::_initSetup ()
     connect(_setupObj, SIGNAL(completed()), 
             this, SLOT(_setupCompleted()));
 
-    // authentication forwarding to setup
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            _setupObj, SIGNAL(authSupplied(Auth)));
+    // authentication forwarding
+    connect(_setupObj, SIGNAL(authRequired(QString)),
+            this, SLOT(_authRequired(QString)));
 
     return 0;
 err:
@@ -317,9 +399,9 @@ int Core::_initCloud ()
     connect(_cloud, SIGNAL(need(QString)), 
             this, SIGNAL(need(QString)));
 
-    // authentication forwarding to cloud
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            _cloud, SIGNAL(authSupplied(Auth)));
+    // authentication forwarding
+    connect(_cloud, SIGNAL(authRequired(QString)),
+            this, SLOT(_authRequired(QString)));
 
     return 0;
 err:

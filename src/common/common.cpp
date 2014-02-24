@@ -25,6 +25,8 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
     else
         s += package;
 
+    s += sep;
+
     return s;
 #else 
     return QString(LIBENCLOUD_DATA_PREFIX);

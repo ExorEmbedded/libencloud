@@ -15,10 +15,18 @@ public:
             const QString &user, const QString &pass);
 
     bool isValid () const;
+
     const QString &getType () const;
+    void setType (const QString &type);
+
     const QString &getUrl () const;
+    void setUrl (const QString &url);
+
     const QString &getUser () const;
+    void setUser (const QString &user);
+
     const QString &getPass () const;
+    void setPass (const QString &pass);
 
 protected:
     bool _valid;

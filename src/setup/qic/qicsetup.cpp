@@ -20,6 +20,8 @@ QicSetup::QicSetup (Config *cfg)
             this, SIGNAL(need(QString)));
     connect(&_setupMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
+    connect(&_setupMsg, SIGNAL(authRequired(QString)),
+            this, SIGNAL(authRequired(QString)));
     connect(this, SIGNAL(authSupplied(Auth)),
             &_setupMsg, SLOT(authSupplied(Auth)));
 }

@@ -29,6 +29,7 @@ signals:
     void progress (const Progress &progress);
     void ipAssigned (const QString &ip);
     void need (const QString &what);
+    void authRequired (const QString &type);
     void authSupplied (const Auth &auth);
 
 private slots:

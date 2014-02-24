@@ -38,10 +38,12 @@
 #define LIBENCLOUD_PREFIX_PATH          "/"
 #endif
 #ifdef Q_OS_WIN32  // relative paths - refer to src/common/config.cpp
+#  define LIBENCLOUD_EXE                ".exe"
 #  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
 #  define LIBENCLOUD_SBIN_PREFIX        "\\bin\\"  // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
 #  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#else  // absolute paths
+#else  // unix - absolute paths
+#  define LIBENCLOUD_EXE                ""
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
 #  define LIBENCLOUD_DATA_PREFIX        "/var/lib/encloud/"
@@ -55,7 +57,7 @@
 #define LIBENCLOUD_INIT_KEY_FILE        "init_key.pem"
 #define LIBENCLOUD_OP_CERT_FILE         "op_cert.pem"
 #define LIBENCLOUD_OP_KEY_FILE          "op_key.pem"
-#define LIBENCLOUD_VPN_EXE_FILE         "openvpn"
+#define LIBENCLOUD_VPN_EXE_FILE         "openvpn" LIBENCLOUD_EXE
 #define LIBENCLOUD_VPN_CONF_FILE        "openvpn.conf"
 #define LIBENCLOUD_VPN_MGMT_HOST        "localhost"
 #define LIBENCLOUD_VPN_MGMT_PORT        1195

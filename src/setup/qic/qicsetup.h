@@ -42,6 +42,7 @@ signals:
     void error (QString msg = "");
     void progress (const Progress &progress);
     void need (const QString &what);
+    void authRequired (const QString &type);
     void completed ();
 
     // other -> this

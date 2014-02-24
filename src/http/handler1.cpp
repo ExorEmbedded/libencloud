@@ -128,7 +128,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QUrl url;
-            QString type, user, pass, aurl;
+            QString id, user, pass, aurl;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
@@ -136,25 +136,21 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
             url.setEncodedQuery((*request.getContent()).toAscii());
 
             LIBENCLOUD_HANDLER_ERR_IF (
-                    ((type = url.queryItemValue("type")) == "") ||
+                    ((id = url.queryItemValue("id")) == "") ||
                     ((user = url.queryItemValue("user")) == "") ||
                     ((pass = url.queryItemValue("pass")) == ""),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
 
-            LIBENCLOUD_HANDLER_ERR_IF (
-                    type != "sb" &&
-                    type != "sb_proxy" &&
-                    type != "cloud" &&
-                    type != "cloud_proxy",
-                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
-
             aurl = url.queryItemValue("url");
 
-            LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(Auth(type, aurl, user, pass)), 
-                    LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+            QUuid uuid(id);
+            Auth auth("", aurl, user, pass);
 
-            // reset need state
-            _parent->removeNeed(type + "_auth");
+            LIBENCLOUD_HANDLER_ERR_IF (uuid.isNull() || !auth.isValid(),
+                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
+            LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(uuid, auth), 
+                    LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
         }
         break;
 #endif

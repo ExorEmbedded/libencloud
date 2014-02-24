@@ -54,7 +54,7 @@ public:
     void detach ();
 
 signals:
-    void need (const QString &what);  // auth, proxy_auth
+    void authRequired (const QString &type);
     void ipAssigned (const QString &ip);
     void sigError (VpnManager::Error err, QString msg = "");
 

@@ -3,11 +3,14 @@
 #include <encloud/HttpHandler>
 #include <common/common.h>
 #include <common/config.h>
+#include <common/utils.h>
 #include <http/handler.h>
 
 // disable heavy tracing
+#if 1
 #undef LIBENCLOUD_TRACE 
-#define LIBENCLOUD_TRACE do {} while(0)
+#define LIBENCLOUD_TRACE LIBENCLOUD_NOP
+#endif
 
 namespace libencloud {
 
@@ -29,13 +32,13 @@ HttpHandler::~HttpHandler ()
 QString HttpHandler::getCoreError () const      { return _coreError; }
 State HttpHandler::getCoreState () const        { return _coreState; }
 Progress HttpHandler::getCoreProgress () const  { return _coreProgress; }
-QString HttpHandler::getNeed () const           { return _need; }
+QString HttpHandler::getNeed () const           { return _needs.join(" "); }
 
 void HttpHandler::removeNeed (const QString &what)
 {
     LIBENCLOUD_TRACE;
 
-    _need = _need.remove(what).trimmed();
+    _needs.removeAll(what);
 }
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -59,11 +62,23 @@ err:
 }
 #endif
 
-int HttpHandler::setAuth (const Auth &auth)
+int HttpHandler::setAuth (const QUuid &uuid, const Auth &auth)
 {
+    QString id = utils::uuid2String(uuid);
     LIBENCLOUD_TRACE;
 
-    emit authSupplied(auth);
+    //LIBENCLOUD_DBG("needs: " << _needs);
+
+    // remove authentication needs that match given uuid
+    foreach (QString need, _needs.filter("_auth=" + id,
+                Qt::CaseInsensitive))
+    {
+        //LIBENCLOUD_DBG("need: " << need);
+
+        _needs.removeAll(need);
+    }
+
+    emit authSupplied(uuid, auth);
 
     return 0;
 }
@@ -137,12 +152,8 @@ void HttpHandler::_needReceived (const QString &what)
 {
     LIBENCLOUD_DBG("what: " << what);
 
-    if (!_need.contains(what))
-    {
-        if (_need != "")
-            _need += " ";
-        _need += what;
-    }
+    if (!_needs.contains(what))
+        _needs.append(what);
 }
 
 //

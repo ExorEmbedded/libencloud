@@ -24,7 +24,7 @@ public slots:
     void process ();
 
 #ifdef LIBENCLOUD_MODE_SECE
-    void licenseReceived (QUuid uuid);
+    void licenseReceived (const QUuid &uuid);
 #endif
 
 private slots:

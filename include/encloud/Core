@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
+#include <QUuid>
 #include <encloud/Common>
 #include <encloud/Auth>
 #include <encloud/State>
@@ -11,6 +12,7 @@
 
 namespace libencloud {
 
+class AuthSession;
 class Cloud;
 class Config;
 class HttpServer;
@@ -50,6 +52,8 @@ private slots:
     void _setupCompleted ();
     void _errorReceived (const QString &msg);
     void _progressReceived (const Progress &p);
+    void _authRequired (const QString &type);
+    void _authSupplied (const QUuid &uuid, const Auth &auth);
 
 private:
     int _initConfig ();
@@ -72,6 +76,8 @@ private:
     QState *_previousState;
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
+
+    QMap<QString,AuthSession *> _authSessions;
 };
 
 }  // namespace libencloud

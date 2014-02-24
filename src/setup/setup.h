@@ -30,12 +30,13 @@ signals:
     virtual void error (QString msg = "") = 0;
     virtual void progress (const Progress &progress) = 0;
     virtual void need (const QString &what) = 0;
+    virtual void authRequired (const QString &type) = 0;
     virtual void completed () = 0;
 
     // other -> this (optional overrides)
     void authSupplied (const Auth &auth);  
 #ifdef LIBENCLOUD_MODE_SECE
-    virtual void licenseForward (QUuid uuid) = 0;
+    virtual void licenseForward (const QUuid &uuid) = 0;
 #endif
 
 protected:
