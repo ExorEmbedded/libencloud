@@ -80,6 +80,7 @@ int RetrCertMsg::_packRequest ()
     LIBENCLOUD_ERR_IF (libencloud_crypto_gencsr(&_cfg->crypto, qPrintable(tmpkeyfn), &buf, &len));
 
     _csr = QByteArray(buf, len);
+    LIBENCLOUD_FREE(buf);
 
     return 0;
 err:
