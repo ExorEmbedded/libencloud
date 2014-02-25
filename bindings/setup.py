@@ -1,21 +1,21 @@
 """
-Prepare python bindings package for libece.
+Prepare python bindings package for libencloud.
 """
 from distutils.core import setup, Extension
 
 setup(
-        name = 'ece',
+        name = 'encloud',
         version = '0.1',
-        description = 'Bindings for libece',
+        description = 'Bindings for libencloud',
         author = 'Steven Dorigotti',
         author_email = 's.dorigotti@endian.com',
         license = 'Proprietary',
         ext_modules = [Extension(
-            '_ece',
-            sources = [ 'ece.i' ],
+            '_encloud',
+            sources = [ 'encloud.i' ],
             include_dirs = [ '../include' ],
-            libraries = [ 'ece' ],
+            libraries = [ 'encloud' ],
             library_dirs = [ '../src' ]
             )],
-        py_modules = ['ece']
+        py_modules = ['encloud']
     )

@@ -1,0 +1,86 @@
+#ifndef _LIBENCLOUD_HTTP_HANDLER_H_
+#define _LIBENCLOUD_HTTP_HANDLER_H_
+
+#include <QObject>
+#include <QString>
+#include <QStringList>
+#include <QUuid>
+#include <encloud/Auth>
+#include <encloud/Common>
+#include <encloud/HttpAbstractHandler>
+#include <encloud/State>
+#include <encloud/Progress>
+
+namespace libencloud {
+
+// keep me aligned with _versionToApiHandler() factory method
+typedef enum {
+    API_VERSION_1 = 1,
+    // future extensions here
+
+    API_VERSION_CURRENT = API_VERSION_1  // set to current version
+} 
+ApiVersion;
+
+class ApiHandler;
+
+class LIBENCLOUD_DLLSPEC HttpHandler : public QObject, public HttpAbstractHandler
+{
+    Q_OBJECT;
+
+public:
+
+    HttpHandler ();
+    ~HttpHandler ();
+
+    // top-level concrete handler
+    int handle (const HttpRequest &request, HttpResponse &response);
+
+    // attributes used by HTTP API handlers
+    QString getCoreError () const;
+
+    State getCoreState () const;
+
+    Progress getCoreProgress () const;
+
+    QString getNeed () const;
+    void removeNeed (const QString &what);
+
+#ifdef LIBENCLOUD_MODE_ECE
+    QUuid getPoi () const;
+#endif
+
+#ifdef LIBENCLOUD_MODE_SECE
+    int setLicense (const QString &);
+#endif
+
+    int setAuth (const QUuid &uuid, const Auth &auth);
+
+signals:
+    void licenseSend (const QUuid &uuid);
+    void authSupplied (const QUuid &uuid, const Auth &auth);
+
+private slots:
+    void _coreErrorReceived (const QString &msg);
+    void _coreStateChanged (State state);
+    void _coreProgressReceived (const Progress &progress);
+    void _needReceived (const QString &what);
+
+private:
+    HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
+
+    ApiHandler *api;
+
+    QString _coreError;
+    State _coreState;
+    Progress _coreProgress;
+    QStringList _needs;
+
+#ifdef LIBENCLOUD_MODE_ECE
+    QUuid _poi;
+#endif
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_HANDLER_H_

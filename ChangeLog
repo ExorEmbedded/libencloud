@@ -1,3 +1,6 @@
+libencloud X.Y (//):
+	- API: new fully async APIs; cloud support; major renaming s/ece/libencloud
+
 libece 0.5 (27/01/2014):
 	- API: ECE-specific extensions (ECE_TYPE_SECE defined on win32)
 	- SB: remove curly brackets around Qt's uuid representation

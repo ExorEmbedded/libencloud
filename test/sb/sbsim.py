@@ -1,6 +1,6 @@
 # *** EXPERIMENTAL/TESTING ONLY ***
 #
-# Tiny Switchboard simulator for libece communication testing
+# Tiny Switchboard simulator for libencloud communication testing
 #
 # Prerequisites:
 #   * apache2 config: sample in test/sb/default-ssl
@@ -87,7 +87,7 @@ def handler_info (req):
                         'C' : 'AU',
                         'ST' : 'Some-State',
                         'O' : 'Internet Widgits Pty Ltd',
-                        'CN' : 'label from SB 123'
+                        'CN' : 'label from SB 123'   #  ECE-only
                         }
                     },
                 # note: cert could be run through 'openssl x509' to get PEM-only part
@@ -135,7 +135,7 @@ def handler_csr (req):
     # request certificate from CA based on CSR and without prompts
     rc = os.system('openssl ca -batch -in ' + csrfn + ' -out ' + certfn + ' -startdate ' + startdate + ' -policy policy_anything');
     if rc:
-        req.write(json.dumps({ 'error' : 'opeensl failure', 'rc:' : rc }))
+        req.write(json.dumps({ 'error' : 'openssl failure', 'rc:' : rc }))
         return apache.DECLINED
 
     """
@@ -166,7 +166,7 @@ def handler_conf (req):
                     'ip' : 'localhost', 
                     'port' : '1194',
                     'proto' : 'tcp',
-                    'type' : 'null'
+                    'type' : 'tun'
                     }
                 }))
     

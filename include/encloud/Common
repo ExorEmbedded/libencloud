@@ -1,0 +1,31 @@
+#ifndef _LIBENCLOUD_COMMON_H_
+#define _LIBENCLOUD_COMMON_H_
+
+#include <QString>
+
+#ifndef LIBENCLOUD_DLLSPEC
+#  if defined(Q_OS_WIN32)
+#    if defined(_LIBENCLOUD_LIB_)
+#       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
+#    else
+#       define LIBENCLOUD_DLLSPEC __declspec(dllimport)
+#    endif
+#  else
+#    define LIBENCLOUD_DLLSPEC
+#  endif
+#endif
+
+namespace libencloud {
+
+class Config;
+
+// win32: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
+// unix: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
+LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
+
+} // namespace libencloud
+
+// global exported configuration object - used for logging
+LIBENCLOUD_DLLSPEC extern libencloud::Config *g_cfg;
+
+#endif /* _LIBENCLOUD_COMMON_H_ */

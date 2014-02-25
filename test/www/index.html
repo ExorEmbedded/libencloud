@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<title>Hello World</title>
+<script type="text/javascript" src="/javascript/jquery/jquery.js">
+</script>
+</head>
+
+<body>
+
+<script>
+
+/**
+ * Display Endian Encloud Service status.
+ * 
+ * JSONP support / fake AJAX (bypass same-origin policy)
+ */
+
+var statusUrl = "http://localhost:4884/test";
+var statusTimer = 5000;
+var statusTimeout = 3000;  // must be < statusTimer, otherwise queue fills up
+var defaultState = "unknown (could not connect to Encloud Service)";
+
+function jsonpCallback(data) {
+
+    console.log("jsonpCallback() st: " + data.state);
+
+    $("#encloudState").html(
+            "state: " + data.state + "<br>" +
+            "need: " + data.need 
+    );
+}
+
+function jsonpError(x, t, m) {
+
+    console.log("jsonpError() err: " + t);
+
+    if (t === "timeout")
+        $("#encloudState").html(defaultState);
+}
+
+function jsonpRequest() {
+    $.ajax({
+        type: "GET",
+        url: statusUrl,
+        dataType: "jsonp",
+        jsonp: "callback",
+        jsonpCallback: "jsonpCallback",
+        timeout: statusTimeout,
+        error: jsonpError
+    });
+}
+
+function onReady() {
+    setInterval(jsonpRequest, statusTimer);
+}
+
+$(document).ready(onReady);
+
+</script>
+
+<div id="encloudState">
+<script>document.write(defaultState)</script>
+</div>
+
+</body>
+</html>

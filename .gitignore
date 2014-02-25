@@ -8,19 +8,21 @@
 *.so.*
 *.pyc
 *.tar.gz
+moc_*.cpp
+*.rc
+*.pdb
+*.pro.user
 
 # build-generated files
-/Makefile
-/etc/Makefile
-/include/Makefile
-/src/Makefile
-/src/build/
-/test/Makefile
-/test/build/
+Makefile
+Makefile.Debug
+Makefile.Release
+build/
+/src/debug/
 /test/test
-/bindings/ece.py
+/bindings/libencloud.py
 /bindings/*_wrap.c
 /bindings/build
 
 # dist-generated files
-/libece-*
+/libencloud-*

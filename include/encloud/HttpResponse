@@ -1,0 +1,32 @@
+#ifndef _LIBENCLOUD_HTTP_RESPONSE_H_
+#define _LIBENCLOUD_HTTP_RESPONSE_H_
+
+#include <encloud/Common>
+#include <encloud/Http>
+#include <encloud/HttpHeaders>
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC HttpResponse
+{
+
+public:
+    HttpResponse ();
+    ~HttpResponse ();
+
+    HttpHeaders *getHeaders ();
+    void setContent (const QString &content);
+    void setStatus (HttpStatus status);
+
+    int encode (QByteArray &data);
+
+private:
+    HttpStatus _status;
+    QString _version;
+    HttpHeaders _headers;
+    QString _content;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_HTTP_RESPONSE_H_

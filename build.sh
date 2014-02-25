@@ -2,8 +2,13 @@
 #
 # WARNING: cleans untracked files!!!
 
-git clean -fdx . && \
-qmake && \
+git clean -fdx .
+
+qmake CONFIG+="endian modesece"
+
+#qmake CONFIG+=modeece
+#qmake CONFIG+=modeqic
+
 make check
 
 if [ $? -ne 0 ]; then

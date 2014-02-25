@@ -6,7 +6,7 @@ SOURCES += main.c
 all: $(TARGET) test
 
 $(TARGET):
-	$(CC) $(CFLAGS) -o $(TARGET) -I../include -L../src $(SOURCES) -lece
+	$(CC) $(CFLAGS) -o $(TARGET) -I../include -L../src $(SOURCES) -lencloud
 
 test: $(TARGET)
 	LD_LIBRARY_PATH=../src ./test-c

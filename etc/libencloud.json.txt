@@ -1,0 +1,58 @@
+libencloud configuration
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+* Notes: 
+    - basically all fields are optional
+    - comments are *not* valid Json
+
+* Sample:
+
+{
+  "bind" : "all",                               # bind to all interfaces (testing)
+                                                # otherwise binds only to localhost and tap interface
+
+  "serial" : "serial",                          # serial number (ECE only)
+  "poi" : "poi",                                # Proof of Identity (ECE only)
+
+  "sb" : {                                      # global SB settings 
+    "url" : "https://sb-host"
+  },
+
+  "timeout" : 3,                                # exponential base for retry in seconds
+
+  "csr" : {                                     # certificate Request template
+    "tmpl" : "csr-tmpl.json"              
+  },
+
+  "ssl_init" : {                                # initialization channel setup
+    "sb" : {
+      "url" : "https://initialization-host/"    # override sb host
+    },
+    "ca" : "init_ca.pem",              
+    "cert" : "init_cert.pem",
+    "key" : "init_key.pem"
+  },
+
+  "ssl_op" : {                                  # operation channel setup
+    "sb" : {
+      "url" : "https://operation-host/"         # override sb host
+    },
+    "ca" : "op_ca.pem",
+    "cert" : "op_cert.pem",
+    "key" : "op_key.pem"
+  },
+
+  "rsa" : {                                     # key size for generated RSA keys
+    "bits" : 2048
+  },
+
+  "vpn" : {                                     # OpenVPN configuration file
+    "exe" : "openvpn",           
+    "conf" : "openvpn.conf"
+  },
+
+  "log" : {
+    "to" : "file",      # log to file ("%AppData%/$PRODUCT/libencloud-log.txt)
+    "lev" : 3           # log level: 0 = min .. 7 = max
+  }
+}

@@ -1,0 +1,52 @@
+#ifndef _LIBENCLOUD_LOGGER_H_
+#define _LIBENCLOUD_LOGGER_H_
+
+#include <QFile>
+#include <QString>
+#include <QTextStream>
+#include <encloud/Common>
+
+// defaults
+#ifdef Q_OS_WIN32
+#  define LIBENCLOUD_LOGGER_PATH  "c:/" LIBENCLOUD_PKGNAME "-log.txt"
+#else
+#  define LIBENCLOUD_LOGGER_PATH  "/tmp/" LIBENCLOUD_PKGNAME "-log.txt"
+#endif
+
+/**
+ * Sets up log handler for qDebug(), etc
+ */
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC Logger
+{
+public:
+    Logger ();
+    ~Logger ();
+
+public:
+
+    // default is LIBENCLOUD_LOGGER_PATH
+    int setPath (const QString &path);
+
+    // default is WriteOnly | Text
+    int setExtraMode (QIODevice::OpenModeFlag flags);
+
+    int open ();
+    int close ();
+
+    bool isValid ();
+
+protected:
+    QString _path;
+    QIODevice::OpenModeFlag _extraMode;
+
+    bool _isValid;
+
+    QFile logFile;
+    QTextStream logText;
+};
+
+}  // namespace libencloud
+
+#endif

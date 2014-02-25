@@ -1,0 +1,32 @@
+#ifndef _LIBENCLOUD_STATE_H_
+#define _LIBENCLOUD_STATE_H_
+
+#include <QString>
+#include <encloud/Common>
+
+namespace libencloud 
+{
+
+/**
+ * General libencloud state for monitoring.
+ *
+ * <encloud/Progress> gives more detailed description of steps 
+ * based on modules activated (setup and/or cloud).
+ */
+
+typedef enum
+{
+    StateNone = -1,
+    StateIdle = 0,  // grey
+    StateError,     // red
+    StateSetup,     // yellow   (if !LIBENCLOUD_DISABLE_SETUP)
+    StateConnect,   // orange   (if !LIBENCLOUD_DISABLE_CLOUD)
+    StateCloud      // green    (if !LIBENCLOUD_DISABLE_CLOUD)
+}
+State;
+
+LIBENCLOUD_DLLSPEC QString stateToString (State state);
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_STATE_H_

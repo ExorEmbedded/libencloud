@@ -7,7 +7,7 @@ TARGET = test
 SOURCES += main.cpp
 SOURCES += json.cpp
 SOURCES += crypto.cpp
-SOURCES += ece.cpp
+#SOURCES += libencloud.cpp
 
 HEADERS += test.h
 
@@ -16,21 +16,21 @@ windows {
     SOURCES += $$OPENSSLPATH\\include\\openssl\\applink.c
 }
 
+INCLUDEPATH += ../src/
+DEPENDPATH += ../src/
 
-INCLUDEPATH += ../src
-
-# libece
+# libencloud
 win32 {
     *-g++* {
         # MinGW
-        LIBS += ../src/$$DESTDIR/libece0.a
+        LIBS += ../src/$$DESTDIR/libencloud0.a
     }
     *-msvc* {
         # MSVC
-        LIBS += ../src/$$DESTDIR/ece.lib
+        LIBS += ../src/$$DESTDIR/encloud.lib
     }
 } else {
-    LIBS += -L../src/ -lece
+    LIBS += -L../src/ -lencloud
 }
 
 # json - external linkage only for QJson
@@ -39,4 +39,5 @@ contains(CONFIG, qjson) {
 }
 
 # command to run upon 'make check'
-check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR ./test
+# LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
+check.commands = LD_LIBRARY_PATH=:../src:$$LIBDIR $$(LIBENCLOUD_WRAP) ./test

@@ -1,0 +1,87 @@
+#ifndef _LIBENCLOUD_CORE_H_
+#define _LIBENCLOUD_CORE_H_
+
+#include <QObject>
+#include <QStateMachine>
+#include <QString>
+#include <QUuid>
+#include <encloud/Common>
+#include <encloud/Auth>
+#include <encloud/State>
+#include <encloud/Progress>
+
+namespace libencloud {
+
+class AuthSession;
+class Cloud;
+class Config;
+class HttpServer;
+class SetupInterface;
+
+class LIBENCLOUD_DLLSPEC Core : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    Core ();
+    ~Core ();
+
+    bool isValid();
+
+    int start ();
+    int stop ();
+
+    Config *getConfig () const;
+    int attachServer (HttpServer *server);
+
+    // Note: the following signals are for internal usage - clients
+    // should use HTTP API for status monitoring and providing data
+
+signals:
+    void error (const QString &msg);
+    void stateChanged (State state);
+    void progress (const Progress &p);
+    void need (const QString &what);
+    void authSupplied (const Auth &auth);
+
+private slots:
+    void _stopped ();
+    void _stateEntered ();
+    void _stateExited ();
+    void _setupCompleted ();
+    void _errorReceived (const QString &msg);
+    void _progressReceived (const Progress &p);
+    void _authRequired (const QString &type);
+    void _authSupplied (const QUuid &uuid, const Auth &auth);
+
+private:
+    int _initConfig ();
+    int _initCrypto ();
+    int _initSetup ();
+    int _initCloud ();
+    int _initFsm ();
+    int _startCloud ();
+    void _supplyAuthTo (QObject *dest, const Auth &auth);
+    QString _stateStr (QState *state);
+
+    bool _isValid;
+
+    Config *_cfg;
+    SetupInterface *_setup;
+    QObject *_setupObj;
+    Cloud *_cloud;
+
+    QStateMachine _fsm;
+    QState *_initialState;
+    QState *_previousState;
+    QState _setupSt, *_setupState;
+    QState _cloudSt, *_cloudState;
+
+    Auth _lastAuth;
+    QMap<QString,AuthSession *> _authSessions;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_CORE_H_

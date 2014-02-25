@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <QtCore>
-#include "ece.h"
-#include "utils.h"
+#include <encloud/Common>
+#include <common/utils.h>
+#include <common/config.h>
 #include "test.h"
 
 #ifdef __cplusplus
@@ -11,7 +12,7 @@ extern "C" {
 
 int test_json ();
 int test_crypto ();
-int test_ece (int argc, char *argv[]);
+int test_libencloud (int argc, char *argv[]);
 
 #ifdef __cplusplus
 }
@@ -19,10 +20,15 @@ int test_ece (int argc, char *argv[]);
 
 int main (int argc, char *argv[])
 {
+    LIBENCLOUD_UNUSED(argc);
+    LIBENCLOUD_UNUSED(argv);
+
+#if 0
     qDebug() << "#";
-    qDebug() << "# testing libece version: " << ece_version() << " (rev: " << ece_revision() <<  ")";
-    qDebug() << "#                string: " << ECE_STRING;
+    qDebug() << "# testing libencloud version: " << libencloud_version() << " (rev: " << libencloud_revision() <<  ")";
+    qDebug() << "#                string: " << LIBENCLOUD_STRING;
     qDebug() << "#";
+#endif
 
 #ifdef Q_OS_UNIX
     qDebug() << "# OS: Unix";
@@ -30,11 +36,14 @@ int main (int argc, char *argv[])
 #ifdef Q_OS_WIN32
     qDebug() << "# OS: W32";
 #endif
-    qDebug() << "# hw_info: " << EceUtils::getHwInfo();
+
+    qDebug() << "# hw_info: " << libencloud::utils::getHwInfo();
 
     TEST_ZERO (test_json());
     TEST_ZERO (test_crypto());
-    TEST_ZERO (test_ece(argc, argv));
+#if 0
+    TEST_ZERO (test_libencloud(argc, argv));
+#endif
 
     qDebug() << "# All tests passed.";
     return EXIT_SUCCESS;

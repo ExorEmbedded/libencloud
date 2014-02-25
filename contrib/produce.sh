@@ -4,7 +4,7 @@
 #
 
 # defaults
-TMPDIR=/tmp/ece
+TMPDIR=/tmp/libencloud
 DESTDIR=.
 KEY=key.pem
 KEY_SZ=2048
