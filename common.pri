@@ -19,6 +19,14 @@
 #   nosetup     no setup module (e.g. VPN client/manager only)
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 
+
+# Local configuration overrides. Sample content:
+#     CONFIG += endian
+#     CONFIG += modeqic
+LOCALCONFIG=$$(HOME)/.qmake.pri
+exists($${LOCALCONFIG}): include($${LOCALCONFIG})
+
+
 #
 # global defs
 #
