@@ -252,8 +252,8 @@ void VpnClient::stop (void)
         this->process->kill();
 #else
         this->process->terminate();
-        this->process->waitForFinished();
 #endif
+        this->process->waitForFinished();
     }
     LIBENCLOUD_DELETE(this->process);
 

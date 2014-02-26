@@ -88,6 +88,14 @@ int Core::stop ()
 
     _fsm.stop();
 
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    _cloud->stop();
+#endif
+
+#ifndef LIBENCLOUD_DISABLE_SETUP
+    _setup->stop();
+#endif
+
     return 0;
 }
 
@@ -151,19 +159,6 @@ err:
 //
 // private slots
 // 
-
-void Core::_stopped ()
-{
-    LIBENCLOUD_TRACE;
-
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    _cloud->stop();
-#endif
-
-#ifndef LIBENCLOUD_DISABLE_SETUP
-    _setup->stop();
-#endif
-}
 
 void Core::_stateEntered ()
 {
@@ -453,9 +448,6 @@ int Core::_initFsm ()
 
     _fsm.setInitialState(_initialState);
 
-    connect(&_fsm, SIGNAL(stopped()), 
-            this, SLOT(_stopped()));
-
     return 0;
 }
 
@@ -538,4 +530,4 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
     return 0;
 err:
     return ~0;
-};
+}

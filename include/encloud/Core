@@ -46,7 +46,6 @@ signals:
     void authSupplied (const Auth &auth);
 
 private slots:
-    void _stopped ();
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();

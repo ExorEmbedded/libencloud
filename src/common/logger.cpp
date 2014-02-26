@@ -10,6 +10,10 @@ static void __log_handler (QtMsgType type, const char *msg);
 
 namespace libencloud {
 
+//
+// public methods
+//
+
 Logger::Logger ()
     : _isValid(false)
 {
@@ -90,12 +94,17 @@ bool Logger::isValid ()
 
 }  // namespace libencloud
 
+//
+// static functions
+//
+
 static void __log_handler (QtMsgType type, const char *msg)
 {
     Q_UNUSED(type);
 
-    LIBENCLOUD_ERR_IF (msg == NULL);
-    LIBENCLOUD_ERR_IF (g_svcLogText == NULL);
+    if (msg == NULL ||
+            g_svcLogText == NULL)
+        return;
 
     *g_svcLogText << msg << endl;
 
