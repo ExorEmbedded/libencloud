@@ -41,9 +41,6 @@ void RetrConfMsg::process ()
     connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
-    // for SNI, Host field in header must match name of operation-host
-    headers["Host"] = LIBENCLOUD_GETCONFIG_HOSTNAME;
-
     _client->run(url, params, headers, config);
 
 err:

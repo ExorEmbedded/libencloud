@@ -68,8 +68,6 @@
 #define LIBENCLOUD_CMD_GETCERT          "manage/commands/commands.access.cloud.getCertificate"
 #define LIBENCLOUD_CMD_GETCONFIG        "manage/commands/commands.access.cloud.getConfiguration"
 
-#define LIBENCLOUD_GETCONFIG_HOSTNAME   "operation-host"
-
 #define LIBENCLOUD_LOG_LEV              3
 
 #endif  /* _LIBENCLOUD_PRIV_CRYPTO_H_ */

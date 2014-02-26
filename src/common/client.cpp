@@ -29,6 +29,7 @@ void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QB
     request.setSslConfiguration(conf);
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
     request.setRawHeader("X-Custom-User-Agent", LIBENCLOUD_USERAGENT);
+    request.setRawHeader("Host", url.host().toAscii());
 
     // override with passed custom headers
     for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
