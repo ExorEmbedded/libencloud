@@ -78,6 +78,13 @@ QString Config::dump ()
     ts << "dumping configuration:";
     ts << endl;
 
+#if defined(LIBENCLOUD_MODE_QIC)
+    ts << "mode=QIC" << endl;
+#elif defined(LIBENCLOUD_MODE_ECE)
+    ts << "mode=ECE" << endl;
+#elif defined(LIBENCLOUD_MODE_SECE)
+    ts << "mode=SECE" << endl;
+#endif
     ts << "prefix=" << _prefix << endl;
     ts << "confPrefix=" << _confPrefix << endl;
     ts << "sbinPrefix=" << _sbinPrefix << endl;

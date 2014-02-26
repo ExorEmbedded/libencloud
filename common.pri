@@ -67,9 +67,11 @@ modeqic {
         DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
     }
 } else:modeece {
+    PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_ENCLOUD}
     DEFINES += LIBENCLOUD_MODE_ECE
     DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_ENCLOUD}\\\"
 } else:modesece {
+    PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_SECE}
     DEFINES += LIBENCLOUD_MODE_SECE
     DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_SECE}\\\"
 } else {

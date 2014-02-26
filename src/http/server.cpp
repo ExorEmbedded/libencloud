@@ -159,7 +159,8 @@ int HttpServerPriv::stop ()
 {
     LIBENCLOUD_SVC_TRACE;
     
-    close();
+    if (isListening())
+        close();
 
     return 0;
 }
