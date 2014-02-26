@@ -1,17 +1,16 @@
 
-[ What is libencloud? ]
+[[ What is libencloud? ]]
 
-libencloud is a simplified Switchboard communication library which provides
-functionality to handle:
+libencloud is a Qt-based library which provides functionality to connect to
+Cloud Services from PCs and devices.
+
+It comprises the following modules:
+ - setup: retrieval from Switchboard of setup information such as VPN connection configuration
  - request and renewal of Operation certificates
- - setup: retrieval of license info and VPN connection configuration
- - VPN client and manager components
- - HTTP-based API for Switchboard/GUI management
+ - cloud: VPN client and manager components
+ - HTTP-based API for monitoring and control via client applications (Switchboard, GUI, browser or other custom clients)
 
-, whilst hiding internal Qt-based C++ implementation including a
-JSON-over-HTTPS communication channel, PKI management and licensing details.
-
-[ Build ]
+[[ Build ]]
                                                 Tested version (s)
                                                 ^^^^^^^^^^^^^^
 Linux                                           Ubuntu 12.04
@@ -45,6 +44,11 @@ Install openssl 1.0.1e from here http://slproweb.com/download/Win32OpenSSL-1_0_1
 Open the project file with qtcreator and select the kit (MinGW or VS2008).
 
 Add the environment variable OPENSSL_INCLUDEPATH to build environment (otherwise use default path c:\openssl).
+
+Setup organisation and mode in CONFIG variable in "qmake" Build Step (see common.pri for definitions).
+
+Optional: to deploy locally for testing/development, add "install" to arguments
+in "Make" Build Step.
 
 Run qmake and build.
 
