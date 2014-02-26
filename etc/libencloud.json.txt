@@ -15,7 +15,7 @@ libencloud configuration
   "poi" : "poi",                                # Proof of Identity (ECE only)
 
   "sb" : {                                      # global SB settings 
-    "url" : "https://sb-host"
+    "url" : "https://switchboard-host"
   },
 
   "timeout" : 3,                                # exponential base for retry in seconds
