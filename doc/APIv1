@@ -3,7 +3,6 @@
 | Encloud API v1 |
 ==================
 
-TODO: notification if ip/port via SB API
 
 [ Important Notes ]
 
@@ -14,12 +13,21 @@ TODO: notification if ip/port via SB API
 
 [  Type definitions ]
 
-     <uuid>    e.g.  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+     <uuid>     e.g.  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+     <sb_url>   Switchboard URL
+     <e_url>    Encloud URL
+
+
+[ Switchboard Setup Notification ]
+
+* POST <sb_url>/manage/commands/commands.access.cloud.setup
+
+    e.g. 1      port=1234
 
 
 [ State Retrieval ]
 
-* GET /api_v1/status
+* GET <e_url>/api_v1/status
 
     Def 'state'        -1      None
                         0      Idle            (grey)
@@ -36,28 +44,28 @@ TODO: notification if ip/port via SB API
                     'step': 2,                  # current step number 
                     'step': 5                   # total number of steps
                 },
-                'need' : 'license sb_auth=<uuid>'   # OPTIONAL list of space-separated "need" strings
-            })"                                     jo be fulfilled via API. Possible values:
-                                                    'license', 'sb_auth', 'proxy_auth'
-                                                    <uuid> is an authentication identifier token
+            'need' : 'license sb_auth'          # OPTIONAL list of space-separated "need" strings
+        })"                                     jo be fulfilled via API. Possible values:
+                                                'license', 'sb_auth', 'proxy_auth'
 
 
 [ Authentication/Login API ]
 
-* POST /api_v1/auth                    [ Note: QIC only! ]
+* POST <e_url>/api_v1/auth
 
-    Def 'id'            authentication session identifier
-    Def 'url'           OPTIONAL destination url (for Switchboard login)
+    e.g. 1              id=proxy&type=http&url=<url>&user=myuser&pass=mypass
+    e.g. 2              id=sb&url=<url>&user=myuser&pass=mypass
+
+    Def 'id'            authentication identifier: 'sb', 'proxy'
+    Def 'type'          OPTIONAL type of authentication (for proxy)
+    Def 'url'           destination url (for Switchboard login or proxy)
     Def 'user'          user for authentication
     Def 'pass'          password for authentication
-
-    e.g. 1              id=<uuid>&url=myurl&user=myuser&pass=mypass
-    e.g. 2              id=<uuid>&user=myuser&pass=mypass
 
 
 [ Setup API ]             
 
-* GET /api_v1/setup                    [ Note: ECE only! ]
+* GET <e_url>/api_v1/setup                    [ Note: ECE only! ]
 
     Def 'poi'           proof of identity returned by ECE for Switchboard association
 
@@ -65,7 +73,7 @@ TODO: notification if ip/port via SB API
                  'poi' : '<uuid>'
              })"
 
-* GET /api_v1/setup                    [ Note: QIC only! ]                              [[TODO]]
+* GET <e_url>/api_v1/setup                    [ Note: QIC only! ]                              [[TODO]]
 
     e.g.    "jsonpCallback({
                  'server ' : {
@@ -76,7 +84,7 @@ TODO: notification if ip/port via SB API
                  }
              })"
 
-* POST /api_v1/setup                   [ Note: SECE only! ]
+* POST <e_url>/api_v1/setup                   [ Note: SECE only! ]
 
     Def 'license'       license entered by user to activate SECE
 
@@ -85,7 +93,7 @@ TODO: notification if ip/port via SB API
 
 [ Cloud API ]
 
-* POST /api_v1/cloud                                                                        [[TODO]]
+* POST <e_url>/api_v1/cloud                                                                        [[TODO]]
 
     Def 'action'        operation:                  controller:
 
@@ -94,14 +102,15 @@ TODO: notification if ip/port via SB API
                         'open','close'              Switchboard
 
     e.g. 1              action=start
-    e.g. 2              action=syncRoutes&ips[]=192.168.1.100&ips[]=192.168.1.101
-    e.g. 3              action=open&prog=myRdpApp&args=param1%20param2                      #uuid?
-
+    e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
+    e.g. 3              action=open&prog=myRdpApp&endpoint=myEndpoint&path=
+                            /%HOME_PATH%/to/File&args=%DEVICE_IP%20param2
+    e.g. 4              action=close&prog=myRdpApp&endpoint=myEndpoint
 
 [ Error Handling ]
 
 Upon error, the following two scenarios are possible:
-   - if the error is at transport level, a standard HTTP status code is                     [[avoid?]]
+   - if the error is at transport level, a standard HTTP status code is
      returned (generally with no content)
      HTTP Statuses returned in this version:
          - LIBENCLOUD_HTTP_STATUS_OK
@@ -112,5 +121,6 @@ Upon error, the following two scenarios are possible:
      returned in the json message with appropriate description.
 
      => "jsonpCallback({
-             'error' : 'Some nasty error'
+             'error' : 'Some nasty error',
+             'rc' : 123
          })"

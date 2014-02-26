@@ -1,7 +1,6 @@
 - setup: qic (msg, ip, pages)
 - fsm: outer + inner, stop handling
 - ssl: CA support/check
-- vpn: validation of sb config
 - qic: listen port to registry and notification to Switchboard;
   fix bad auth / cancel cases and reuse creds
   setup config retrieval; proxies;
@@ -9,9 +8,9 @@
 - new error handling                                                    [2]
 - server: check Content-Length
 - ece/sece: initialisation-host and operation-host from Cert
+    => json in notes field
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - backoff: test recovery
-- conf: move generated stuff from etc to persistent cache path (/var/lib/encloud?)
 - deps: qjson build
 - build: qmake PRODUCT variable for component placement, split by org   [1]
     check Exor, QSettings split?
