@@ -37,7 +37,8 @@ Core::Core ()
 {
     LIBENCLOUD_TRACE;
 
-    qDebug() << "Starting " << qPrintable(info::versionInfo());
+    qDebug() << "Starting " << qPrintable(info::versionInfo())
+            << "rev: " << qPrintable(info::revision());
 
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
@@ -62,7 +63,7 @@ Core::~Core ()
 {
     LIBENCLOUD_TRACE;
 
-    g_cfg = NULL;
+    g_libencloudCfg = NULL;
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
     LIBENCLOUD_DELETE(_cloud);
@@ -329,8 +330,8 @@ int Core::_initConfig ()
 
     LIBENCLOUD_ERR_IF (_cfg->loadFromFile());
 
-    g_cfg = _cfg;
-    LIBENCLOUD_DBG(g_cfg->dump());
+    g_libencloudCfg = _cfg;
+    LIBENCLOUD_DBG(g_libencloudCfg->dump());
 
     return 0;
 err:

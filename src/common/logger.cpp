@@ -107,7 +107,4 @@ static void __log_handler (QtMsgType type, const char *msg)
         return;
 
     *g_svcLogText << msg << endl;
-
-err:
-    return;
 }

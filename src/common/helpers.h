@@ -27,7 +27,7 @@
 #define LIBENCLOUD_NOP do {} while (0)
 #define __LIBENCLOUD_MSG(lev, levstr, msg) \
     do { \
-        if (!g_cfg || lev <= g_cfg->config.logLevel) { \
+        if (!g_libencloudCfg || lev <= g_libencloudCfg->config.logLevel) { \
             qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
                     << " " << QThread::currentThreadId() \
                     << " [" << levstr << "] [" << LIBENCLOUD_APP << ":" << __FILE__ << ":" \

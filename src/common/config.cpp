@@ -255,4 +255,4 @@ QString Config::_joinPaths (const QString &s1, const QString &s2)
 
 } // namespace libencloud
 
-libencloud::Config *g_cfg = NULL;
+libencloud::Config *g_libencloudCfg = NULL;
