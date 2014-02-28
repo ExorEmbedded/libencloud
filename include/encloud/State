@@ -17,11 +17,16 @@ namespace libencloud
 typedef enum
 {
     StateNone = -1,
+
     StateIdle = 0,  // grey
     StateError,     // red
     StateSetup,     // yellow   (if !LIBENCLOUD_DISABLE_SETUP)
     StateConnect,   // orange   (if !LIBENCLOUD_DISABLE_CLOUD)
-    StateCloud      // green    (if !LIBENCLOUD_DISABLE_CLOUD)
+    StateCloud,     // green    (if !LIBENCLOUD_DISABLE_CLOUD)
+
+    StateFirst = StateIdle,
+    StateLast = StateCloud,
+    StateNum = StateLast - StateFirst + 1,
 }
 State;
 
