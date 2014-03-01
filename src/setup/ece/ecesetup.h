@@ -45,16 +45,30 @@ public:
     int getTotalSteps() const;
 
 signals:
+    //
+    // setup -> core
+    //
     void error (QString msg = "");
     void progress (const Progress &progress);
-    void need (const QString &what);
-    void authRequired (const QString &type);
-    void retry ();
     void completed ();
 
+    //
+    // internal -> setup -> core
+    //
+    void need (const QString &what);
+    void authRequired (Auth::Id id);
+
+    //
+    // core -> setup -> internal
+    //
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (const QUuid &uuid);
 #endif
+   
+    //
+    // internals
+    // 
+    void retry ();
 
 private slots:
     void _stateEntered ();

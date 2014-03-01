@@ -25,10 +25,13 @@
 // do NOT change this - Switchboard relies on it!
 #define LIBENCLOUD_USERAGENT_QIC        "Endian 4i Connect " LIBENCLOUD_VERSION
 
-#define LIBENCLOUD_SB_URL               "https://sb-host/"
+#define LIBENCLOUD_SB_URL               "https://switchboard-host/"
 
-// initial timeout for retry (in seconds) - grows exponentially
-#define LIBENCLOUD_RETRY_TIMEOUT        3
+// timeout without exponential backoff
+#define LIBENCLOUD_RETRY_TIMEOUT        5
+
+// exponent for timeout with exponential backoff - base increases by 1 at each failure
+#define LIBENCLOUD_RETRY_BASE           2
 
 #define LIBENCLOUD_TIMEOUT              10000  /* ms */
 #define LIBENCLOUD_URL_SZ               1024

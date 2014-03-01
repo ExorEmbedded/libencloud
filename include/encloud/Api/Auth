@@ -1,0 +1,32 @@
+#ifndef _LIBENCLOUD_API_AUTH_H_
+#define _LIBENCLOUD_API_AUTH_H_
+
+#include <encloud/Auth>
+
+/**
+ * Qt helper to interact with Encloud's HTTP Auth API.
+ * 
+ * Please refer to doc/APIv* for details.
+ *
+ * Usage: no result checking required - simply check StatusApi periodically and
+ * send data if required.
+ */
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC AuthApi : public QObject
+{
+    Q_OBJECT;
+
+public:
+
+    AuthApi ();
+    ~AuthApi ();
+
+    void authSupply (const Auth &auth);
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_API_AUTH_H_
+

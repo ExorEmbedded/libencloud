@@ -99,13 +99,13 @@ void EceSetup::_stateExited ()
 void EceSetup::_onError (QString msg)
 {
     QState *state = qobject_cast<QState *>(sender());
+    int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
 
-    LIBENCLOUD_DBG("state: " << state << " backoff: " << QString::number(_backoff));
+    LIBENCLOUD_DBG("state: " << state << ", retrying in " << QString::number(secs) << " seconds");
 
     _error = true;
 
-    QTimer::singleShot(qPow(LIBENCLOUD_RETRY_TIMEOUT, _backoff) * 1000,
-            this, SLOT(_onRetryTimeout()));
+    QTimer::singleShot(secs * 1000, this, SLOT(_onRetryTimeout()));
     _backoff++;
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);

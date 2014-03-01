@@ -65,7 +65,7 @@
 
 [ Setup API ]             
 
-* GET <e_url>/api_v1/setup                    [ Note: ECE only! ]
+* GET <e_url>/api_v1/setup                    Product: ECE
 
     Def 'poi'           proof of identity returned by ECE for Switchboard association
 
@@ -73,7 +73,7 @@
                  'poi' : '<uuid>'
              })"
 
-* GET <e_url>/api_v1/setup                    [ Note: QIC only! ]                              [[TODO]]
+* GET <e_url>/api_v1/setup                    Product: QIC                                     [[TODO]]
 
     e.g.    "jsonpCallback({
                  'server ' : {
@@ -95,7 +95,7 @@
 
 * POST <e_url>/api_v1/cloud                                                                        [[TODO]]
 
-    Def 'action'        operation:                  controller:
+    Def 'action'        Operation:                  Clients:
 
                         'start','stop'              GUI/browser
                         'syncRoutes'                Switchboard

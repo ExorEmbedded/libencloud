@@ -30,21 +30,22 @@ void SetupMsg::process ()
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration config;
+    QString authData;
+    QString headerData;
 
-    if (!_auth.isValid())
+    if (!_sbAuth.isValid())
     {
-        emit authRequired("sb");
-        return;
+        emit authRequired(Auth::SwitchboardId);
+        LIBENCLOUD_EMIT_ERR (error(tr("Switchboard login required")));
     }
 
-    QString concatenated = _auth.getUser() + ":" + _auth.getPass();
-    QByteArray data = concatenated.toLocal8Bit().toBase64();
-    QString headerData = "Basic " + data;
+    authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
+    headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
     EMIT_ERROR_ERR_IF (_client == NULL);
 
-    url.setUrl(_auth.getUrl());
+    url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QIC_CONFIG_URL);
 
     LIBENCLOUD_DBG("url: " << url);
@@ -64,14 +65,19 @@ err:
     return;
 }
 
-// TODO handle proxy
 void SetupMsg::authSupplied (const Auth &auth)
 {
     LIBENCLOUD_TRACE;
 
-    _auth = auth;
-
-    process();
+    switch (auth.getId())
+    {
+        case Auth::SwitchboardId:
+            _sbAuth = auth;
+            break;
+        default:
+            // Qt Proxy is handled globally in core
+            break;
+    }
 }
 
 //
@@ -122,7 +128,7 @@ int SetupMsg::_decodeResponse (const QString &response)
     // bubble Switchboard errors
     if (ok && !json["error"].isNull())
     {
-        emit authRequired("sb");
+        emit authRequired(Auth::SwitchboardId);
 
         LIBENCLOUD_EMIT_ERR (error(tr("Switchboard error: ") +
                     json["error"].toString()));

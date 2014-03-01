@@ -37,8 +37,8 @@ Cloud::Cloud (Config *cfg)
             this, SLOT(_vpnManagerErr(VpnManager::Error, QString)));
 
     // authentication forwarding to and from manager
-    connect(_vpnManager, SIGNAL(authRequired(QString)), 
-            this, SIGNAL(authRequired(QString)));
+    connect(_vpnManager, SIGNAL(authRequired(Auth::Id)), 
+            this, SIGNAL(authRequired(Auth::Id)));
     connect(this, SIGNAL(authSupplied(Auth)), 
             _vpnManager, SLOT(authSupplied(Auth)));
 

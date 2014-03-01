@@ -9,9 +9,8 @@
 - server: check Content-Length
 - ece/sece: initialisation-host and operation-host from Cert
     => json in notes field
+  license/qsettings: per-user or per-machine?
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
-- backoff: test recovery
+- backoff: support cancellation
 - deps: qjson build
-- build: qmake PRODUCT variable for component placement, split by org   [1]
-    check Exor, QSettings split?
 - test: ece, sece, qic, proxy

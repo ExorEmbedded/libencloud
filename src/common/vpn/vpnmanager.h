@@ -27,8 +27,7 @@ public:
         CommError,
         MgmtError,
         UnhandledError,
-        SocketError,
-        AuthError
+        SocketError
     }
     Error;
 
@@ -54,7 +53,7 @@ public:
     void detach ();
 
 signals:
-    void authRequired (const QString &type);
+    void authRequired (Auth::Id id);
     void ipAssigned (const QString &ip);
     void sigError (VpnManager::Error err, QString msg = "");
 
@@ -91,6 +90,9 @@ private:
 
     QTimer *stateTimer;
     QString assignedIp;
+
+    Auth _sbAuth;
+    Auth _proxyAuth;
 };
 
 }  // namespace libencloud

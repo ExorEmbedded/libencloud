@@ -38,14 +38,22 @@ public:
     int getTotalSteps() const;
 
 signals:
-    // this -> other
+    //
+    // setup -> core
+    //
     void error (QString msg = "");
     void progress (const Progress &progress);
-    void need (const QString &what);
-    void authRequired (const QString &type);
     void completed ();
 
-    // other -> this
+    //
+    // internal -> setup -> core
+    //
+    void need (const QString &what);
+    void authRequired (Auth::Id id);
+
+    //
+    // core -> setup -> internal
+    //
     void authSupplied (const Auth &auth);  
 
 private slots:

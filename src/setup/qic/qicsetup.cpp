@@ -20,8 +20,8 @@ QicSetup::QicSetup (Config *cfg)
             this, SIGNAL(need(QString)));
     connect(&_setupMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(QString)),
-            this, SIGNAL(authRequired(QString)));
+    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
+            this, SIGNAL(authRequired(Auth::Id)));
     connect(this, SIGNAL(authSupplied(Auth)),
             &_setupMsg, SLOT(authSupplied(Auth)));
 }
@@ -61,10 +61,12 @@ int QicSetup::getTotalSteps() const
 
 void QicSetup::_onError (QString msg)
 {
-    LIBENCLOUD_DBG("backoff: " << QString::number(_backoff));
+    QState *state = qobject_cast<QState *>(sender());
+    int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
 
-    QTimer::singleShot(qPow(LIBENCLOUD_RETRY_TIMEOUT, _backoff) * 1000,
-            this, SLOT(_onRetryTimeout()));
+    LIBENCLOUD_DBG("state: " << state << ", retrying in " << QString::number(secs) << " seconds");
+
+    QTimer::singleShot(secs * 1000, this, SLOT(_onRetryTimeout()));
     _backoff++;
 
     emit error(msg);

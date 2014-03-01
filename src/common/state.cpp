@@ -20,8 +20,9 @@ QString stateToString (State state)
             return "Connecting";
         case StateCloud:
             return "Connected";
+        default:
+            return "";
     }
-    return "";
 }
 
 }  // namespace libencloud

@@ -1,16 +1,15 @@
 #!/bin/sh
 
-[ $# -lt 2 ] && echo "Usage: $0 HOST ACTION [UUID] [URL] [USER] [PASS]" && exit 1
+[ $# -lt 2 ] && echo "Usage: $0 HOST ACTION [URL] [USER] [PASS]" && exit 1
 
 HOST="$1"
 URL="api_v1"
 PORT="4884"
 ACTION="$2"
 LICENSE="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
-UUID="$3"
-LOGINURL="$4"
-USER="$5"
-PASS="$6"
+LOGINURL="$3"
+USER="$4"
+PASS="$5"
 ARGS=
 
 case ${ACTION} in
@@ -21,9 +20,13 @@ case ${ACTION} in
         URL=${URL}/setup
         ARGS="--post-data license=${LICENSE}"
         ;;
-    auth)
+    sb_auth)
         URL=${URL}/auth
-        ARGS="--post-data id=${UUID}&url=${LOGINURL}&user=${USER}&pass=${PASS}"
+        ARGS="--post-data id=sb&url=${LOGINURL}&user=${USER}&pass=${PASS}"
+        ;;
+    proxy_auth)
+        URL=${URL}/auth
+        ARGS="--post-data id=proxy&type=http&url=${LOGINURL}&user=${USER}&pass=${PASS}"
         ;;
     *)
         echo "Invalid command: '${ACTION}'!"

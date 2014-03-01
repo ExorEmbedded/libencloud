@@ -19,6 +19,14 @@ namespace libencloud {
 
 class Config;
 
+typedef enum
+{
+    CoreModule,
+    SetupModule,
+    CloudModule
+} 
+Module;
+
 // win32: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
 // unix: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
 LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");

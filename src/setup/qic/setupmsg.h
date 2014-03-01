@@ -22,7 +22,7 @@ public:
 signals:
     void error (QString msg = "");
     void need (const QString &what);
-    void authRequired (const QString &type);
+    void authRequired (Auth::Id id);
     void processed ();
 
 public slots:
@@ -39,7 +39,7 @@ private:
     int _unpackResponse ();
 
     //request inputs
-    Auth _auth;
+    Auth _sbAuth;
 
     //response outputs
     VpnConfig _vpnConfig;

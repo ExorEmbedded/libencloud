@@ -128,7 +128,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QUrl url;
-            QString id, user, pass, aurl;
+            QString id, type, user, pass, aurl;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
@@ -137,19 +137,19 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
 
             LIBENCLOUD_HANDLER_ERR_IF (
                     ((id = url.queryItemValue("id")) == "") ||
+                    ((aurl = url.queryItemValue("url")) == "") ||
                     ((user = url.queryItemValue("user")) == "") ||
                     ((pass = url.queryItemValue("pass")) == ""),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
 
-            aurl = url.queryItemValue("url");
+            type = url.queryItemValue("type");
 
-            QUuid uuid(id);
-            Auth auth("", aurl, user, pass);
+            Auth auth(id, type, aurl, user, pass);
 
-            LIBENCLOUD_HANDLER_ERR_IF (uuid.isNull() || !auth.isValid(),
+            LIBENCLOUD_HANDLER_ERR_IF (!auth.isValid(),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
 
-            LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(uuid, auth), 
+            LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(auth), 
                     LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
         }
         break;

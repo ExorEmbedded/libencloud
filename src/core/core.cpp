@@ -16,13 +16,6 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
 
 namespace libencloud {
 
-class AuthSession 
-{
-public:
-    QString source;     // "setup" | "cloud"
-    QString type;       // "sb" | "proxy"
-};
-
 //
 // public methods
 //
@@ -31,7 +24,9 @@ Core::Core ()
     : _isValid(false)
     , _cfg(NULL)
     , _setup(NULL)
+    , _setupObj(NULL)
     , _cloud(NULL)
+    , _cloudObj(NULL)
     , _setupState(&_setupSt)
     , _cloudState(&_cloudSt)
 {
@@ -143,9 +138,21 @@ int Core::attachServer (HttpServer *server)
             _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
 
-    // handle authentication received via handler
-    connect(obj, SIGNAL(authSupplied(QUuid, Auth)), 
-           this, SLOT(_authSupplied(QUuid, Auth)));
+    // when auth is supplied, it is forwarded to all modules, while
+    // authentication requests are reemitted in _authRequired as need signals
+    // for handler
+#ifndef LIBENCLOUD_DISABLE_SETUP
+    connect(obj, SIGNAL(authSupplied(Auth)), 
+           _setupObj, SIGNAL(authSupplied(Auth)));
+    connect(_setupObj, SIGNAL(authRequired(Auth::Id)), 
+           this, SLOT(_authRequired(Auth::Id)));
+#endif
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    connect(obj, SIGNAL(authSupplied(Auth)), 
+           _cloudObj, SIGNAL(authSupplied(Auth)));
+    connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
+           this, SLOT(_authRequired(Auth::Id)));
+#endif
 
     // attach core configuration
     server->_cfg = _cfg;
@@ -231,88 +238,20 @@ void Core::_progressReceived (const Progress &p)
     emit progress(pt);
 }
 
-// Create new auth session and emit need request for handler
-void Core::_authRequired (const QString &type)
+void Core::_authRequired (Auth::Id id)
 {
-    QUuid uuid = QUuid::createUuid();
-    QString id = utils::uuid2String(uuid);
-    QString source;
-    AuthSession *session = NULL;
-
-    LIBENCLOUD_DBG("type: " << type);
-
-    // FIXME causes fsm loops
-#if 0
-    // reuse last credentials if of same type
-    if (_lastAuth.isValid() && _lastAuth.getType() == type)
+    switch (id)
     {
-        _supplyAuthTo(sender(), _lastAuth);
-        return;
+        case Auth::SwitchboardId:
+            emit need ("sb_auth");
+            break;
+        case Auth::ProxyId:
+            emit need ("proxy_auth");
+            break;
+        default:
+            LIBENCLOUD_ERR_IF (1);
+            break;
     }
-#endif
-
-    if (sender() == _setupObj)
-        source = "setup";
-    else 
-        source = "cloud";
-
-    // check on same id
-    LIBENCLOUD_ERR_IF (_authSessions.contains(id));
-
-    // also check that we don't already have a pending request 
-    // with given source + type
-    foreach (session, _authSessions)
-        if (session->source == source &&
-                session->type == type)
-            return;
-
-    LIBENCLOUD_DBG ("adding session: " << id);
-
-    session = new AuthSession();
-    LIBENCLOUD_ERR_IF (session == NULL);
-
-    session->source = source;
-    session->type = type;
-
-    _authSessions[id] = session;
-
-    emit need(type + "_auth=" + id);
-
-    return;
-err:
-    LIBENCLOUD_DELETE(session);
-    return;
-}
-
-void Core::_authSupplied (const QUuid &uuid, const Auth &auth)
-{
-    QString id = utils::uuid2String(uuid);
-    AuthSession *session;
-    QObject *destination; 
-    Auth newAuth(auth);
-
-    LIBENCLOUD_DBG ("retrieving session: " << id);
-
-    LIBENCLOUD_ERR_IF (!_authSessions.contains(id));
-
-    session = _authSessions[id];
-    LIBENCLOUD_ERR_IF (session == NULL);
-
-    if (session->source == "setup")
-        destination = _setupObj;
-    else
-        destination = _cloud;
-
-    // get type from session
-    newAuth.setType(session->type);
-
-    _supplyAuthTo(destination, newAuth);
-
-    LIBENCLOUD_DELETE(_authSessions[id]);
-
-    LIBENCLOUD_ERR_IF (_authSessions.remove(id) == 0);
-
-    _lastAuth = newAuth;
 err:
     return;
 }
@@ -376,10 +315,6 @@ int Core::_initSetup ()
     connect(_setupObj, SIGNAL(completed()), 
             this, SLOT(_setupCompleted()));
 
-    // authentication forwarding
-    connect(_setupObj, SIGNAL(authRequired(QString)),
-            this, SLOT(_authRequired(QString)));
-
     return 0;
 err:
     return ~0;
@@ -392,25 +327,24 @@ int Core::_initCloud ()
     _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
 
+    _cloudObj = dynamic_cast<QObject *>(_cloud);
+    LIBENCLOUD_ERR_IF (_cloudObj == NULL);
+
     // error signal handling
-    connect(_cloud, SIGNAL(error(QString)), 
+    connect(_cloudObj, SIGNAL(error(QString)), 
             this, SLOT(_errorReceived(QString)));
 
     // state changes forwarding for connecting/connected states
-    connect(_cloud, SIGNAL(stateChanged(State)), 
+    connect(_cloudObj, SIGNAL(stateChanged(State)), 
             this, SIGNAL(stateChanged(State)));
 
     // progress signal handling
-    connect(_cloud, SIGNAL(progress(Progress)), 
+    connect(_cloudObj, SIGNAL(progress(Progress)), 
             this, SLOT(_progressReceived(Progress)));
 
     // need message signal forwarding
-    connect(_cloud, SIGNAL(need(QString)), 
+    connect(_cloudObj, SIGNAL(need(QString)), 
             this, SIGNAL(need(QString)));
-
-    // authentication forwarding
-    connect(_cloud, SIGNAL(authRequired(QString)),
-            this, SLOT(_authRequired(QString)));
 
     return 0;
 err:
@@ -450,16 +384,6 @@ int Core::_initFsm ()
     _fsm.setInitialState(_initialState);
 
     return 0;
-}
-
-void Core::_supplyAuthTo (QObject *dest, const Auth &auth)
-{
-    // connect temporarily only to emit signal to proper destination
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            dest, SIGNAL(authSupplied(Auth)));
-    emit authSupplied(auth);
-    disconnect(this, SIGNAL(authSupplied(Auth)), 
-            dest, SIGNAL(authSupplied(Auth)));
 }
 
 QString Core::_stateStr (QState *state)

@@ -26,15 +26,26 @@ public:
     virtual int getTotalSteps() const = 0;
 
 signals:
-    // this -> other
+    //
+    // setup -> core
+    //
     virtual void error (QString msg = "") = 0;
     virtual void progress (const Progress &progress) = 0;
-    virtual void need (const QString &what) = 0;
-    virtual void authRequired (const QString &type) = 0;
     virtual void completed () = 0;
 
-    // other -> this (optional overrides)
-    void authSupplied (const Auth &auth);  
+    //
+    // internal -> setup -> core
+    //
+    virtual void need (const QString &what) = 0;
+    virtual void authRequired (Auth::Id id) = 0;
+
+    //
+    // core -> setup -> internal
+    //
+
+    // OPTIONAL
+    void authSupplied (const Auth &auth); 
+
 #ifdef LIBENCLOUD_MODE_SECE
     virtual void licenseForward (const QUuid &uuid) = 0;
 #endif

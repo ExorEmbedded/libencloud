@@ -51,8 +51,6 @@ QString VpnManager::errorString (Error err)
             return tr("Unhandled functionality");
         case SocketError:
             return tr("Error in socket communication");
-        case AuthError:
-            return tr("Authentication failed");
     }
 
     return "";
@@ -156,7 +154,7 @@ void VpnManager::detach ()
 
 void VpnManager::parseLine (QByteArray line)
 {
-    //LIBENCLOUD_DBG("line: " << line);
+//    LIBENCLOUD_DBG("line: " << line);
 
     line.chop(2);  // remove carriage returns
 
@@ -194,17 +192,34 @@ err:
 
 void VpnManager::parseLinePass (QByteArray rest)
 {
+//    LIBENCLOUD_DBG("rest: " << rest);
+
     if (qstrcmp(rest, "Verification Failed: 'Auth'") == 0)
     {
-        LIBENCLOUD_EMIT_ERR(sigError((this->err = AuthError)));
+        emit authRequired(Auth::SwitchboardId);
+    }
+    else if (qstrcmp(rest, "Verification Failed: 'HTTP Proxy'") == 0 ||
+            qstrcmp(rest, "Verification Failed: 'SOCKS Proxy'") == 0)
+    {
+        emit authRequired(Auth::ProxyId);
     }
     else if (qstrcmp(rest, "Need 'Auth' username/password") == 0)
     {
-        emit authRequired("sb");
+        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid(), authRequired(Auth::SwitchboardId));
+
+        sendAuth("Auth", _sbAuth.getUser(), _sbAuth.getPass());
     }
     else if (qstrcmp(rest, "Need 'HTTP Proxy' username/password") == 0)
     {
-        emit authRequired("proxy");
+        LIBENCLOUD_EMIT_ERR_IF (!_proxyAuth.isValid(), authRequired(Auth::ProxyId));
+
+        sendAuth("HTTP Proxy", _proxyAuth.getUser(), _proxyAuth.getPass());
+    }
+    else if (qstrcmp(rest, "Need 'SOCKS Proxy' username/password") == 0)
+    {
+        LIBENCLOUD_EMIT_ERR_IF (!_proxyAuth.isValid(), authRequired(Auth::ProxyId));
+
+        sendAuth("SOCKS Proxy", _proxyAuth.getUser(), _proxyAuth.getPass());
     }
     else
     {
@@ -299,15 +314,21 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 // public slots
 //
 
-// Only catch auth signals for Cloud
 void VpnManager::authSupplied (const Auth &auth)
 {
     LIBENCLOUD_DBG("type: " << auth.getType());
 
-    if (auth.getType() == "sb")
-        sendAuth("Auth", auth.getUser(), auth.getPass());
-    else if (auth.getType() == "proxy")
-        sendAuth("HTTP Proxy", auth.getUser(), auth.getPass());
+    switch (auth.getId())
+    {
+        case Auth::SwitchboardId:
+            _sbAuth = auth;
+            break;
+        case Auth::ProxyId:
+            _proxyAuth = auth;
+            break;
+    }
+
+    return;
 }
 
 //

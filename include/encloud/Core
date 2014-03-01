@@ -35,7 +35,7 @@ public:
     Config *getConfig () const;
     int attachServer (HttpServer *server);
 
-    // Note: the following signals are for internal usage - clients
+    // Note: the following signals and slots are for internal usage - clients
     // should use HTTP API for status monitoring and providing data
 
 signals:
@@ -51,8 +51,7 @@ private slots:
     void _setupCompleted ();
     void _errorReceived (const QString &msg);
     void _progressReceived (const Progress &p);
-    void _authRequired (const QString &type);
-    void _authSupplied (const QUuid &uuid, const Auth &auth);
+    void _authRequired (Auth::Id id);
 
 private:
     int _initConfig ();
@@ -61,7 +60,6 @@ private:
     int _initCloud ();
     int _initFsm ();
     int _startCloud ();
-    void _supplyAuthTo (QObject *dest, const Auth &auth);
     QString _stateStr (QState *state);
 
     bool _isValid;
@@ -70,15 +68,13 @@ private:
     SetupInterface *_setup;
     QObject *_setupObj;
     Cloud *_cloud;
+    QObject *_cloudObj;
 
     QStateMachine _fsm;
     QState *_initialState;
     QState *_previousState;
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
-
-    Auth _lastAuth;
-    QMap<QString,AuthSession *> _authSessions;
 };
 
 }  // namespace libencloud

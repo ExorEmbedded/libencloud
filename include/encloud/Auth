@@ -10,27 +10,56 @@ namespace libencloud
 class LIBENCLOUD_DLLSPEC Auth
 {
 public:
+
+    typedef enum
+    {
+        SwitchboardId = 0,
+        ProxyId,
+        FirstId = SwitchboardId,
+        LastId = ProxyId
+    }
+    Id;
+
+    // only used for ProxyId
+    typedef enum
+    {
+        NoneType = -1,
+        HttpType,
+        SocksType,
+        FirstType = NoneType,
+        LastType = SocksType
+    }
+    Type;
+
     Auth ();
-    Auth (const QString &type, const QString &url, 
+    Auth (Id id, Type type, const QString &url,
+            const QString &user, const QString &pass);
+    Auth (const QString &id, const QString &type, const QString &url,
             const QString &user, const QString &pass);
 
     bool isValid () const;
 
-    const QString &getType () const;
-    void setType (const QString &type);
+    Id getId () const;
+    int setId (Id id);
+    int setStrId (const QString &id);
+
+    Type getType () const;
+    int setType (Type type);
+    int setStrType (const QString &type);
 
     const QString &getUrl () const;
-    void setUrl (const QString &url);
+    int setUrl (const QString &url);
 
     const QString &getUser () const;
-    void setUser (const QString &user);
+    int setUser (const QString &user);
 
     const QString &getPass () const;
-    void setPass (const QString &pass);
+    int setPass (const QString &pass);
 
 protected:
     bool _valid;
-    QString _type;
+    Id _id;
+    Type _type;
     QString _url;
     QString _user;
     QString _pass;

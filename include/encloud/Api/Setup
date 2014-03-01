@@ -1,0 +1,31 @@
+#ifndef _LIBENCLOUD_API_SETUP_H_
+#define _LIBENCLOUD_API_SETUP_H_
+
+/**
+ * Qt helper to interact with Encloud's HTTP Setup API.
+ * 
+ * Please refer to doc/APIv* for details.
+ * 
+ * Usage: no result checking required - simply check StatusApi periodically and
+ * send data if required.
+ */
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC SetupApi : public QObject
+{
+    Q_OBJECT;
+
+public:
+
+    SetupApi ();
+    ~SetupApi ();
+
+    QUuid getPoi ();
+
+    void licenseSend ();
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_API_SETUP_H_

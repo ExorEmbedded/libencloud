@@ -62,25 +62,27 @@ err:
 }
 #endif
 
-int HttpHandler::setAuth (const QUuid &uuid, const Auth &auth)
+int HttpHandler::setAuth (const Auth &auth)
 {
-    QString id = utils::uuid2String(uuid);
     LIBENCLOUD_TRACE;
 
-    //LIBENCLOUD_DBG("needs: " << _needs);
-
-    // remove authentication needs that match given uuid
-    foreach (QString need, _needs.filter("_auth=" + id,
-                Qt::CaseInsensitive))
+    switch (auth.getId())
     {
-        //LIBENCLOUD_DBG("need: " << need);
-
-        _needs.removeAll(need);
+        case Auth::SwitchboardId:
+            _needs.removeAll("sb_auth");
+            break;
+        case Auth::ProxyId:
+            _needs.removeAll("proxy_auth");
+            break;
+        default:
+            LIBENCLOUD_ERR_IF (1);
     }
 
-    emit authSupplied(uuid, auth);
+    emit authSupplied(auth);
 
     return 0;
+err:
+    return ~0;
 }
 
 // JSONP support (bypass same-origin policy)
