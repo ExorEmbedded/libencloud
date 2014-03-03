@@ -3,8 +3,8 @@
 
 #include <QString>
 #include <QtPlugin>
+#include <encloud/Client>
 #include <common/config.h>
-#include <common/client.h>
 
 namespace libencloud {
 

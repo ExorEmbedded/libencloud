@@ -4,7 +4,7 @@
 #include <QStateMachine>
 #include <QtPlugin>
 #include <QUuid>
-#include <common/client.h>
+#include <encloud/Client>
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/ece/retrinfomsg.h>

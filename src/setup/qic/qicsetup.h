@@ -2,7 +2,7 @@
 #define _LIBENCLOUD_PRIV_SETUP_QIC_H_
 
 #include <QtPlugin>
-#include <common/client.h>
+#include <encloud/Client>
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/qic/setupmsg.h>

@@ -5,7 +5,7 @@
 #include <QSslCertificate>
 #include <QString>
 #include <QUuid>
-#include <common/client.h>
+#include <encloud/Client>
 #include <common/message.h>
 
 namespace libencloud {

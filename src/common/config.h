@@ -10,11 +10,11 @@
 #include <QString>
 #include <QUrl>
 #include <encloud/Common>
+#include <encloud/Json>
 #include <encloud/Logger>
 #include "crypto.h"
 #include "defaults.h"
 #include "helpers.h"
-#include "json.h"
 
 namespace libencloud {
 

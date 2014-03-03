@@ -1,13 +1,20 @@
+#include <encloud/Client>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/client.h>
 
 #define EMIT_ERROR(msg) LIBENCLOUD_EMIT(error(msg))
 #define EMIT_ERROR_ERR_IF(cond, msg) LIBENCLOUD_EMIT_ERR_IF(cond, error(msg))
 
+// Allow debug deactivation via API
+#define CLIENT_DBG(msg) do { \
+    if (_debug) \
+        LIBENCLOUD_DBG(msg); \
+    } while (0);
+
 namespace libencloud {
 
 Client::Client ()
+    : _debug (true)
 {
     connect(&_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
@@ -17,11 +24,16 @@ Client::Client ()
             SLOT(_finished(QNetworkReply *)));
 }
 
+void Client::setDebug (bool b) 
+{
+    _debug = b;
+}
+
 void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
         const QSslConfiguration &conf)
 {
-    LIBENCLOUD_DBG("url: " << url.toString());
-    LIBENCLOUD_DBG(" ### >>>>> ### " << params.toString());
+    CLIENT_DBG("url: " << url.toString());
+    CLIENT_DBG(" ### >>>>> ### " << params.toString());
 
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
@@ -76,7 +88,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
         {
             case QSslError::SelfSignedCertificateInChain:
             case QSslError::HostNameMismatch:
-                LIBENCLOUD_DBG("IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                CLIENT_DBG("IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
                 ignoreErrors.append(err);
                 break;
             default:
@@ -84,7 +96,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
                 break;
 
 #if 0
-            LIBENCLOUD_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
+            CLIENT_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
                     " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
 #endif
         }
@@ -125,7 +137,7 @@ void Client::_finished (QNetworkReply *reply)
 
     response = reply->readAll();
 
-    LIBENCLOUD_DBG(" ### <<<<< ### " << response);
+    CLIENT_DBG(" ### <<<<< ### " << response);
 
     reply->deleteLater();
 

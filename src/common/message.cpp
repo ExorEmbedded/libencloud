@@ -1,7 +1,7 @@
+#include <encloud/Client>
 #include <common/common.h>
 #include <common/config.h>
 #include <common/message.h>
-#include <common/client.h>
 
 namespace libencloud {
 

@@ -18,6 +18,7 @@
 #
 #   nosetup     no setup module (e.g. VPN client/manager only)
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
+#   noapi       no API module (Qt-based HTTP client for Encloud Service)
 
 
 # Local configuration overrides. Sample content:
@@ -88,6 +89,7 @@ modeqic {
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
+noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
 
 # Platform-specific config and macros
 win32 {

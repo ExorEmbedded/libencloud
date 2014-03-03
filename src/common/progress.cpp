@@ -16,6 +16,13 @@ Progress::Progress (QString desc, int step, int total)
 {
 }
 
+bool Progress::operator== (const Progress &p) const
+{
+    return (_desc == p._desc &&
+            _step == p._step &&
+            _total == p._total);
+}
+
 QString Progress::getDesc () const
 {
     return _desc;

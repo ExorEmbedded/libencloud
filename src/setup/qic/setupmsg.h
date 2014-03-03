@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <encloud/Auth>
-#include <common/client.h>
+#include <encloud/Client>
 #include <common/message.h>
 #include <common/vpn/vpnconfig.h>
 

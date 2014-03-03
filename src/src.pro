@@ -25,8 +25,14 @@ SOURCES += common/common.cpp
 HEADERS += $$SRCBASEDIR/include/encloud/Auth
 SOURCES += common/auth.cpp
 
+HEADERS += $$SRCBASEDIR/include/encloud/Client
+SOURCES += common/client.cpp
+
 HEADERS += $$SRCBASEDIR/include/encloud/Info
 SOURCES += common/info.cpp
+
+HEADERS += $$SRCBASEDIR/include/encloud/Json
+SOURCES += common/json.cpp
 
 HEADERS += $$SRCBASEDIR/include/encloud/Logger
 SOURCES += common/logger.cpp
@@ -42,12 +48,6 @@ SOURCES += common/config.cpp
 
 HEADERS += common/message.h
 SOURCES += common/message.cpp
-
-HEADERS += common/client.h
-SOURCES += common/client.cpp
-
-HEADERS += common/json.h
-SOURCES += common/json.cpp
 
 # old GPL Json implementation (small: self-contained)
 contains(CONFIG, qtjson) {
@@ -104,6 +104,15 @@ SOURCES += core/core.cpp
 !nocloud {
     HEADERS += cloud/*.h
     SOURCES += cloud/*.cpp
+}
+
+#
+# api sources
+# 
+
+!noapi {
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/Status
+    SOURCES += api/*.cpp
 }
 
 #

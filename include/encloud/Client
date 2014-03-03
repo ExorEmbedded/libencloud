@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_PRIV_CLIENT_H_
-#define _LIBENCLOUD_PRIV_CLIENT_H_
+#ifndef _LIBENCLOUD_CLIENT_H_
+#define _LIBENCLOUD_CLIENT_H_
 
 #include <QObject>
 #include <QUrl>
@@ -9,15 +9,17 @@
 #include <QNetworkAccessManager>
 #include <QAuthenticator>
 #include <QSslConfiguration>
+#include <encloud/Common>
 
 namespace libencloud {
 
-class Client : public QObject
+class LIBENCLOUD_DLLSPEC Client : public QObject
 {
     Q_OBJECT
 
 public:
     Client ();
+    void setDebug (bool b);
     void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers, 
             const QSslConfiguration &conf);
 
@@ -32,9 +34,10 @@ protected slots:
     void _finished (QNetworkReply *reply);
 
 protected:
+    bool _debug;
     QNetworkAccessManager _qnam;
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_CLIENT_H_ */
+#endif  /* _LIBENCLOUD_CLIENT_H_ */

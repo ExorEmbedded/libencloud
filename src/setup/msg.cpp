@@ -1,6 +1,6 @@
 #include <QStringList>
+#include <encloud/Json>
 #include "msg.h"
-#include "json.h"
 #include "helpers.h"
 #include "defaults.h"
 #include "utils.h"

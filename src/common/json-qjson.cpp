@@ -1,6 +1,6 @@
 #include <qjson/parser.h>
 #include <qjson/serializer.h>
-#include "json.h"
+#include <encloud/Json>
 
 /**
  * QJson-based interface (LGPL/external)
