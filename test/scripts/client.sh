@@ -4,7 +4,7 @@
 
 HOST="$1"
 URL="api_v1"
-PORT="4884"
+PORT="4804"
 ACTION="$2"
 LICENSE="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
 LOGINURL="$3"

@@ -106,8 +106,8 @@ int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
     version = versionRx.cap(1);
     action = versionRx.cap(2);
 
-    LIBENCLOUD_DBG("path: " << path << ", version: " << version <<
-            ", action: " << action);
+//    LIBENCLOUD_DBG("path: " << path << ", version: " << version <<
+//            ", action: " << action);
 
     apiHandler = _versionToApiHandler((ApiVersion) version.toInt());
     LIBENCLOUD_ERR_IF (apiHandler == NULL);

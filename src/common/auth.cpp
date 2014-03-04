@@ -65,6 +65,19 @@ int Auth::setId (Auth::Id id)
     return 0;
 }
 
+const QString Auth::getStrId () const
+{
+    switch (_id) 
+    {
+        case Auth::SwitchboardId:
+            return "sb";
+        case Auth::ProxyId:
+            return "proxy";
+        default:
+            return "";
+    }
+}
+
 int Auth::setStrId (const QString &id)
 {
     if (id == "sb")
@@ -91,6 +104,19 @@ int Auth::setType (Type type)
     _type = type;
 
     return 0;
+}
+
+const QString Auth::getStrType () const
+{
+    switch (_type) 
+    {
+        case Auth::HttpType:
+            return "http";
+        case Auth::SocksType:
+            return "socks";
+        default:
+            return "";
+    }
 }
 
 int Auth::setStrType (const QString &type)

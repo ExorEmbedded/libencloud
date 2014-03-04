@@ -1,10 +1,8 @@
 #include <QRegExp>
-#include <common/common.h>
-#include <common/config.h>
 #include <encloud/Json>
 #include <encloud/Api/Status>
-
-#define LIBENCLOUD_API_STATUS_PATH  "/api_v1/status"
+#include <common/common.h>
+#include <common/config.h>
 
 namespace libencloud {
 
@@ -13,11 +11,12 @@ namespace libencloud {
 //
 
 StatusApi::StatusApi ()
-    : _state (StateNone)
+    : Api ()
+    , _state (StateNone)
 {
     LIBENCLOUD_TRACE;
 
-    connect(&_timer, SIGNAL(timeout()), this, SLOT(_timeout()));
+    connect(&_pollTimer, SIGNAL(timeout()), this, SLOT(_pollTimeout()));
 
     _client.setDebug(false);
     connect(&_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
@@ -35,26 +34,29 @@ void StatusApi::start (int interval)
 {
     LIBENCLOUD_TRACE;
 
-    _timer.start(interval);
+    // trigger a first request immediately
+    _pollTimeout();
+
+    _pollTimer.start(interval);
 }
 
 void StatusApi::stop ()
 {
     LIBENCLOUD_TRACE;
 
-    _timer.stop();
+    _pollTimer.stop();
 }
 
 //
-// private slots
+// protected slots
 //
 
-void StatusApi::_timeout ()
+void StatusApi::_pollTimeout ()
 {
     //LIBENCLOUD_TRACE;
 
-    // TODO from config/registry
-    QUrl url("http://localhost:4884");
+    QUrl url(QString(LIBENCLOUD_API_SCHEME) + _host +
+            QString(':') + QString::number(_port));
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration config;

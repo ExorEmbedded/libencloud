@@ -9,19 +9,9 @@
 
 #define LIBENCLOUD_SRV_LISTEN          "127.0.0.1"
 
-//#ifdef LIBENCLOUD_DISABLE_SERVICE
-#define LIBENCLOUD_SVC_TRACE         LIBENCLOUD_TRACE
-#define LIBENCLOUD_SVC_LOG(msg)      LIBENCLOUD_DBG(msg)
-#define LIBENCLOUD_SVC_ERR_IF(cond)  LIBENCLOUD_ERR_IF(cond)
-#define LIBENCLOUD_SVC_RETURN_IF(cond, res) LIBENCLOUD_RETURN_IF(cond, res)
-#define LIBENCLOUD_SVC_DBG(msg)      LIBENCLOUD_DBG(msg)
-//#else
-//#  include "service.h"
-//#endif
-
 // disable heavy tracing
-#undef LIBENCLOUD_SVC_TRACE 
-#define LIBENCLOUD_SVC_TRACE do {} while(0)
+#undef LIBENCLOUD_TRACE 
+#define LIBENCLOUD_TRACE do {} while(0)
 
 namespace libencloud {
 
@@ -29,21 +19,25 @@ namespace libencloud {
 // public methods
 //
     
-HttpServer::HttpServer (QObject *parent)
-    : _cfg(NULL)
-    , _localServer(NULL)
-    , _cloudServer(NULL)
+HttpServer::HttpServer ()
+    : _cfg(NULL)  // set by Core at during init
     , _handler(NULL)
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
-    _localServer = new HttpServerPriv(parent); 
-    _cloudServer = new HttpServerPriv(parent); 
+    _localServer = new HttpServerPriv(this); 
+    LIBENCLOUD_ERR_IF (_localServer == NULL);
+
+    _cloudServer = new HttpServerPriv(this); 
+    LIBENCLOUD_ERR_IF (_cloudServer == NULL);
+
+err:
+    return;
 }
 
 HttpServer::~HttpServer ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     LIBENCLOUD_DELETE(_localServer);
     LIBENCLOUD_DELETE(_cloudServer);
@@ -53,7 +47,7 @@ HttpAbstractHandler *HttpServer::getHandler () { return _handler; }
 
 int HttpServer::setHandler (HttpAbstractHandler *handler)
 {
-    LIBENCLOUD_SVC_ERR_IF (handler == NULL);
+    LIBENCLOUD_ERR_IF (handler == NULL);
 
     _handler = handler;
 
@@ -67,18 +61,18 @@ err:
 
 int HttpServer::start ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     // initially listens only on local interface, unless configured differently
     if (_cfg && _cfg->config.bind == "all")
     {
-        LIBENCLOUD_SVC_DBG("Binding to all interfaces");
+        LIBENCLOUD_DBG("Binding to all interfaces");
         _localServer->start(QHostAddress::Any,
             LIBENCLOUD_SRV_PORT_DFT);
     }
     else
     {
-        LIBENCLOUD_SVC_DBG("Binding only to local interface");
+        LIBENCLOUD_DBG("Binding only to local interface");
         _localServer->start(QHostAddress(LIBENCLOUD_SRV_LISTEN), 
             LIBENCLOUD_SRV_PORT_DFT);
     }
@@ -88,7 +82,7 @@ int HttpServer::start ()
 
 int HttpServer::stop ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     _localServer->stop();
     _cloudServer->stop();
@@ -107,7 +101,7 @@ bool HttpServer::isListening ()
 
 void HttpServer::vpnIpAssigned (const QString &ip)
 {
-    LIBENCLOUD_SVC_DBG ("ip: " << ip);
+    LIBENCLOUD_DBG ("ip: " << ip);
 
     if (_cfg && _cfg->config.bind == "all")
         return;
@@ -120,15 +114,20 @@ void HttpServer::vpnIpAssigned (const QString &ip)
 // public methods
 //
 
-HttpServerPriv::HttpServerPriv (QObject *parent)
-    : QTcpServer(parent)
+HttpServerPriv::HttpServerPriv (HttpServer *server)
+    : QTcpServer(NULL)
+    , _server(server)
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (server == NULL);
+err:
+    return;
 }
 
 HttpServerPriv::~HttpServerPriv ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     close();
 }
@@ -146,9 +145,37 @@ err:
 
 int HttpServerPriv::start (const QHostAddress &address, quint16 port)
 {
-    LIBENCLOUD_SVC_TRACE;
+    enum { MAX_ATTEMPTS = 10 };
+    int i = 0;
 
-    LIBENCLOUD_ERR_IF (!listen(address, port));
+    Config *cfg = _server->_cfg;
+
+    // if port setting already exists use it
+    if (cfg && cfg->settings->contains("port"))
+    {
+        if (listen(address, cfg->settings->value("port").toInt()))
+            return 0;
+
+        // otherwise follow through and try other ports
+        i++;
+    }
+
+    // no setting - scan for a free port
+    for (; i < MAX_ATTEMPTS && !listen(address, port); i++, port++) 
+        ;
+    LIBENCLOUD_ERR_MSG_IF (i == MAX_ATTEMPTS,
+            "Could not bind to any port - scanned " <<
+            QString::number(MAX_ATTEMPTS) << " ports from " << QString::number(port));
+
+    LIBENCLOUD_DBG("bound to port: " << QString::number(port));
+
+    if (cfg)
+    {
+        cfg->settings->setValue("port", QString::number(port));
+        cfg->settings->sync();
+        LIBENCLOUD_ERR_MSG_IF (cfg->settings->status() != QSettings::NoError, 
+                "could not write configuration to file - check permissions!");
+    }
 
     return 0;
 err:
@@ -157,7 +184,7 @@ err:
 
 int HttpServerPriv::stop ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
     
     if (isListening())
         close();
@@ -167,10 +194,10 @@ int HttpServerPriv::stop ()
 
 void HttpServerPriv::incomingConnection (int sd)
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     QTcpSocket *socket = new QTcpSocket(this); 
-    LIBENCLOUD_SVC_ERR_IF (socket == NULL);
+    LIBENCLOUD_ERR_IF (socket == NULL);
 
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
@@ -192,12 +219,12 @@ void HttpServerPriv::readyRead ()
     QByteArray inData;
     QByteArray outData;
 
-    LIBENCLOUD_SVC_DBG("bytesAvailable: " << QString::number(socket->bytesAvailable()));
+//    LIBENCLOUD_DBG("bytesAvailable: " << QString::number(socket->bytesAvailable()));
 
     inData = socket->readAll();
     LIBENCLOUD_ERR_IF (inData.isEmpty());
 
-    LIBENCLOUD_DBG("<<<" << QString(inData).replace(LIBENCLOUD_HTTP_NL, " | "));
+//    LIBENCLOUD_DBG("<<<" << QString(inData).replace(LIBENCLOUD_HTTP_NL, " | "));
 
     // if nothing has been received yet we need a header
     if (_contexts[socket].data.isEmpty())
@@ -205,8 +232,8 @@ void HttpServerPriv::readyRead ()
         HttpHeaders headers;
         LIBENCLOUD_ERR_IF (headers.decode(inData));
 
-        LIBENCLOUD_DBG("header size: " << headers.getSize() << 
-                ", content-length: " << headers.get("content-length"));
+//        LIBENCLOUD_DBG("header size: " << headers.getSize() << 
+//                ", content-length: " << headers.get("content-length"));
         
         _contexts[socket].bytesExpected = headers.getSize() + headers.get("content-Length").toInt();
     }
@@ -219,7 +246,7 @@ void HttpServerPriv::readyRead ()
         outData = handleMessage(_contexts[socket].data);
         LIBENCLOUD_ERR_IF (outData.isEmpty());
 
-        LIBENCLOUD_DBG(">>>" << QString(outData).replace(LIBENCLOUD_HTTP_NL, " | "));
+//        LIBENCLOUD_DBG(">>>" << QString(outData).replace(LIBENCLOUD_HTTP_NL, " | "));
 
         socket->write(outData);
         _contexts[socket].data.clear();
@@ -231,7 +258,7 @@ err:
 
 void HttpServerPriv::disconnected ()
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     QTcpSocket* socket = (QTcpSocket*)sender();
     socket->deleteLater();
@@ -243,7 +270,7 @@ void HttpServerPriv::error (QAbstractSocket::SocketError socketError)
 
     QTcpSocket* socket = (QTcpSocket*)sender();
 
-    LIBENCLOUD_SVC_DBG("err: " << QString::number(socket->error())
+    LIBENCLOUD_DBG("err: " << QString::number(socket->error())
             << " (" << socket->errorString() << ")");
 }
 
@@ -253,7 +280,7 @@ void HttpServerPriv::error (QAbstractSocket::SocketError socketError)
 
 QByteArray HttpServerPriv::handleMessage (QByteArray message)
 {
-    LIBENCLOUD_SVC_TRACE;
+    LIBENCLOUD_TRACE;
 
     QByteArray outMessage;
     HttpRequest request;

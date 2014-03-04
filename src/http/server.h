@@ -3,6 +3,9 @@
 
 #include <QTcpServer>
 #include <encloud/HttpAbstractHandler>
+#include <encloud/HttpServer>
+#include <common/common.h>
+#include <common/config.h>
 
 namespace libencloud {
 
@@ -18,7 +21,7 @@ class HttpServerPriv : public QTcpServer
     Q_OBJECT
 
 public:
-    HttpServerPriv (QObject *parent = 0);
+    HttpServerPriv (HttpServer *server);
     ~HttpServerPriv ();
 
     int setHandler (HttpAbstractHandler *handler);
@@ -39,6 +42,7 @@ private:
     QByteArray handleMessage (QByteArray message);
     QVariant handleJson (QVariant json);
 
+    HttpServer *_server;
     QMap<QTcpSocket *, http_context_t> _contexts;
     HttpAbstractHandler *_handler;
 };

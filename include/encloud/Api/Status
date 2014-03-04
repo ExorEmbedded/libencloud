@@ -8,6 +8,7 @@
 #include <encloud/Common>
 #include <encloud/Progress>
 #include <encloud/State>
+#include <encloud/Api/Common>
 
 /**
  * Qt helper to interact with Encloud's HTTP Status API.
@@ -17,7 +18,7 @@
 
 namespace libencloud {
 
-class LIBENCLOUD_DLLSPEC StatusApi : public QObject
+class LIBENCLOUD_DLLSPEC StatusApi : public Api
 {
     Q_OBJECT
 
@@ -50,17 +51,19 @@ signals:
 
     void error (const QString &msg);
 
-private slots:
-    void _timeout ();
+protected slots:
+
+    void _pollTimeout ();
     void _clientComplete (const QString &response);
 
-private:
+protected:
+
     int _parseState (QVariant v);
     int _parseError (QVariant v);
     int _parseProgress (QVariant v);
     int _parseNeed (QVariant v);
 
-    QTimer _timer;
+    QTimer _pollTimer;
     Client _client;
 
     // API context

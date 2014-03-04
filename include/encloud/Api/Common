@@ -1,0 +1,70 @@
+#ifndef _LIBENCLOUD_API_COMMON_H_
+#define _LIBENCLOUD_API_COMMON_H_
+
+#include <QObject>
+#include <QSettings>
+#include <QTimer>
+#include <encloud/Common>
+#include <encloud/HttpServer>
+
+//
+// defaults
+//
+#define LIBENCLOUD_API_SCHEME       "http://"
+#define LIBENCLOUD_API_HOST         "localhost"
+#define LIBENCLOUD_API_PORT         LIBENCLOUD_SRV_PORT_DFT
+
+//
+// API definitions
+//
+#define LIBENCLOUD_API_VERSION      "1"
+#define LIBENCLOUD_API_PREFIX_PATH  "/api_v" LIBENCLOUD_API_VERSION
+#define LIBENCLOUD_API_STATUS_PATH  LIBENCLOUD_API_PREFIX_PATH"/status"
+#define LIBENCLOUD_API_AUTH_PATH    LIBENCLOUD_API_PREFIX_PATH"/auth"
+#define LIBENCLOUD_API_SETUP_API    LIBENCLOUD_API_PREFIX_PATH"/setup"
+#define LIBENCLOUD_API_CLOUD_API    LIBENCLOUD_API_PREFIX_PATH"/cloud"
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC Api : public QObject
+{
+    Q_OBJECT
+
+public:
+    typedef enum
+    {
+        SuccessRc = 0,
+        ErrorRc
+    }
+    ResultCode;
+
+    Api ();
+    virtual ~Api ();
+
+    // QIC-only: needs to be run once to get encloud settings
+    int init ();
+
+    void setHost (const QString &host);
+    void setPort (int port);
+
+signals:
+    // QIC-only: other clients won't need to wait for settings (fixed port allocation)
+    void gotSettings ();
+
+//
+// internals
+// 
+
+protected slots:
+    void _settingsTimeout ();
+    
+protected:
+    static QSettings *_settings;
+    QTimer _settingsTimer;
+    QString _host;
+    int _port;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_API_COMMON_H_
