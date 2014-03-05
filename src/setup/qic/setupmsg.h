@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_
 
 #include <QString>
+#include <QVariant>
 #include <encloud/Auth>
 #include <encloud/Client>
 #include <common/message.h>
@@ -23,6 +24,7 @@ signals:
     void error (QString msg = "");
     void need (const QString &what);
     void authRequired (Auth::Id id);
+    void serverConfigSupply (const QVariant &variant);
     void processed ();
 
 public slots:
@@ -44,6 +46,7 @@ private:
     //response outputs
     VpnConfig _vpnConfig;
     QSslCertificate _caCert;
+    QVariantMap _serverConfig;
 };
 
 } // namespace libencloud

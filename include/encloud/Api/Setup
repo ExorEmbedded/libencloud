@@ -36,12 +36,19 @@ public slots:
     //
     void licenseSupply (const QUuid &uuid);
 
+    //
+    // QIC-only
+    //
+    void portSupply (int port);
+    void configRetrieve ();
+
 signals:
 
     //
     // ECE-only
     //
-    void poiReceived (libencloud::Api::ResultCode rc, QUuid poi = QUuid());
+    void poiReceived (libencloud::Api::ResultCode rc,
+            QUuid poi = QUuid());
 
     //
     // SECE-only
@@ -50,6 +57,13 @@ signals:
     // Note: success only indicates correct message delivery
     // Status API must be checked for further license "needs"
     void licenseSent (libencloud::Api::ResultCode rc);
+
+    //
+    // QIC-only
+    //
+    void portSent (libencloud::Api::ResultCode rc);
+    void configReceived (libencloud::Api::ResultCode rc,
+            const QVariant &config);
 
 protected slots:
 
@@ -62,7 +76,9 @@ protected:
     {
         NoneType,
         PoiRetrieveType,
-        LicenseSupplyType
+        LicenseSupplyType,
+        PortSupplyType,
+        ConfigRetrieveType
     }
     MsgType; 
 

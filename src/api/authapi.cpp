@@ -54,7 +54,7 @@ void AuthApi::_error (const QString &err)
 
 void AuthApi::_clientComplete (const QString &response)
 {
-    LIBENCLOUD_DBG("response: " << response);
+    LIBENCLOUD_UNUSED(response);
 
     emit authSent(Api::SuccessRc);
 }

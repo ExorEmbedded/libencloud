@@ -118,6 +118,7 @@ int SetupMsg::_encodeRequest (QUrl &url, QUrl &params)
 int SetupMsg::_decodeResponse (const QString &response)
 {
     QVariantMap json;
+    QVariantMap serverMap; 
     bool ok;
 
     json = json::parse(response, ok).toMap();
@@ -154,7 +155,13 @@ int SetupMsg::_decodeResponse (const QString &response)
     LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
             error(tr("CA Certificate from Switchboard not valid")));
 
-    // TODO emit signal with whole config for API
+    // remapping to Encloud configuration
+    serverMap["uuid"] = json["uuid"];
+    serverMap["internal_ip"] = json["vpn_server_ip"];
+    serverMap["available_pages"] = json["available_pages"];
+    _serverConfig["server"] = serverMap;
+
+    emit (serverConfigSupply(_serverConfig));
 
     return 0;
 err:

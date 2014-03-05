@@ -43,6 +43,7 @@ signals:
     //
     void error (QString msg = "");
     void progress (const Progress &progress);
+    void serverConfigSupply (const QVariant &variant);
     void completed ();
 
     //

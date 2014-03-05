@@ -5,6 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QUuid>
+#include <QVariant>
 #include <encloud/Auth>
 #include <encloud/Common>
 #include <encloud/HttpAbstractHandler>
@@ -55,10 +56,17 @@ public:
     int setLicense (const QString &);
 #endif
 
+    int setClientPort (int port);
     int setAuth (const Auth &auth);
+    const QVariant &getServerConfig () const;
 
 signals:
+
+#ifdef LIBENCLOUD_MODE_SECE
     void licenseSend (const QUuid &uuid);
+#endif
+
+    void clientPortSend (int port);
     void authSupplied (const Auth &auth);
 
 private slots:
@@ -66,6 +74,7 @@ private slots:
     void _coreStateChanged (State state);
     void _coreProgressReceived (const Progress &progress);
     void _needReceived (const QString &what);
+    void _serverConfigReceived (const QVariant &config);
 
 private:
     HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
@@ -76,6 +85,8 @@ private:
     QStringList _needs;
 
     QUuid _poi;
+
+    QVariant _serverConfig;
 };
 
 }  // namespace libencloud

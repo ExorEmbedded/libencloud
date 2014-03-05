@@ -44,6 +44,7 @@ signals:
     void progress (const Progress &p);
     void need (const QString &what);
     void authSupplied (const Auth &auth);
+    void serverConfigSupply (const QVariant &variant);
 
 private slots:
     void _stateEntered ();
@@ -52,6 +53,7 @@ private slots:
     void _errorReceived (const QString &msg);
     void _progressReceived (const Progress &p);
     void _authRequired (Auth::Id id);
+    void _clientPortReceived (int port);
 
 private:
     int _initConfig ();

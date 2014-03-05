@@ -13,7 +13,7 @@
 
 [  Type definitions ]
 
-     <uuid>     e.g.  'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee'
+     <uuid>     e.g.  "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
      <sb_url>   Switchboard URL
      <e_url>    Encloud URL
 
@@ -29,24 +29,24 @@
 
 * GET <e_url>/api_v1/status
 
-    Def 'state'        -1      None
+    Def "state"        -1      None
                         0      Idle            (grey)
                         1      Error           (red)
                         2      Setting Up      (yellow)
                         3      Connecting      (orange)
                         4      Connected       (green)
 
-    e.g.    "jsonpCallback({
-                'state' : 1,                    # string representation of state
-                'error' : 'Some error',         # OPTIONAL: defined if state == 1 (StateError)
-                'progress' {
-                    'desc: 'Step description',  # string representation of step
-                    'step': 2,                  # current step number 
-                    'step': 5                   # total number of steps
+    e.g.    'jsonpCallback({
+                "state" : 1,                    # string representation of state
+                "error" : "Some error",         # OPTIONAL: defined if state == 1 (StateError)
+                "progress" {
+                    "desc: "Step description",  # string representation of step
+                    "step": 2,                  # current step number 
+                    "step": 5                   # total number of steps
                 },
-            'need' : 'license sb_auth'          # OPTIONAL list of space-separated "need" strings
-        })"                                     jo be fulfilled via API. Possible values:
-                                                'license', 'sb_auth', 'proxy_auth'
+            "need" : "license sb_auth"          # OPTIONAL list of space-separated "need" strings
+        })'                                     jo be fulfilled via API. Possible values:
+                                                "license", "sb_auth", "proxy_auth"
 
 
 [ Authentication/Login API ]
@@ -56,50 +56,56 @@
     e.g. 1              id=proxy&type=http&url=<url>&user=myuser&pass=mypass
     e.g. 2              id=sb&url=<url>&user=myuser&pass=mypass
 
-    Def 'id'            authentication identifier: 'sb', 'proxy'
-    Def 'type'          OPTIONAL type of authentication (for proxy)
-    Def 'url'           destination url (for Switchboard login or proxy)
-    Def 'user'          user for authentication
-    Def 'pass'          password for authentication
+    Def "id"            authentication identifier: "sb", "proxy"
+    Def "type"          OPTIONAL type of authentication (for proxy)
+    Def "url"           destination url (for Switchboard login or proxy)
+    Def "user"          user for authentication
+    Def "pass"          password for authentication
 
 
 [ Setup API ]             
 
-* GET <e_url>/api_v1/setup                    Product: ECE
+* GET <e_url>/api_v1/setup                  Client: ECE
 
-    Def 'poi'           proof of identity returned by ECE for Switchboard association
+    Def "poi"           proof of identity returned by ECE for Switchboard association
 
-    e.g.    "jsonpCallback({
-                 'poi' : '<uuid>'
-             })"
+    e.g.    'jsonpCallback({
+                 "poi" : "<uuid>"
+             })'
 
-* GET <e_url>/api_v1/setup                    Product: QIC                                     [[TODO]]
+* POST <e_url>/api_v1/setup                 Client: SECE          
 
-    e.g.    "jsonpCallback({
-                 'server ' : {
-                     'uuid' : '<uuid>',
-                     'external_ip' : '77.88.99.100',
-                     'internal_ip' : '192.168.50.1'
-                     'available_pages' : { 'settings' : '/manage/access/settings/standalone/',      # [...]
-                 }
-             })"
-
-* POST <e_url>/api_v1/setup                   [ Note: SECE only! ]
-
-    Def 'license'       license entered by user to activate SECE
+    Def "license"       license entered by user to activate SECE
 
     e.g.                license=<uuid>
+
+* POST <e_url>/api_v1/setup                 Client: QIC
+
+    Def "clientPort"    Port at which client can be reached - used by Encloud to forward application
+                        open/close requests via Cloud API
+
+    e.g.                clientPort=12345
+
+* GET <e_url>/api_v1/setup                  Client: QIC
+
+    e.g.    'jsonpCallback({
+                 "server" : {
+                     "uuid" : "<uuid>",
+                     "internal_ip" : "192.168.50.1"
+                     "available_pages" : { "settings" : "/manage/access/settings/standalone/",      # [...]
+                 }
+             })'
 
 
 [ Cloud API ]
 
 * POST <e_url>/api_v1/cloud                                                                        [[TODO]]
 
-    Def 'action'        Operation:                  Clients:
+    Def "action"        Operation:                  Clients:
 
-                        'start','stop'              GUI/browser
-                        'syncRoutes'                Switchboard
-                        'open','close'              Switchboard
+                        "start","stop"              GUI/browser
+                        "syncRoutes"                Switchboard
+                        "open","close"              Switchboard
 
     e.g. 1              action=start
     e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
@@ -117,10 +123,10 @@ Upon error, the following two scenarios are possible:
          - LIBENCLOUD_HTTP_STATUS_BADMETHOD
          - LIBENCLOUD_HTTP_STATUS_BADREQUEST
          - LIBENCLOUD_HTTP_STATUS_NOTFOUND
-   - if the failure is at application level, an 'error' field will be                       [[TODO]]
+   - if the failure is at application level, an "error" field will be                       [[TODO]]
      returned in the json message with appropriate description.
 
-     => "jsonpCallback({
-             'error' : 'Some nasty error',
-             'rc' : 123
-         })"
+     => 'jsonpCallback({
+             "error" : "Some nasty error",
+             "rc" : 123
+         })'

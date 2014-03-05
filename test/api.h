@@ -17,8 +17,13 @@ public:
     TestApi ();
 
 signals:
+
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseSupply (const QUuid &uuid);
+#endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+    void portSupply (int);
 #endif
 
 private slots:
@@ -43,6 +48,10 @@ private slots:
 
 #ifdef LIBENCLOUD_MODE_SECE
     void _licenseSent (libencloud::Api::ResultCode rc);
+#endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+    void _portSent (libencloud::Api::ResultCode rc);
 #endif
 
 private:

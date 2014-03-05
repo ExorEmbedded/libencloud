@@ -24,6 +24,8 @@ QicSetup::QicSetup (Config *cfg)
             this, SIGNAL(authRequired(Auth::Id)));
     connect(this, SIGNAL(authSupplied(Auth)),
             &_setupMsg, SLOT(authSupplied(Auth)));
+    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
+            this, SIGNAL(serverConfigSupply(QVariant)));
 }
 
 int QicSetup::start ()
@@ -64,7 +66,8 @@ void QicSetup::_onError (QString msg)
     QState *state = qobject_cast<QState *>(sender());
     int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
 
-    LIBENCLOUD_DBG("state: " << state << ", retrying in " << QString::number(secs) << " seconds");
+    LIBENCLOUD_DBG("state: " << state << ", retrying in " <<
+            QString::number(secs) << " seconds");
 
     QTimer::singleShot(secs * 1000, this, SLOT(_onRetryTimeout()));
     _backoff++;

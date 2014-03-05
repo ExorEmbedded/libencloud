@@ -36,6 +36,14 @@ TestApi::TestApi ()
     connect(&_setupApi, SIGNAL(licenseSent(libencloud::Api::ResultCode)),
                 this, SLOT(_licenseSent(libencloud::Api::ResultCode)));
 #endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+    TEST_MSG("testing QIC API");
+    connect(this, SIGNAL(portSupply(int)),
+                &_setupApi, SLOT(portSupply(int)));
+    connect(&_setupApi, SIGNAL(portSent(libencloud::Api::ResultCode)),
+                this, SLOT(_portSent(libencloud::Api::ResultCode)));
+#endif
 }
 
 void TestApi::run ()
@@ -55,6 +63,10 @@ void TestApi::run ()
 #ifdef LIBENCLOUD_MODE_SECE
     //emit licenseSupply(QUuid("AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE"));
     emit licenseSupply(QUuid("94C97E4B-AB8C-4DD6-B06B-EF3E18ED2D83"));
+#endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+    emit portSupply(12345);
 #endif
 
     qApp->exec();
@@ -91,6 +103,15 @@ void TestApi::_poiReceived (libencloud::Api::ResultCode rc, QUuid uuid)
 
 #ifdef LIBENCLOUD_MODE_SECE
 void TestApi::_licenseSent (libencloud::Api::ResultCode rc)
+{
+    QVERIFY (rc == libencloud::Api::SuccessRc);
+
+    LIBENCLOUD_DBG("rc: " << QString::number(rc));
+}
+#endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+void TestApi::_portSent (libencloud::Api::ResultCode rc)
 {
     QVERIFY (rc == libencloud::Api::SuccessRc);
 

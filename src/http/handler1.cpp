@@ -202,11 +202,58 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
             url.setEncodedQuery((*request.getContent()).toAscii());
 
             if ((val = url.queryItemValue("license")) != "")
+            {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+            else
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
         }
         break;
 #endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+        case LIBENCLOUD_HTTP_METHOD_POST:
+        {
+            QUrl url;
+            QString val;
+
+            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
+                        "application/x-www-form-urlencoded",
+                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+            url.setEncodedQuery((*request.getContent()).toAscii());
+
+            if ((val = url.queryItemValue("clientPort")) != "")
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+            else
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+
+            break;
+        }
+#endif
+
+#ifdef LIBENCLOUD_MODE_QIC
+        case LIBENCLOUD_HTTP_METHOD_GET:
+        {
+            QVariant j = _parent->getServerConfig();
+            bool ok;
+
+            QString content = json::serialize(j, ok);
+            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+
+            response.setContent("jsonpCallback(" + content + ")");
+  
+            break;
+        }
+#endif
+
         case -1:  // make compiler happy
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);

@@ -75,6 +75,19 @@ err:
 }
 #endif
 
+int HttpHandler::setClientPort (int port)
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (port < 0 || port > 65536);
+
+    emit clientPortSend(port);
+
+    return 0;
+err:
+    return ~0;
+}
+
 int HttpHandler::setAuth (const Auth &auth)
 {
     LIBENCLOUD_TRACE;
@@ -96,6 +109,11 @@ int HttpHandler::setAuth (const Auth &auth)
     return 0;
 err:
     return ~0;
+}
+
+const QVariant &HttpHandler::getServerConfig () const
+{
+    return _serverConfig;
 }
 
 // JSONP support (bypass same-origin policy)
@@ -169,6 +187,13 @@ void HttpHandler::_needReceived (const QString &what)
 
     if (!_needs.contains(what))
         _needs.append(what);
+}
+
+void HttpHandler::_serverConfigReceived (const QVariant &config)
+{
+    LIBENCLOUD_DBG("config: " << config);
+
+    _serverConfig = config;
 }
 
 //

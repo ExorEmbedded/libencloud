@@ -151,6 +151,13 @@ int Core::attachServer (HttpServer *server)
             _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
 
+#ifdef LIBENCLOUD_MODE_QIC
+    connect(obj, SIGNAL(clientPortSend(int)), 
+            this, SLOT(_clientPortReceived(int)));
+    connect(this, SIGNAL(serverConfigSupply(QVariant)), 
+            obj, SLOT(_serverConfigReceived(QVariant)));
+#endif
+
     // when auth is supplied, it is forwarded to all modules, while
     // authentication requests are reemitted in _authRequired as need signals
     // for handler
@@ -269,6 +276,21 @@ err:
     return;
 }
 
+void Core::_clientPortReceived (int port)
+{
+    QString sp = QString::number(port);
+
+    LIBENCLOUD_DBG ("port: " << sp);
+
+    _cfg->settings->setValue("clientPort", sp);
+    _cfg->settings->sync();
+
+    LIBENCLOUD_ERR_MSG_IF (_cfg->settings->status() != QSettings::NoError, 
+            "could not write configuration to file - check permissions!");
+err:
+    return;
+}
+
 //
 // private methods
 // 
@@ -323,6 +345,10 @@ int Core::_initSetup ()
     // need message signal forwarding
     connect(_setupObj, SIGNAL(need(QString)), 
             this, SIGNAL(need(QString)));
+
+    // server configuration forwarding
+    connect(_setupObj, SIGNAL(serverConfigSupply(QVariant)), 
+            this, SIGNAL(serverConfigSupply(QVariant)));
 
     // setup completion handling
     connect(_setupObj, SIGNAL(completed()), 
