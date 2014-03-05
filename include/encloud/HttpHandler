@@ -47,7 +47,8 @@ public:
     void removeNeed (const QString &what);
 
 #ifdef LIBENCLOUD_MODE_ECE
-    QUuid getPoi () const;
+    const QUuid &getPoi () const;
+    int setPoi (const QUuid &uuid);
 #endif
 
 #ifdef LIBENCLOUD_MODE_SECE
@@ -69,16 +70,12 @@ private slots:
 private:
     HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
 
-    ApiHandler *api;
-
     QString _coreError;
     State _coreState;
     Progress _coreProgress;
     QStringList _needs;
 
-#ifdef LIBENCLOUD_MODE_ECE
     QUuid _poi;
-#endif
 };
 
 }  // namespace libencloud

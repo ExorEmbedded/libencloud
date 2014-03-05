@@ -154,7 +154,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
         }
         break;
 #endif
-        case true:  // make compiler happy
+        case -1:  // make compiler happy
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }
@@ -175,13 +175,19 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 
 #ifdef LIBENCLOUD_MODE_ECE
         case LIBENCLOUD_HTTP_METHOD_GET:
+        {
+            QVariantMap j;
+            bool ok;
   
-            response.setContent(
-                    "jsonpCallback({"\
-                        "'poi' : '" + utils::uuid2String(_parent->getPoi()) +  "'"\
-                    "})");
+            j["poi"] = utils::uuid2String(_parent->getPoi());
+
+            QString content = json::serialize(j, ok);
+            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+
+            response.setContent("jsonpCallback(" + content + ")");
   
             break;
+        }
 #endif
 
 #ifdef LIBENCLOUD_MODE_SECE
@@ -201,7 +207,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
         }
         break;
 #endif
-        case true:  // make compiler happy
+        case -1:  // make compiler happy
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }

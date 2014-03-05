@@ -96,12 +96,13 @@ void EceSetup::_stateExited ()
     _error = false;
 }
 
-void EceSetup::_onError (QString msg)
+void EceSetup::_onErrorState ()
 {
     QState *state = qobject_cast<QState *>(sender());
     int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
 
-    LIBENCLOUD_DBG("state: " << state << ", retrying in " << QString::number(secs) << " seconds");
+    LIBENCLOUD_DBG("state: " << state << 
+            ", retrying in " << QString::number(secs) << " seconds");
 
     _error = true;
 
@@ -109,8 +110,6 @@ void EceSetup::_onError (QString msg)
     _backoff++;
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);
-
-    emit error(msg);
 }
 
 void EceSetup::_onRetryTimeout ()
@@ -137,9 +136,10 @@ int EceSetup::_initFsm ()
     LIBENCLOUD_DBG("retrConfState: " << _retrConfState);
 
     // failures result in retry of previous state (with backoff)
-    connect(_errorState, SIGNAL(entered()), this, SLOT(_onError()));
+    connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
     _initMsg(_retrInfoMsg);
+    connect(&_retrInfoMsg, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
     // only SECE needs license, which is received via setup module
 #ifdef LIBENCLOUD_MODE_SECE
@@ -152,6 +152,7 @@ int EceSetup::_initFsm ()
     _retrInfoState->addTransition(&_retrInfoMsg, SIGNAL(processed()), _retrCertState);
 
     _initMsg(_retrCertMsg);
+    connect(&_retrCertMsg, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(_retrCertState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrCertState, SIGNAL(entered()), &_retrCertMsg, SLOT(process()));
     connect(_retrCertState, SIGNAL(exited()), this, SLOT(_stateExited()));
@@ -159,6 +160,7 @@ int EceSetup::_initFsm ()
     _retrCertState->addTransition(&_retrCertMsg, SIGNAL(processed()), _retrConfState);
 
     _initMsg(_retrConfMsg);
+    connect(&_retrConfMsg, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(_retrConfState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrConfState, SIGNAL(entered()), &_retrConfMsg, SLOT(process()));
     connect(_retrConfState, SIGNAL(exited()), this, SLOT(_stateExited()));

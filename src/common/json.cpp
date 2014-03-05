@@ -31,5 +31,23 @@ err:
     return json;
 }
 
+QVariant parseJsonp (const QString &str, bool &ok)
+{
+    QRegExp jsonpRx("\\w+\\((.*)\\)");
+    QString json;
+
+    jsonpRx.indexIn(str);
+
+    LIBENCLOUD_ERR_IF (jsonpRx.captureCount() != 1);
+
+    json = jsonpRx.cap(1);
+
+    return libencloud::json::parse(json, ok);
+
+err:
+    ok = false;
+    return QVariant();
+}
+
 } // namespace json
 } // namespace libencloud

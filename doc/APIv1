@@ -80,7 +80,7 @@
                      'uuid' : '<uuid>',
                      'external_ip' : '77.88.99.100',
                      'internal_ip' : '192.168.50.1'
-                     'available_pages' : { 'settings' : '/manage/accecess/settings/standalone/',      # [...]
+                     'available_pages' : { 'settings' : '/manage/access/settings/standalone/',      # [...]
                  }
              })"
 

@@ -1,28 +1,15 @@
 #ifndef _LIBENCLOUD_API_COMMON_H_
 #define _LIBENCLOUD_API_COMMON_H_
 
+#include <QMap>
 #include <QObject>
 #include <QSettings>
+#include <QSslConfiguration>
 #include <QTimer>
+#include <QUrl>
+#include <encloud/Client>
 #include <encloud/Common>
 #include <encloud/HttpServer>
-
-//
-// defaults
-//
-#define LIBENCLOUD_API_SCHEME       "http://"
-#define LIBENCLOUD_API_HOST         "localhost"
-#define LIBENCLOUD_API_PORT         LIBENCLOUD_SRV_PORT_DFT
-
-//
-// API definitions
-//
-#define LIBENCLOUD_API_VERSION      "1"
-#define LIBENCLOUD_API_PREFIX_PATH  "/api_v" LIBENCLOUD_API_VERSION
-#define LIBENCLOUD_API_STATUS_PATH  LIBENCLOUD_API_PREFIX_PATH"/status"
-#define LIBENCLOUD_API_AUTH_PATH    LIBENCLOUD_API_PREFIX_PATH"/auth"
-#define LIBENCLOUD_API_SETUP_API    LIBENCLOUD_API_PREFIX_PATH"/setup"
-#define LIBENCLOUD_API_CLOUD_API    LIBENCLOUD_API_PREFIX_PATH"/cloud"
 
 namespace libencloud {
 
@@ -62,7 +49,11 @@ protected:
     static QSettings *_settings;
     QTimer _settingsTimer;
     QString _host;
-    int _port;
+    Client _client;
+    QUrl _url;
+    QUrl _params;
+    QMap<QByteArray, QByteArray> _headers;
+    QSslConfiguration _config;
 };
 
 }  // namespace libencloud

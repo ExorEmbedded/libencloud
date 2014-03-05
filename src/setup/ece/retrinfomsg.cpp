@@ -78,7 +78,9 @@ void RetrInfoMsg::_clientComplete (const QString &response)
     // stop listening to signals from client
     disconnect(_client, 0, this, 0);
 
-    EMIT_ERROR_ERR_IF (_decodeResponse(response));
+    // signals emitted internally
+    LIBENCLOUD_ERR_IF (_decodeResponse(response));
+
     EMIT_ERROR_ERR_IF (_unpackResponse());
 
     emit processed();
@@ -88,7 +90,7 @@ err:
 
 //
 // private methods
-// 
+//
 
 int RetrInfoMsg::_packRequest ()
 {
@@ -111,7 +113,7 @@ int RetrInfoMsg::_encodeRequest (QUrl &url, QUrl &params)
     url.setPath(LIBENCLOUD_CMD_GETINFO);
 
 #ifdef LIBENCLOUD_MODE_SECE
-    params.addQueryItem("lic", _license.toString().remove('{').remove('}'));
+    params.addQueryItem("lic", utils::uuid2String(_license));
     params.addQueryItem("hw_info", _hwInfo);
 #else
     LIBENCLOUD_UNUSED(params);
@@ -126,7 +128,7 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     QString errString;
 
     QVariantMap jo = json::parse(response, ok).toMap();
-    LIBENCLOUD_ERR_IF (!ok || jo.isEmpty());
+    EMIT_ERROR_ERR_IF (!ok || jo.isEmpty());
 
     // <TEST> failure
 #if 0
@@ -136,23 +138,23 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     errString = jo["error"].toString();
     if (!errString.isEmpty())
     {
-        LIBENCLOUD_DBG ("SB error: " << errString);
+        LIBENCLOUD_EMIT (error("SB error: " + errString));
         goto err;
     }
 
     _time = utils::pytime2DateTime(jo["time"].toString());
-    LIBENCLOUD_ERR_IF (!_time.isValid());
+    EMIT_ERROR_ERR_IF (!_time.isValid());
 
     _valid = jo["valid"].toBool();
 
     _expiry = utils::pytime2DateTime(jo["expiry"].toString());
-    LIBENCLOUD_ERR_IF (!_expiry.isValid());
+    EMIT_ERROR_ERR_IF (!_expiry.isValid());
 
     _csrTmpl = jo["csr_template"];
-    LIBENCLOUD_ERR_IF (_csrTmpl.isNull());
+    EMIT_ERROR_ERR_IF (_csrTmpl.isNull());
 
     _caCert = QSslCertificate(jo["ca_cert"].toString().toAscii());
-    LIBENCLOUD_ERR_IF (!_caCert.isValid());
+    EMIT_ERROR_ERR_IF (!_caCert.isValid());
 
     return 0;
 err:

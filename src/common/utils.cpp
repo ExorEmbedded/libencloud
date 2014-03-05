@@ -75,7 +75,7 @@ err:
 
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 {
-    return uuid.toString().remove('{').remove('}');
+    return uuid.toString().remove('{').remove('}').toUpper();
 }
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)

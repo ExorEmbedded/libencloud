@@ -61,10 +61,12 @@ signals:
     //
     // core -> setup -> internal
     //
+    void authSupplied (const Auth &auth);  
+
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (const QUuid &uuid);
 #endif
-   
+
     //
     // internals
     // 
@@ -73,7 +75,7 @@ signals:
 private slots:
     void _stateEntered ();
     void _stateExited ();
-    void _onError (QString msg = "");
+    void _onErrorState ();
     void _onRetryTimeout ();
 
 private:

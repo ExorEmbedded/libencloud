@@ -1,4 +1,6 @@
 #include <encloud/Json>
+#include <common/common.h>
+#include <common/config.h>
 #include "qtjson.h"
 
 /**

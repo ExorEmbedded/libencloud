@@ -42,7 +42,20 @@ void HttpHandler::removeNeed (const QString &what)
 }
 
 #ifdef LIBENCLOUD_MODE_ECE
-QUuid HttpHandler::getPoi  () const             { return _poi; }
+const QUuid &HttpHandler::getPoi  () const             { return _poi; }
+#endif
+
+#ifdef LIBENCLOUD_MODE_ECE
+int HttpHandler::setPoi (const QUuid &uuid)
+{
+    LIBENCLOUD_ERR_IF (uuid.isNull());
+
+    _poi = uuid;
+
+    return 0;
+err:
+    return ~0;
+}
 #endif
 
 #ifdef LIBENCLOUD_MODE_SECE

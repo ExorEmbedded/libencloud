@@ -93,7 +93,7 @@ int RetrCertMsg::_encodeRequest (QUrl &url, QUrl &params)
     url.setPath(LIBENCLOUD_CMD_GETCERT);
 
 #ifdef LIBENCLOUD_MODE_SECE
-    params.addQueryItem("lic", _license.toString().remove('{').remove('}'));
+    params.addQueryItem("lic", utils::uuid2String(_license));
     params.addQueryItem("hw_info", _hwInfo);
 #endif
 

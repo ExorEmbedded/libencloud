@@ -13,5 +13,5 @@
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - backoff: support cancellation
 - deps: qjson build
-- test: ece, sece, qic, proxy
+- test: ece (SB missing cert type/label management?), sece, qic, proxy
 - other: pimpl-based private interface hiding

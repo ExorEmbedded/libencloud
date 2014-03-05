@@ -1,12 +1,23 @@
 include(../common.pri)
 
 TEMPLATE = app
+
+CONFIG += gui
 CONFIG += console
+CONFIG += qtestlib
+
 TARGET = test
 
 SOURCES += main.cpp
+
+SOURCES += api.cpp
+HEADERS += api.h
+
 SOURCES += json.cpp
+HEADERS += json.h
+
 SOURCES += crypto.cpp
+
 #SOURCES += libencloud.cpp
 
 HEADERS += test.h

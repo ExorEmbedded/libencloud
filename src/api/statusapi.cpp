@@ -3,6 +3,7 @@
 #include <encloud/Api/Status>
 #include <common/common.h>
 #include <common/config.h>
+#include <api/api.h>
 
 namespace libencloud {
 
@@ -18,9 +19,10 @@ StatusApi::StatusApi ()
 
     connect(&_pollTimer, SIGNAL(timeout()), this, SLOT(_pollTimeout()));
 
-    _client.setDebug(false);
     connect(&_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+
+    _url.setPath(LIBENCLOUD_API_STATUS_PATH);
 }
 
 StatusApi::~StatusApi ()
@@ -37,6 +39,7 @@ void StatusApi::start (int interval)
     // trigger a first request immediately
     _pollTimeout();
 
+    // then start periodic poll timer
     _pollTimer.start(interval);
 }
 
@@ -53,34 +56,17 @@ void StatusApi::stop ()
 
 void StatusApi::_pollTimeout ()
 {
-    //LIBENCLOUD_TRACE;
-
-    QUrl url(QString(LIBENCLOUD_API_SCHEME) + _host +
-            QString(':') + QString::number(_port));
-    QUrl params;
-    QMap<QByteArray, QByteArray> headers;
-    QSslConfiguration config;
-
-    url.setPath(LIBENCLOUD_API_STATUS_PATH);
-
-    _client.run(url, params, headers, config);
+    _client.run(_url, _params, _headers, _config);
 }
 
 void StatusApi::_clientComplete (const QString &response)
 {
     bool ok;
-    QRegExp jsonpRx("\\w+\\((.*)\\)");
-    QString json;
     QVariantMap jo;
-
-    jsonpRx.indexIn(response);
-
-    LIBENCLOUD_ERR_IF (jsonpRx.captureCount() != 1);
-    json = jsonpRx.cap(1);
 
 //    LIBENCLOUD_DBG("response: " << json);
 
-    jo = json::parse(json, ok).toMap();
+    jo = json::parseJsonp(response, ok).toMap();
     LIBENCLOUD_ERR_IF (!ok);
 
     if (!jo["state"].isNull())

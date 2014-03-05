@@ -2,6 +2,9 @@
 #define _LIBENCLOUD_API_SETUP_H_
 
 #include <QObject>
+#include <QUuid>
+#include <encloud/Common>
+#include <encloud/Api/Common>
 
 /**
  * Qt helper to interact with Encloud's HTTP Setup API.
@@ -11,7 +14,7 @@
 
 namespace libencloud {
 
-class LIBENCLOUD_DLLSPEC SetupApi : public QObject
+class LIBENCLOUD_DLLSPEC SetupApi : public Api
 {
     Q_OBJECT
 
@@ -20,9 +23,50 @@ public:
     SetupApi ();
     ~SetupApi ();
 
-    QUuid getPoi ();
 
-    void licenseSend ();
+public slots:
+
+    //
+    // ECE-only
+    //
+    void poiRetrieve ();
+
+    //
+    // SECE-only
+    //
+    void licenseSupply (const QUuid &uuid);
+
+signals:
+
+    //
+    // ECE-only
+    //
+    void poiReceived (libencloud::Api::ResultCode rc, QUuid poi = QUuid());
+
+    //
+    // SECE-only
+    //
+
+    // Note: success only indicates correct message delivery
+    // Status API must be checked for further license "needs"
+    void licenseSent (libencloud::Api::ResultCode rc);
+
+protected slots:
+
+    void _error (const QString &err);
+    void _clientComplete (const QString &response);
+
+protected:
+
+    typedef enum 
+    {
+        NoneType,
+        PoiRetrieveType,
+        LicenseSupplyType
+    }
+    MsgType; 
+
+    MsgType _msgType;
 };
 
 }  // namespace libencloud

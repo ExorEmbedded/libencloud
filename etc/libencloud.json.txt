@@ -11,7 +11,6 @@ libencloud configuration
   "bind" : "all",                               # bind to all interfaces (testing)
                                                 # otherwise binds only to localhost and tap interface
 
-  "serial" : "serial",                          # serial number (ECE only)
   "poi" : "poi",                                # Proof of Identity (ECE only)
 
   "sb" : {                                      # global SB settings 

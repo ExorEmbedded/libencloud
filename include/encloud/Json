@@ -8,12 +8,19 @@
 namespace libencloud {
 namespace json {
 
+    //
     // implementation-specific interfaces (defined in json-xxx.cpp)
+    //
     LIBENCLOUD_DLLSPEC QVariant parse (const QString &str, bool &ok);
     LIBENCLOUD_DLLSPEC QString serialize (const QVariant &json, bool &ok);
 
+    //
     // generic helpers (defined in json.cpp)
+    //
     LIBENCLOUD_DLLSPEC QVariant parseFromFile (const QString &filename, bool &ok);
+
+    // Json wrapped in a Javascript function (JSONP)
+    LIBENCLOUD_DLLSPEC QVariant parseJsonp (const QString &str, bool &ok);
 
 } // namespace json
 } // namespace libencloud

@@ -31,8 +31,7 @@ typedef struct
 {
     QString bind;
 
-#ifndef LIBENCLOUD_MODE_SECE
-    QFileInfo serialPath;
+#ifdef LIBENCLOUD_MODE_ECE
     QFileInfo poiPath;
 #endif
     

@@ -64,7 +64,6 @@ protected:
     int _parseNeed (QVariant v);
 
     QTimer _pollTimer;
-    Client _client;
 
     // API context
     State _state;

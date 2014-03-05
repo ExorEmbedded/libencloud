@@ -4,6 +4,7 @@
 #include <encloud/Core>
 #include <encloud/Progress>
 #include <encloud/HttpServer>
+#include <encloud/HttpHandler>
 #include <common/config.h>
 #include <common/crypto.h>
 #include <common/utils.h>
@@ -103,6 +104,7 @@ Config *Core::getConfig () const
 int Core::attachServer (HttpServer *server)
 {
     QObject *obj;
+    HttpHandler *handler;
 
     LIBENCLOUD_ERR_IF (server == NULL);
 
@@ -118,11 +120,22 @@ int Core::attachServer (HttpServer *server)
             obj, SLOT(vpnIpAssigned(QString)));
 #endif
 
+    handler = dynamic_cast<HttpHandler *> (server->getHandler());
+    LIBENCLOUD_ERR_IF (handler == NULL);
+
+    //
+    // handler setup
+    // 
+
+#ifdef LIBENCLOUD_MODE_ECE
+    LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
+#endif
+
     //
     // handler connections
     // 
 
-    obj = dynamic_cast<QObject *> (server->getHandler());
+    obj = dynamic_cast<QObject *> (handler);
 
     connect(this, SIGNAL(error(QString)), 
             obj, SLOT(_coreErrorReceived(QString)));

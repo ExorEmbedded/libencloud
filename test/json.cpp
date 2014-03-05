@@ -1,50 +1,41 @@
 #include <encloud/Json>
 #include "test.h"
+#include "json.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int test_json ()
+void TestJson::run ()
 {
-    bool ok;
-    QString sin, sout;
-    QVariant json;
-    QVariantMap jm;
-
     TEST_TRACE;
 
     // simple test
-    sin = "{ \"teststr\" : \"mystr\", \"testint\" : 123 }";
-    json = libencloud::json::parse(sin, ok);
-    jm = json.toMap();
-
-    TEST_ZERO (strcmp(qPrintable(jm["teststr"].toString()), "mystr"));
-    TEST_EQUALS (jm["testint"].toInt(), 123);
-
-    sout = libencloud::json::serialize(json, ok);
-
-    LIBENCLOUD_DBG("sin: " << sin);
-    LIBENCLOUD_DBG("sout: " << sout);
+    test("{ \"teststr\" : \"mystr\", \"testint\" : 123 }", false);
 
     // with newlines and tabs
-    sin = "\n{\n\t\"teststr\":\t\"mystr\",\n\t\"testint\":\t123\n}\n";
-    json = libencloud::json::parse(sin, ok);
+    test("\n{\n\t\"teststr\":\t\"mystr\",\n\t\"testint\":\t123\n}\n", false);
 
-    TEST_ZERO (strcmp(qPrintable(jm["teststr"].toString()), "mystr"));
-    TEST_EQUALS (jm["testint"].toInt(), 123);
+    // JSONP
+    test("jsonpCallback({ \"teststr\" : \"mystr\", \"testint\" : 123 })", true);
+}
+
+void TestJson::test (const QString &s, bool jsonp)
+{
+    bool ok;
+    QString sout;
+    QVariant json;
+
+    if (jsonp)
+        json = libencloud::json::parseJsonp(s, ok);
+    else
+        json = libencloud::json::parse(s, ok);
+    QVERIFY (ok);
 
     sout = libencloud::json::serialize(json, ok);
+    QVERIFY (ok);
 
-    LIBENCLOUD_DBG("sin: " << sin);
-    LIBENCLOUD_DBG("sout: " << sout);
+    LIBENCLOUD_DBG ("in: " << s);
+    LIBENCLOUD_DBG ("out: " << sout);
 
-    return 0;
-
+    // generic comparision is difficult due to random reordering
+    //QVERIFY(sout == s);  
 err:
-    return ~0;
-}
-
-#ifdef __cplusplus
-}
-#endif
+    return;
+};

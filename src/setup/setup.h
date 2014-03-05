@@ -43,8 +43,7 @@ signals:
     // core -> setup -> internal
     //
 
-    // OPTIONAL
-    void authSupplied (const Auth &auth); 
+    virtual void authSupplied (const Auth &auth) = 0; 
 
 #ifdef LIBENCLOUD_MODE_SECE
     virtual void licenseForward (const QUuid &uuid) = 0;

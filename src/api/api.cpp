@@ -1,6 +1,7 @@
 #include <encloud/Api/Common>
 #include <common/common.h>
 #include <common/config.h>
+#include <api/api.h>
 
 #define LIBENCLOUD_API_SETTINGS_TOUT   1000
 
@@ -13,10 +14,14 @@ QSettings *Api::_settings = NULL;
 //
 
 Api::Api ()
-    : _host(LIBENCLOUD_API_HOST)
-    , _port(LIBENCLOUD_API_PORT)
 {
     LIBENCLOUD_TRACE;
+
+    _url.setScheme(LIBENCLOUD_API_SCHEME);
+    _url.setHost(LIBENCLOUD_API_HOST);
+    _url.setPort(LIBENCLOUD_API_PORT);
+
+    _client.setDebug(false);
 }
 
 Api::~Api ()
@@ -39,6 +44,7 @@ int Api::init ()
     _settingsTimeout();
     connect(&_settingsTimer, SIGNAL(timeout()), this, SLOT(_settingsTimeout()));
 #endif
+    LIBENCLOUD_ERR_IF (0);  // avoid unused label
 
     return 0;
 err:
@@ -52,7 +58,7 @@ void Api::setHost (const QString &host)
 
 void Api::setPort (int port)
 {
-    _port = port;
+    _url.setPort(port);
 }
 
 //
@@ -70,7 +76,7 @@ void Api::_settingsTimeout ()
         LIBENCLOUD_DBG("Settings found");
 
         _settingsTimer.stop();
-        _port = _settings->value("port").toInt();
+        _url.setPort(_settings->value("port").toInt());
         emit gotSettings();
     }
 }

@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_TEST_H_
 #define _LIBENCLOUD_TEST_H_
 
+#include <QtTest>
 #include <stdio.h>
 #include <common/helpers.h>
 #include <common/config.h>
