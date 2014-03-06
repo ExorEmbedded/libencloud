@@ -36,6 +36,4 @@ void TestJson::test (const QString &s, bool jsonp)
 
     // generic comparision is difficult due to random reordering
     //QVERIFY(sout == s);  
-err:
-    return;
 };

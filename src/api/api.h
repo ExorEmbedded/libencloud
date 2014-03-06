@@ -1,12 +1,17 @@
 #ifndef _LIBENCLOUD_PRIV_API_H_
 #define _LIBENCLOUD_PRIV_API_H_
 
+#include <encloud/Common>
+#include <encloud/Server>
+
 //
 // defaults
 //
 #define LIBENCLOUD_API_SCHEME       "http"
 #define LIBENCLOUD_API_HOST         "localhost"
 #define LIBENCLOUD_API_PORT         LIBENCLOUD_SRV_PORT_DFT
+#define LIBENCLOUD_API_URL          LIBENCLOUD_API_SCHEME "://" LIBENCLOUD_API_HOST ":" \
+                                    LIBENCLOUD_MACRO_STR(LIBENCLOUD_API_PORT)
 
 //
 // API definitions

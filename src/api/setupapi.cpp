@@ -16,8 +16,6 @@ SetupApi::SetupApi ()
 
     connect(&_client, SIGNAL(error(QString)), this, SLOT(_error(QString)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
-
-    _url.setPath(LIBENCLOUD_API_SETUP_PATH);
 }
 
 SetupApi::~SetupApi ()
@@ -27,40 +25,64 @@ SetupApi::~SetupApi ()
 
 void SetupApi::poiRetrieve ()
 {
-    _msgType = PoiRetrieveType;
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
 
-    _client.run(_url, _params, _headers, _config);
+    _msgType = PoiRetrieveType;
+
+    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::licenseSupply (const QUuid &uuid)
 {
-    _msgType = LicenseSupplyType;
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
     _params.addQueryItem("license", uuid.toString());
 
-    _client.run(_url, _params, _headers, _config);
+    _msgType = LicenseSupplyType;
+
+    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::portSupply (int port)
 {
-    _msgType = PortSupplyType;
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
     _params.addQueryItem("clientPort", QString::number(port));
 
-    _client.run(_url, _params, _headers, _config);
+    _msgType = PortSupplyType;
+
+    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::configRetrieve ()
 {
-    _msgType = ConfigRetrieveType;
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
 
-    _client.run(_url, _params, _headers, _config);
+    _msgType = ConfigRetrieveType;
+
+    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::_error (const QString &err)
@@ -88,8 +110,6 @@ void SetupApi::_error (const QString &err)
 
 void SetupApi::_clientComplete (const QString &response)
 {
-    LIBENCLOUD_DBG("response: " << response);
-
     switch (_msgType)
     {
         case PoiRetrieveType:

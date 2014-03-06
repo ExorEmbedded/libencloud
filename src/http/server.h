@@ -3,7 +3,7 @@
 
 #include <QTcpServer>
 #include <encloud/HttpAbstractHandler>
-#include <encloud/HttpServer>
+#include <encloud/Server>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -16,19 +16,22 @@ typedef struct
 } 
 http_context_t;
 
-class HttpServerPriv : public QTcpServer
+class HttpServer : public QTcpServer
 {
     Q_OBJECT
 
 public:
-    HttpServerPriv (HttpServer *server);
-    ~HttpServerPriv ();
+    HttpServer (QObject *parent, Server *server);
+    ~HttpServer ();
 
     int setHandler (HttpAbstractHandler *handler);
 
     int start (const QHostAddress &address = QHostAddress::Any, 
             quint16 port = 0);
     int stop ();
+
+signals:
+    void portBound (int port);
 
 protected:
     void incomingConnection (int sd);
@@ -42,7 +45,7 @@ private:
     QByteArray handleMessage (QByteArray message);
     QVariant handleJson (QVariant json);
 
-    HttpServer *_server;
+    Server *_server;
     QMap<QTcpSocket *, http_context_t> _contexts;
     HttpAbstractHandler *_handler;
 };

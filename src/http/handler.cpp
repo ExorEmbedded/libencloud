@@ -90,7 +90,7 @@ err:
 
 int HttpHandler::setAuth (const Auth &auth)
 {
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("auth user: " << auth.getUser());
 
     switch (auth.getId())
     {
@@ -114,6 +114,15 @@ err:
 const QVariant &HttpHandler::getServerConfig () const
 {
     return _serverConfig;
+}
+
+int HttpHandler::setAction (const QString &action, const Params &params)
+{
+    LIBENCLOUD_DBG("action: " << action << ", params: " << params);
+
+    emit actionRequest(action, params);
+
+    return 0;
 }
 
 // JSONP support (bypass same-origin policy)

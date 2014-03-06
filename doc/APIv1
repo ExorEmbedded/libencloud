@@ -99,7 +99,7 @@
 
 [ Cloud API ]
 
-* POST <e_url>/api_v1/cloud                                                                        [[TODO]]
+* POST <e_url>/api_v1/cloud
 
     Def "action"        Operation:                  Clients:
 
@@ -107,8 +107,13 @@
                         "syncRoutes"                Switchboard
                         "open","close"              Switchboard
 
+    client -> encloud:
+
     e.g. 1              action=start
     e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
+
+    encloud -> gui (QIC):
+
     e.g. 3              action=open&prog=myRdpApp&endpoint=myEndpoint&path=
                             /%HOME_PATH%/to/File&args=%DEVICE_IP%20param2
     e.g. 4              action=close&prog=myRdpApp&endpoint=myEndpoint

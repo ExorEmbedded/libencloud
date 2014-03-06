@@ -6,6 +6,7 @@
 #include <QUuid>
 #include <encloud/Api/Common>
 #include <encloud/Api/Auth>
+#include <encloud/Api/Cloud>
 #include <encloud/Api/Setup>
 #include <encloud/Api/Status>
 
@@ -18,6 +19,10 @@ public:
 
 signals:
 
+    //
+    // Setup Api
+    //
+
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseSupply (const QUuid &uuid);
 #endif
@@ -25,6 +30,12 @@ signals:
 #ifdef LIBENCLOUD_MODE_QIC
     void portSupply (int);
 #endif
+
+    //
+    // Cloud Api
+    //
+
+    void actionRequest (const QString &action, const libencloud::Params &params);
 
 private slots:
     void run();
@@ -54,9 +65,12 @@ private slots:
     void _portSent (libencloud::Api::ResultCode rc);
 #endif
 
+    void _actionSent (libencloud::Api::ResultCode rc);
+
 private:
     libencloud::StatusApi _statusApi;
     libencloud::SetupApi _setupApi;
+    libencloud::CloudApi _cloudApi;
 };
 
 #endif

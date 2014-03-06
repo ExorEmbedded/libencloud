@@ -3,8 +3,6 @@
 #include <encloud/Info>
 #include <encloud/Core>
 #include <encloud/Progress>
-#include <encloud/HttpServer>
-#include <encloud/HttpHandler>
 #include <common/config.h>
 #include <common/crypto.h>
 #include <common/utils.h>
@@ -30,6 +28,7 @@ Core::Core ()
     , _cloudObj(NULL)
     , _setupState(&_setupSt)
     , _cloudState(&_cloudSt)
+    , _clientPort(-1)
 {
     LIBENCLOUD_TRACE;
 
@@ -101,7 +100,7 @@ Config *Core::getConfig () const
     return _cfg;
 }
 
-int Core::attachServer (HttpServer *server)
+int Core::attachServer (Server *server)
 {
     QObject *obj;
     HttpHandler *handler;
@@ -173,6 +172,9 @@ int Core::attachServer (HttpServer *server)
     connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
            this, SLOT(_authRequired(Auth::Id)));
 #endif
+
+    connect(obj, SIGNAL(actionRequest(QString, Params)), 
+            this, SLOT(_actionRequest(QString, Params)));
 
     // attach core configuration
     server->_cfg = _cfg;
@@ -282,11 +284,41 @@ void Core::_clientPortReceived (int port)
 
     LIBENCLOUD_DBG ("port: " << sp);
 
+    /*
+    If we ever need this to be persistent:
+
     _cfg->settings->setValue("clientPort", sp);
     _cfg->settings->sync();
 
     LIBENCLOUD_ERR_MSG_IF (_cfg->settings->status() != QSettings::NoError, 
             "could not write configuration to file - check permissions!");
+    */
+
+    _clientPort = port;
+}
+
+void Core::_actionRequest (const QString &action, const Params &params)
+{
+    LIBENCLOUD_DBG ("action: " << action << ", params: " << params);
+    
+    if (action == "start")
+        start();
+    else if (action == "stop")
+        stop();
+    else if (action == "syncRoutes")
+        ;  // TODO => core/net
+    else if (action == "open" || 
+            action == "close")
+    {
+        // by now we whould have received port setting from client
+        LIBENCLOUD_ERR_IF (_clientPort == -1);
+
+        _cloudApi.setPort(_clientPort);
+        emit actionRequest(action, Params());  // => _cloudApi TESTME
+    }
+    else 
+        emit error(tr("Invalid action: ") + action);
+
 err:
     return;
 }
@@ -388,6 +420,17 @@ int Core::_initCloud ()
     return 0;
 err:
     return ~0;
+}
+
+// The Cloud API client is used to forward actions to GUI
+int Core::_initApi ()
+{
+    LIBENCLOUD_TRACE;
+
+    connect(this, SIGNAL(actionRequest(QString, libencloud::Params)), 
+            &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+
+    return 0;
 }
 
 int Core::_initFsm ()

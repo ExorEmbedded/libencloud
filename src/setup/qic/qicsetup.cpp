@@ -1,3 +1,4 @@
+#define LIBENCLOUD_DISABLE_TRACE  // disable heavy tracing
 #include <QTimer>
 #include <common/common.h>
 #include <common/config.h>

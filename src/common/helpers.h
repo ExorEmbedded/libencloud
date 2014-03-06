@@ -49,7 +49,7 @@
   #define LIBENCLOUD_ERR_RC_IF(cond, retcode) do { if (cond) { rc = retcode; goto err; } } while (0)
   #define LIBENCLOUD_ERR_MSG_IF(cond, msg) LIBENCLOUD_ERR_IF(cond)
 #else
-  #if (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_ERR)
+  #if ((LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_ERR) && !defined(LIBENCLOUD_DISABLE_TRACE))
     #define LIBENCLOUD_TRACE __LIBENCLOUD_MSG(LIBENCLOUD_LOG_DEBUG, "trace", "")
   #else
     #define LIBENCLOUD_TRACE LIBENCLOUD_NOP

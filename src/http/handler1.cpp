@@ -266,18 +266,45 @@ err:
     return ~0;
 }
 
-// TODO
 int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &response)
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_UNUSED(request);
-    LIBENCLOUD_UNUSED(response);
+    switch (httpMethodFromString(request.getMethod()))
+    {
+        case LIBENCLOUD_HTTP_METHOD_POST:
+        {
+            QUrl url;
+            QString val;
+
+            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
+                        "application/x-www-form-urlencoded",
+                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+            url.setEncodedQuery((*request.getContent()).toAscii());
+
+            if ((val = url.queryItemValue("action")) != "")
+            {
+                url.removeQueryItem("action");
+
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setAction(val, url.queryItems()),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+            else
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+
+            break;
+        }
+        default:
+            LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+    }
 
     // only reach here upon success
     LIBENCLOUD_HANDLER_OK;
-
     return 0;
+err:
+    return ~0;
 }
 
 }  // namespace libencloud

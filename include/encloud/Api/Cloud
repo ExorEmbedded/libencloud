@@ -1,0 +1,43 @@
+#ifndef _LIBENCLOUD_API_CLOUD_H_
+#define _LIBENCLOUD_API_CLOUD_H_
+
+#include <QObject>
+#include <encloud/Common>
+#include <encloud/Api/Common>
+
+/**
+ * Qt helper to interact with Encloud's HTTP Cloud API.
+ * 
+ * Please refer to doc/APIv* for details.
+ */
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC CloudApi : public Api
+{
+    Q_OBJECT
+
+public:
+
+    CloudApi ();
+    ~CloudApi ();
+
+public slots:
+
+    void actionRequest (const QString &action, const libencloud::Params &params);
+
+signals:
+    // Note: success only indicates correct message delivery
+    // Status API must be checked for failures
+    void actionSent (libencloud::Api::ResultCode rc);
+
+protected slots:
+
+    void _error (const QString &err);
+    void _clientComplete (const QString &response);
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_API_CLOUD_H_
+

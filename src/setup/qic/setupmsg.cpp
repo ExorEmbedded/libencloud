@@ -1,3 +1,4 @@
+#define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
 #include <QVariantMap>
 #include <common/common.h>
 #include <common/config.h>

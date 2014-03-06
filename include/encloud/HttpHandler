@@ -59,6 +59,7 @@ public:
     int setClientPort (int port);
     int setAuth (const Auth &auth);
     const QVariant &getServerConfig () const;
+    int setAction (const QString &action, const Params &params);
 
 signals:
 
@@ -68,6 +69,7 @@ signals:
 
     void clientPortSend (int port);
     void authSupplied (const Auth &auth);
+    void actionRequest (const QString &action, const Params &params);
 
 private slots:
     void _coreErrorReceived (const QString &msg);

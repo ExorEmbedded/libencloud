@@ -34,6 +34,12 @@ public:
     void setHost (const QString &host);
     void setPort (int port);
 
+    //
+    // shared data
+    //
+    static const QSettings *getSettings ();
+    static const QUrl &getUrl ();
+
 signals:
     // QIC-only: other clients won't need to wait for settings (fixed port allocation)
     void gotSettings ();
@@ -46,11 +52,13 @@ protected slots:
     void _settingsTimeout ();
     
 protected:
-    static QSettings *_settings;
+
+    static QSettings *__settings;
+    static QUrl __url;
+
     QTimer _settingsTimer;
     QString _host;
     Client _client;
-    QUrl _url;
     QUrl _params;
     QMap<QByteArray, QByteArray> _headers;
     QSslConfiguration _config;

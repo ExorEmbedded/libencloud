@@ -7,15 +7,16 @@
 #include <QUuid>
 #include <encloud/Common>
 #include <encloud/Auth>
+#include <encloud/Server>
 #include <encloud/State>
 #include <encloud/Progress>
+#include <encloud/Api/Cloud>
 
 namespace libencloud {
 
 class AuthSession;
 class Cloud;
 class Config;
-class HttpServer;
 class SetupInterface;
 
 class LIBENCLOUD_DLLSPEC Core : public QObject
@@ -33,7 +34,7 @@ public:
     int stop ();
 
     Config *getConfig () const;
-    int attachServer (HttpServer *server);
+    int attachServer (Server *server);
 
     // Note: the following signals and slots are for internal usage - clients
     // should use HTTP API for status monitoring and providing data
@@ -45,6 +46,7 @@ signals:
     void need (const QString &what);
     void authSupplied (const Auth &auth);
     void serverConfigSupply (const QVariant &variant);
+    void actionRequest (const QString &action, const Params &params);
 
 private slots:
     void _stateEntered ();
@@ -54,12 +56,14 @@ private slots:
     void _progressReceived (const Progress &p);
     void _authRequired (Auth::Id id);
     void _clientPortReceived (int port);
+    void _actionRequest (const QString &action, const Params &params);
 
 private:
     int _initConfig ();
     int _initCrypto ();
     int _initSetup ();
     int _initCloud ();
+    int _initApi ();
     int _initFsm ();
     int _startCloud ();
     QString _stateStr (QState *state);
@@ -77,6 +81,9 @@ private:
     QState *_previousState;
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
+
+    int _clientPort;
+    CloudApi _cloudApi;
 };
 
 }  // namespace libencloud

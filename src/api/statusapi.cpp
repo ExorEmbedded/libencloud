@@ -21,8 +21,6 @@ StatusApi::StatusApi ()
 
     connect(&_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
-
-    _url.setPath(LIBENCLOUD_API_STATUS_PATH);
 }
 
 StatusApi::~StatusApi ()
@@ -56,7 +54,11 @@ void StatusApi::stop ()
 
 void StatusApi::_pollTimeout ()
 {
-    _client.run(_url, _params, _headers, _config);
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_STATUS_PATH);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void StatusApi::_clientComplete (const QString &response)

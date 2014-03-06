@@ -44,6 +44,12 @@ TestApi::TestApi ()
     connect(&_setupApi, SIGNAL(portSent(libencloud::Api::ResultCode)),
                 this, SLOT(_portSent(libencloud::Api::ResultCode)));
 #endif
+
+    TEST_MSG("testing Cloud API");
+    connect(this, SIGNAL(actionRequest(QString, libencloud::Params)),
+                &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+    connect(&_cloudApi, SIGNAL(actionSent(libencloud::Api::ResultCode)),
+                this, SLOT(_actionSent(libencloud::Api::ResultCode)));
 }
 
 void TestApi::run ()
@@ -53,8 +59,12 @@ void TestApi::run ()
     // run this test for 5s
     QTimer::singleShot(5000, qApp, SLOT(quit()));
 
+    LIBENCLOUD_DBG("Starting Status API");
+
     // default port assumed (don't wait for settings)
     _statusApi.start(1000);
+
+    LIBENCLOUD_DBG("Testing Setup API");
 
 #ifdef LIBENCLOUD_MODE_ECE
     _setupApi.poiRetrieve();
@@ -68,6 +78,14 @@ void TestApi::run ()
 #ifdef LIBENCLOUD_MODE_QIC
     emit portSupply(12345);
 #endif
+
+    LIBENCLOUD_DBG("Testing Cloud API");
+
+    libencloud::Params params;
+    params.append(libencloud::Param("myKey1", "myVal1"));
+    params.append(libencloud::Param("myKey2", "myVal2"));
+
+    emit actionRequest("myAction", params);
 
     qApp->exec();
 }
@@ -118,3 +136,10 @@ void TestApi::_portSent (libencloud::Api::ResultCode rc)
     LIBENCLOUD_DBG("rc: " << QString::number(rc));
 }
 #endif
+
+void TestApi::_actionSent (libencloud::Api::ResultCode rc)
+{
+    QVERIFY (rc == libencloud::Api::SuccessRc);
+
+    LIBENCLOUD_DBG("rc: " << QString::number(rc));
+}
