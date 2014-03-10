@@ -1,8 +1,8 @@
 #include <QByteArray>
+#include <encloud/Http/HttpHeaders>
+#include <encloud/Http/HttpRequest>
 #include <common/common.h>
 #include <common/config.h>
-#include <encloud/HttpHeaders>
-#include <encloud/HttpRequest>
 
 // disable heavy tracing
 #undef LIBENCLOUD_TRACE 

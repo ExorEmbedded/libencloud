@@ -1,6 +1,6 @@
 #include <QDir>
 #include <QRegExp>
-#include <encloud/HttpHandler>
+#include <encloud/Http/HttpHandler>
 #include <common/common.h>
 #include <common/config.h>
 #include <common/utils.h>

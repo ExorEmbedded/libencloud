@@ -1,7 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_HTTP_HANDLER1_H_
 #define _LIBENCLOUD_PRIV_HTTP_HANDLER1_H_
 
-#include <encloud/HttpAbstractHandler>
+#include <encloud/Http/HttpAbstractHandler>
 
 /**
  * Refer to doc/APIv1.

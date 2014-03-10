@@ -2,8 +2,8 @@
 #define _LIBENCLOUD_HTTP_ABSTRACT_HANDLER_H_
 
 #include <encloud/Common>
-#include <encloud/HttpRequest>
-#include <encloud/HttpResponse>
+#include <encloud/Http/HttpRequest>
+#include <encloud/Http/HttpResponse>
 
 namespace libencloud {
 

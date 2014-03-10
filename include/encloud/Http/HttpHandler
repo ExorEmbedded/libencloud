@@ -8,7 +8,7 @@
 #include <QVariant>
 #include <encloud/Auth>
 #include <encloud/Common>
-#include <encloud/HttpAbstractHandler>
+#include <encloud/Http/HttpAbstractHandler>
 #include <encloud/State>
 #include <encloud/Progress>
 

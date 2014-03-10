@@ -1,4 +1,4 @@
-#include <encloud/Http>
+#include <encloud/Http/Http>
 
 namespace libencloud {
 

@@ -1,5 +1,5 @@
 #include <QByteArray>
-#include <encloud/HttpResponse>
+#include <encloud/Http/HttpResponse>
 #include <common/common.h>
 #include <common/config.h>
 

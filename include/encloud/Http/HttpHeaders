@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QStringList>
 #include <encloud/Common>
-#include <encloud/Http>
+#include <encloud/Http/Http>
 
 namespace libencloud {
 

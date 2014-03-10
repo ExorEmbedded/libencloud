@@ -1,9 +1,9 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include <QRegExp>
-#include <encloud/HttpServer>
-#include <encloud/HttpRequest>
-#include <encloud/HttpResponse>
+#include <encloud/Http/HttpServer>
+#include <encloud/Http/HttpRequest>
+#include <encloud/Http/HttpResponse>
 #include <common/common.h>
 #include <common/config.h>
 

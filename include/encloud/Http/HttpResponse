@@ -2,8 +2,8 @@
 #define _LIBENCLOUD_HTTP_RESPONSE_H_
 
 #include <encloud/Common>
-#include <encloud/Http>
-#include <encloud/HttpHeaders>
+#include <encloud/Http/Http>
+#include <encloud/Http/HttpHeaders>
 
 namespace libencloud {
 

@@ -125,13 +125,13 @@ SOURCES += core/core.cpp
 # http sources
 # 
 
-HEADERS += $$SRCBASEDIR/include/encloud/Http
-HEADERS += $$SRCBASEDIR/include/encloud/HttpHandler
-HEADERS += $$SRCBASEDIR/include/encloud/HttpAbstractHandler
-HEADERS += $$SRCBASEDIR/include/encloud/HttpRequest
-HEADERS += $$SRCBASEDIR/include/encloud/HttpResponse
-HEADERS += $$SRCBASEDIR/include/encloud/HttpHeaders
-HEADERS += $$SRCBASEDIR/include/encloud/HttpServer
+HEADERS += $$SRCBASEDIR/include/encloud/Http/Http
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpHandler
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpAbstractHandler
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpRequest
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpResponse
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpHeaders
+HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpServer
 HEADERS += http/*.h
 SOURCES += http/*.cpp
 

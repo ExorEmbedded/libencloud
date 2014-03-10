@@ -6,17 +6,18 @@ HEADERS += encloud/Auth
 HEADERS += encloud/Common
 HEADERS += encloud/Core
 
-HEADERS += encloud/Http
-HEADERS += encloud/HttpAbstractHandler
-HEADERS += encloud/HttpHandler
-HEADERS += encloud/HttpHeaders
-HEADERS += encloud/HttpRequest
-HEADERS += encloud/HttpResponse
-HEADERS += encloud/HttpServer
+HEADERS += encloud/Http/Http
+HEADERS += encloud/Http/HttpAbstractHandler
+HEADERS += encloud/Http/HttpHandler
+HEADERS += encloud/Http/HttpHeaders
+HEADERS += encloud/Http/HttpRequest
+HEADERS += encloud/Http/HttpResponse
+HEADERS += encloud/Http/HttpServer
 
 HEADERS += encloud/Info
 HEADERS += encloud/Logger
 HEADERS += encloud/Progress
+HEADERS += encloud/Server
 HEADERS += encloud/State
 
 HEADERS += encloud/Api/AuthApi

@@ -1,5 +1,5 @@
-#include <encloud/Http>
-#include <encloud/HttpHeaders>
+#include <encloud/Http/Http>
+#include <encloud/Http/HttpHeaders>
 #include <common/common.h>
 #include <common/config.h>
 

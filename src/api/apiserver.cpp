@@ -1,6 +1,6 @@
 #include <encloud/Core>
 #include <encloud/Common>
-#include <encloud/HttpServer>
+#include <encloud/Http/HttpServer>
 #include <encloud/Server>
 #include <common/common.h>
 #include <common/config.h>
