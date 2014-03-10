@@ -20,7 +20,7 @@
 
 [ Switchboard Setup Notification ]
 
-* POST <sb_url>/manage/commands/commands.access.cloud.setup
+* POST <sb_url>/manage/commands/commands.access.cloud.setup                 [[TODO]]
 
     e.g. 1      port=1234
 
@@ -39,7 +39,7 @@
     e.g.    'jsonpCallback({
                 "state" : 1,                    # string representation of state
                 "error" : "Some error",         # OPTIONAL: defined if state == 1 (StateError)
-                "progress" {
+                "progress" {                    # OPTIONAL
                     "desc: "Step description",  # string representation of step
                     "step": 2,                  # current step number 
                     "step": 5                   # total number of steps

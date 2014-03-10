@@ -91,10 +91,13 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
                 _parent->getCoreError() != "")
                 j["error"] = _parent->getCoreError();
 
-            jProg["desc"] = progress.getDesc();
-            jProg["step"] = progress.getStep();
-            jProg["total"] = progress.getTotal();
-            j["progress"] = jProg;
+            if (progress.isValid())
+            {
+                jProg["desc"] = progress.getDesc();
+                jProg["step"] = progress.getStep();
+                jProg["total"] = progress.getTotal();
+                j["progress"] = jProg;
+            }
 
             if (_parent->getNeed() != "")
                 j["need"] = _parent->getNeed();

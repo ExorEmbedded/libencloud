@@ -6,18 +6,31 @@ namespace libencloud
 {
 
 Progress::Progress ()
-    : _step(0)
+    : _isValid(false)
+    , _step(0)
     , _total(0)
 {
 }
 
 Progress::Progress (const QString &desc, int step, int total)
-    : _desc(desc)
+    : _isValid(false)
+    , _desc(desc)
     , _step(step)
     , _total(total)
 {
+    LIBENCLOUD_ERR_IF (desc == "");
+    LIBENCLOUD_ERR_IF (step <= 0);
+    LIBENCLOUD_ERR_IF (total <= 0);
+
     LIBENCLOUD_DBG(QString::number(step) << "/" << QString::number(total) << " " << desc);
+
+    _isValid = true;
+
+err:
+    return;
 }
+
+bool Progress::isValid () const   { return _isValid; }
 
 bool Progress::operator== (const Progress &p) const
 {
