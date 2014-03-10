@@ -1,0 +1,25 @@
+#include <QNetworkProxy>
+#include <QNetworkProxyFactory>
+#include <QNetworkProxyQuery>
+
+class MyFactory : public QNetworkProxyFactory 
+{
+public:
+    QList<QNetworkProxy> queryProxy ( const QNetworkProxyQuery & query = QNetworkProxyQuery() );
+};
+
+// TODO override for localhost
+QList<QNetworkProxy> MyFactory::queryProxy (const QNetworkProxyQuery & query)
+{
+    QList<QNetworkProxy> list;
+
+    list.append(QNetworkProxy());
+
+    return list;
+}
+
+MyFactory *f = new MyFactory();
+QNetworkProxyFactory::setApplicationProxyFactory (f);
+
+QList<QNetworkProxy> list = QNetworkProxyFactory::proxyForQuery(QNetworkProxyQuery(QString("localhost"), 80));
+LIBENCLOUD_DBG("type: " << QString::number(list[0].type()));

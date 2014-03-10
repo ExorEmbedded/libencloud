@@ -19,7 +19,7 @@ const VpnConfig *RetrConfMsg::getVpnConfig ()
 // public slots
 //
 
-void RetrConfMsg::process ()
+int RetrConfMsg::process ()
 {
     LIBENCLOUD_TRACE;
 
@@ -43,8 +43,9 @@ void RetrConfMsg::process ()
 
     _client->run(url, params, headers, config);
 
+    return 0;
 err:
-    return;
+    return ~0;
 }
 
 //

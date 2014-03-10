@@ -24,9 +24,9 @@ signals:
     // message processing COMPLETED ()
     virtual void processed () = 0;
 
-public slots:
+public:
     // START processing the message (pack before sending)
-    virtual void process () = 0;
+    virtual int process () = 0;
 
 protected:
     Config *_cfg;

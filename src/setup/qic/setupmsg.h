@@ -28,7 +28,7 @@ signals:
     void processed ();
 
 public slots:
-    void process ();
+    int process ();
     void authSupplied (const Auth &auth);
 
 private slots:

@@ -73,6 +73,11 @@ int Cloud::stop()
 	return 0;
 }
 
+int Cloud::getTotalSteps() const
+{
+    return VpnClient::StateLast - VpnClient::StateFirst + 1;
+}
+
 //
 // private slots
 //
@@ -81,7 +86,7 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
 {
     QString stateStr = VpnClient::stateString(state);
 
-    LIBENCLOUD_DBG("state: " << stateStr);
+//    LIBENCLOUD_DBG("state: " << stateStr);
 
     switch (state)
     {

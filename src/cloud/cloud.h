@@ -23,6 +23,8 @@ public:
 	int start ();
 	int stop ();
 
+    int getTotalSteps() const;
+
 signals:
     void error (QString msg = "");
     void stateChanged (State state);

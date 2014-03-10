@@ -12,7 +12,7 @@ class LIBENCLOUD_DLLSPEC Progress
 public:
 
     Progress ();
-    Progress (QString desc, int step, int total);
+    Progress (const QString &desc, int step, int total);
 
     bool operator== (const Progress &p) const;
 

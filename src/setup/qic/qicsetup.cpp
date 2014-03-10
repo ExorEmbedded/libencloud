@@ -12,8 +12,6 @@ QicSetup::QicSetup (Config *cfg)
 {
     LIBENCLOUD_TRACE;
 
-    emit progress(Progress(tr("Initialising QIC Setup Module"), StateInit, getTotalSteps()));
-
     _initMsg(_setupMsg);
     connect(&_setupMsg, SIGNAL(error(QString)),
             this, SLOT(_onError(QString)));
@@ -33,9 +31,11 @@ int QicSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
+    if (_setupMsg.process())
+        return ~0;
+
     emit progress(Progress(tr("Retrieving Configuration from Switchboard"),
                 StateSetupMsg, getTotalSteps()));
-    _setupMsg.process();
 
     return 0;
 }
@@ -79,6 +79,9 @@ void QicSetup::_onError (QString msg)
 void QicSetup::_onProcessed ()
 {
     _backoff = 1;
+
+    emit progress(Progress(tr("Received Configuration from Switchboard"),
+                StateReceived, getTotalSteps()));
 
     emit completed();
 }

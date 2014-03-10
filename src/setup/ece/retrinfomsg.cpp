@@ -50,8 +50,9 @@ void RetrInfoMsg::process ()
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 
+    return 0;
 err:
-    return;
+    return ~0;
 }
 
 #ifdef LIBENCLOUD_MODE_SECE

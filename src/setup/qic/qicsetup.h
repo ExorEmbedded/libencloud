@@ -20,12 +20,12 @@ public:
         StateError = 0,
 
         // used for steps
-        StateInit = 1,
-        StateSetupMsg,
+        StateSetupMsg = 1,
+        StateReceived,
 
         // used for total count
-        StateFirst = StateInit,
-        StateLast = StateSetupMsg
+        StateFirst = StateSetupMsg,
+        StateLast = StateReceived
     } State;
 
     QicSetup (Config *cfg);

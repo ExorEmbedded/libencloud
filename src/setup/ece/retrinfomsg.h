@@ -21,7 +21,7 @@ signals:
     void processed ();
 
 public slots:
-    void process ();
+    int process ();
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseReceived (const QUuid &uuid);

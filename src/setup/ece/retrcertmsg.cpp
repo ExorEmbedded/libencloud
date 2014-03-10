@@ -14,7 +14,7 @@ namespace libencloud {
 // public slots
 //
 
-void RetrCertMsg::process ()
+int RetrCertMsg::process ()
 {
     LIBENCLOUD_TRACE;
 
@@ -37,8 +37,9 @@ void RetrCertMsg::process ()
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 
+    return 0;
 err:
-    return;
+    return ~0;
 }
 
 //

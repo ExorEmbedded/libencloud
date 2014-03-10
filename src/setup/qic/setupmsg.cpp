@@ -23,7 +23,7 @@ const VpnConfig *SetupMsg::getVpnConfig ()
 // public slots
 //
 
-void SetupMsg::process ()
+int SetupMsg::process ()
 {
     LIBENCLOUD_TRACE;
 
@@ -62,13 +62,14 @@ void SetupMsg::process ()
 
     _client->run(url, params, headers, config);
 
+    return 0;
 err:
-    return;
+    return ~0;
 }
 
 void SetupMsg::authSupplied (const Auth &auth)
 {
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("user: " << auth.getUser());
 
     switch (auth.getId())
     {

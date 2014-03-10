@@ -71,29 +71,29 @@ QString VpnClient::stateString (State st)
     switch (st)
     {
         case StateIdle:
-            return "idle";
+            return "Idle";
         case StateConfigured:
-            return "vpn configured";
+            return "VPN configured";
         case StateStarting:
-            return "about to launch process";
+            return "About to launch process";
         case StateStarted:
-            return "process started";
+            return "Process started";
         case StateConnecting:
-            return "connecting to vpn";
+            return "Connecting to VPN";
         case StateConnectingWaitingInitialResponse:
-            return "waiting for server response";
+            return "Waiting for server response";
         case StateConnectingAuthenticating:
-            return "authenticating with server";
+            return "Authenticating with server";
         case StateConnectingDownloadingConfiguration:
-            return "downloading vpn config";
+            return "Downloading VPN config";
         case StateConnectingAssigningIP:
-            return "assigning local ips";
+            return "Assigning local IPs";
         case StateConnectingAddingRoutes:
-            return "adding routes";
+            return "Adding routes";
         case StateConnected:
-            return "vpn tunnel active";
+            return "VPN tunnel active";
         case StateExiting:
-            return "vpn exiting";
+            return "VPN exiting";
     }
     return "";
 }

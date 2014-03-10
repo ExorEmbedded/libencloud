@@ -92,6 +92,8 @@ int Core::stop ()
     _setup->stop();
 #endif
 
+    emit stateChanged(StateIdle);
+
     return 0;
 }
 
@@ -243,14 +245,12 @@ void Core::_progressReceived (const Progress &p)
 {
     Progress pt(p);
 
-    // only need remapping for cloud if both setup and cloud are enabled
+    // only need remapping for if both setup and cloud are enabled
 #if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_SETUP)
     if (sender() == _cloud)
-    {
-        int totalSetup = _setup->getTotalSteps();
-        pt.setStep(p.getStep() + totalSetup);
-        pt.setTotal(p.getStep() + totalSetup);
-    }
+        pt.setStep(p.getStep() + _setup->getTotalSteps());
+
+    pt.setTotal(_setup->getTotalSteps() + _cloud->getTotalSteps());
 #endif
 
     LIBENCLOUD_DBG("descr: " << pt.getDesc() <<

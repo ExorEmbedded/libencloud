@@ -1,4 +1,6 @@
 #include <encloud/Progress>
+#include <common/common.h>
+#include <common/config.h>
 
 namespace libencloud 
 {
@@ -9,11 +11,12 @@ Progress::Progress ()
 {
 }
 
-Progress::Progress (QString desc, int step, int total)
+Progress::Progress (const QString &desc, int step, int total)
     : _desc(desc)
     , _step(step)
     , _total(total)
 {
+    LIBENCLOUD_DBG(QString::number(step) << "/" << QString::number(total) << " " << desc);
 }
 
 bool Progress::operator== (const Progress &p) const

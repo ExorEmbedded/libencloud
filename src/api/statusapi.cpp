@@ -1,4 +1,3 @@
-#include <QRegExp>
 #include <encloud/Json>
 #include <encloud/Api/Status>
 #include <common/common.h>
@@ -57,6 +56,8 @@ void StatusApi::_pollTimeout ()
     QUrl url(getUrl());
 
     url.setPath(LIBENCLOUD_API_STATUS_PATH);
+
+//    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }

@@ -18,7 +18,7 @@ signals:
     void processed ();
 
 public slots:
-    void process ();
+    int process ();
 
 private slots:
     void _clientComplete (const QString &response);
