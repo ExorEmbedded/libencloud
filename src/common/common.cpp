@@ -8,6 +8,15 @@
 
 namespace libencloud {
 
+LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
+{
+    foreach (Param param, params)
+        if (param.first == key)
+            return param.second;
+
+    return "";
+}
+
 LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 {
     const QString sep = "/";

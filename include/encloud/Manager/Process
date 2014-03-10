@@ -1,0 +1,72 @@
+#ifndef _LIBENCLOUD_PROCESS_H_
+#define _LIBENCLOUD_PROCESS_H_
+
+#include <QObject>
+#include <QProcess>
+#include <encloud/Common>
+
+#define LIBENCLOUD_PROCESS_ZOMBIE_TOUT  5000  /* ms */
+
+namespace libencloud 
+{
+
+class LIBENCLOUD_DLLSPEC Process : public QObject
+{
+    Q_OBJECT
+
+public:
+    typedef enum
+    {
+        NoError = 0,
+        BadParamsError,
+        MemoryError,
+        BadStateError,
+        ConfigError,
+        ProcessError
+    }
+    Error;
+
+    typedef enum
+    {
+        StateIdle = 0,      // stopped (initial, error state)
+        StateStarting,      // about to launch process
+        StateStarted,       // process has started
+        StateZombie         // this state is entered Q4IC_PROCESS_ZOMBIE_TOUT ms after finished
+    }
+    State;
+
+    Process (const QString &path, const QString &args);
+    ~Process ();
+
+    QProcess *start ();
+    QProcess *startDetached ();
+    int stop ();
+
+    QString getPath ();
+    QString getArgs ();
+    bool getDetached ();
+
+signals:
+    void error (Process::Error err);
+    void stateChanged (Process::State state);
+
+private slots:
+    void processError (QProcess::ProcessError err);
+    void processStarted ();
+    void processFinished (int exitCode, QProcess::ExitStatus exitStatus);
+    void processZombie ();
+
+private:
+    QProcess *startEx ();
+
+    bool _detach;
+    QString _path;
+    QString _args;
+    QProcess *_process;
+    Error _err;
+    State _state;
+};
+
+}  // namespace libencloud
+
+#endif  /* _LIBENCLOUD_PROCESS_H_ */

@@ -278,6 +278,22 @@ err:
     return;
 }
 
+void Core::_serverConfigReceived (const QVariant &variant)
+{
+    LIBENCLOUD_TRACE;
+
+    QVariantMap serverMap = variant.toMap();
+
+    LIBENCLOUD_ERR_IF (serverMap["server"].isNull());
+    serverMap = serverMap["server"].toMap();
+
+    LIBENCLOUD_ERR_IF (serverMap["internal_ip"].isNull());
+
+    _networkManager.setGateway("", serverMap["internal_ip"].toString());
+err:
+    return;
+}
+
 void Core::_clientPortReceived (int port)
 {
     QString sp = QString::number(port);
@@ -301,13 +317,22 @@ void Core::_actionRequest (const QString &action, const Params &params)
 {
     LIBENCLOUD_DBG ("action: " << action << ", params: " << params);
     
+    //
+    // handled locally
+    //
     if (action == "start")
-        start();
+        LIBENCLOUD_ERR_IF (start());
     else if (action == "stop")
-        stop();
+        LIBENCLOUD_ERR_IF (stop());
+    //
+    // handled by NetworkManager
+    //
     else if (action == "syncRoutes")
-        ;  // TODO => core/net
-    else if (action == "open" || 
+        _networkManager.syncRoutes(paramsFind(params, "ips").split(","));
+    //
+    // forwarded to GUI service
+    //
+    else if (action == "open" ||
             action == "close")
     {
         // by now we whould have received port setting from client
@@ -378,7 +403,9 @@ int Core::_initSetup ()
     connect(_setupObj, SIGNAL(need(QString)), 
             this, SIGNAL(need(QString)));
 
-    // server configuration forwarding
+    // server configuration handling and forwarding
+    connect(_setupObj, SIGNAL(serverConfigSupply(QVariant)), 
+            this, SLOT(_serverConfigReceived(QVariant)));
     connect(_setupObj, SIGNAL(serverConfigSupply(QVariant)), 
             this, SIGNAL(serverConfigSupply(QVariant)));
 

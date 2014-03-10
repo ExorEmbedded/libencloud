@@ -5,6 +5,7 @@
   fix bad auth / cancel cases and reuse creds
   setup config retrieval; proxies;
   action commands (start,stop,open,close,syncRoutes);
+- mgr: reset routes upon stop
 - new error handling                                                    [2]
 - server: check Content-Length
 - ece/sece: initialisation-host and operation-host from Cert

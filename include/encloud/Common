@@ -34,6 +34,7 @@ Module;
 
 typedef QPair<QString, QString> Param;
 typedef QList<Param> Params;
+LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key);
 
 // win32: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
 // unix: COMMON_APPDATA/ORG/PRODUCT/PACKAGE

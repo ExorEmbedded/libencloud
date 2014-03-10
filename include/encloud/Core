@@ -5,12 +5,13 @@
 #include <QStateMachine>
 #include <QString>
 #include <QUuid>
-#include <encloud/Common>
+#include <encloud/Api/CloudApi>
 #include <encloud/Auth>
+#include <encloud/Common>
+#include <encloud/Manager/NetworkManager>
+#include <encloud/Progress>
 #include <encloud/Server>
 #include <encloud/State>
-#include <encloud/Progress>
-#include <encloud/Api/CloudApi>
 
 namespace libencloud {
 
@@ -56,6 +57,7 @@ private slots:
     void _progressReceived (const Progress &p);
     void _authRequired (Auth::Id id);
     void _clientPortReceived (int port);
+    void _serverConfigReceived (const QVariant &variant);
     void _actionRequest (const QString &action, const Params &params);
 
 private:
@@ -84,6 +86,8 @@ private:
 
     int _clientPort;
     CloudApi _cloudApi;
+
+    NetworkManager _networkManager;
 };
 
 }  // namespace libencloud

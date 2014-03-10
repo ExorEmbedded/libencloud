@@ -1,39 +1,20 @@
-#!/bin/sh
+#!/bin/sh  -x
 
-[ $# -lt 2 ] && echo "Usage: $0 HOST ACTION [URL] [USER] [PASS]" && exit 1
+[ $# -lt 2 ] && echo "Usage: $0 HOST PATH [PARAMS]" && exit 1
 
 HOST="$1"
-URL="api_v1"
+PATH="api_v1/$2"
 PORT="4804"
-ACTION="$2"
-LICENSE="94c97e4b-ab8c-4dd6-b06b-ef3e18ed2d83"
-LOGINURL="$3"
-USER="$4"
-PASS="$5"
-ARGS=
+WGET=/usr/bin/wget
 
-case ${ACTION} in
-    get)
-        URL=${URL}/status
-        ;;
-    lic)
-        URL=${URL}/setup
-        ARGS="--post-data license=${LICENSE}"
-        ;;
-    sb_auth)
-        URL=${URL}/auth
-        ARGS="--post-data id=sb&url=${LOGINURL}&user=${USER}&pass=${PASS}"
-        ;;
-    proxy_auth)
-        URL=${URL}/auth
-        ARGS="--post-data id=proxy&type=http&url=${LOGINURL}&user=${USER}&pass=${PASS}"
-        ;;
-    *)
-        echo "Invalid command: '${ACTION}'!"
-        exit 1
-esac
+shift
+shift
 
-wget -O - ${ARGS} ${HOST}:${PORT}/${URL} 2>/dev/null
+PARAMS=$@
+
+[ "${PARAMS}" != "" ] && ARGS="--post-data ${PARAMS}"
+
+${WGET} -O - ${ARGS} ${HOST}:${PORT}/${PATH} 2>/dev/null
 [ $? -ne 0 ] && echo "error contacting server!"
 
 # in case content has no newline

@@ -1,0 +1,60 @@
+#ifndef _LIBENCLOUD_PROCESSMANAGER_H_
+#define _LIBENCLOUD_PROCESSMANAGER_H_
+
+#include <QObject>
+#include <QList>
+#include <QString>
+#include <QUuid>
+#include <QVariantMap>
+#include <QProcess>
+#include <QSettings>
+#include <encloud/Common>
+#include <encloud/Manager/Process>
+
+namespace libencloud 
+{
+
+class LIBENCLOUD_DLLSPEC ProcessManager : public QObject
+{
+    Q_OBJECT
+
+public:
+    typedef enum
+    {
+        NoError = 0,
+        BadParamsError,
+        MemoryError,
+        NotExecError,
+        ProcessError
+    }
+    Error;
+
+    ProcessManager ();
+    ~ProcessManager ();
+
+    // plain execution (no remapping)
+    QProcess *start (const QString &path, const QString &args);
+    QProcess *startDetached (const QString &path, const QString &args);
+
+    // get/set
+    inline QList<Process *> *getProcesses() { return &_processes; };
+
+signals:
+    void sigError (ProcessManager::Error err, QString msg = "");
+
+protected slots:
+    void processStateChanged (Process::State state);
+
+protected:
+    void removeProcess (Process *process);
+    QString remapPath (const QString &path, const QString &progPath);
+    void remapArgs (QString &args, const QString &deviceIp);
+    QProcess *startEx (bool detach, const QString &path, const QString &args);
+
+    QList<Process *> _processes;
+};
+
+}  // namespace libencloud
+
+#endif  /* _LIBENCLOUD_PROCESSMANAGER_H_ */
+

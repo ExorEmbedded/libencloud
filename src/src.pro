@@ -22,25 +22,25 @@ HEADERS += common/helpers.h
 HEADERS += common/common.h
 SOURCES += common/common.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Auth
+HEADERS += $${PUBINCLUDEDIR}/Auth
 SOURCES += common/auth.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Client
+HEADERS += $${PUBINCLUDEDIR}/Client
 SOURCES += common/client.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Info
+HEADERS += $${PUBINCLUDEDIR}/Info
 SOURCES += common/info.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Json
+HEADERS += $${PUBINCLUDEDIR}/Json
 SOURCES += common/json.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Logger
+HEADERS += $${PUBINCLUDEDIR}/Logger
 SOURCES += common/logger.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/State
+HEADERS += $${PUBINCLUDEDIR}/State
 SOURCES += common/state.cpp
 
-HEADERS += $$SRCBASEDIR/include/encloud/Progress
+HEADERS += $${PUBINCLUDEDIR}/Progress
 SOURCES += common/progress.cpp
 
 HEADERS += common/config.h
@@ -77,7 +77,12 @@ SOURCES += common/crypto.cpp
 # core sources
 # 
 
-HEADERS += $$SRCBASEDIR/include/encloud/Core
+HEADERS += $${PUBINCLUDEDIR}/Manager/NetworkManager
+HEADERS += $${PUBINCLUDEDIR}/Manager/ProcessManager
+HEADERS += $${PUBINCLUDEDIR}/Manager/Process
+SOURCES += mgr/*.cpp
+
+HEADERS += $${PUBINCLUDEDIR}/Core
 SOURCES += core/core.cpp
 
 #
@@ -111,12 +116,12 @@ SOURCES += core/core.cpp
 # 
 
 !noapi {
-    HEADERS += $$SRCBASEDIR/include/encloud/Server
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/AuthApi
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/CloudApi
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/CommonApi
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/SetupApi
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/StatusApi
+    HEADERS += $${PUBINCLUDEDIR}/Server
+    HEADERS += $${PUBINCLUDEDIR}/Api/AuthApi
+    HEADERS += $${PUBINCLUDEDIR}/Api/CloudApi
+    HEADERS += $${PUBINCLUDEDIR}/Api/CommonApi
+    HEADERS += $${PUBINCLUDEDIR}/Api/SetupApi
+    HEADERS += $${PUBINCLUDEDIR}/Api/StatusApi
     HEADERS += api/*.h
     SOURCES += api/*.cpp
 }
@@ -125,13 +130,13 @@ SOURCES += core/core.cpp
 # http sources
 # 
 
-HEADERS += $$SRCBASEDIR/include/encloud/Http/Http
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpHandler
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpAbstractHandler
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpRequest
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpResponse
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpHeaders
-HEADERS += $$SRCBASEDIR/include/encloud/Http/HttpServer
+HEADERS += $${PUBINCLUDEDIR}/Http/Http
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpHandler
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpAbstractHandler
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpRequest
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpResponse
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpHeaders
+HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += http/*.h
 SOURCES += http/*.cpp
 

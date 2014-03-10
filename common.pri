@@ -132,6 +132,7 @@ windows{
 # 
 
 SRCBASEDIR = $${PWD}
+PUBINCLUDEDIR = $${SRCBASEDIR}/include/encloud
 
 # public API and headers are included globally
 INCLUDEPATH += $${SRCBASEDIR}/include

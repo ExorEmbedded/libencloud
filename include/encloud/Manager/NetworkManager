@@ -1,0 +1,66 @@
+#ifndef _LIBENCLOUD_NETWORKMANAGER_H_
+#define _LIBENCLOUD_NETWORKMANAGER_H_
+
+#include <QObject>
+#include <QStringList>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <encloud/Common>
+#include <encloud/Manager/ProcessManager>
+
+namespace libencloud 
+{
+
+/**
+ * Handles routes sync
+ */
+class LIBENCLOUD_DLLSPEC NetworkManager : public QObject
+{
+    Q_OBJECT
+
+public:
+    typedef enum
+    {
+        NoError = 0,
+        BadParamsError,
+        RequestError,
+        ReplyError,
+        SysError
+    }
+    Error;
+
+    NetworkManager (ProcessManager *processManager = NULL);
+    ~NetworkManager ();
+
+    static QString errorString (Error err);
+
+signals:
+    void sigError (NetworkManager::Error err, QString msg = "");
+
+public:
+    void setGateway (const QString &externalAddr, const QString &internalAddr);
+    void syncRoutes (const QStringList &connectedEndpoints);
+
+    // get/set
+    inline ProcessManager *getProcessManager () { return _processManager; };
+
+protected slots:
+    void finishedReadRoutes (int exitCode, QProcess::ExitStatus exitStatus);
+
+protected:
+    void readRoutes ();
+    void addRoute (const QString &endpoint);
+    void delRoute (const QString &endpoint);
+
+    ProcessManager *_processManager;
+    bool _processManagerInternal;
+    QProcess *_process;
+    QString _gateway;
+    QStringList _connectedEndpoints;
+    QStringList _previousEndpoints;
+};
+
+}  // namespace libencloud
+
+#endif  /* _LIBENCLOUD_NETWORKMANAGER_H_ */
