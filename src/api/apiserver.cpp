@@ -115,10 +115,6 @@ int Server::start ()
 
     LIBENCLOUD_ERR_IF (_core->attachServer(this));
 
-    // Core autostarts only in Encloud Mode
-    if (_mode == Server::EncloudMode)
-        LIBENCLOUD_ERR_IF (_core->start());
-
     // initially listens only on local interface, unless configured differently
     if (_cfg && _cfg->config.bind == "all")
     {
