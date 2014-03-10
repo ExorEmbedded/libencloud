@@ -1,4 +1,4 @@
-#include <encloud/Api/Auth>
+#include <encloud/Api/AuthApi>
 #include <common/common.h>
 #include <common/config.h>
 #include <api/api.h>

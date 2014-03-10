@@ -10,7 +10,7 @@
 #include <encloud/Server>
 #include <encloud/State>
 #include <encloud/Progress>
-#include <encloud/Api/Cloud>
+#include <encloud/Api/CloudApi>
 
 namespace libencloud {
 

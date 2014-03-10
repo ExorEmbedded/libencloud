@@ -8,7 +8,7 @@
 #include <encloud/Common>
 #include <encloud/Progress>
 #include <encloud/State>
-#include <encloud/Api/Common>
+#include <encloud/Api/CommonApi>
 
 /**
  * Qt helper to interact with Encloud's HTTP Status API.

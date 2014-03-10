@@ -1,9 +1,9 @@
 #include <encloud/Core>
 #include <encloud/Common>
+#include <encloud/HttpServer>
 #include <encloud/Server>
 #include <common/common.h>
 #include <common/config.h>
-#include <http/server.h>
 
 #define LIBENCLOUD_SRV_LISTEN          "127.0.0.1"
 

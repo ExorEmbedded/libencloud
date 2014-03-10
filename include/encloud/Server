@@ -2,8 +2,9 @@
 #define _LIBENCLOUD_SERVER_H_
 
 #include <QObject>
-#include <encloud/HttpHandler>
+#include <encloud/Common>
 #include <encloud/HttpAbstractHandler>
+#include <encloud/HttpHandler>
 
 // default (initial) port - can be overridden via setPort()
 #define LIBENCLOUD_SRV_PORT_DFT 4804

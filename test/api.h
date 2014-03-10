@@ -4,11 +4,11 @@
 #include <QCoreApplication>
 #include <QObject>
 #include <QUuid>
-#include <encloud/Api/Common>
-#include <encloud/Api/Auth>
-#include <encloud/Api/Cloud>
-#include <encloud/Api/Setup>
-#include <encloud/Api/Status>
+#include <encloud/Api/CommonApi>
+#include <encloud/Api/AuthApi>
+#include <encloud/Api/CloudApi>
+#include <encloud/Api/SetupApi>
+#include <encloud/Api/StatusApi>
 
 class TestApi : public QObject
 {

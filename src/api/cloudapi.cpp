@@ -1,4 +1,4 @@
-#include <encloud/Api/Cloud>
+#include <encloud/Api/CloudApi>
 #include <common/common.h>
 #include <common/config.h>
 #include <api/api.h>

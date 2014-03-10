@@ -1,11 +1,11 @@
 #include <QTcpSocket>
 #include <QStringList>
 #include <QRegExp>
-#include <encloud/HttpRequest>
 #include <encloud/HttpServer>
+#include <encloud/HttpRequest>
+#include <encloud/HttpResponse>
 #include <common/common.h>
 #include <common/config.h>
-#include <http/server.h>
 
 // disable heavy tracing
 #undef LIBENCLOUD_TRACE 

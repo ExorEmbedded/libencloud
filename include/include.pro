@@ -19,10 +19,11 @@ HEADERS += encloud/Logger
 HEADERS += encloud/Progress
 HEADERS += encloud/State
 
-HEADERS += encloud/Api/Auth
-HEADERS += encloud/Api/Common
-HEADERS += encloud/Api/Setup
-HEADERS += encloud/Api/Status
+HEADERS += encloud/Api/AuthApi
+HEADERS += encloud/Api/CloudApi
+HEADERS += encloud/Api/CommonApi
+HEADERS += encloud/Api/SetupApi
+HEADERS += encloud/Api/StatusApi
 
 # header installation
 unix {

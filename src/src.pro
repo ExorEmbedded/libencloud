@@ -112,11 +112,11 @@ SOURCES += core/core.cpp
 
 !noapi {
     HEADERS += $$SRCBASEDIR/include/encloud/Server
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/Auth
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/Cloud
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/Common
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/Setup
-    HEADERS += $$SRCBASEDIR/include/encloud/Api/Status
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/AuthApi
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/CloudApi
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/CommonApi
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/SetupApi
+    HEADERS += $$SRCBASEDIR/include/encloud/Api/StatusApi
     HEADERS += api/*.h
     SOURCES += api/*.cpp
 }
