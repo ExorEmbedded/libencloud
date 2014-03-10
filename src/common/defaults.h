@@ -23,7 +23,7 @@
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
 
 // do NOT change this - Switchboard relies on it!
-#define LIBENCLOUD_USERAGENT_QIC        "Endian 4i Connect " LIBENCLOUD_VERSION
+#define LIBENCLOUD_USERAGENT_QIC        "Endian 4i Connect 3.0"
 
 #define LIBENCLOUD_SB_URL               "https://switchboard-host/"
 
