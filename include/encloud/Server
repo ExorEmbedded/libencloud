@@ -23,21 +23,19 @@ class LIBENCLOUD_DLLSPEC Server : public QObject
     friend class HttpServer;
 
 public:
-    typedef enum 
-    {
-        EncloudMode,  // Encloud mode provides setup, status and control of
-                      // Cloud services (default)
-
-        GuiMode       // Gui listens for actions from Encloud 
-                      // (e.g. open/close application)
-    } 
-    Mode;
 
     Server (QObject *parent = 0, Mode = EncloudMode);
     ~Server ();
 
-    HttpAbstractHandler *getHandler ();
+    inline bool isValid () const {
+        return _isValid; };
+
+    inline HttpAbstractHandler *getHandler () const {
+        return _handler; };
     int setHandler (HttpAbstractHandler *handler);
+
+    inline QObject *getCoreObj() {
+        return (QObject *) _core; };
 
     // set port (or initial port for scan if port is busy)
     int setInitialPort (int port);
@@ -54,6 +52,7 @@ public slots:
 private:
     void _delete ();
 
+    bool _isValid;
     QObject *_parent;
     Mode _mode;
     bool _running;

@@ -26,7 +26,7 @@ class LIBENCLOUD_DLLSPEC Core : public QObject
 
 public:
 
-    Core ();
+    Core (Mode = EncloudMode);
     ~Core ();
 
     bool isValid();
@@ -47,7 +47,7 @@ signals:
     void need (const QString &what);
     void authSupplied (const Auth &auth);
     void serverConfigSupply (const QVariant &variant);
-    void actionRequest (const QString &action, const Params &params);
+    void actionRequest (const QString &action, const libencloud::Params &params);
 
 private slots:
     void _stateEntered ();
@@ -71,6 +71,7 @@ private:
     QString _stateStr (QState *state);
 
     bool _isValid;
+    Mode _mode;
 
     Config *_cfg;
     SetupInterface *_setup;

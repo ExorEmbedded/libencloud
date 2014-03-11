@@ -14,7 +14,8 @@ namespace libencloud  {
 //
 
 Server::Server (QObject *parent, Mode mode)
-    : _parent(parent)
+    : _isValid(false)
+    , _parent(parent)
     , _mode(mode)
     , _running(false)
     , _cfg(NULL)  // set by Core during init
@@ -26,7 +27,7 @@ Server::Server (QObject *parent, Mode mode)
 {
     LIBENCLOUD_TRACE;
 
-    _core = new libencloud::Core();
+    _core = new libencloud::Core(_mode);
     LIBENCLOUD_ERR_IF (_core == NULL);
     LIBENCLOUD_ERR_IF (!_core->isValid());
 
@@ -39,7 +40,7 @@ Server::Server (QObject *parent, Mode mode)
     _localServer->setHandler(_handler);
     connect(_localServer, SIGNAL(portBound(int)), this, SIGNAL(portBound(int)));
 
-    if (_mode == Server::EncloudMode)
+    if (_mode == EncloudMode)
     {
         _cloudServer = new HttpServer(_parent, this); 
         LIBENCLOUD_ERR_IF (_cloudServer == NULL);
@@ -47,9 +48,12 @@ Server::Server (QObject *parent, Mode mode)
         _cloudServer->setHandler(_handler);
     }
 
+    _isValid = true;
+
     return;
 err:
     _delete();
+    return;
 }
 
 Server::~Server ()
@@ -58,8 +62,6 @@ Server::~Server ()
 
     _delete();
 }
-
-HttpAbstractHandler *Server::getHandler () { return _handler; }
 
 int Server::setHandler (HttpAbstractHandler *handler)
 {

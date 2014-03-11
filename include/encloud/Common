@@ -32,6 +32,16 @@ typedef enum
 } 
 Module;
 
+typedef enum 
+{
+    EncloudMode,  // Encloud mode provides setup, status and control of
+                  // Cloud services (default)
+
+    GuiMode       // Gui listens for actions from Encloud 
+                  // (e.g. open/close application)
+} 
+Mode;
+
 typedef QPair<QString, QString> Param;
 typedef QList<Param> Params;
 LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key);

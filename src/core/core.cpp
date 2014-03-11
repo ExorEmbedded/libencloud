@@ -19,9 +19,9 @@ namespace libencloud {
 // public methods
 //
 
-Core::Core ()
+Core::Core (Mode mode)
     : _isValid(false)
-    , _cfg(NULL)
+    , _mode(mode)
     , _setup(NULL)
     , _setupObj(NULL)
     , _cloud(NULL)
@@ -33,7 +33,8 @@ Core::Core ()
     LIBENCLOUD_TRACE;
 
     qDebug() << "Starting " << qPrintable(info::versionInfo())
-            << "rev: " << qPrintable(info::revision());
+            << " rev: " << qPrintable(info::revision())
+            << " mode: " << QString::number(_mode);
 
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
@@ -46,6 +47,7 @@ Core::Core ()
     LIBENCLOUD_ERR_IF (_initCloud());
 #endif
 
+    LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
 
     _isValid = true;
@@ -313,9 +315,10 @@ void Core::_clientPortReceived (int port)
     _clientPort = port;
 }
 
+// This handler is triggered for all API receivers
 void Core::_actionRequest (const QString &action, const Params &params)
 {
-    LIBENCLOUD_DBG ("action: " << action << ", params: " << params);
+//    LIBENCLOUD_DBG ("action: " << action << ", params: " << params);
     
     //
     // handled locally
@@ -335,11 +338,17 @@ void Core::_actionRequest (const QString &action, const Params &params)
     else if (action == "open" ||
             action == "close")
     {
-        // by now we whould have received port setting from client
-        LIBENCLOUD_ERR_IF (_clientPort == -1);
-
-        _cloudApi.setPort(_clientPort);
-        emit actionRequest(action, Params());  // => _cloudApi TESTME
+        switch (_mode)
+        {
+            case EncloudMode:
+                // by now we whould have received port setting from client
+                LIBENCLOUD_ERR_IF (_clientPort == -1);
+                _cloudApi.setPort(_clientPort);
+                break;
+            case GuiMode:
+                break;
+        }
+        emit actionRequest(action, params);
     }
     else 
         emit error(tr("Invalid action: ") + action);
@@ -454,8 +463,12 @@ int Core::_initApi ()
 {
     LIBENCLOUD_TRACE;
 
-    connect(this, SIGNAL(actionRequest(QString, libencloud::Params)), 
-            &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+    // Encloud Service forwards action requests to Gui via Cloud API
+    if (_mode == EncloudMode)
+        connect(this, SIGNAL(actionRequest(QString, libencloud::Params)), 
+                &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+
+    // else if (mode == GuiMode) signal is caught by Gui
 
     return 0;
 }

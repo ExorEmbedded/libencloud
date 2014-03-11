@@ -81,8 +81,8 @@
 
 * POST <e_url>/api_v1/setup                 Client: QIC
 
-    Def "clientPort"    Port at which client can be reached - used by Encloud to forward application
-                        open/close requests via Cloud API
+    Def "clientPort"    Port at which client can be reached - set by GUI and used by Encloud 
+                        to forward application open/close requests via Cloud API
 
     e.g.                clientPort=12345
 
