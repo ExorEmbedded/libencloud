@@ -14,7 +14,7 @@
 #  define LIBENCLOUD_REVISION           ""
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION
 #else
-#  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " r" LIBENCLOUD_REVISION
+#  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " rev" LIBENCLOUD_REVISION
 #endif
 
 // tap device - MUST match name defined in CheckTap
