@@ -9,6 +9,7 @@
 #include <setup/qic/qicsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
+#include <api/api.h>
 
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
@@ -49,6 +50,7 @@ Core::Core (Mode mode)
 
     LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
+    LIBENCLOUD_ERR_IF (_init());
 
     _isValid = true;
 
@@ -195,6 +197,14 @@ err:
 // private slots
 // 
 
+void Core::_stateChanged (State state)
+{
+    LIBENCLOUD_DBG("state: " << QString::number(state) << " (" <<
+            stateToString(state) << ")");
+
+    // do stuff based on global state
+}
+
 void Core::_stateEntered ()
 {
     QState *state = qobject_cast<QState *>(sender());
@@ -297,21 +307,25 @@ err:
     return;
 }
 
+// Setup watchdog which disconnects upon close
 void Core::_clientPortReceived (int port)
 {
     QString sp = QString::number(port);
+    QUrl url;
 
     LIBENCLOUD_DBG ("port: " << sp);
 
-    /*
-    If we ever need this to be persistent:
+    if (_clientWatchdog.isRunning())
+        _clientWatchdog.stop();
 
-    _cfg->settings->setValue("clientPort", sp);
-    _cfg->settings->sync();
+    url.setScheme(LIBENCLOUD_API_SCHEME);
+    url.setHost(LIBENCLOUD_API_HOST);
+    url.setPort(port);
+    url.setPath(LIBENCLOUD_API_STATUS_PATH);
 
-    LIBENCLOUD_ERR_MSG_IF (_cfg->settings->status() != QSettings::NoError, 
-            "could not write configuration to file - check permissions!");
-    */
+    _clientWatchdog.setUrl(url);
+    _clientWatchdog.start();
+    // _clientDown() will be invoked upon down() signal
 
     _clientPort = port;
 }
@@ -356,6 +370,14 @@ void Core::_actionRequest (const QString &action, const Params &params)
 
 err:
     return;
+}
+
+// If watchdog notifies a down stop the service (closed or crashed)
+void Core::_clientDown ()
+{
+    LIBENCLOUD_TRACE;
+
+    stop();
 }
 
 //
@@ -445,6 +467,8 @@ int Core::_initCloud ()
     // state changes forwarding for connecting/connected states
     connect(_cloudObj, SIGNAL(stateChanged(State)), 
             this, SIGNAL(stateChanged(State)));
+    connect(this, SIGNAL(stateChanged(State)), 
+            this, SLOT(_stateChanged(State)));
 
     // progress signal handling
     connect(_cloudObj, SIGNAL(progress(Progress)), 
@@ -505,6 +529,14 @@ int Core::_initFsm ()
 #endif
 
     _fsm.setInitialState(_initialState);
+
+    return 0;
+}
+
+// Init other local objects
+int Core::_init ()
+{
+    connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
 
     return 0;
 }

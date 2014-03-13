@@ -43,6 +43,9 @@ SOURCES += common/state.cpp
 HEADERS += $${PUBINCLUDEDIR}/Progress
 SOURCES += common/progress.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/Watchdog
+SOURCES += common/watchdog.cpp
+
 HEADERS += common/config.h
 SOURCES += common/config.cpp
 

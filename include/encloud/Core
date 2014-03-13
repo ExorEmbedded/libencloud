@@ -12,6 +12,7 @@
 #include <encloud/Progress>
 #include <encloud/Server>
 #include <encloud/State>
+#include <encloud/Watchdog>
 
 namespace libencloud {
 
@@ -50,6 +51,7 @@ signals:
     void actionRequest (const QString &action, const libencloud::Params &params);
 
 private slots:
+    void _stateChanged (State state);
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
@@ -59,6 +61,7 @@ private slots:
     void _clientPortReceived (int port);
     void _serverConfigReceived (const QVariant &variant);
     void _actionRequest (const QString &action, const Params &params);
+    void _clientDown ();
 
 private:
     int _initConfig ();
@@ -67,6 +70,7 @@ private:
     int _initCloud ();
     int _initApi ();
     int _initFsm ();
+    int _init ();
     int _startCloud ();
     QString _stateStr (QState *state);
 
@@ -85,8 +89,9 @@ private:
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
 
-    int _clientPort;
     CloudApi _cloudApi;
+    int _clientPort;
+    Watchdog _clientWatchdog;
 
     NetworkManager _networkManager;
 };

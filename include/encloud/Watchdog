@@ -1,0 +1,66 @@
+#ifndef _LIBENCLOUD_WATCHDOG_H_
+#define _LIBENCLOUD_WATCHDOG_H_
+
+#include <QTimer>
+#include <QUrl>
+#include <encloud/Common>
+#include <encloud/Client>
+
+#define LIBENCLOUD_WATCHDOG_URL     "http://localhost:4814"
+#define LIBENCLOUD_WATCHDOG_TOUT    3000  // ms
+
+namespace libencloud {
+
+/**
+ * Watchdog for HTTP-based services
+ */
+class LIBENCLOUD_DLLSPEC Watchdog : public QObject
+{
+    Q_OBJECT
+
+public:
+
+    typedef enum {
+        UnknownState,
+        UpState,
+        DownState
+    }
+    State; 
+
+    Watchdog ();
+    ~Watchdog ();
+
+    int setUrl (const QUrl &url);
+    int setInterval (int msecs);
+
+    int start ();
+    int stop ();
+
+    inline bool isRunning () {
+        return _running; }
+
+signals:
+    void up ();
+    void down ();
+
+protected slots:
+    void _timeout ();
+    void _clientError (const QString &errmsg);
+    void _clientComplete (const QString &response);
+
+protected:
+    QUrl _url;
+    QUrl _params;
+    QMap<QByteArray, QByteArray> _headers;
+    QSslConfiguration _config;
+
+    int _interval;
+    QTimer _timer;
+    Client _client;
+    bool _running;
+    State _state;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_WATCHDOG_H_

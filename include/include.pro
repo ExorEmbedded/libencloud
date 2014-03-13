@@ -5,6 +5,12 @@ TEMPLATE = subdirs
 HEADERS += encloud/Auth
 HEADERS += encloud/Common
 HEADERS += encloud/Core
+HEADERS += encloud/Info
+HEADERS += encloud/Logger
+HEADERS += encloud/Progress
+HEADERS += encloud/Server
+HEADERS += encloud/State
+HEADERS += encloud/Watchdog
 
 HEADERS += encloud/Http/Http
 HEADERS += encloud/Http/HttpAbstractHandler
@@ -13,12 +19,6 @@ HEADERS += encloud/Http/HttpHeaders
 HEADERS += encloud/Http/HttpRequest
 HEADERS += encloud/Http/HttpResponse
 HEADERS += encloud/Http/HttpServer
-
-HEADERS += encloud/Info
-HEADERS += encloud/Logger
-HEADERS += encloud/Progress
-HEADERS += encloud/Server
-HEADERS += encloud/State
 
 HEADERS += encloud/Api/AuthApi
 HEADERS += encloud/Api/CloudApi
