@@ -114,9 +114,12 @@
 
     encloud -> gui (QIC):
 
-    e.g. 3              action=open&prog=myRdpApp&endpoint=myEndpoint&path=
-                            /%HOME_PATH%/to/File&args=%DEVICE_IP%20param2
-    e.g. 4              action=close&prog=myRdpApp&endpoint=myEndpoint
+    e.g. 3              action=open&name=myApp&endpoint=myEndpoint&remark=myRemark&path=
+                            /%HOME_PATH%/to/File&args=param1%20param2
+    e.g. 4              action=close&name=myApp&endpoint=myEndpoint
+
+    Notes: 
+        * ID = name+endpoint
 
 [ Error Handling ]
 

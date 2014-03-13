@@ -1,13 +1,11 @@
-- setup: qic (msg, ip, pages)
-- fsm: outer + inner, stop handling
 - ssl: CA support/check
 - qic: listen port to registry and notification to Switchboard;
   fix bad auth / cancel cases and reuse creds
   setup config retrieval; proxies;
-  action commands (start,stop,open,close,syncRoutes);
-- mgr: reset routes upon stop
+- actions: check effectively running pids
 - new error handling                                                    [2]
 - server: check Content-Length
+- cloud: first message not routed properly?
 - ece/sece: initialisation-host and operation-host from Cert
     => json in notes field
   license/qsettings: per-user or per-machine?
