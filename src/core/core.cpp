@@ -95,6 +95,7 @@ int Core::stop ()
 #endif
 
     emit stateChanged(StateIdle);
+    emit progress(Progress());
 
     return 0;
 }
