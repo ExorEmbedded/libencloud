@@ -51,7 +51,6 @@ libencloud configuration
   },
 
   "log" : {
-    "to" : "file",      # log to file ("%AppData%/$PRODUCT/libencloud-log.txt)
     "lev" : 3           # log level: 0 = min .. 7 = max
   }
 }

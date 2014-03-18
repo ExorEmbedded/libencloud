@@ -35,6 +35,7 @@ public:
     int open ();
     int close ();
 
+    // Note: to be called *after* open()
     bool isValid ();
 
 protected:

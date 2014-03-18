@@ -228,16 +228,6 @@ int Config::_parseLog (const QVariantMap &jo)
                 "log level must be between 0 and 7!");
     }
 
-    if (!jo["to"].isNull())
-    {
-        config.logTo = jo["to"].toString();
-        LIBENCLOUD_ERR_MSG_IF (config.logTo != "file",
-                "only file logging supported!");
-
-        config.logger.setPath(_dataPrefix + "/" + LIBENCLOUD_PKGNAME + "-log.txt");
-        config.logger.open();
-    }
-
     return 0;
 err:
     return ~0;
