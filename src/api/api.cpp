@@ -39,7 +39,9 @@ int Api::init ()
     // other products use fixed port
 #ifdef LIBENCLOUD_MODE_QIC
     LIBENCLOUD_DBG("Creating shared Settings object");
-    __settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
+
+    // API settings have System Scope (used by Encloud Service)
+    __settings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (__settings == NULL);
 
     _settingsTimer.start(LIBENCLOUD_API_SETTINGS_TOUT);
