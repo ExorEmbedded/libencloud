@@ -155,8 +155,17 @@ void HttpServer::error (QAbstractSocket::SocketError socketError)
 
     QTcpSocket *socket = (QTcpSocket*) sender();
 
-    LIBENCLOUD_DBG("err: " << QString::number(socket->error())
-            << " (" << socket->errorString() << ")");
+    switch (socket->error())
+    {
+        // silent errors
+        case QAbstractSocket::RemoteHostClosedError:
+            break;
+        default:
+            LIBENCLOUD_DBG("err: " << QString::number(socket->error())
+                    << " (" << socket->errorString() << ")");
+    }
+
+    socket->deleteLater();
 }
 
 //
