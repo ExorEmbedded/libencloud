@@ -19,6 +19,7 @@ Makefile.Debug
 Makefile.Release
 build/
 /src/debug/
+/src/release/
 /test/test
 /bindings/libencloud.py
 /bindings/*_wrap.c
