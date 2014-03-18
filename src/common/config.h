@@ -11,7 +11,6 @@
 #include <QUrl>
 #include <encloud/Common>
 #include <encloud/Json>
-#include <encloud/Logger>
 #include "crypto.h"
 #include "defaults.h"
 #include "helpers.h"
@@ -51,7 +50,6 @@ typedef struct
     QString vpnArgs;
 
     int logLevel;
-    Logger logger;
     QString logTo;
 }
 libencloud_config_t;
