@@ -52,7 +52,8 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
 
 } // namespace libencloud
 
-// global exported configuration object - used for logging
+// global exported log level
 LIBENCLOUD_DLLSPEC extern libencloud::Config *g_libencloudCfg;
+LIBENCLOUD_DLLSPEC extern int g_libencloudLogLev;
 
 #endif /* _LIBENCLOUD_COMMON_H_ */

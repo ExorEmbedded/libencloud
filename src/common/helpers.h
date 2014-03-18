@@ -16,6 +16,7 @@
 #define LIBENCLOUD_LOG_NOTICE  5   /* normal but significant condition */
 #define LIBENCLOUD_LOG_INFO    6   /* informational */
 #define LIBENCLOUD_LOG_DEBUG   7   /* debug-level messages */
+#define LIBENCLOUD_LOG_MAX     LIBENCLOUD_LOG_DEBUG
 
 #ifndef LIBENCLOUD_LOGLEVEL
 #define LIBENCLOUD_LOGLEVEL    7
@@ -27,7 +28,7 @@
 #define LIBENCLOUD_NOP do {} while (0)
 #define __LIBENCLOUD_MSG(lev, levstr, msg) \
     do { \
-        if (!g_libencloudCfg || lev <= g_libencloudCfg->config.logLevel) { \
+        if (lev <= g_libencloudLogLev) { \
             qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
                     << " " << QThread::currentThreadId() \
                     << " [" << levstr << "] [" << LIBENCLOUD_APP << ":" << __FILE__ << ":" \

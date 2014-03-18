@@ -226,6 +226,9 @@ int Config::_parseLog (const QVariantMap &jo)
         config.logLevel = jo["lev"].toInt();
         LIBENCLOUD_ERR_MSG_IF ((config.logLevel < 0 || config.logLevel > 7),
                 "log level must be between 0 and 7!");
+
+        // set this value globally for log macros
+        g_libencloudLogLev = config.logLevel;
     }
 
     return 0;
@@ -241,3 +244,4 @@ QString Config::_joinPaths (const QString &s1, const QString &s2)
 } // namespace libencloud
 
 libencloud::Config *g_libencloudCfg = NULL;
+int g_libencloudLogLev = LIBENCLOUD_LOG_MAX;
