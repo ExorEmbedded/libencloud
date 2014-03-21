@@ -56,6 +56,17 @@ LIBENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString s)
     return qPrintable(s);
 }
 
+// Open a file, creating parent directory if necessary
+LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode)
+{
+    QFileInfo fi(file);
+    QDir dir(fi.dir());
+
+    dir.mkpath(dir.path());
+
+    return file.open(mode);
+}
+
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 {
     LIBENCLOUD_RETURN_IF (!fi.isFile(), NULL);

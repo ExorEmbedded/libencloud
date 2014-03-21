@@ -1,8 +1,7 @@
-#include <QDir>
-#include <QFileInfo>
 #include <encloud/Logger>
 #include <common/common.h>
 #include <common/config.h>
+#include <common/utils.h>
 
 // logging: Qt4 forces usage of globals with qInstallMsgHandler()
 static QTextStream *g_svcLogText = NULL;
@@ -47,15 +46,10 @@ int Logger::setExtraMode (QIODevice::OpenModeFlag flags)
 
 int Logger::open ()
 {
-    QFileInfo fi(_path);
-    QDir dir(fi.dir());
-
     LIBENCLOUD_DBG("path: " << _path);
 
-    dir.mkpath(dir.path());
-
     logFile.setFileName(_path);
-    LIBENCLOUD_ERR_IF (!logFile.open(QIODevice::WriteOnly | QIODevice::Text | _extraMode));
+    LIBENCLOUD_ERR_IF (!utils::fileCreate(logFile, QIODevice::WriteOnly | QIODevice::Text | _extraMode));
 
     logText.setDevice(&logFile);
     g_svcLogText = &logText;

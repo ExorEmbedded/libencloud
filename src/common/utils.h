@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_PRIV_UTILS_H
 
 #include <QDateTime>
+#include <QFile>
 #include <QString>
 #include <QtCore>
 #include <QUuid>
@@ -13,6 +14,7 @@ namespace utils {
 LIBENCLOUD_DLLSPEC QString getHwInfo (void);
 LIBENCLOUD_DLLSPEC QDateTime pytime2DateTime (QString pydate);
 LIBENCLOUD_DLLSPEC QByteArray encodeQueryItem (QString pydate);
+LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode);
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi);
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid);
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);

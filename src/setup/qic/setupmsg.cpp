@@ -176,13 +176,13 @@ int SetupMsg::_unpackResponse ()
     QFile caf(cafn);
 
     // save the Operation CA certificate to file
-    LIBENCLOUD_EMIT_ERR_IF (!caf.open(QIODevice::WriteOnly) ||
-                caf.write(_caCert.toPem()) == -1,
-            error(tr("System error writing Operation CA to disk")));
+    LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
+    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
     caf.close();
 
     return 0;
 err:
+    emit error(tr("System error writing Operation CA: ") + caf.errorString());
     caf.close();
     return ~0;
 }
