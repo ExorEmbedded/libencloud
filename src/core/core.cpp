@@ -249,6 +249,15 @@ err:
 // Forward error state and message to http handler
 void Core::_errorReceived (const QString &msg)
 {
+    LIBENCLOUD_TRACE;
+
+   // QIC stops progress upon critical errors for user intervention
+   // while ECE and SECE keep on retrying automatically
+#if defined(LIBENCLOUD_MODE_QIC)
+    _fsm.stop();
+    emit progress(Progress());
+#endif
+
     emit stateChanged(StateError);
     emit error(msg);
 }
@@ -278,10 +287,10 @@ void Core::_authRequired (Auth::Id id)
     switch (id)
     {
         case Auth::SwitchboardId:
-            emit need ("sb_auth");
+            emit need("sb_auth");
             break;
         case Auth::ProxyId:
-            emit need ("proxy_auth");
+            emit need("proxy_auth");
             break;
         default:
             LIBENCLOUD_ERR_IF (1);

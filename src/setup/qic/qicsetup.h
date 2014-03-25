@@ -58,17 +58,13 @@ signals:
     void authSupplied (const Auth &auth);  
 
 private slots:
-    void _onError (QString msg = "");
     void _onProcessed ();
-    void _onRetryTimeout ();
 
 private:
     int _initMsg (MessageInterface &msg);
 
     SetupMsg _setupMsg;
     Client _client;
-
-    int _backoff;
 };
 
 } // namespace libencloud

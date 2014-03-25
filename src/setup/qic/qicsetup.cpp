@@ -6,15 +6,19 @@
 
 namespace libencloud {
 
+/**
+ * Unlike ECE/SECE Setup, the QIC Setup Module makes no automatic retries =>
+ * errors are forwarded to user.
+ */
+
 QicSetup::QicSetup (Config *cfg)
     : SetupInterface(cfg)
-    , _backoff(1)
 {
     LIBENCLOUD_TRACE;
 
     _initMsg(_setupMsg);
     connect(&_setupMsg, SIGNAL(error(QString)),
-            this, SLOT(_onError(QString)));
+            this, SIGNAL(error(QString)));
     connect(&_setupMsg, SIGNAL(need(QString)),
             this, SIGNAL(need(QString)));
     connect(&_setupMsg, SIGNAL(processed()),
@@ -40,7 +44,6 @@ int QicSetup::start ()
     return 0;
 }
 
-// TODO
 int QicSetup::stop ()
 {
     LIBENCLOUD_TRACE;
@@ -62,36 +65,14 @@ int QicSetup::getTotalSteps() const
 // private slots
 //
 
-void QicSetup::_onError (QString msg)
-{
-    QState *state = qobject_cast<QState *>(sender());
-    int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
-
-    LIBENCLOUD_DBG("state: " << state << ", retrying in " <<
-            QString::number(secs) << " seconds");
-
-    QTimer::singleShot(secs * 1000, this, SLOT(_onRetryTimeout()));
-    _backoff++;
-
-    emit error(msg);
-}
-
 void QicSetup::_onProcessed ()
 {
-    _backoff = 1;
+    LIBENCLOUD_TRACE;
 
     emit progress(Progress(tr("Received Configuration from Switchboard"),
                 StateReceived, getTotalSteps()));
 
     emit completed();
-}
-
-void QicSetup::_onRetryTimeout ()
-{
-    LIBENCLOUD_TRACE;
-
-    stop();
-    start();
 }
 
 //
