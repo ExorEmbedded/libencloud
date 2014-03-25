@@ -20,6 +20,8 @@
 #  endif
 #endif
 
+#define LIBENCLOUD_LOCALHOST    "127.0.0.1"
+
 namespace libencloud {
 
 class Config;

@@ -1,6 +1,8 @@
 #ifndef _LIBENCLOUD_PRIV_DEFAULTS_H_
 #define _LIBENCLOUD_PRIV_DEFAULTS_H_
 
+#include <encloud/Common>
+
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
 #define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
 
@@ -62,7 +64,7 @@
 #define LIBENCLOUD_OP_KEY_FILE          "op_key.pem"
 #define LIBENCLOUD_VPN_EXE_FILE         "openvpn" LIBENCLOUD_EXE
 #define LIBENCLOUD_VPN_CONF_FILE        "openvpn.conf"
-#define LIBENCLOUD_VPN_MGMT_HOST        "localhost"
+#define LIBENCLOUD_VPN_MGMT_HOST        LIBENCLOUD_LOCALHOST
 #define LIBENCLOUD_VPN_MGMT_PORT        1195
 #define LIBENCLOUD_VPN_VERBOSITY        2
 #define LIBENCLOUD_RSA_BITS             1024

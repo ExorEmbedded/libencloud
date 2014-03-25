@@ -6,7 +6,7 @@
 #include <encloud/Common>
 #include <encloud/Client>
 
-#define LIBENCLOUD_WATCHDOG_URL     "http://localhost:4814"
+#define LIBENCLOUD_WATCHDOG_URL     "http://" LIBENCLOUD_LOCALHOST ":4814"
 #define LIBENCLOUD_WATCHDOG_TOUT    3000  // ms
 
 namespace libencloud {

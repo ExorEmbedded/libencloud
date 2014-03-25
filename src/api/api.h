@@ -8,7 +8,7 @@
 // defaults
 //
 #define LIBENCLOUD_API_SCHEME       "http"
-#define LIBENCLOUD_API_HOST         "localhost"
+#define LIBENCLOUD_API_HOST         LIBENCLOUD_LOCALHOST
 #define LIBENCLOUD_API_PORT         LIBENCLOUD_SRV_PORT_DFT
 #define LIBENCLOUD_API_URL          LIBENCLOUD_API_SCHEME "://" LIBENCLOUD_API_HOST ":" \
                                     LIBENCLOUD_MACRO_STR(LIBENCLOUD_API_PORT)
