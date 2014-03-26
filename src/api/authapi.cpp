@@ -32,6 +32,7 @@ void AuthApi::authSupply (const Auth &auth)
 
     url.setPath(LIBENCLOUD_API_AUTH_PATH);
 
+    _params.clear();
     _params.addQueryItem("id", auth.getStrId());
     _params.addQueryItem("type", auth.getStrType());
     _params.addQueryItem("url", auth.getUrl());
