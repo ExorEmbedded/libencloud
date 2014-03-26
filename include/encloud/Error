@@ -29,13 +29,14 @@ public:
         CodeLast =              CodeAuthFailed
     } Code;
 
+    // Default constructor (unhandled error)
     Error ();
 
-    // Use this for public errors so they can be remapped numerically
+    // Use this for public errors which should be handled by client
     // Known error code + extra informative description
     Error (Code code, QString extra = "");
 
-    // Use this for private errors (only logged)
+    // Plain error message with undefined error code
     Error (const QString &msg);
 
     bool isValid () const;

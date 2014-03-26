@@ -14,15 +14,16 @@ Auth::Auth ()
 {
 }
 
-Auth::Auth (Id id, Type type, const QString &url, 
-        const QString &user, const QString &pass)
+Auth::Auth (Id id, Type type, QString url, 
+        QString user, QString pass)
     : _valid(false)
 {
-    LIBENCLOUD_ERR_IF (setId(id));
-    LIBENCLOUD_ERR_IF (setType(type));
-    LIBENCLOUD_ERR_IF (setUrl(url));
-    LIBENCLOUD_ERR_IF (setUser(user));
-    LIBENCLOUD_ERR_IF (setPass(pass));
+    if (setId(id) ||
+            setType(type) ||
+            setUrl(url) ||
+            setUser(user) ||
+            setPass(pass))
+        goto err;
 
     _valid = true;
 
@@ -30,15 +31,16 @@ err:
     return; 
 }
 
-Auth::Auth (const QString &id, const QString &type, const QString &url, 
-        const QString &user, const QString &pass)
+Auth::Auth (const QString &id, QString type, QString url, 
+        QString user, QString pass)
     : _valid(false)
 {
-    LIBENCLOUD_ERR_IF (setStrId(id));
-    LIBENCLOUD_ERR_IF (setStrType(type));
-    LIBENCLOUD_ERR_IF (setUrl(url));
-    LIBENCLOUD_ERR_IF (setUser(user));
-    LIBENCLOUD_ERR_IF (setPass(pass));
+    if (setStrId(id) ||
+            setStrType(type) ||
+            setUrl(url) ||
+            setUser(user) ||
+            setPass(pass))
+        goto err;
 
     _valid = true;
 
@@ -58,7 +60,8 @@ Auth::Id Auth::getId () const
 
 int Auth::setId (Auth::Id id)
 {
-    LIBENCLOUD_RETURN_IF (id < FirstId || id > LastId, ~0);
+    if (id < FirstId || id > LastId)
+        return ~0;
 
     _id = id;
 
@@ -85,11 +88,9 @@ int Auth::setStrId (const QString &id)
     else if (id == "proxy")
         _id = Auth::ProxyId;
     else
-        LIBENCLOUD_ERR_IF (1);
+        return ~0;
 
     return 0;
-err:
-    return ~0;
 }
 
 Auth::Type Auth::getType () const
@@ -99,7 +100,8 @@ Auth::Type Auth::getType () const
 
 int Auth::setType (Type type)
 {
-    LIBENCLOUD_RETURN_IF (type < FirstType || type > LastType, ~0);
+    if (type < FirstType || type > LastType)
+        return ~0;
     
     _type = type;
 
@@ -128,11 +130,9 @@ int Auth::setStrType (const QString &type)
     else if (type == "socks")
         _type = Auth::SocksType;
     else
-        LIBENCLOUD_ERR_IF (1);
+        return ~0;
 
     return 0;
-err:
-    return ~0;
 }
 
 const QString &Auth::getUrl () const
@@ -142,7 +142,8 @@ const QString &Auth::getUrl () const
 
 int Auth::setUrl (const QString &url)
 {
-    LIBENCLOUD_RETURN_IF (!QUrl(url).isValid(), ~0);
+    if (!QUrl(url).isValid())
+        return ~0;
 
     _url = url;
 
@@ -156,7 +157,8 @@ const QString &Auth::getUser () const
 
 int Auth::setUser (const QString &user)
 {
-    LIBENCLOUD_RETURN_IF (user == "", ~0);
+    if (user == "")
+        return ~0;
 
     _user = user;
 
@@ -170,7 +172,8 @@ const QString &Auth::getPass () const
 
 int Auth::setPass (const QString &pass)
 {
-    LIBENCLOUD_RETURN_IF (pass == "", ~0);
+    if (pass == "")
+        return ~0;
 
     _pass = pass;
 

@@ -38,11 +38,13 @@ err:
 Error::Error (const QString &msg)
     : _isValid(false)
     , _code(CodeUndefined)
-    , _seq(-1)
+    , _seq(++__seq)
 {
     LIBENCLOUD_DBG(msg);
 
     _desc = msg;
+
+    _isValid = true;
 }
 
 bool Error::isValid () const   { return _isValid; }
@@ -81,7 +83,8 @@ Error::Code Error::getCode () const
 
 int Error::setCode (Error::Code code)
 {
-    LIBENCLOUD_ERR_IF (code < CodeFirst || code > CodeLast);
+    if (code < CodeFirst || code > CodeLast)
+        goto err;
 
     _code = code;
 

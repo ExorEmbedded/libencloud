@@ -32,10 +32,10 @@ public:
     Type;
 
     Auth ();
-    Auth (Id id, Type type, const QString &url,
-            const QString &user, const QString &pass);
-    Auth (const QString &id, const QString &type, const QString &url,
-            const QString &user, const QString &pass);
+    Auth (Id id, Type type = NoneType, QString url = "",
+            QString user = "", QString pass = "");
+    Auth (const QString &id, QString type = "", QString url = "",
+            QString user = "", QString pass = "");
 
     bool isValid () const;
 

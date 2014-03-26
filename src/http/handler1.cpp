@@ -148,18 +148,29 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
             url.setEncodedQuery((*request.getContent()).toAscii());
 
             LIBENCLOUD_HANDLER_ERR_IF (
+                    ((id = url.queryItemValue("id")) == ""),
+                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
+            /* allow empty credentials for reset
+            LIBENCLOUD_HANDLER_ERR_IF (
                     ((id = url.queryItemValue("id")) == "") ||
                     ((aurl = url.queryItemValue("url")) == "") ||
                     ((user = url.queryItemValue("user")) == "") ||
                     ((pass = url.queryItemValue("pass")) == ""),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+                */
 
             type = url.queryItemValue("type");
+            aurl = url.queryItemValue("url");
+            user = url.queryItemValue("user");
+            pass = url.queryItemValue("pass");
 
             Auth auth(id, type, aurl, user, pass);
 
+            /* allow empty credentials for reset
             LIBENCLOUD_HANDLER_ERR_IF (!auth.isValid(),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            */
 
             LIBENCLOUD_HANDLER_ERR_IF (_parent->setAuth(auth), 
                     LIBENCLOUD_HTTP_STATUS_INTERNALERROR);

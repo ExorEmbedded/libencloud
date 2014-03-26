@@ -92,17 +92,21 @@ int HttpHandler::setAuth (const Auth &auth)
 {
     LIBENCLOUD_DBG("auth user: " << auth.getUser());
 
-    switch (auth.getId())
+    if (auth.isValid())
     {
-        case Auth::SwitchboardId:
-            _needs.removeAll("sb_auth");
-            break;
-        case Auth::ProxyId:
-            _needs.removeAll("proxy_auth");
-            break;
-        default:
-            LIBENCLOUD_ERR_IF (1);
-    }
+        switch (auth.getId())
+        {
+            case Auth::SwitchboardId:
+                _needs.removeAll("sb_auth");
+                break;
+            case Auth::ProxyId:
+                _needs.removeAll("proxy_auth");
+                break;
+            default:
+                LIBENCLOUD_ERR_IF (1);
+        }
+
+    } // otherwise can be a credential reset
 
     emit authSupplied(auth);
 
