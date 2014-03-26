@@ -32,11 +32,16 @@ err:
 
 bool Progress::isValid () const   { return _isValid; }
 
-bool Progress::operator== (const Progress &p) const
+bool Progress::operator == (const Progress &p) const
 {
     return (_desc == p._desc &&
             _step == p._step &&
             _total == p._total);
+}
+
+bool Progress::operator != (const Progress &p) const
+{
+    return !(p == *this);
 }
 
 QString Progress::getDesc () const

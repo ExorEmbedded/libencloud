@@ -19,7 +19,7 @@ Watchdog::Watchdog ()
     connect(&_timer, SIGNAL(timeout()), this, SLOT(_timeout()));
 
     _client.setDebug(false);
-    connect(&_client, SIGNAL(error(QString)), this, SLOT(_clientError(QString)));
+    connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_clientError(libencloud::Error)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 }
 
@@ -77,9 +77,9 @@ void Watchdog::_timeout ()
     _client.run(_url, _params, _headers, _config);
 }
 
-void Watchdog::_clientError (const QString &errmsg)
+void Watchdog::_clientError (const libencloud::Error &error)
 {
-    LIBENCLOUD_UNUSED(errmsg);
+    LIBENCLOUD_UNUSED(error);
 
     if (_state == DownState)
         return;

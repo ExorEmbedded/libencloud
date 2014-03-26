@@ -268,33 +268,6 @@ void VpnClient::stop (void)
 // private slots
 //
 
-#if 0
-void VpnClient::gotLogin (const QString &url, const QString &user, const QString &pass)
-{
-    Q_UNUSED(user);
-    Q_UNUSED(pass);
-
-    this->remoteUrl = QUrl(url);
-}
-
-void VpnClient::sbGotConfig (QString sbConfig)
-{
-    QVariantMap json;
-    bool ok;
-
-    json = Json::parse(sbConfig, ok).toMap();
-
-    LIBENCLOUD_EMIT_ERR_IF (!ok ||
-            parseConfig(json) ||
-            parseCaCert(json)
-            , sigError(this->err = ConfigError));
-
-    emit stateChanged((this->st = StateConfigured));
-err:
-    return;
-}
-#endif
-
 void VpnClient::processError (QProcess::ProcessError err)
 {
     QString errStr = this->process->errorString();
@@ -366,61 +339,5 @@ err:
 #endif  // Q_OS_WIN
     return;
 }
-
-#if 0
-int VpnClient::parseConfig(const QVariantMap &jo)
-{
-    QString vpnConfig;
-    QRegExp regexHostPort("\\nremote\\s+(\\S+)\\s+(\\d+)");
-
-    LIBENCLOUD_ERR_IF (jo["openvpn_conf"].isNull());
-
-    vpnConfig = jo["openvpn_conf"].toString() + "\n";
-    regexHostPort.indexIn(vpnConfig);
-
-    // Use host name instead of IP received from Switchboard - avoids problems
-    // due to ip change (config not updated).
-    // Note: '--remote' overrides breaks proxy (Assertion failed at proxy.c:217)
-    // so we replace the configuration value instead of overriding
-    LIBENCLOUD_ERR_IF (regexHostPort.capturedTexts().count() != 3);
-    this->remotePort = regexHostPort.capturedTexts()[2].toInt();
-    vpnConfig.replace(regexHostPort, "\nremote " +
-            this->remoteUrl.host() + " " +
-            QString::number(this->remotePort));
-
-    // print out a one-line copy
-    LIBENCLOUD_DBG("vpnConfig: " << QString(vpnConfig).replace("\n", "|"));
-
-    LIBENCLOUD_ERR_IF (!_cfgFile.open() ||
-            _cfgFile.write(vpnConfig.toAscii()) == -1);
-
-    LIBENCLOUD_DBG("configFile: " << _cfgFile.fileName());
-    _cfgFile.close();
-
-    return 0;
-err:
-    return ~0;
-}
-
-int VpnClient::parseCaCert(const QVariantMap &jo)
-{
-    QSslCertificate caCert;
-
-    LIBENCLOUD_ERR_IF (jo["openvpn_cert"].isNull());
-
-    caCert = QSslCertificate(jo["openvpn_cert"].toString().toAscii());
-    LIBENCLOUD_ERR_IF (!caCert.isValid());
-
-    LIBENCLOUD_ERR_IF (!this->caCertFile.open() ||
-            this->caCertFile.write(caCert.toPem()) == -1);
-
-    LIBENCLOUD_DBG("caCertFile: " << this->caCertFile.fileName());
-    this->caCertFile.close();
-
-    return 0;
-err:
-    return ~0;
-}
-#endif
 
 }  // namespace libencloud

@@ -4,6 +4,7 @@
 #include <QString>
 #include <QtPlugin>
 #include <encloud/Client>
+#include <encloud/Error>
 #include <common/config.h>
 
 namespace libencloud {
@@ -19,7 +20,7 @@ public:
 
 signals:
     // an error occurred
-    virtual void error (QString msg = "") = 0;
+    virtual void error (const Error &error) = 0;
 
     // message processing COMPLETED ()
     virtual void processed () = 0;

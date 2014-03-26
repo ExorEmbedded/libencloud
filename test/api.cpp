@@ -12,8 +12,8 @@ TestApi::TestApi ()
 
     connect(&_statusApi, SIGNAL(apiState(libencloud::State)),
             this, SLOT(_statusApiState(libencloud::State)));
-    connect(&_statusApi, SIGNAL(apiError(QString)),
-            this, SLOT(_statusApiError(QString)));
+    connect(&_statusApi, SIGNAL(apiError(libencloud::Error)),
+            this, SLOT(_statusApiError(libencloud::Error)));
     connect(&_statusApi, SIGNAL(apiProgress(libencloud::Progress)),
             this, SLOT(_statusApiProgress(libencloud::Progress)));
     connect(&_statusApi, SIGNAL(apiNeed(QString)),
@@ -95,9 +95,9 @@ void TestApi::_statusApiState (libencloud::State st)
     LIBENCLOUD_DBG("state: " << QString::number(st));
 }
 
-void TestApi::_statusApiError (const QString &msg)
+void TestApi::_statusApiError (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("msg: " << msg);
+    LIBENCLOUD_DBG("err: " << err.toString());
 }
 
 void TestApi::_statusApiProgress (const libencloud::Progress &progress)

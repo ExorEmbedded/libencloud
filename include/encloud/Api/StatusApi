@@ -41,7 +41,7 @@ signals:
     //
 
     void apiState (libencloud::State st);
-    void apiError (const QString &msg);
+    void apiError (const libencloud::Error &err);
     void apiProgress (const libencloud::Progress &progress);
     void apiNeed (const QString &need);
 
@@ -49,7 +49,8 @@ signals:
     // Local signals 
     //
 
-    void error (const QString &msg);
+    // emitted also on apiError()
+    void error (const libencloud::Error &err);
 
 protected slots:
 
@@ -58,16 +59,16 @@ protected slots:
 
 protected:
 
-    int _parseState (QVariant v);
-    int _parseError (QVariant v);
-    int _parseProgress (QVariant v);
-    int _parseNeed (QVariant v);
+    int _parseState (const QVariant &v);
+    int _parseError (const QVariant &v);
+    int _parseProgress (const QVariant &v);
+    int _parseNeed (const QVariant &v);
 
     QTimer _pollTimer;
 
     // API context
     State _state;
-    QString _error;
+    Error _error;
     Progress _progress;
     QStringList _needs;
 };

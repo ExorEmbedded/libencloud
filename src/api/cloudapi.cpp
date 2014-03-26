@@ -13,7 +13,7 @@ CloudApi::CloudApi ()
 {
     LIBENCLOUD_TRACE;
 
-    connect(&_client, SIGNAL(error(QString)), this, SLOT(_error(QString)));
+    connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 }
 
@@ -39,9 +39,9 @@ void CloudApi::actionRequest (const QString &action, const Params &params)
     _client.run(url, _params, _headers, _config);
 }
 
-void CloudApi::_error (const QString &err)
+void CloudApi::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("err: " << err);
+    LIBENCLOUD_DBG("err: " << err.toString());
 
     emit actionSent(Api::ErrorRc);
 }

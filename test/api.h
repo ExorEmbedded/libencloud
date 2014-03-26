@@ -45,7 +45,7 @@ private slots:
     //
 
     void _statusApiState (libencloud::State st);
-    void _statusApiError (const QString &msg);
+    void _statusApiError (const libencloud::Error &err);
     void _statusApiProgress (const libencloud::Progress &progress);
     void _statusApiNeed (const QString &need);
 

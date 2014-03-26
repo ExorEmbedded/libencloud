@@ -15,7 +15,8 @@ public:
     Progress (const QString &desc, int step, int total);
 
     bool isValid () const;
-    bool operator== (const Progress &p) const;
+    bool operator == (const Progress &p) const;
+    bool operator != (const Progress &p) const;
 
     QString getDesc () const;
     void setDesc (const QString &desc);

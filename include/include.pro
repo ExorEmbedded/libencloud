@@ -5,6 +5,7 @@ TEMPLATE = subdirs
 HEADERS += encloud/Auth
 HEADERS += encloud/Common
 HEADERS += encloud/Core
+HEADERS += encloud/Error
 HEADERS += encloud/Info
 HEADERS += encloud/Logger
 HEADERS += encloud/Progress

@@ -10,6 +10,7 @@
 #include <QAuthenticator>
 #include <QSslConfiguration>
 #include <encloud/Common>
+#include <encloud/Error>
 
 namespace libencloud {
 
@@ -24,7 +25,7 @@ public:
             const QSslConfiguration &conf);
 
 signals:
-    void error (const QString &msg);
+    void error (const libencloud::Error &err);
     void complete (const QString &reponse);
 
 protected slots:

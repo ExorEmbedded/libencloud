@@ -35,7 +35,7 @@ signals:
 
 protected slots:
 
-    void _error (const QString &err);
+    void _error (const libencloud::Error &err);
     void _clientComplete (const QString &response);
 };
 

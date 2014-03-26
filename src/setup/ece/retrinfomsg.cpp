@@ -5,7 +5,7 @@
 #include <setup/ece/retrinfomsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
-#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error()))
 
 namespace libencloud {
 
@@ -35,7 +35,7 @@ void RetrInfoMsg::process ()
         case 0:  // ok - continue on
             break;
         case 1:  // data needed - emit a silent error
-            emit error();
+            emit error(Error());
             goto err;
         default:  // otherwise emit a nonsilent error
             EMIT_ERROR_ERR_IF (1);
@@ -45,7 +45,7 @@ void RetrInfoMsg::process ()
 
     // setup signals from client
     disconnect(_client, 0, this, 0);
-    connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+    connect(_client, SIGNAL(error(libencloud::Error), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
@@ -139,7 +139,7 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     errString = jo["error"].toString();
     if (!errString.isEmpty())
     {
-        LIBENCLOUD_EMIT (error("SB error: " + errString));
+        LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
         goto err;
     }
 

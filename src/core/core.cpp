@@ -143,8 +143,8 @@ int Core::attachServer (Server *server)
 
     obj = dynamic_cast<QObject *> (handler);
 
-    connect(this, SIGNAL(error(QString)), 
-            obj, SLOT(_coreErrorReceived(QString)));
+    connect(this, SIGNAL(error(libencloud::Error)), 
+            obj, SLOT(_coreErrorReceived(libencloud::Error)));
     connect(this, SIGNAL(stateChanged(State)), 
             obj, SLOT(_coreStateChanged(State)));
     connect(this, SIGNAL(progress(Progress)), 
@@ -237,17 +237,17 @@ void Core::_setupCompleted ()
 
     const VpnConfig *vpnConfig = _setup->getVpnConfig();
     LIBENCLOUD_EMIT_ERR_IF (vpnConfig == NULL, 
-            error(tr("No Cloud configuration from Setup Module")));
+            error(Error(tr("No Cloud configuration from Setup Module"))));
 
     // write retrieved configuration to file
     LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(_cfg->config.vpnConfPath.absoluteFilePath()),
-            error(tr("Failed writing configuration to file")));
+            error(Error(tr("Failed writing configuration to file"))));
 err:
     return;
 }
 
 // Forward error state and message to http handler
-void Core::_errorReceived (const QString &msg)
+void Core::_errorReceived (const libencloud::Error &err)
 {
     LIBENCLOUD_TRACE;
 
@@ -259,7 +259,7 @@ void Core::_errorReceived (const QString &msg)
 #endif
 
     emit stateChanged(StateError);
-    emit error(msg);
+    emit error(err);
 }
 
 // Remap step/nsteps and forward signal for http handler
@@ -375,7 +375,7 @@ void Core::_actionRequest (const QString &action, const Params &params)
         emit actionRequest(action, params);
     }
     else 
-        emit error(tr("Invalid action: ") + action);
+        emit error(Error(tr("Invalid action: ") + action));
 
 err:
     return;
@@ -433,8 +433,8 @@ int Core::_initSetup ()
     LIBENCLOUD_ERR_IF (_setupObj == NULL);
 
     // error signal handling
-    connect(_setupObj, SIGNAL(error(QString)), 
-            this, SLOT(_errorReceived(QString)));
+    connect(_setupObj, SIGNAL(error(libencloud::Error)), 
+            this, SLOT(_errorReceived(libencloud::Error)));
 
     // progress signal handling
     connect(_setupObj, SIGNAL(progress(Progress)), 
@@ -470,8 +470,8 @@ int Core::_initCloud ()
     LIBENCLOUD_ERR_IF (_cloudObj == NULL);
 
     // error signal handling
-    connect(_cloudObj, SIGNAL(error(QString)), 
-            this, SLOT(_errorReceived(QString)));
+    connect(_cloudObj, SIGNAL(error(libencloud::Error)), 
+            this, SLOT(_errorReceived(libencloud::Error)));
 
     // state changes forwarding for connecting/connected states
     connect(_cloudObj, SIGNAL(stateChanged(State)), 

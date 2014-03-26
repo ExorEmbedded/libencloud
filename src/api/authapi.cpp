@@ -13,7 +13,7 @@ AuthApi::AuthApi ()
 {
     LIBENCLOUD_TRACE;
 
-    connect(&_client, SIGNAL(error(QString)), this, SLOT(_error(QString)));
+    connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 }
 
@@ -49,9 +49,9 @@ void AuthApi::authSupply (const Auth &auth)
 // protected slots
 //
 
-void AuthApi::_error (const QString &err)
+void AuthApi::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("err: " << err);
+    LIBENCLOUD_DBG("err: " << err.toString());
 
     emit authSent(Api::ErrorRc);
 }

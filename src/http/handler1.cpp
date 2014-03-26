@@ -80,23 +80,32 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
         case LIBENCLOUD_HTTP_METHOD_GET:
         {
             Progress progress = _parent->getCoreProgress();
+            Error error = _parent->getCoreError();
             QVariantMap j;
-            QVariantMap jProg;
+            QVariantMap jMap;
             bool ok;
 
             j["state"] = _parent->getCoreState();
 
             // avoid "need" showing up as error
             if (_parent->getCoreState() == StateError &&
-                _parent->getCoreError() != "")
-                j["error"] = _parent->getCoreError();
+                error.isValid())
+            {
+                jMap["code"] = error.getCode();
+                jMap["seq"] = error.getSeq();
+                if (error.getDesc() != "")
+                    jMap["desc"] = error.getDesc();
+                if (error.getExtra() != "")
+                    jMap["extra"] = error.getExtra();
+                j["error"] = jMap;
+            }
 
             if (progress.isValid())
             {
-                jProg["desc"] = progress.getDesc();
-                jProg["step"] = progress.getStep();
-                jProg["total"] = progress.getTotal();
-                j["progress"] = jProg;
+                jMap["desc"] = progress.getDesc();
+                jMap["step"] = progress.getStep();
+                jMap["total"] = progress.getTotal();
+                j["progress"] = jMap;
             }
 
             if (_parent->getNeed() != "")

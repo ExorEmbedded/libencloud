@@ -28,6 +28,9 @@ SOURCES += common/auth.cpp
 HEADERS += $${PUBINCLUDEDIR}/Client
 SOURCES += common/client.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/Error
+SOURCES += common/error.cpp
+
 HEADERS += $${PUBINCLUDEDIR}/Info
 SOURCES += common/info.cpp
 

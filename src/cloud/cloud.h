@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QString>
 #include <encloud/Auth>
+#include <encloud/Error>
 #include <encloud/State>
 #include <encloud/Progress>
 #include <common/config.h>
@@ -26,7 +27,7 @@ public:
     int getTotalSteps() const;
 
 signals:
-    void error (QString msg = "");
+    void error (const libencloud::Error &error);
     void stateChanged (State state);
     void progress (const Progress &progress);
     void ipAssigned (const QString &ip);

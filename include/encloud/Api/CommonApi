@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <encloud/Client>
 #include <encloud/Common>
+#include <encloud/Error>
 
 namespace libencloud {
 

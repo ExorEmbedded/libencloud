@@ -41,7 +41,7 @@ signals:
     //
     // setup -> core
     //
-    void error (QString msg = "");
+    void error (const libencloud::Error &error);
     void progress (const Progress &progress);
     void serverConfigSupply (const QVariant &variant);
     void completed ();

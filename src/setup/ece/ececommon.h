@@ -6,7 +6,7 @@
 #include <common/config.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
-#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error()))
 
 namespace libencloud {
 namespace setupece {

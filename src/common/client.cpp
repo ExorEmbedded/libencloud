@@ -2,8 +2,8 @@
 #include <common/common.h>
 #include <common/config.h>
 
-#define EMIT_ERROR(msg) LIBENCLOUD_EMIT(error(msg))
-#define EMIT_ERROR_ERR_IF(cond, msg) LIBENCLOUD_EMIT_ERR_IF(cond, error(msg))
+#define EMIT_ERROR(msg) LIBENCLOUD_EMIT(error(Error(msg)))
+#define EMIT_ERROR_ERR_IF(cond, msg) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error(msg)))
 
 // Allow debug deactivation via API
 #define CLIENT_DBG(msg) do { \

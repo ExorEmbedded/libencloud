@@ -29,10 +29,10 @@ HttpHandler::~HttpHandler ()
     LIBENCLOUD_TRACE;
 }
 
-QString HttpHandler::getCoreError () const      { return _coreError; }
-State HttpHandler::getCoreState () const        { return _coreState; }
-Progress HttpHandler::getCoreProgress () const  { return _coreProgress; }
-QString HttpHandler::getNeed () const           { return _needs.join(" "); }
+const Error &HttpHandler::getCoreError () const     { return _coreError; }
+State HttpHandler::getCoreState () const            { return _coreState; }
+Progress HttpHandler::getCoreProgress () const      { return _coreProgress; }
+QString HttpHandler::getNeed () const               { return _needs.join(" "); }
 
 void HttpHandler::removeNeed (const QString &what)
 {
@@ -166,14 +166,9 @@ err:
 // private slots
 //
 
-void HttpHandler::_coreErrorReceived (const QString &msg)
+void HttpHandler::_coreErrorReceived (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("msg: " << msg);
-
-    if (msg == "")
-        _coreError = "<Undefined>";
-    else
-        _coreError = msg;
+    _coreError = err;
 }
 
 void HttpHandler::_coreStateChanged (State state)

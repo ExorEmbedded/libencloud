@@ -38,7 +38,7 @@ int RetrConfMsg::process ()
 
     // setup signals from client
     disconnect(_client, 0, this, 0);
-    connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, headers, config);

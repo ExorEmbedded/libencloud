@@ -8,6 +8,7 @@
 #include <QVariant>
 #include <encloud/Auth>
 #include <encloud/Common>
+#include <encloud/Error>
 #include <encloud/Http/HttpAbstractHandler>
 #include <encloud/State>
 #include <encloud/Progress>
@@ -38,7 +39,7 @@ public:
     int handle (const HttpRequest &request, HttpResponse &response);
 
     // attributes used by HTTP API handlers
-    QString getCoreError () const;
+    const Error &getCoreError () const;
 
     State getCoreState () const;
 
@@ -72,7 +73,7 @@ signals:
     void actionRequest (const QString &action, const Params &params);
 
 private slots:
-    void _coreErrorReceived (const QString &msg);
+    void _coreErrorReceived (const libencloud::Error &err);
     void _coreStateChanged (State state);
     void _coreProgressReceived (const Progress &progress);
     void _needReceived (const QString &what);
@@ -81,7 +82,7 @@ private slots:
 private:
     HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
 
-    QString _coreError;
+    Error _coreError;
     State _coreState;
     Progress _coreProgress;
     QStringList _needs;

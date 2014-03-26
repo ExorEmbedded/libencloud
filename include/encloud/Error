@@ -1,0 +1,72 @@
+#ifndef _LIBENCLOUD_ERROR_H_
+#define _LIBENCLOUD_ERROR_H_
+
+#include <QObject>
+#include <QString>
+#include <encloud/Common>
+
+namespace libencloud 
+{
+
+class LIBENCLOUD_DLLSPEC Error
+{
+
+public:
+
+    typedef enum {
+        CodeUndefined =         -1,
+        CodeSuccess =           0,
+
+        CodeHostUnreach =       1,
+
+        CodeAuthFailed =        100,
+
+        CodeProxyAuthFailed =   200,
+
+        CodeServerError =       500,
+
+        CodeFirst =             CodeSuccess,
+        CodeLast =              CodeAuthFailed
+    } Code;
+
+    Error ();
+
+    // Use this for public errors so they can be remapped numerically
+    // Known error code + extra informative description
+    Error (Code code, QString extra = "");
+
+    // Use this for private errors (only logged)
+    Error (const QString &msg);
+
+    bool isValid () const;
+    bool operator == (const Error &e) const;
+    bool operator != (const Error &e) const;
+    QString toString () const;
+
+    Code getCode () const;
+    int setCode (Code code);
+
+    int getSeq () const;
+    int setSeq (int seq);
+
+    QString getDesc () const;
+    int setDesc (const QString &desc);
+
+    QString getExtra () const;
+    int setExtra (const QString &desc);
+
+private:
+
+    QString _code2Desc (Code code);
+
+    bool _isValid;
+    Code _code;
+    static int __seq;
+    int _seq;
+    QString _desc;
+    QString _extra;
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_ERROR_H_

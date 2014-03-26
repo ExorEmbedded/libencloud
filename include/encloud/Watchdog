@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <encloud/Common>
 #include <encloud/Client>
+#include <encloud/Error>
 
 #define LIBENCLOUD_WATCHDOG_URL     "http://" LIBENCLOUD_LOCALHOST ":4814"
 #define LIBENCLOUD_WATCHDOG_TOUT    3000  // ms
@@ -45,7 +46,7 @@ signals:
 
 protected slots:
     void _timeout ();
-    void _clientError (const QString &errmsg);
+    void _clientError (const libencloud::Error &err);
     void _clientComplete (const QString &response);
 
 protected:

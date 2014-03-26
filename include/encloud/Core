@@ -8,6 +8,8 @@
 #include <encloud/Api/CloudApi>
 #include <encloud/Auth>
 #include <encloud/Common>
+#include <encloud/Error>
+#include <encloud/Manager/NetworkManager>
 #include <encloud/Manager/NetworkManager>
 #include <encloud/Progress>
 #include <encloud/Server>
@@ -42,7 +44,7 @@ public:
     // should use HTTP API for status monitoring and providing data
 
 signals:
-    void error (const QString &msg);
+    void error (const libencloud::Error &err);
     void stateChanged (State state);
     void progress (const Progress &p);
     void need (const QString &what);
@@ -55,7 +57,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
-    void _errorReceived (const QString &msg);
+    void _errorReceived (const libencloud::Error &err);
     void _progressReceived (const Progress &p);
     void _authRequired (Auth::Id id);
     void _clientPortReceived (int port);

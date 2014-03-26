@@ -6,7 +6,7 @@
 #include <setup/qic/setupmsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
-#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error())
+#define EMIT_ERROR_ERR_IF(cond) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error()))
 
 namespace libencloud {
 
@@ -37,7 +37,7 @@ int SetupMsg::process ()
     if (!_sbAuth.isValid())
     {
         emit authRequired(Auth::SwitchboardId);
-        LIBENCLOUD_EMIT_ERR (error(tr("Switchboard login required")));
+        LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
     authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
@@ -57,7 +57,7 @@ int SetupMsg::process ()
 
     // setup signals from client
     disconnect(_client, 0, this, 0);
-    connect(_client, SIGNAL(error(QString)), this, SIGNAL(error(QString)));
+    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, headers, config);
@@ -126,15 +126,23 @@ int SetupMsg::_decodeResponse (const QString &response)
     json = json::parse(response, ok).toMap();
 
     LIBENCLOUD_EMIT_ERR_IF (!ok,
-            error(tr("Error parsing SB response")));
+            error(Error(tr("Error parsing SB response"))));
 
     // bubble Switchboard errors
     if (ok && !json["error"].isNull())
     {
-        emit authRequired(Auth::SwitchboardId);
+        QString sbError = json["error"].toString();
 
-        LIBENCLOUD_EMIT_ERR (error(tr("Switchboard error: ") +
-                    json["error"].toString()));
+        if (sbError == "Unauthorized")
+        {
+            emit authRequired(Auth::SwitchboardId);
+            LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeAuthFailed)));
+        }
+        else
+        {
+            LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeServerError,
+                        json["error"].toString())));
+        }
     }
 
     // field validity check
@@ -144,18 +152,18 @@ int SetupMsg::_decodeResponse (const QString &response)
             json["openvpn_conf"].isNull() ||
             json["available_pages"].isNull() ||
             json["openvpn_cert"].isNull(),
-            error(tr("Error parsing SB configuration")));
+            error(Error(tr("Error parsing SB configuration"))));
 
     // most fields not used locally (retrieved by QIC via API)
     // for now we're only interested in VPN configuration,
     _vpnConfig = VpnConfig(json["openvpn_conf"].toString(), _cfg);
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
-            error(tr("VPN Configuration from Switchboard not valid")));
+            error(Error(tr("VPN Configuration from Switchboard not valid"))));
 
     // and CA certificate
     _caCert = QSslCertificate(json["openvpn_cert"].toString().toAscii());
     LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
-            error(tr("CA Certificate from Switchboard not valid")));
+            error(Error(tr("CA Certificate from Switchboard not valid"))));
 
     // remapping to Encloud configuration
     serverMap["uuid"] = json["uuid"];
@@ -182,7 +190,7 @@ int SetupMsg::_unpackResponse ()
 
     return 0;
 err:
-    emit error(tr("System error writing Operation CA: ") + caf.errorString());
+    emit error(Error(tr("System error writing Operation CA: ") + caf.errorString()));
     caf.close();
     return ~0;
 }

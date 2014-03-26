@@ -6,6 +6,7 @@
 #include <QtPlugin>
 #include <QUuid>
 #include <encloud/Auth>
+#include <encloud/Error>
 #include <encloud/Progress>
 #include <encloud/State>
 #include <common/vpn/vpnconfig.h>
@@ -29,7 +30,7 @@ signals:
     //
     // setup -> core
     //
-    virtual void error (QString msg = "") = 0;
+    virtual void error (const libencloud::Error &err) = 0;
     virtual void progress (const Progress &progress) = 0;
     virtual void completed () = 0;
 

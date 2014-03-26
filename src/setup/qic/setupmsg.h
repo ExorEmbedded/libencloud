@@ -21,7 +21,7 @@ public:
     const VpnConfig *getVpnConfig ();
 
 signals:
-    void error (QString msg = "");
+    void error (const libencloud::Error &err);
     void need (const QString &what);
     void authRequired (Auth::Id id);
     void serverConfigSupply (const QVariant &variant);

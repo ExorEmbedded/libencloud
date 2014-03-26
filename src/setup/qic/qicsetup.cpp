@@ -17,8 +17,8 @@ QicSetup::QicSetup (Config *cfg)
     LIBENCLOUD_TRACE;
 
     _initMsg(_setupMsg);
-    connect(&_setupMsg, SIGNAL(error(QString)),
-            this, SIGNAL(error(QString)));
+    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
+            this, SIGNAL(error(libencloud::Error)));
     connect(&_setupMsg, SIGNAL(need(QString)),
             this, SIGNAL(need(QString)));
     connect(&_setupMsg, SIGNAL(processed()),
