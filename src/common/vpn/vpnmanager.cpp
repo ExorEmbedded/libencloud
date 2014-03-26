@@ -144,6 +144,7 @@ void VpnManager::detach ()
         LIBENCLOUD_DELETE(this->socket);
     }
 
+    this->attachRetries = 0;
     this->st = StateDetached;
     this->err = NoError;
 }
