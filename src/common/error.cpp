@@ -142,23 +142,27 @@ QString Error::_code2Desc (Code code)
     switch (code)
     {
         case CodeUndefined:
-            return QObject::tr("Undefined");
+            return QObject::tr("<Undefined>");
 
         // 0xx
         case CodeSuccess:
-            return QObject::tr("Success");
-        case CodeHostUnreach:
-            return QObject::tr("Host Unreachable");
+            return QObject::tr("Operation Successful");
+        case CodeServerUnreach:
+            return QObject::tr("Server Unreachable. Please check address and connectivity.");
 
         // 1xx
-        case CodeAuthFailed:
-            return QObject::tr("Authentication Failure");
-
-        // 2xx
-        case CodeProxyAuthFailed:
-            return QObject::tr("Proxy Authentication Failure");
+        case CodeServiceUnreach:
+            return QObject::tr("Local Encloud Service Unreachable");
 
         // 5xx
+        case CodeAuthFailed:
+            return QObject::tr("Server Authentication Failure. Please check credentials.");
+
+        // 6xx
+        case CodeProxyAuthFailed:
+            return QObject::tr("Proxy Authentication Failure. Please check credentials.");
+
+        // 1xxx
         case CodeServerError:
             return QObject::tr("Generic Server Error");
     }

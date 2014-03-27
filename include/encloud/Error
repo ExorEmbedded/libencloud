@@ -17,13 +17,15 @@ public:
         CodeUndefined =         -1,
         CodeSuccess =           0,
 
-        CodeHostUnreach =       1,
+        CodeServerUnreach =     1,
 
-        CodeAuthFailed =        100,
+        CodeServiceUnreach =    100,
 
-        CodeProxyAuthFailed =   200,
+        CodeAuthFailed =        500,
 
-        CodeServerError =       500,
+        CodeProxyAuthFailed =   600,
+
+        CodeServerError =       1000,
 
         CodeFirst =             CodeSuccess,
         CodeLast =              CodeAuthFailed

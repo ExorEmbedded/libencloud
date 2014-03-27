@@ -18,7 +18,7 @@ StatusApi::StatusApi ()
 
     connect(&_pollTimer, SIGNAL(timeout()), this, SLOT(_pollTimeout()));
 
-    connect(&_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
+    connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_clientError(libencloud::Error)));
     connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 }
 
@@ -85,6 +85,20 @@ void StatusApi::_clientComplete (const QString &response)
         LIBENCLOUD_ERR_IF (_parseNeed(jo["need"]));
 err:
     return;
+}
+
+void StatusApi::_clientError (const libencloud::Error &err)
+{
+    switch (err.getCode())
+    {
+        // Server in our case is the Encloud Service
+        case Error::CodeServerUnreach:
+            emit error(Error(Error::CodeServiceUnreach));
+            break;
+        default:
+            emit error(err);
+            break;
+    }
 }
 
 //

@@ -112,9 +112,16 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
     LIBENCLOUD_UNUSED(err);
 
-    EMIT_ERROR(reply->errorString());
-    
-    reply->deleteLater();
+    switch (reply->error())
+    {
+        case QNetworkReply::ConnectionRefusedError:
+        case QNetworkReply::UnknownNetworkError:
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach)));
+            break;
+        default:
+            EMIT_ERROR(reply->errorString());
+            break;
+    }
 }
 
 /**

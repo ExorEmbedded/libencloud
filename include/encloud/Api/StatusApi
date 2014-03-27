@@ -56,6 +56,7 @@ protected slots:
 
     void _pollTimeout ();
     void _clientComplete (const QString &response);
+    void _clientError (const libencloud::Error &err);
 
 protected:
 
