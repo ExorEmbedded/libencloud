@@ -72,17 +72,10 @@ void StatusApi::_clientComplete (const QString &response)
     jo = json::parseJsonp(response, ok).toMap();
     LIBENCLOUD_ERR_IF (!ok);
 
-    if (!jo["state"].isNull())
-        LIBENCLOUD_ERR_IF (_parseState(jo["state"]));
-
-    if (!jo["error"].isNull())
-        LIBENCLOUD_ERR_IF (_parseError(jo["error"]));
-
-    if (!jo["progress"].isNull())
-        LIBENCLOUD_ERR_IF (_parseProgress(jo["progress"]));
-
-    if (!jo["need"].isNull())
-        LIBENCLOUD_ERR_IF (_parseNeed(jo["need"]));
+    LIBENCLOUD_ERR_IF (_parseState(jo["state"]));
+    LIBENCLOUD_ERR_IF (_parseError(jo["error"]));
+    LIBENCLOUD_ERR_IF (_parseProgress(jo["progress"]));
+    LIBENCLOUD_ERR_IF (_parseNeed(jo["need"]));
 err:
     return;
 }
@@ -107,7 +100,10 @@ void StatusApi::_clientError (const libencloud::Error &err)
 
 int StatusApi::_parseState (const QVariant &v)
 {
-    State s = (State) v.toInt();
+    State s = StateNone;
+
+    if (!v.isNull())
+       s = (State) v.toInt();
 
     if (s != _state)
         emit apiState((_state = s));
@@ -117,50 +113,60 @@ int StatusApi::_parseState (const QVariant &v)
 
 int StatusApi::_parseError (const QVariant &v)
 {
-    QVariantMap jo = v.toMap();
     Error err;
 
-    LIBENCLOUD_ERR_IF (jo["code"].isNull());
+    if (!v.isNull())
+    {
+        QVariantMap jo = v.toMap();
 
-    if (!jo["code"].isNull())
-        err.setCode((Error::Code) jo["code"].toInt());
+        if (!jo["code"].isNull())
+            err.setCode((Error::Code) jo["code"].toInt());
 
-    if (!jo["seq"].isNull())
-        err.setSeq(jo["seq"].toInt());
+        if (!jo["seq"].isNull())
+            err.setSeq(jo["seq"].toInt());
 
-    if (!jo["desc"].isNull())
-        err.setDesc(jo["desc"].toString());
+        if (!jo["desc"].isNull())
+            err.setDesc(jo["desc"].toString());
 
-    if (!jo["extra"].isNull())
-        err.setExtra(jo["extra"].toString());
+        if (!jo["extra"].isNull())
+            err.setExtra(jo["extra"].toString());
+    }
+
+//    LIBENCLOUD_DBG("err: " << err.toString());
 
     // emit apiError, generic error and also state (for confirmation)
     if (err != _error) {
+
         _error = err;
-        emit apiError(_error);
-        emit error(_error);
-        emit apiState(_state);
+
+        if (_error.getCode() != Error::CodeUndefined)
+        {
+            emit apiError(_error);
+            emit error(_error);
+            emit apiState(_state);
+        }
     }
 
     return 0;
-err:
-    return ~0;
 }
 
 int StatusApi::_parseProgress (const QVariant &v)
 {
     Progress p;
    
-    QVariantMap vm = v.toMap();
+    if (!v.isNull())
+    {
+        QVariantMap jo = v.toMap();
 
-    if (!vm["desc"].isNull())
-        p.setDesc(vm["desc"].toString());
+        if (!jo["desc"].isNull())
+            p.setDesc(jo["desc"].toString());
 
-    if (!vm["step"].isNull())
-        p.setStep(vm["step"].toInt());
+        if (!jo["step"].isNull())
+            p.setStep(jo["step"].toInt());
 
-    if (!vm["total"].isNull())
-        p.setTotal(vm["total"].toInt());
+        if (!jo["total"].isNull())
+            p.setTotal(jo["total"].toInt());
+    }
 
     if (p != _progress)
         emit apiProgress((_progress = p));
@@ -170,16 +176,21 @@ int StatusApi::_parseProgress (const QVariant &v)
 
 int StatusApi::_parseNeed (const QVariant &v)
 {
-    QStringList needs = v.toString().split(" ");
+    QStringList needs;
 
-    if (needs != _needs)
+    if (!v.isNull())
     {
-        foreach (QString n, needs)
-            if (!_needs.contains(n))
-                emit apiNeed(n);
+        needs = v.toString().split(" ");
 
-        _needs = needs;
-    }
+        if (needs != _needs)
+        {
+            foreach (QString n, needs)
+                if (!_needs.contains(n))
+                    emit apiNeed(n);
+
+            _needs = needs;
+        }
+    } 
 
     return 0;
 }

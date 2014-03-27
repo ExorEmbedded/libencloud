@@ -114,12 +114,8 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
     switch (reply->error())
     {
-        case QNetworkReply::ConnectionRefusedError:
-        case QNetworkReply::UnknownNetworkError:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach)));
-            break;
         default:
-            EMIT_ERROR(reply->errorString());
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach)));
             break;
     }
 }
