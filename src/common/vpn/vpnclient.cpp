@@ -124,7 +124,7 @@ QStringList VpnClient::getArgs (void)
     QString caCertPath;
     QNetworkProxy proxy = QNetworkProxy::applicationProxy();
 
-    args << "--log" << getCommonAppDataDir() + "openvpn.log";
+    args << "--log" << getCommonAppDataDir() + "openvpn-log.txt";
 
     configPath = _cfg->config.vpnConfPath.absoluteFilePath();
     args << "--config" << configPath;
