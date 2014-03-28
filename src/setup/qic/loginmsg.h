@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_
 
 #include <QString>
 #include <QVariant>
@@ -8,23 +8,19 @@
 #include <common/message.h>
 #include <common/vpn/vpnconfig.h>
 
-#define LIBENCLOUD_SETUP_QIC_CONFIG_URL        "/manage/status/status.access.config/"
+#define LIBENCLOUD_SETUP_QIC_LOGIN_URL        "/manage/access/login/"
+#define LIBENCLOUD_SETUP_QIC_LOGOUT_URL        "/manage/access/logout/"
 
 namespace libencloud {
 
-class SetupMsg : public QObject, public MessageInterface
+class LoginMsg : public QObject, public MessageInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
 
-public:
-    const VpnConfig *getVpnConfig ();
-
 signals:
     void error (const libencloud::Error &err);
-    void need (const QString &what);
     void authRequired (Auth::Id id);
-    void serverConfigSupply (const QVariant &variant);
     void processed ();
 
 public slots:
@@ -41,15 +37,9 @@ private:
     int _unpackResponse ();
 
     //request inputs
-    bool _in;
     Auth _sbAuth;
-
-    //response outputs
-    VpnConfig _vpnConfig;
-    QSslCertificate _caCert;
-    QVariantMap _serverConfig;
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QIC_SETUPMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_ */

@@ -6,6 +6,7 @@
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/qic/setupmsg.h>
+#include <setup/qic/loginmsg.h>
 
 namespace libencloud {
 
@@ -64,6 +65,7 @@ private:
     int _initMsg (MessageInterface &msg);
 
     SetupMsg _setupMsg;
+    LoginMsg _loginMsg;
     Client _client;
 };
 

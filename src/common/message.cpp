@@ -9,14 +9,33 @@ namespace libencloud {
 // public methods
 //
 
-void MessageInterface::setConfig (Config *cfg)
+int MessageInterface::setConfig (Config *cfg)
 {
+    LIBENCLOUD_ERR_IF (cfg == NULL);
+
     _cfg = cfg;
+
+    return 0;
+err:
+    return ~0;
 }
 
-void MessageInterface::setClient (Client *client)
+int MessageInterface::setClient (Client *client)
 {
+    LIBENCLOUD_ERR_IF (client == NULL);
+
     _client = client;
+
+    return 0;
+err:
+    return ~0;
+}
+
+int MessageInterface::setData (const QVariant &data)
+{
+    _data = data;
+
+    return 0;
 }
 
 } // namespace libencloud

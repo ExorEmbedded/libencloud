@@ -4,6 +4,10 @@
 #include <common/config.h>
 #include <setup/qic/qicsetup.h>
 
+// Login/Logout are unnecessary when using Basic Auth, and logout doesn't kick
+// out of VPN connection which is what we really would need
+//#define LIBENCLOUD_SETUP_QIC_WITH_LOGIN
+
 namespace libencloud {
 
 /**
@@ -29,11 +33,27 @@ QicSetup::QicSetup (Config *cfg)
             &_setupMsg, SLOT(authSupplied(Auth)));
     connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
             this, SIGNAL(serverConfigSupply(QVariant)));
+
+#ifdef LIBENCLOUD_SETUP_QIC_WITH_LOGIN
+    _initMsg(_loginMsg);
+    connect(&_loginMsg, SIGNAL(error(libencloud::Error)),
+            this, SIGNAL(error(libencloud::Error)));
+    connect(this, SIGNAL(authSupplied(Auth)),
+            &_loginMsg, SLOT(authSupplied(Auth)));
+#endif
 }
 
 int QicSetup::start ()
 {
     LIBENCLOUD_TRACE;
+
+    QVariantMap data;
+    data["in"] = true;
+
+#ifdef LIBENCLOUD_SETUP_QIC_WITH_LOGIN
+    _loginMsg.setData(data);
+    _loginMsg.process();
+#endif
 
     if (_setupMsg.process())
         return ~0;
@@ -47,6 +67,14 @@ int QicSetup::start ()
 int QicSetup::stop ()
 {
     LIBENCLOUD_TRACE;
+
+    QVariantMap data;
+    data["in"] = false;
+
+#ifdef LIBENCLOUD_SETUP_QIC_WITH_LOGIN
+    _loginMsg.setData(data);
+    _loginMsg.process();
+#endif
 
     return 0;
 }

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QtPlugin>
+#include <QVariant>
 #include <encloud/Client>
 #include <encloud/Error>
 #include <common/config.h>
@@ -15,8 +16,9 @@ namespace libencloud {
 class MessageInterface
 {
 public:
-    void setConfig (Config *cfg);
-    void setClient (Client *client);
+    int setConfig (Config *cfg);
+    int setClient (Client *client);
+    int setData (const QVariant &data);
 
 signals:
     // an error occurred
@@ -25,13 +27,14 @@ signals:
     // message processing COMPLETED ()
     virtual void processed () = 0;
 
-public:
+public slots:
     // START processing the message (pack before sending)
     virtual int process () = 0;
 
 protected:
     Config *_cfg;
     Client *_client;
+    QVariant _data;
 };
 
 } // namespace libencloud
