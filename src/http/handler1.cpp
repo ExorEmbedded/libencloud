@@ -87,9 +87,7 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
 
             j["state"] = _parent->getCoreState();
 
-            // avoid "need" showing up as error
-            if (_parent->getCoreState() == StateError &&
-                error.isValid())
+            if (_parent->getCoreState() == StateError)
             {
                 jMap["code"] = error.getCode();
                 jMap["seq"] = error.getSeq();

@@ -14,8 +14,9 @@ int Error::__seq = 0;
 Error::Error ()
     : _isValid(false)
     , _code(CodeUndefined)
-    , _seq(-1)
+    , _seq(++__seq)
 {
+    _desc = _code2Desc(_code);
 }
 
 Error::Error (Code code, QString extra)
@@ -100,13 +101,9 @@ int Error::getSeq () const
 
 int Error::setSeq (int seq)
 {
-    LIBENCLOUD_ERR_IF (seq < 0);
-
     _seq = seq;
 
     return 0;
-err:
-    return ~0;
 }
 
 QString Error::getDesc () const
@@ -142,13 +139,13 @@ QString Error::_code2Desc (Code code)
     switch (code)
     {
         case CodeUndefined:
-            return QObject::tr("<Undefined>");
+            return QObject::tr("Generic Error");
 
         // 0xx
         case CodeSuccess:
             return QObject::tr("Operation Successful");
         case CodeServerUnreach:
-            return QObject::tr("Server Unreachable. Please check address and connectivity.");
+            return QObject::tr("Server Unreachable - please check address and connectivity");
 
         // 1xx
         case CodeServiceUnreach:
@@ -156,11 +153,11 @@ QString Error::_code2Desc (Code code)
 
         // 5xx
         case CodeAuthFailed:
-            return QObject::tr("Server Authentication Failure. Please check credentials.");
+            return QObject::tr("Server Authentication Failure - please check credentials");
 
         // 6xx
         case CodeProxyAuthFailed:
-            return QObject::tr("Proxy Authentication Failure. Please check credentials.");
+            return QObject::tr("Proxy Authentication Failure - please check credentials");
 
         // 1xxx
         case CodeServerError:
