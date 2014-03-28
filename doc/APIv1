@@ -95,6 +95,7 @@
 * GET <e_url>/api_v1/setup                  Client: QIC
 
     e.g.    'jsonpCallback({
+                 "time" : 1396014836.523807,        # When the config data was received
                  "server" : {
                      "uuid" : "<uuid>",
                      "internal_ip" : "192.168.50.1"

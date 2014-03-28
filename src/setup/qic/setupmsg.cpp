@@ -166,6 +166,8 @@ int SetupMsg::_decodeResponse (const QString &response)
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
     // remapping to Encloud configuration
+    _serverConfig["time"] = json["time"];
+
     map["uuid"] = json["uuid"];
     map["internal_ip"] = json["vpn_server_ip"];
     map["available_pages"] = json["available_pages"];
