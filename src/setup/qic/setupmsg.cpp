@@ -45,7 +45,7 @@ int SetupMsg::process ()
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
     EMIT_ERROR_ERR_IF (_client == NULL);
-
+    
     url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QIC_CONFIG_URL);
 
@@ -93,7 +93,7 @@ void SetupMsg::_clientComplete (const QString &response)
     disconnect(_client, 0, this, 0);
 
     LIBENCLOUD_ERR_IF (_decodeResponse(response));
-    EMIT_ERROR_ERR_IF (_unpackResponse());
+    LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
 err:
@@ -190,7 +190,9 @@ int SetupMsg::_unpackResponse ()
 
     return 0;
 err:
-    emit error(Error(tr("System error writing Operation CA: ") + caf.errorString()));
+    emit (error(Error(Error::CodeSystemError, tr("Failed writing Operation CA: ") +
+                    caf.errorString())));
+
     caf.close();
     return ~0;
 }

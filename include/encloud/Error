@@ -15,15 +15,17 @@ public:
 
     typedef enum {
         CodeUndefined =         -1,
-        CodeSuccess =           0,
 
-        CodeServerUnreach =     1,
+        CodeSuccess =           0,
+        CodeSystemError =       1,
 
         CodeServiceUnreach =    100,
 
-        CodeAuthFailed =        500,
+        CodeServerUnreach =     200,
 
-        CodeProxyAuthFailed =   600,
+        CodeAuthFailed =        300,
+
+        CodeProxyAuthFailed =   500,
 
         CodeServerError =       1000,
 

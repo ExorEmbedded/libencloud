@@ -138,24 +138,29 @@ QString Error::_code2Desc (Code code)
 {
     switch (code)
     {
+        // emitted when no specific error code is given
         case CodeUndefined:
             return QObject::tr("Generic Error");
 
         // 0xx
         case CodeSuccess:
             return QObject::tr("Operation Successful");
-        case CodeServerUnreach:
-            return QObject::tr("Server Unreachable - please check address and connectivity");
+        case CodeSystemError:
+            return QObject::tr("System Error - please check resource status");
 
         // 1xx
         case CodeServiceUnreach:
             return QObject::tr("Local Encloud Service Unreachable");
 
-        // 5xx
+        // 2xx
+        case CodeServerUnreach:
+            return QObject::tr("Server Unreachable - please check address and connectivity");
+
+        // 3xx
         case CodeAuthFailed:
             return QObject::tr("Server Authentication Failure - please check credentials");
 
-        // 6xx
+        // 5xx
         case CodeProxyAuthFailed:
             return QObject::tr("Proxy Authentication Failure - please check credentials");
 
