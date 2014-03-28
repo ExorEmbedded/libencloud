@@ -120,7 +120,7 @@ int SetupMsg::_encodeRequest (QUrl &url, QUrl &params)
 int SetupMsg::_decodeResponse (const QString &response)
 {
     QVariantMap json;
-    QVariantMap serverMap; 
+    QVariantMap map;
     bool ok;
 
     json = json::parse(response, ok).toMap();
@@ -166,10 +166,14 @@ int SetupMsg::_decodeResponse (const QString &response)
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
     // remapping to Encloud configuration
-    serverMap["uuid"] = json["uuid"];
-    serverMap["internal_ip"] = json["vpn_server_ip"];
-    serverMap["available_pages"] = json["available_pages"];
-    _serverConfig["server"] = serverMap;
+    map["uuid"] = json["uuid"];
+    map["internal_ip"] = json["vpn_server_ip"];
+    map["available_pages"] = json["available_pages"];
+    _serverConfig["server"] = map;
+
+    map.clear();
+    map["already_connected"] = json["already_connected"];
+    _serverConfig["client"] = map;
 
     emit (serverConfigSupply(_serverConfig));
 
