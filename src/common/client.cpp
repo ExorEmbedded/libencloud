@@ -114,6 +114,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
     switch (reply->error())
     {
+        case -1:  // make compiler happy
         default:
             LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach)));
             break;
