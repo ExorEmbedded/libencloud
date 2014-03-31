@@ -59,6 +59,8 @@ int Watchdog::start ()
 
 int Watchdog::stop ()
 {
+    LIBENCLOUD_TRACE;
+
     _timer.stop();
 
     _running = false;

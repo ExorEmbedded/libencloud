@@ -87,6 +87,7 @@ int Core::stop ()
     LIBENCLOUD_TRACE;
 
     _fsm.stop();
+    _clientWatchdog.stop();
 
 #ifndef LIBENCLOUD_DISABLE_CLOUD
     _cloud->stop();
