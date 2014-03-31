@@ -30,8 +30,8 @@
     do { \
         if (lev <= g_libencloudLogLev) { \
             qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
-                    << " " << QThread::currentThreadId() \
-                    << " [" << levstr << "] [" << LIBENCLOUD_APP << ":" << __FILE__ << ":" \
+                    << " [" << QThread::currentThreadId() \
+                    << "] [" << levstr << "] [" << LIBENCLOUD_APP << ":" << __FILE__ << ":" \
                     << __FUNCTION__ << "():" << __LINE__ << "] " << msg; \
         } \
     } while (0);
