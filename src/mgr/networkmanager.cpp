@@ -100,7 +100,15 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
             currentRoutes.append(regex.capturedTexts());
     }
 
-    LIBENCLOUD_DBG("currentRoutes: " << currentRoutes);
+    LIBENCLOUD_DBG("previous: " << _previousEndpoints <<
+                   " current: " << currentRoutes <<
+                   " connected: " << _connectedEndpoints);
+
+    if (_connectedEndpoints.empty())
+    {
+        LIBENCLOUD_DBG("clearing previous endpoints");
+        _previousEndpoints.clear();
+    }
 
     // remove previous endpoints that are no longer in connectedEndpoints
     foreach (QString endpoint, _previousEndpoints)
