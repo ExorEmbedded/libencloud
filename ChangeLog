@@ -1,5 +1,9 @@
-libencloud X.Y (//):
-	- API: new fully async APIs; cloud support; major renaming s/ece/libencloud
+ChangeLog file for Endian libencloud
+
+libencloud 0.6 (02/04/2014):
+	- major rewrite and fixes
+	- renaming s/ece/libencloud
+	- API: new fully async APIs
 
 libece 0.5 (27/01/2014):
 	- API: ECE-specific extensions (ECE_TYPE_SECE defined on win32)
