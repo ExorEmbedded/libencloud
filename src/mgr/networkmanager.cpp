@@ -121,13 +121,17 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
         }
     }
 
-    // add enpoints which were not already connected in previousEndpoints
+    // add new endpoints which are not already in routing table
     foreach (QString endpoint, _connectedEndpoints)
     {
-        if (!_previousEndpoints.contains(endpoint))
+        if (endpoint == "")
+            continue;
+
+        if (!currentRoutes.contains(endpoint))
         {
             addRoute(endpoint);
-            _previousEndpoints.append(endpoint);
+            if (!_previousEndpoints.contains(endpoint))
+                _previousEndpoints.append(endpoint);
         }
     }
 
