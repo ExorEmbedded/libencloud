@@ -50,7 +50,8 @@ public:
     int setType (Type type);
     const QString getStrType () const;
     int setStrType (const QString &type);
-    static Type typeFromQt (QNetworkProxy::ProxyType);
+    static Type typeFromQt (QNetworkProxy::ProxyType type);
+    static QNetworkProxy::ProxyType typeToQt (Type type);
 
     const QString &getUrl () const;
     int setUrl (const QString &url);
