@@ -46,6 +46,9 @@ SOURCES += common/state.cpp
 HEADERS += $${PUBINCLUDEDIR}/Progress
 SOURCES += common/progress.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/Proxy
+SOURCES += common/proxy.cpp
+
 HEADERS += $${PUBINCLUDEDIR}/Watchdog
 SOURCES += common/watchdog.cpp
 

@@ -13,6 +13,9 @@ SOURCES += main.cpp
 SOURCES += api.cpp
 HEADERS += api.h
 
+SOURCES += proxy.cpp
+HEADERS += proxy.h
+
 SOURCES += json.cpp
 HEADERS += json.h
 

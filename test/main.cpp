@@ -4,6 +4,7 @@
 #include <common/utils.h>
 #include <common/config.h>
 #include "test.h"
+#include "proxy.h"
 #include "api.h"
 #include "json.h"
 
@@ -31,6 +32,9 @@ int main (int argc, char *argv[])
 #endif
 
     qDebug() << "# hw_info: " << libencloud::utils::getHwInfo();
+
+    TestProxy proxyTest;
+    QTest::qExec(&proxyTest, argc, argv); 
 
     TestApi apiTest;
     QTest::qExec(&apiTest, argc, argv); 

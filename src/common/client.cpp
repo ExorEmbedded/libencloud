@@ -71,8 +71,7 @@ err:
 void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenticator *authenticator)
 { 
     LIBENCLOUD_UNUSED(authenticator); 
-    const QNetworkProxy *p = &proxy;  //unused
-    LIBENCLOUD_UNUSED(p);
+    LIBENCLOUD_UNUSED(proxy);
 
     EMIT_ERROR(tr("Proxy Authentication Required"));
 }

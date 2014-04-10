@@ -1,0 +1,28 @@
+#ifndef _LIBENCLOUD_PROXY_H_
+#define _LIBENCLOUD_PROXY_H_
+
+#include <QObject>
+#include <encloud/Common>
+#include <QNetworkProxy>
+#include <QNetworkProxyFactory>
+
+namespace libencloud {
+
+/**
+ * Qt proxies also localhost requests - this class fixes such behaviour.
+ */
+class LIBENCLOUD_DLLSPEC ProxyFactory : public QObject, public QNetworkProxyFactory
+{
+    Q_OBJECT
+
+public:
+    int setApplicationProxy (const QNetworkProxy &proxy);
+    QList<QNetworkProxy> queryProxy (const QNetworkProxyQuery & query = QNetworkProxyQuery());
+
+private:
+    QNetworkProxy _proxy;
+};
+
+} // namespace libencloud
+
+#endif  /* _LIBENCLOUD_PROXY_H_ */

@@ -9,6 +9,7 @@ HEADERS += encloud/Error
 HEADERS += encloud/Info
 HEADERS += encloud/Logger
 HEADERS += encloud/Progress
+HEADERS += encloud/Proxy
 HEADERS += encloud/Server
 HEADERS += encloud/State
 HEADERS += encloud/Watchdog
