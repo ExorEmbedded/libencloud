@@ -4,8 +4,23 @@
 
 namespace libencloud {
 
+QString Proxy::toString (const QNetworkProxy &p)
+{
+    QString s;
+    
+    s += "type: " + QString::number(p.type()) + ", ";
+    s += "host: " + p.hostName() + ", ";
+    s += "port: " + QString::number(p.port()) + ", ";
+    s += "user: " + p.user() + ", ";
+    s += "pass: <not shown>";
+
+    return s;
+}
+
 int ProxyFactory::setApplicationProxy (const QNetworkProxy &proxy)
 {
+    LIBENCLOUD_DBG(Proxy::toString(proxy));
+
     _proxy = proxy;
 
     return 0;

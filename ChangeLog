@@ -3,6 +3,7 @@ ChangeLog file for Endian libencloud
 libencloud 0.X:
 	- custom ProxyFactory to avoid proxying localhost requests [CONNECT-106]
 	- auth: typeFromQt(), typeToQt(), toString()
+	- proxy: toString()
 
 libencloud 0.6 (02/04/2014):
 	- major rewrite and fixes

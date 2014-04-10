@@ -8,6 +8,12 @@
 
 namespace libencloud {
 
+class LIBENCLOUD_DLLSPEC Proxy
+{
+public:
+    static QString toString (const QNetworkProxy &p);
+};
+
 /**
  * Qt proxies also localhost requests - this class fixes such behaviour.
  */
