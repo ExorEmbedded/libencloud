@@ -135,6 +135,19 @@ int Auth::setStrType (const QString &type)
     return 0;
 }
 
+Auth::Type Auth::typeFromQt (QNetworkProxy::ProxyType type)
+{
+    switch (type)
+    {
+        case QNetworkProxy::HttpProxy:
+            return Auth::HttpType;
+        case QNetworkProxy::Socks5Proxy:
+            return Auth::SocksType;
+        default:
+            return Auth::NoneType;
+    }
+}
+
 const QString &Auth::getUrl () const
 {
     return _url;
