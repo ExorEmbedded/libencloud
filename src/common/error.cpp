@@ -154,7 +154,7 @@ QString Error::_code2Desc (Code code)
 
         // 2xx
         case CodeServerUnreach:
-            return QObject::tr("Server Unreachable - please check address and connectivity");
+            return QObject::tr("Server Unreachable");
 
         // 3xx
         case CodeAuthFailed:

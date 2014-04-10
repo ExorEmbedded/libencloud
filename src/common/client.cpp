@@ -109,13 +109,13 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *> (sender());
 
-    LIBENCLOUD_UNUSED(err);
+    CLIENT_DBG("err: " << reply->errorString());
 
-    switch (reply->error())
+    switch (err)
     {
         case 1:  // make compiler happy
         default:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach)));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, reply->errorString())));
             break;
     }
 }
