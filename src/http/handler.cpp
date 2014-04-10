@@ -90,7 +90,7 @@ err:
 
 int HttpHandler::setAuth (const Auth &auth)
 {
-    LIBENCLOUD_DBG("auth user: " << auth.getUser());
+    LIBENCLOUD_DBG(auth.toString());
 
     if (auth.isValid())
     {

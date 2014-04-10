@@ -39,6 +39,7 @@ public:
             QString user = "", QString pass = "");
 
     bool isValid () const;
+    QString toString () const;
 
     Id getId () const;
     int setId (Id id);

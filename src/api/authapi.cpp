@@ -32,15 +32,15 @@ void AuthApi::authSupply (const Auth &auth)
 
     url.setPath(LIBENCLOUD_API_AUTH_PATH);
 
+    LIBENCLOUD_DBG("url: " << url.toString() << 
+            ", auth: " << auth.toString());
+
     _params.clear();
     _params.addQueryItem("id", auth.getStrId());
     _params.addQueryItem("type", auth.getStrType());
     _params.addQueryItem("url", auth.getUrl());
     _params.addQueryItem("user", auth.getUser());
     _params.addQueryItem("pass", auth.getPass());
-
-    LIBENCLOUD_DBG("url: " << url.toString() << 
-            ", user: " << _params.queryItemValue("user"));
 
     _client.run(url, _params, _headers, _config);
 }

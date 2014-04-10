@@ -53,6 +53,19 @@ bool Auth::isValid () const
     return _valid;
 }
 
+QString Auth::toString () const
+{
+    QString s;
+
+    s += "id: " + getStrId() + ", ";
+    s += "type: " + getStrType() + ", ";
+    s += "url: " + getUrl() + ", ";
+    s += "user: " + getUser() + ", ";
+    s += "pass: <not shown>";
+
+    return s;
+}
+
 Auth::Id Auth::getId () const
 {
     return _id;
