@@ -3,6 +3,7 @@
 #include <encloud/Info>
 #include <encloud/Core>
 #include <encloud/Progress>
+#include <encloud/Proxy>
 #include <common/config.h>
 #include <common/crypto.h>
 #include <common/utils.h>
@@ -168,14 +169,16 @@ int Core::attachServer (Server *server)
     // when auth is supplied, it is forwarded to all modules, while
     // authentication requests are reemitted in _authRequired as need signals
     // for handler
-#ifndef LIBENCLOUD_DISABLE_SETUP
     connect(obj, SIGNAL(authSupplied(Auth)), 
+           this, SLOT(_authSupplied(Auth)));
+#ifndef LIBENCLOUD_DISABLE_SETUP
+    connect(this, SIGNAL(authSupplied(Auth)), 
            _setupObj, SIGNAL(authSupplied(Auth)));
     connect(_setupObj, SIGNAL(authRequired(Auth::Id)), 
            this, SLOT(_authRequired(Auth::Id)));
 #endif
 #ifndef LIBENCLOUD_DISABLE_CLOUD
-    connect(obj, SIGNAL(authSupplied(Auth)), 
+    connect(this, SIGNAL(authSupplied(Auth)), 
            _cloudObj, SIGNAL(authSupplied(Auth)));
     connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
            this, SLOT(_authRequired(Auth::Id)));
@@ -281,6 +284,50 @@ void Core::_progressReceived (const Progress &p)
                    " total: " << pt.getTotal());
 
     emit progress(pt);
+}
+
+void Core::_authSupplied (const Auth &auth)
+{
+    libencloud::ProxyFactory *proxyFactory = NULL;
+
+    LIBENCLOUD_DBG(auth.toString());
+
+    // proxy settings handled globally
+    switch (auth.getId()) 
+    {
+        case Auth::ProxyId:
+        {
+            QUrl url(auth.getUrl());
+            
+            QNetworkProxy proxy(
+                Auth::typeToQt(auth.getType()),
+                url.host(),
+                url.port(),
+                auth.getUser(),
+                auth.getPass()
+                );
+
+            proxyFactory = new libencloud::ProxyFactory;
+            LIBENCLOUD_ERR_IF (proxyFactory == NULL);
+
+            proxyFactory->setApplicationProxy(proxy);
+
+            LIBENCLOUD_DBG("setting application proxy factory");
+
+            // lib takes ownership of our proxy factory
+            QNetworkProxyFactory::setApplicationProxyFactory(proxyFactory);  
+            break;
+        }
+        default:
+            break;
+    }
+
+    emit authSupplied(auth);
+
+    return;
+err:
+    LIBENCLOUD_DELETE(proxyFactory);
+    return;
 }
 
 void Core::_authRequired (Auth::Id id)
