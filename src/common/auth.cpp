@@ -11,12 +11,16 @@ namespace libencloud {
 
 Auth::Auth ()
     : _valid(false)
+    , _id(Auth::NoneId)
+    , _type(Auth::NoneType)
 {
 }
 
 Auth::Auth (Id id, Type type, QString url, 
         QString user, QString pass)
     : _valid(false)
+    , _id(Auth::NoneId)
+    , _type(Auth::NoneType)
 {
     if (setId(id) ||
             setType(type) ||
@@ -34,6 +38,8 @@ err:
 Auth::Auth (const QString &id, QString type, QString url, 
         QString user, QString pass)
     : _valid(false)
+    , _id(Auth::NoneId)
+    , _type(Auth::NoneType)
 {
     if (setStrId(id) ||
             setStrType(type) ||
