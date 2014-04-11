@@ -7,11 +7,14 @@
 
 #define LIBENCLOUD_TEST_PROXY_TYPE  QNetworkProxy::HttpProxy
 #define LIBENCLOUD_TEST_PROXY_HOST  "127.0.0.1"
+//#define LIBENCLOUD_TEST_PROXY_HOST  "192.168.122.247"
 #define LIBENCLOUD_TEST_PROXY_PORT  3128
+//#define LIBENCLOUD_TEST_PROXY_PORT  8080
 #define LIBENCLOUD_TEST_PROXY_USER  "test"
 #define LIBENCLOUD_TEST_PROXY_PASS  "test"
 #define LIBENCLOUD_TEST_PROXY_URL   "http://www.google.com"
 //#define LIBENCLOUD_TEST_PROXY_URL   LIBENCLOUD_API_URL LIBENCLOUD_API_STATUS_PATH
+//#define LIBENCLOUD_TEST_PROXY_URL   "https://192.168.122.145/manage/status/status.access.config/"
 
 TestProxy::TestProxy ()
 {
