@@ -152,11 +152,12 @@ QStringList VpnClient::getArgs (void)
         case (QNetworkProxy::HttpProxy):
             args << "--http-proxy" << proxy.hostName() << QString::number(proxy.port());
             args << "auto";
-#ifdef Q_OS_WIN
-            args << "ntlm";
-#else
-            args << "basic";
-#endif
+
+            // mimic HTTP Proxy Type detection in 4iConnect 1X,2X
+            if (proxy.user().contains('\\'))
+                args << "ntlm";
+            else
+                args << "basic";
             break;
         case (QNetworkProxy::NoProxy):
         default:
