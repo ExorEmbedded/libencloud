@@ -14,7 +14,8 @@ public:
 
     typedef enum
     {
-        SwitchboardId = 0,
+        NoneId = -1,
+        SwitchboardId,
         ProxyId,
         FirstId = SwitchboardId,
         LastId = ProxyId

@@ -258,8 +258,7 @@ void Core::_errorReceived (const libencloud::Error &err)
    // QIC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically
 #if defined(LIBENCLOUD_MODE_QIC)
-    _fsm.stop();
-    emit progress(Progress());
+    stop();
 #endif
 
     emit stateChanged(StateError);
@@ -298,7 +297,7 @@ void Core::_authSupplied (const Auth &auth)
         case Auth::ProxyId:
         {
             QUrl url(auth.getUrl());
-            
+
             QNetworkProxy proxy(
                 Auth::typeToQt(auth.getType()),
                 url.host(),
@@ -310,7 +309,8 @@ void Core::_authSupplied (const Auth &auth)
             proxyFactory = new libencloud::ProxyFactory;
             LIBENCLOUD_ERR_IF (proxyFactory == NULL);
 
-            proxyFactory->setApplicationProxy(proxy);
+            proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
+                    QNetworkProxy::NoProxy : proxy);
 
             LIBENCLOUD_DBG("setting application proxy factory");
 

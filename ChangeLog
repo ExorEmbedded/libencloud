@@ -5,6 +5,7 @@ libencloud 0.X:
 	  handle global proxy settings in core [CONNECT-106]
 	- auth: typeFromQt(), typeToQt(), toString()
 	- proxy: toString()
+	- vpn: improved process failure handling
 
 libencloud 0.6 (02/04/2014):
 	- major rewrite and fixes

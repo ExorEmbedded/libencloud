@@ -141,10 +141,11 @@ void VpnManager::detach ()
             this->socket->close();
         }
 
-        LIBENCLOUD_DELETE(this->socket);
+        this->socket->deleteLater();;
     }
 
-    this->attachRetries = 0;
+    if (this->st != StateAttaching)
+        this->attachRetries = 0;
     this->st = StateDetached;
     this->err = NoError;
 }
@@ -327,6 +328,8 @@ void VpnManager::authSupplied (const Auth &auth)
         case Auth::ProxyId:
             _proxyAuth = auth;
             break;
+        default:
+            LIBENCLOUD_ERR("bad id");
     }
 
     return;
@@ -410,13 +413,14 @@ void VpnManager::socketError (QAbstractSocket::SocketError err)
             {
                 LIBENCLOUD_DBG("Reached maximum number retries - giving up");
                 this->attachRetries = 0;
+                LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
                 break;
             }
             LIBENCLOUD_DBG("Failed connecting to socket - retrying in 1 second");
             QTimer::singleShot(1000, this, SLOT(retryAttach()));
             return; // remain in attaching state
         default:
-            LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
+            break;
     }
 err:
     return;
