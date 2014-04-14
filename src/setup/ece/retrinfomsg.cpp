@@ -17,7 +17,7 @@ namespace libencloud {
 // public slots
 //
 
-void RetrInfoMsg::process ()
+int RetrInfoMsg::process ()
 {
     LIBENCLOUD_TRACE;
 
@@ -45,7 +45,7 @@ void RetrInfoMsg::process ()
 
     // setup signals from client
     disconnect(_client, 0, this, 0);
-    connect(_client, SIGNAL(error(libencloud::Error), this, SIGNAL(error(libencloud::Error)));
+    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);

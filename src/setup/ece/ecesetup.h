@@ -50,6 +50,7 @@ signals:
     //
     void error (const libencloud::Error &err);
     void progress (const Progress &progress);
+    void serverConfigSupply (const QVariant &variant);
     void completed ();
 
     //
