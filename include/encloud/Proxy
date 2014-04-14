@@ -22,11 +22,23 @@ class LIBENCLOUD_DLLSPEC ProxyFactory : public QObject, public QNetworkProxyFact
     Q_OBJECT
 
 public:
+    ProxyFactory ();
+
+    int setInclusive (bool inclusive);
     int setApplicationProxy (const QNetworkProxy &proxy);
+    
+    int add (const QString &host);
+    int remove (const QString &host);
+
+protected:
     QList<QNetworkProxy> queryProxy (const QNetworkProxyQuery & query = QNetworkProxyQuery());
 
 private:
+    bool _isLocal (const QString &host);
+
+    bool _inclusive;
     QNetworkProxy _proxy;
+    QList<QString> _hosts;
 };
 
 } // namespace libencloud

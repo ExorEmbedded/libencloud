@@ -31,6 +31,7 @@ Core::Core (Mode mode)
     , _setupState(&_setupSt)
     , _cloudState(&_cloudSt)
     , _clientPort(-1)
+    , _proxyFactory(NULL)
 {
     LIBENCLOUD_TRACE;
 
@@ -287,13 +288,19 @@ void Core::_progressReceived (const Progress &p)
 
 void Core::_authSupplied (const Auth &auth)
 {
-    libencloud::ProxyFactory *proxyFactory = NULL;
-
     LIBENCLOUD_DBG(auth.toString());
 
     // proxy settings handled globally
     switch (auth.getId()) 
     {
+        case Auth::SwitchboardId:
+            _sbAuth = auth;
+
+            // inclusive proxy factory logic (default) => add Switchboard host
+            if (_proxyFactory)
+                _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
+
+            break;
         case Auth::ProxyId:
         {
             QUrl url(auth.getUrl());
@@ -306,16 +313,20 @@ void Core::_authSupplied (const Auth &auth)
                 auth.getPass()
                 );
 
-            proxyFactory = new libencloud::ProxyFactory;
-            LIBENCLOUD_ERR_IF (proxyFactory == NULL);
+            _proxyFactory = new libencloud::ProxyFactory;
+            LIBENCLOUD_ERR_IF (_proxyFactory == NULL);
 
-            proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
+            _proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
                     QNetworkProxy::NoProxy : proxy);
+            if (_sbAuth.getUrl() != "")
+                _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
 
             LIBENCLOUD_DBG("setting application proxy factory");
 
             // lib takes ownership of our proxy factory
-            QNetworkProxyFactory::setApplicationProxyFactory(proxyFactory);  
+            QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
+
+            _proxyAuth = auth;
             break;
         }
         default:
@@ -326,7 +337,7 @@ void Core::_authSupplied (const Auth &auth)
 
     return;
 err:
-    LIBENCLOUD_DELETE(proxyFactory);
+    LIBENCLOUD_DELETE(_proxyFactory);
     return;
 }
 

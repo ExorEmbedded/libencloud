@@ -14,7 +14,8 @@
 #define LIBENCLOUD_TEST_PROXY_PASS  "test"
 #define LIBENCLOUD_TEST_PROXY_URL   "http://www.google.com"
 //#define LIBENCLOUD_TEST_PROXY_URL   LIBENCLOUD_API_URL LIBENCLOUD_API_STATUS_PATH
-//#define LIBENCLOUD_TEST_PROXY_URL   "https://192.168.122.145/manage/status/status.access.config/"
+//#define LIBENCLOUD_TEST_PROXY_SB    "192.168.122.145"
+//#define LIBENCLOUD_TEST_PROXY_URL   "https://" LIBENCLOUD_TEST_PROXY_SB "/manage/status/status.access.config/"
 
 TestProxy::TestProxy ()
 {
@@ -42,6 +43,12 @@ void TestProxy::run ()
 
     _proxyFactory = new libencloud::ProxyFactory();
     LIBENCLOUD_ERR_IF (_proxyFactory == NULL);
+
+    _proxyFactory->setInclusive(false);
+
+    // set host names manually only if inclusive == false
+    //_proxyFactory->add(LIBENCLOUD_TEST_PROXY_SB);
+    //_proxyFactory->add("www.google.com");
 
     _proxyFactory->setApplicationProxy(_proxy);
 

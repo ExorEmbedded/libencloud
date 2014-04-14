@@ -12,6 +12,7 @@
 #include <encloud/Manager/NetworkManager>
 #include <encloud/Manager/NetworkManager>
 #include <encloud/Progress>
+#include <encloud/Proxy>
 #include <encloud/Server>
 #include <encloud/State>
 #include <encloud/Watchdog>
@@ -97,6 +98,9 @@ private:
     Watchdog _clientWatchdog;
 
     NetworkManager _networkManager;
+    libencloud::ProxyFactory *_proxyFactory;
+    Auth _sbAuth;
+    Auth _proxyAuth;
 };
 
 }  // namespace libencloud
