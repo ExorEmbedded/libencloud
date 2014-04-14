@@ -6,6 +6,7 @@ libencloud 0.X:
 	- auth: typeFromQt(), typeToQt(), toString()
 	- proxy: toString()
 	- vpn: improved process failure handling
+	- test: added sample SECE client
 
 libencloud 0.6 (02/04/2014):
 	- major rewrite and fixes

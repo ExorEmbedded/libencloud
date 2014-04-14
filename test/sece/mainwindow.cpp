@@ -1,0 +1,135 @@
+#include <QLayout>
+#include "common.h"
+#include "mainwindow.h"
+
+//
+// public methods
+//
+
+MainWindow::MainWindow()
+    : _state(libencloud::StateIdle)
+    , _widget(NULL)
+    , _layout(NULL)
+    , _button(NULL)
+    , _stateLabel(NULL)
+    , _stateText(NULL)
+    , _progressLabel(NULL)
+    , _progressText(NULL)
+    , _errorLabel(NULL)
+    , _errorText(NULL)
+{
+    SECE_TRACE;
+
+    //
+    // layout
+    //
+    _layout = new QVBoxLayout(this);
+    SECE_ERR_IF (_layout == NULL);
+
+    //
+    // main widget
+    //
+
+    _widget = new QWidget(this);
+    SECE_ERR_IF (_widget == NULL);
+
+    _widget->setLayout(_layout);
+
+    //
+    // button
+    //
+    _button = new QPushButton(this);
+    SECE_ERR_IF (_button == NULL);
+
+    _button->setGeometry(QRect(QPoint(10,10), QSize(100,50)));
+    _button->setText("Connect");
+    _button->setDefault(true);
+    _button->setAutoDefault(true);
+    _layout->addWidget(_button);
+
+    connect(_button, SIGNAL(released()), this, SIGNAL(toggle()));
+
+    //
+    // state label and text field
+    //
+    _stateLabel = new QLabel(this);
+    _stateLabel->setText("state:");
+    _layout->addWidget(_stateLabel);
+
+    _stateText = new QTextEdit(this);
+    SECE_ERR_IF (_stateText == NULL);
+    _stateText->setDisabled(true);
+    _stateText->setText(libencloud::stateToString(_state));
+    _layout->addWidget(_stateText);
+
+    //
+    // progress label and text field
+    //
+    _progressLabel = new QLabel(this);
+    _progressLabel->setText("progress:");
+    _layout->addWidget(_progressLabel);
+
+    _progressText = new QTextEdit(this);
+    SECE_ERR_IF (_progressText == NULL);
+    _progressText->setDisabled(true);
+    _progressText->setText(_progress.toString());
+    _layout->addWidget(_progressText);
+
+    //
+    // error label and text field
+    //
+    _errorLabel = new QLabel(this);
+    _errorLabel->setText("error:");
+    _layout->addWidget(_errorLabel);
+
+    _errorText = new QTextEdit(this);
+    SECE_ERR_IF (_errorText == NULL);
+    _errorText->setDisabled(true);
+    _layout->addWidget(_errorText);
+
+    //
+    // window settings
+    //
+    setFixedSize(200,250);
+    setStyleSheet("background-color: white;");
+    setLayout(_layout);
+    setCentralWidget(_widget);
+
+err:
+    return;
+}
+
+MainWindow::~MainWindow()
+{
+    SECE_TRACE;
+}
+
+//
+// private slots
+//
+void MainWindow::_stateChanged (libencloud::State state)
+{
+    switch (state) 
+    {
+        case libencloud::StateIdle:
+            setStyleSheet("background-color: white;");
+            break;
+        case libencloud::StateError:
+            setStyleSheet("background-color: red;");
+            break;
+        case libencloud::StateSetup:
+            setStyleSheet("background-color: yellow;");
+            break;
+        case libencloud::StateConnect:
+            setStyleSheet("background-color: orange;");
+            break;
+        case libencloud::StateCloud:
+            setStyleSheet("background-color: green;");
+            break;
+        default:
+            break;
+    }
+
+    if (state == libencloud::StateError) 
+        _stateText->setText("error!");
+}
