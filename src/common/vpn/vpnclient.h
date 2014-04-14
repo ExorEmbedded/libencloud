@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_VPNCLIENT_H_
 #define _LIBENCLOUD_PRIV_VPNCLIENT_H_
 
+#include <encloud/Auth>
 #include <QProcess>
 #include <QTemporaryFile>
 #include <QUrl>
@@ -69,13 +70,10 @@ signals:
     void stateChanged (VpnClient::State state);
     void sigError (VpnClient::Error err, QString msg = "");
 
+public slots:
+    void authSupplied (const Auth &auth);
+
 private slots:
-
-#if 0
-    void gotLogin (const QString &url, const QString &user, const QString &pass);
-    void sbGotConfig (QString sbConfig);
-#endif
-
     void processError (QProcess::ProcessError err);
     void processStarted ();
     void processFinished (int exitCode, QProcess::ExitStatus exitStatus);
@@ -94,7 +92,7 @@ private:
     QTemporaryFile configFile;
     QTemporaryFile caCertFile;
     QProcess *process;
-
+    Auth proxyAuth;
 };
 
 }  // namespace libencloud

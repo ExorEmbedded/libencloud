@@ -122,7 +122,6 @@ QStringList VpnClient::getArgs (void)
     QStringList args;
     QString configPath;
     QString caCertPath;
-    QNetworkProxy proxy = QNetworkProxy::applicationProxy();
 
     args << "--log" << getCommonAppDataDir() + "openvpn-log.txt";
 
@@ -144,22 +143,24 @@ QStringList VpnClient::getArgs (void)
     caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
     args << "--ca" << caCertPath;
 
-    switch (proxy.type())
+    QUrl proxyUrl = proxyAuth.getUrl();
+
+    switch (proxyAuth.getType())
     {
-        case (QNetworkProxy::Socks5Proxy):
-            args << "--socks-proxy" << proxy.hostName() << QString::number(proxy.port());
+        case (Auth::SocksType):
+            args << "--socks-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
             break;
-        case (QNetworkProxy::HttpProxy):
-            args << "--http-proxy" << proxy.hostName() << QString::number(proxy.port());
+        case (Auth::HttpType):
+            args << "--http-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
             args << "auto";
 
             // mimic HTTP Proxy Type detection in 4iConnect 1X,2X
-            if (proxy.user().contains('\\'))
+            if (proxyAuth.getUser().contains('\\'))
                 args << "ntlm";
             else
                 args << "basic";
             break;
-        case (QNetworkProxy::NoProxy):
+        case (Auth::NoneType):
         default:
             break;
     }
@@ -263,6 +264,21 @@ void VpnClient::stop (void)
     // don't emit the new state though to avoid automatic restart by Manager
     this->st = StateConfigured;
     this->err = NoError;
+}
+
+//
+// public slots
+//
+void VpnClient::authSupplied (const Auth &auth)
+{
+    switch (auth.getId())
+    {
+        case Auth::ProxyId:
+            proxyAuth = auth;
+            break;
+        default:
+            break;
+    }
 }
 
 //
