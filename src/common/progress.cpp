@@ -22,7 +22,7 @@ Progress::Progress (const QString &desc, int step, int total)
     LIBENCLOUD_ERR_IF (step <= 0);
     LIBENCLOUD_ERR_IF (total <= 0);
 
-    LIBENCLOUD_DBG(QString::number(step) << "/" << QString::number(total) << " " << desc);
+    LIBENCLOUD_DBG(toString());
 
     _isValid = true;
 
@@ -42,6 +42,19 @@ bool Progress::operator == (const Progress &p) const
 bool Progress::operator != (const Progress &p) const
 {
     return !(p == *this);
+}
+
+QString Progress::toString () const
+{
+    QString s;
+
+    s += QString::number(_step);
+    s += '/';
+    s += QString::number(_total);
+    s += ' ';
+    s += _desc;
+
+    return s;
 }
 
 QString Progress::getDesc () const
