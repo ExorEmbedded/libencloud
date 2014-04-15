@@ -78,6 +78,7 @@ QList<QNetworkProxy> ProxyFactory::queryProxy (const QNetworkProxyQuery &query)
 {
     QList<QNetworkProxy> proxies;
     QString host = query.peerHostName();
+    QString log;
 
     if (!query.url().isValid())
     {
@@ -85,24 +86,22 @@ QList<QNetworkProxy> ProxyFactory::queryProxy (const QNetworkProxyQuery &query)
         return proxies;
     }
 
-    if (!_isLocal(host))
-        LIBENCLOUD_DBG("url: " << query.url().toString());
+    log = "url: " + query.url().toString();
 
     if ((_inclusive && _hosts.contains(host)) || 
             (!_inclusive && !_hosts.contains(host)))
     {
-        if (!_isLocal(host))
-            LIBENCLOUD_DBG("proxy: " << Proxy::toString(_proxy));
-
+        log += ", proxy: " + Proxy::toString(_proxy);
         proxies << _proxy;
     }
     else
     {
-        if (!_isLocal(host))
-            LIBENCLOUD_DBG("no proxy");
-
+        log += ", NO proxy";
         proxies << QNetworkProxy(QNetworkProxy::NoProxy);
     }
+
+    if (!_isLocal(host))
+        LIBENCLOUD_DBG(log);
 
     return proxies;
 }
