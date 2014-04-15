@@ -24,7 +24,8 @@ public:
         BadStateError,
         ConfigError,
         NotExecError,
-        ProcessError
+        ProcessError,
+        ProxyNotAllowed
     }
     Error;
 

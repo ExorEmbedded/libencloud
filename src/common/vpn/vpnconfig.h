@@ -21,28 +21,19 @@ public:
     int fromString (const QString &s);
     int fromCfg (Config *cfg);
 
-    void setCaPath (const QString &path);
-    void setCertPath (const QString &path);
-    void setKeyPath (const QString &path);
-
     QString toString () const;
+    int fromFile (const QString &path);
     int toFile (const QString &path) const;
-    
+
+    QStringList get (const QString &key) const;
+
 private:
     int init ();
 
     bool _valid;
     QString _string;
 
-    QString _mode;
-    QString _host;
-    int _port;
-    QString _proto;
-    QString _type;
-
-    QString _caPath;
-    QString _certPath;
-    QString _keyPath;
+    QHash<QString, QStringList> _data;
 };
 
 } // namespace libencloud

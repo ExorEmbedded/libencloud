@@ -1,5 +1,6 @@
 #include <QNetworkProxy>
 #include <QSslCertificate>
+#include <common/vpn/vpnconfig.h>
 #include <common/vpn/vpnclient.h>
 #include <common/common.h>
 #include <common/config.h>
@@ -57,6 +58,8 @@ QString VpnClient::errorString (Error err)
             return tr("Not a valid executable");
         case ProcessError:
             return tr("Process execution error");
+        case ProxyNotAllowed:
+            return tr("Proxy not allowed");
     }
     return "";
 }
@@ -122,6 +125,7 @@ QStringList VpnClient::getArgs (void)
     QStringList args;
     QString configPath;
     QString caCertPath;
+    VpnConfig config;
 
     args << "--log" << getCommonAppDataDir() + "openvpn-log.txt";
 
@@ -177,7 +181,18 @@ QStringList VpnClient::getArgs (void)
     foreach (QString arg, _cfg->config.vpnArgs.split(QRegExp("\\s+")))
         args << arg;
 
+    //
+    // consistency checks
+    //
+    LIBENCLOUD_ERR_IF (config.fromFile(configPath));
+    LIBENCLOUD_EMIT_ERR_IF (
+            config.get("proto")[0] == "udp" &&
+            proxyAuth.getType() != Auth::NoneType,
+            sigError(this->err = ProxyNotAllowed, "Server must be configured to use TCP"));
+
     return args;
+err:
+    return QStringList();
 }
 
 void VpnClient::start (void)
@@ -202,6 +217,12 @@ void VpnClient::start (void)
     enableTap();
 
     args = getArgs();
+    if (args.empty())
+    {
+        LIBENCLOUD_DBG("invalid arguments");
+        return;
+    }
+
     path = _cfg->config.vpnExePath.absoluteFilePath();
 
     LIBENCLOUD_DBG("path: " << path);

@@ -112,16 +112,24 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
 
 void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
 {
-    LIBENCLOUD_UNUSED(errMsg);
+    QString msg;
 
-    emit error(Error(VpnClient::errorString(err)));
+    msg = VpnClient::errorString(err);
+    if (errMsg != "")
+        msg += "\n\n" + errMsg;
+
+    emit error(Error(msg));
 }
 
 void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
 {
-    LIBENCLOUD_UNUSED(errMsg);
+    QString msg;
 
-    emit error(Error(VpnManager::errorString(err)));
+    msg = VpnManager::errorString(err);
+    if (errMsg != "")
+        msg += "\n\n" + errMsg;
+
+    emit error(Error(msg));
 }
 
 } // namespace libencloud

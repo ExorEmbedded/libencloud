@@ -5,7 +5,8 @@ libencloud 0.X:
 	  handle global proxy settings in core [CONNECT-106]
 	- auth: typeFromQt(), typeToQt(), toString()
 	- proxy: toString()
-	- vpn: improved process failure handling
+	- vpn: improved process failure handling; error showing Proxy + UDP not allowed;
+	  added parsing from file to VpnConfig and refactoring [CONNECT-121]
 	- test: added sample SECE client
 
 libencloud 0.6 (02/04/2014):
