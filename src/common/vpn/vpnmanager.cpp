@@ -420,6 +420,8 @@ void VpnManager::socketError (QAbstractSocket::SocketError err)
             QTimer::singleShot(1000, this, SLOT(retryAttach()));
             return; // remain in attaching state
         default:
+            // e.g. RemoteHostClosedError happens when client fails
+            LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
             break;
     }
 err:
@@ -427,4 +429,3 @@ err:
 }
 
 }  // namespace libencloud
-
