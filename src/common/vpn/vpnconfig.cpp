@@ -58,8 +58,6 @@ int VpnConfig::fromMap (const QVariantMap &vm)
 {
     LIBENCLOUD_TRACE;
 
-    _data.clear();
-
     LIBENCLOUD_ERR_IF (!vm.contains("ip"));
     _data["remote"] << vm["ip"].toString();
 
@@ -94,13 +92,8 @@ int VpnConfig::fromCfg (Config *cfg)
     if (cfg == NULL)
         return 0;
     
-    _data["ca"].clear();
     _data["ca"] << cfg->config.sslOp.caPath.absoluteFilePath();
-
-    _data["cert"].clear();
     _data["cert"] << cfg->config.sslOp.certPath.absoluteFilePath();
-
-    _data["key"].clear();
     _data["key"] << cfg->config.sslOp.keyPath.absoluteFilePath();
 
     return 0;
