@@ -97,7 +97,7 @@ private:
     int _clientPort;
     Watchdog _clientWatchdog;
 
-    NetworkManager _networkManager;
+    NetworkManager *_networkManager;
     libencloud::ProxyFactory *_proxyFactory;
     Auth _sbAuth;
     Auth _proxyAuth;

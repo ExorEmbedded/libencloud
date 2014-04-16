@@ -31,6 +31,7 @@ Core::Core (Mode mode)
     , _setupState(&_setupSt)
     , _cloudState(&_cloudSt)
     , _clientPort(-1)
+    , _networkManager(NULL)
     , _proxyFactory(NULL)
 {
     LIBENCLOUD_TRACE;
@@ -65,6 +66,8 @@ Core::~Core ()
     LIBENCLOUD_TRACE;
 
     g_libencloudCfg = NULL;
+
+    LIBENCLOUD_DELETE(_networkManager);
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
     LIBENCLOUD_DELETE(_cloud);
@@ -370,7 +373,7 @@ void Core::_serverConfigReceived (const QVariant &variant)
 
     LIBENCLOUD_ERR_IF (serverMap["internal_ip"].isNull());
 
-    _networkManager.setGateway("", serverMap["internal_ip"].toString());
+    _networkManager->setGateway("", serverMap["internal_ip"].toString());
 err:
     return;
 }
@@ -414,7 +417,7 @@ void Core::_actionRequest (const QString &action, const Params &params)
     // handled by NetworkManager
     //
     else if (action == "syncRoutes")
-        _networkManager.syncRoutes(paramsFind(params, "ips").split(","));
+        _networkManager->syncRoutes(paramsFind(params, "ips").split(","));
     //
     // forwarded to GUI service
     //
@@ -606,7 +609,12 @@ int Core::_init ()
 {
     connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
 
+    _networkManager = new NetworkManager;
+    LIBENCLOUD_ERR_IF (_networkManager == NULL);
+
     return 0;
+err:
+    return ~0;
 }
 
 QString Core::_stateStr (QState *state)
