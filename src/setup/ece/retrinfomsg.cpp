@@ -79,10 +79,9 @@ void RetrInfoMsg::_clientComplete (const QString &response)
     // stop listening to signals from client
     disconnect(_client, 0, this, 0);
 
-    // signals emitted internally
+    // signals are emitted internally
     LIBENCLOUD_ERR_IF (_decodeResponse(response));
-
-    EMIT_ERROR_ERR_IF (_unpackResponse());
+    LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
 err:
@@ -171,13 +170,19 @@ int RetrInfoMsg::_unpackResponse ()
     bool ok;
 
     // save the CSR template to file
-    LIBENCLOUD_ERR_IF (!csrf.open(QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (csrf.write(json::serialize(_csrTmpl, ok).toAscii()) == -1);
+    LIBENCLOUD_EMIT_ERR_IF (
+            (!csrf.open(QIODevice::WriteOnly) ||
+            csrf.write(json::serialize(_csrTmpl, ok).toAscii()) == -1),
+            error(Error(Error::CodeSystemError, tr("Failed writing CSR template: ") +
+                    csrf.errorString())));
     csrf.close();
 
     // save the Operation CA certificate to file
-    LIBENCLOUD_ERR_IF (!caf.open(QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
+    LIBENCLOUD_EMIT_ERR_IF (
+            (!caf.open(QIODevice::WriteOnly) ||
+             caf.write(_caCert.toPem()) == -1),
+            error(Error(Error::CodeSystemError, tr("Failed writing CA cert: ") +
+                    caf.errorString())));
     caf.close();
 
     return 0;

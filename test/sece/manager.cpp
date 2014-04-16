@@ -1,3 +1,5 @@
+#include <encloud/Error>
+#include <encloud/Progress>
 #include "common.h"
 #include "manager.h"
 
@@ -11,13 +13,15 @@ Manager::Manager()
 {
     SECE_TRACE;
 
-    // Setup API
+    // <= Setup API
     connect(&_statusApi, SIGNAL(apiState(libencloud::State)),
             this, SLOT(_statusApiState(libencloud::State)));
 
-    // Cloud API
+    // <= Cloud API
     connect(this, SIGNAL(actionRequest(QString, libencloud::Params)),
             &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+
+    // => GUI in setWindow()
 }
 
 Manager::~Manager()
@@ -38,6 +42,12 @@ int Manager::setWindow (MainWindow *window)
     // API -> MainWindow
     connect(&_statusApi, SIGNAL(apiState(libencloud::State)),
             window, SLOT(_stateChanged(libencloud::State)));
+    connect(&_statusApi, SIGNAL(error(libencloud::Error)),
+            window, SLOT(_gotError(libencloud::Error)));
+    connect(&_statusApi, SIGNAL(apiProgress(libencloud::Progress)),
+            window, SLOT(_gotProgress(libencloud::Progress)));
+    connect(&_statusApi, SIGNAL(apiNeed(QString)),
+            window, SLOT(_gotNeed(QString)));
 
     _window = window;
 
@@ -72,6 +82,7 @@ void Manager::_toggle()
     switch (_prevState)
     {
         case libencloud::StateIdle:
+        case libencloud::StateError:
             _start();
             break;
         default:

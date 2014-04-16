@@ -7,7 +7,7 @@
 //
 
 MainWindow::MainWindow()
-    : _state(libencloud::StateIdle)
+    : _state(libencloud::StateNone)
     , _widget(NULL)
     , _layout(NULL)
     , _button(NULL)
@@ -21,19 +21,13 @@ MainWindow::MainWindow()
     SECE_TRACE;
 
     //
-    // layout
-    //
-    _layout = new QVBoxLayout(this);
-    SECE_ERR_IF (_layout == NULL);
-
-    //
     // main widget
     //
-
     _widget = new QWidget(this);
     SECE_ERR_IF (_widget == NULL);
 
-    _widget->setLayout(_layout);
+    _layout = new QVBoxLayout(_widget);
+    SECE_ERR_IF (_layout == NULL);
 
     //
     // button
@@ -90,9 +84,8 @@ MainWindow::MainWindow()
     //
     // window settings
     //
-    setFixedSize(200,250);
+    setFixedSize(300,300);
     setStyleSheet("background-color: white;");
-    setLayout(_layout);
     setCentralWidget(_widget);
 
 err:
@@ -107,29 +100,55 @@ MainWindow::~MainWindow()
 //
 // private slots
 //
+
 void MainWindow::_stateChanged (libencloud::State state)
 {
     switch (state) 
     {
         case libencloud::StateIdle:
+            _button->setText("Connect");
+            _button->setEnabled(true);
             setStyleSheet("background-color: white;");
             break;
         case libencloud::StateError:
+            _button->setText("Connect");
+            _button->setEnabled(false);  // automatic retries - no user intervention
             setStyleSheet("background-color: red;");
             break;
         case libencloud::StateSetup:
+            _button->setEnabled(false);
             setStyleSheet("background-color: yellow;");
             break;
         case libencloud::StateConnect:
             setStyleSheet("background-color: orange;");
             break;
         case libencloud::StateCloud:
+            _button->setText("Disconnect");
+            _button->setEnabled(true);
             setStyleSheet("background-color: green;");
             break;
         default:
             break;
     }
 
-    if (state == libencloud::StateError) 
-        _stateText->setText("error!");
+    _stateText->setText(libencloud::stateToString(state));
+}
+
+void MainWindow::_gotError (const libencloud::Error &error)
+{
+    _error = error;
+
+    _errorText->setText(_error.getDesc() + "\n" +_error.getExtra());
+}
+
+void MainWindow::_gotProgress (const libencloud::Progress &progress)
+{
+    _progress = progress;
+
+    _progressText->setText(_progress.toString());
+}
+
+void MainWindow::_gotNeed (const QString &need)
+{
+    SECE_DBG(need);
 }
