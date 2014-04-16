@@ -18,8 +18,10 @@
  */
 namespace libencloud {
 
-class LIBENCLOUD_DLLSPEC Logger
+class LIBENCLOUD_DLLSPEC Logger : public QObject
 {
+    Q_OBJECT
+
 public:
     Logger ();
     ~Logger ();
@@ -32,11 +34,12 @@ public:
     // default is WriteOnly | Text
     int setExtraMode (QIODevice::OpenModeFlag flags);
 
-    int open ();
-    int close ();
-
     // Note: to be called *after* open()
     bool isValid ();
+
+public slots:
+    int open ();
+    int close ();
 
 protected:
     QString _path;
