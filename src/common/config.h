@@ -20,6 +20,7 @@ namespace libencloud {
 typedef struct
 {
     QUrl sbUrl;
+    QString auth;
     QFileInfo caPath;
     QFileInfo certPath;
     QFileInfo keyPath;

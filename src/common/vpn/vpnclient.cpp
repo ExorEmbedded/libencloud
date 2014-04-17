@@ -140,9 +140,8 @@ QStringList VpnClient::getArgs (void)
     args << "--management-forget-disconnect";
     args << "--management-query-passwords";
 
-#ifdef LIBENCLOUD_MODE_QIC
-    args << "--auth-user-pass";
-#endif
+    if (_cfg->config.sslOp.auth == "user-pass")
+        args << "--auth-user-pass";
 
     caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
     args << "--ca" << caCertPath;

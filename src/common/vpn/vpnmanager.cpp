@@ -13,7 +13,7 @@ namespace libencloud {
 //
 
 VpnManager::VpnManager (const Config *config)
-    : config(config)
+    : cfg(config)
     , err(NoError)
     , st(StateDetached)
     , socket(NULL)
@@ -51,6 +51,8 @@ QString VpnManager::errorString (Error err)
             return tr("Unhandled functionality");
         case SocketError:
             return tr("Error in socket communication");
+        case AuthFailedError:
+            return tr("Authentication failed");
     }
 
     return "";
@@ -198,7 +200,10 @@ void VpnManager::parseLinePass (QByteArray rest)
 
     if (qstrcmp(rest, "Verification Failed: 'Auth'") == 0)
     {
-        emit authRequired(Auth::SwitchboardId);
+        if (cfg->config.sslOp.auth == "user-pass")  // plain signal for user
+            emit authRequired(Auth::SwitchboardId);
+        else if (cfg->config.sslOp.auth == "x509")  // hard error signal
+            LIBENCLOUD_EMIT_ERR(sigError((this->err = AuthFailedError), rest));
     }
     else if (qstrcmp(rest, "Verification Failed: 'HTTP Proxy'") == 0 ||
             qstrcmp(rest, "Verification Failed: 'SOCKS Proxy'") == 0)

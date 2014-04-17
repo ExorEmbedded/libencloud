@@ -57,6 +57,7 @@
 #define LIBENCLOUD_SERIAL_FILE          "serial"
 #define LIBENCLOUD_POI_FILE             "poi"
 #define LIBENCLOUD_CSRTMPL_FILE         "csr-tmpl.json"
+#define LIBENCLOUD_AUTH_USERPASS        "user-pass"
 #define LIBENCLOUD_INIT_CA_FILE         "init_ca.pem"
 #define LIBENCLOUD_INIT_CERT_FILE       "init_cert.pem"
 #define LIBENCLOUD_INIT_KEY_FILE        "init_key.pem"

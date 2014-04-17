@@ -45,10 +45,12 @@ Config::Config ()
 
     config.csrTmplPath = QFileInfo(_dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
 
+    config.sslInit.auth = LIBENCLOUD_AUTH_USERPASS;
     config.sslInit.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
     config.sslInit.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
     config.sslInit.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
 
+    config.sslOp.auth = LIBENCLOUD_AUTH_USERPASS;
     config.sslOp.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
     config.sslOp.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_CERT_FILE);
     config.sslOp.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_KEY_FILE);
@@ -179,6 +181,12 @@ int Config::_parseSslOp (const QVariantMap &jo)
 
 int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 {
+    if (!jo["auth"].isNull())
+    {
+        sc.auth = jo["auth"].toString();
+        LIBENCLOUD_ERR_IF (sc.auth != "user-pass" && sc.auth != "x509");
+    }
+
     if (!jo["ca"].isNull())
         sc.caPath = _joinPaths(_dataPrefix, jo["ca"].toString());
 

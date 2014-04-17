@@ -27,18 +27,20 @@ libencloud configuration
     "sb" : {
       "url" : "https://initialization-host/"    # override sb host
     },
-    "ca" : "init_ca.pem",              
-    "cert" : "init_cert.pem",
-    "key" : "init_key.pem"
+    "auth" : "x509",                            # "user-pass" (default), "x509"
+    "ca" : "init_ca.pem",                       # RECOMMENDED
+    "cert" : "init_cert.pem",                   # required for "auth" = "x509"
+    "key" : "init_key.pem"                      # required for "auth" = "x509"
   },
 
   "ssl_op" : {                                  # operation channel setup
     "sb" : {
       "url" : "https://operation-host/"         # override sb host
     },
-    "ca" : "op_ca.pem",
-    "cert" : "op_cert.pem",
-    "key" : "op_key.pem"
+    "auth" : "x509",                            # "user-pass" (default), "x509"
+    "ca" : "op_ca.pem",                         # RECOMMENDED
+    "cert" : "op_cert.pem",                     # required for "auth" = "x509"
+    "key" : "op_key.pem"                        # required for "auth" = "x509"
   },
 
   "rsa" : {                                     # key size for generated RSA keys

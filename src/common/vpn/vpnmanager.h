@@ -27,7 +27,8 @@ public:
         CommError,
         MgmtError,
         UnhandledError,
-        SocketError
+        SocketError,
+        AuthFailedError,
     }
     Error;
 
@@ -78,7 +79,7 @@ private:
     void parseLineState (QByteArray line);
     void sendAuth (const QString type, const QString &user, const QString &pass);
 
-    const Config *config;
+    const Config *cfg;
     Error err;
     State st;
     QTcpSocket *socket;
