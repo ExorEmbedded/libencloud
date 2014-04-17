@@ -119,6 +119,8 @@ int Core::attachServer (Server *server)
     QObject *obj;
     HttpHandler *handler;
 
+    LIBENCLOUD_TRACE;
+
     LIBENCLOUD_ERR_IF (server == NULL);
 
     //
@@ -560,6 +562,9 @@ int Core::_initApi ()
 {
     LIBENCLOUD_TRACE;
 
+    _cloudApi = new libencloud::CloudApi;
+    LIBENCLOUD_ERR_IF (_cloudApi == NULL);
+
     // Encloud Service forwards action requests to Gui via Cloud API
     if (_mode == EncloudMode)
         connect(this, SIGNAL(actionRequest(QString, libencloud::Params)), 
@@ -568,6 +573,8 @@ int Core::_initApi ()
     // else if (mode == GuiMode) signal is caught by Gui
 
     return 0;
+err:
+    return ~0;
 }
 
 int Core::_initFsm ()
