@@ -2,6 +2,7 @@ ChangeLog file for Endian libencloud
 
 libencloud 0.X.Y:
 	- vpn: 'client' wasn't being dumped
+	- test: scripts/vpncli.sh extensions for *ECE testing
 
 libencloud 0.6.1 (15/04/2014):
 	- custom ProxyFactory to avoid proxying localhost requests;
