@@ -5,6 +5,7 @@ libencloud 0.X.Y:
 	- error: new Retry object
 	- vpn: 'client' wasn't being dumped, handle retries
 	- test: scripts/vpncli.sh extensions for *ECE testing; SECE sample wip
+	- *ece: fail if getInfo yields valid=false
 
 libencloud 0.6.1 (15/04/2014):
 	- custom ProxyFactory to avoid proxying localhost requests;

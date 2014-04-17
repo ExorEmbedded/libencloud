@@ -146,6 +146,7 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     EMIT_ERROR_ERR_IF (!_time.isValid());
 
     _valid = jo["valid"].toBool();
+    EMIT_ERROR_ERR_IF (!_valid);
 
     _expiry = utils::pytime2DateTime(jo["expiry"].toString());
     EMIT_ERROR_ERR_IF (!_expiry.isValid());
