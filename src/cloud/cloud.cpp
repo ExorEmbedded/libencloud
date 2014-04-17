@@ -119,8 +119,16 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
         msg += "\n\n" + errMsg;
 
     emit error(Error(msg));
+
+    // auto-retry only for *ECE
+#if !defined(LIBENCLOUD_MODE_QIC)
+    _vpnClient->stop();
+    _retry.schedule(this, SLOT(_onRetry()));
+#endif
+    // QIC core does full stop()
 }
 
+// manager socket failures are handled internally - all other errors caught by _vpnClientErr()
 void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
 {
     QString msg;
@@ -130,6 +138,11 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
         msg += "\n\n" + errMsg;
 
     emit error(Error(msg));
+}
+
+void Cloud::_onRetry ()
+{
+    _vpnClient->start();
 }
 
 } // namespace libencloud

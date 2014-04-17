@@ -263,7 +263,7 @@ void Core::_errorReceived (const libencloud::Error &err)
     LIBENCLOUD_TRACE;
 
    // QIC stops progress upon critical errors for user intervention
-   // while ECE and SECE keep on retrying automatically
+   // while ECE and SECE keep on retrying automatically (in internal modules)
 #if defined(LIBENCLOUD_MODE_QIC)
     stop();
 #endif

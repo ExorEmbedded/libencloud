@@ -105,7 +105,7 @@ private:
     QState _checkExpirySt, *_checkExpiryState;
 
     bool _error;
-    int _backoff;
+    Retry _retry;
 };
 
 } // namespace libencloud

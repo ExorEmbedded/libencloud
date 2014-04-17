@@ -15,14 +15,14 @@ namespace libencloud {
 
 class Cloud : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
     Cloud (Config *cfg);
     ~Cloud ();
 
-	int start ();
-	int stop ();
+    int start ();
+    int stop ();
 
     int getTotalSteps() const;
 
@@ -39,11 +39,13 @@ private slots:
     void _vpnStateChanged (VpnClient::State state);
     void _vpnClientErr (VpnClient::Error err, const QString &errMsg);
     void _vpnManagerErr (VpnManager::Error err, const QString &errMsg);
+    void _onRetry ();
 
 private:
-	Config *_cfg;
-	VpnClient *_vpnClient;
-	VpnManager *_vpnManager;
+    Config *_cfg;
+    VpnClient *_vpnClient;
+    VpnManager *_vpnManager;
+    Retry _retry;
 };
 
 } // namespace libencloud

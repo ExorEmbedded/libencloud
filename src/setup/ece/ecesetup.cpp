@@ -21,7 +21,6 @@ EceSetup::EceSetup (Config *cfg)
     , _retrConfState(&_retrConfSt)
     , _checkExpiryState(&_checkExpirySt)
     , _error(false)
-    , _backoff(1)
 {
     LIBENCLOUD_TRACE;
 
@@ -76,7 +75,7 @@ void EceSetup::_stateEntered ()
             " previousState: " << _previousState);
 
     if (!_error)
-        _backoff = 1;
+        _retry.reset();
 
     _previousState = state;
 
@@ -99,15 +98,12 @@ void EceSetup::_stateExited ()
 void EceSetup::_onErrorState ()
 {
     QState *state = qobject_cast<QState *>(sender());
-    int secs = qPow(LIBENCLOUD_RETRY_BASE, _backoff);
 
-    LIBENCLOUD_DBG("state: " << state << 
-            ", retrying in " << QString::number(secs) << " seconds");
+    LIBENCLOUD_DBG("state: " << state);
 
     _error = true;
 
-    QTimer::singleShot(secs * 1000, this, SLOT(_onRetryTimeout()));
-    _backoff++;
+    _retry.schedule(this, SLOT(_onRetryTimeout()));
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);
 }

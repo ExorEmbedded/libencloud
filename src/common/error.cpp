@@ -1,3 +1,5 @@
+#include <QtCore/qmath.h>
+#include <QTimer>
 #include <encloud/Error>
 #include <common/common.h>
 #include <common/config.h>
@@ -171,5 +173,57 @@ QString Error::_code2Desc (Code code)
 
     return "";
 }
+
+void Retry::setTimeout (int timeout)
+{
+    LIBENCLOUD_ERR_IF (timeout <= 0);
+
+    _timeout = timeout;
+err:
+    return;
+}
+
+void Retry::setBackoff (int base, int max)
+{
+    LIBENCLOUD_ERR_IF (base <= 1);
+    LIBENCLOUD_ERR_IF (max < 1);
+
+    _base = base;
+    _max = max;
+err:
+    return;
+}
+
+void Retry::schedule (QObject *receiver, const char *member)
+{
+    int secs;
+
+    LIBENCLOUD_ERR_IF (receiver == NULL);
+    LIBENCLOUD_ERR_IF (member == NULL);
+
+    if (_base > 0)  // exponential backoff
+    {
+        secs = qMin(_max, (int) qPow(_base, _backoff));
+        if (secs < _max)
+            _backoff++;
+    }
+    else  // fixed
+    {
+        secs = _timeout;
+    }
+
+    LIBENCLOUD_DBG("retrying in " << QString::number(secs) << " seconds");
+
+    QTimer::singleShot(secs * 1000, receiver, member);
+
+err:
+    return;
+}
+
+void Retry::reset ()
+{
+    _backoff = 1;
+}
+
 
 }  // namespace libencloud

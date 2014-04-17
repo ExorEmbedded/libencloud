@@ -72,6 +72,41 @@ private:
     QString _extra;
 };
 
+// setTimeout() sets plain constant retry (default)
+// setBackoff() sets base for exponential backoff retries 
+// All retries are single-shot.
+class LIBENCLOUD_DLLSPEC Retry
+{
+public:
+
+    enum {
+        Timeout = 5,      // fixed timeout
+        BackoffBase = 2,  // exponential base for backoff
+        BackoffMax = 300  // 5 minutes
+    };
+
+    Retry() 
+        : _timeout(Timeout) 
+        , _base(-1) 
+        , _backoff(1)
+        , _max(BackoffMax)
+    { };
+
+    void setTimeout (int timeout = Timeout);
+    void setBackoff (int base = BackoffBase, int max = BackoffMax);
+
+    void schedule (QObject *receiver, const char *member);
+
+    // call this to reset exponential backoff
+    void reset ();
+
+private:
+    int _timeout;
+    int _base;
+    int _backoff;
+    int _max;
+};
+
 }  // namespace libencloud
 
 #endif  // _LIBENCLOUD_ERROR_H_

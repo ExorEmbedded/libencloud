@@ -326,12 +326,14 @@ void VpnClient::processStarted ()
 
 void VpnClient::processFinished (int exitCode, QProcess::ExitStatus exitStatus)
 {
-    LIBENCLOUD_EMIT_RETURN_MSG_IF (exitCode || exitStatus,
+    LIBENCLOUD_TRACE;
+
+    // process exiting always indicates failure whatever the return code
+    // for example upon bad cert authentication openvpn exits with status 0!
+    LIBENCLOUD_EMIT_RETURN_MSG_IF (1, //exitCode || exitStatus,
             sigError(this->err = ProcessError),
             "Process exitCode: " + QString::number(exitCode) +
             ", exitStatus: " + QString::number(exitStatus), );
-
-    emit stateChanged((this->st = StateIdle));
 
 //    if (_cfg->vpnManualConfigPath.exists())
 //        this->st = StateConfigured;

@@ -34,6 +34,7 @@
 
 // exponent for timeout with exponential backoff - base increases by 1 at each failure
 #define LIBENCLOUD_RETRY_BASE           2
+#define LIBENCLOUD_RETRY_MAX            300  // 5 minutes
 
 #define LIBENCLOUD_TIMEOUT              10000  /* ms */
 #define LIBENCLOUD_URL_SZ               1024
