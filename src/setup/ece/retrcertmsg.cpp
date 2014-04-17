@@ -21,11 +21,28 @@ int RetrCertMsg::process ()
     QUrl url;
     QUrl params;
     QSslConfiguration config;
+    const char *certData;
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
     EMIT_ERROR_ERR_IF (_client == NULL);
 
     EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
+
+    // don't getCertificate if we already have a valid one
+    certData = utils::file2Data(_cfg->config.sslOp.certPath);
+    if (certData == NULL)
+    {
+        LIBENCLOUD_DBG("No existing Operation Certificate");
+    }
+    else
+    {
+        if (QSslCertificate(certData).isValid())
+        {
+            LIBENCLOUD_DBG("Valid Operation Certificate found - skipping getCertificate");
+            emit processed();
+            return 0;
+        }
+    }
 
     EMIT_ERROR_ERR_IF (_packRequest());
     EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
