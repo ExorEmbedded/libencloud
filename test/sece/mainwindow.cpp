@@ -87,6 +87,7 @@ MainWindow::MainWindow()
     setFixedSize(300,300);
     setStyleSheet("background-color: white;");
     setCentralWidget(_widget);
+    setWindowTitle("SECE Test");
 
 err:
     return;
@@ -107,24 +108,20 @@ void MainWindow::_stateChanged (libencloud::State state)
     {
         case libencloud::StateIdle:
             _button->setText("Connect");
-            _button->setEnabled(true);
             setStyleSheet("background-color: white;");
             break;
         case libencloud::StateError:
-            _button->setText("Connect");
-            _button->setEnabled(false);  // automatic retries - no user intervention
+            _button->setText("Disconnect");
             setStyleSheet("background-color: red;");
             break;
         case libencloud::StateSetup:
-            _button->setEnabled(false);
+            _button->setText("Disconnect");
             setStyleSheet("background-color: yellow;");
             break;
         case libencloud::StateConnect:
             setStyleSheet("background-color: orange;");
             break;
         case libencloud::StateCloud:
-            _button->setText("Disconnect");
-            _button->setEnabled(true);
             setStyleSheet("background-color: green;");
             break;
         default:

@@ -114,9 +114,9 @@ void Manager::_toggle()
     switch (_prevState)
     {
         case libencloud::StateIdle:
-        case libencloud::StateError:
             _start();
             break;
+        case libencloud::StateError:
         default:
             _stop();
             break;
