@@ -48,6 +48,7 @@ public:
     bool operator == (const Error &e) const;
     bool operator != (const Error &e) const;
     QString toString () const;
+    friend QDebug operator << (QDebug d, const Error &error);
 
     Code getCode () const;
     int setCode (Code code);

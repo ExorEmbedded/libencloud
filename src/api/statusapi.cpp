@@ -113,28 +113,30 @@ int StatusApi::_parseState (const QVariant &v)
 
 int StatusApi::_parseError (const QVariant &v)
 {
-    if (v.isNull())
-        return 0;
-    
     Error err;
-    QVariantMap jo = v.toMap();
 
-    if (!jo["code"].isNull())
-        err.setCode((Error::Code) jo["code"].toInt());
+    if (!v.isNull())
+    {
+        QVariantMap jo = v.toMap();
 
-    if (!jo["seq"].isNull())
-        err.setSeq(jo["seq"].toInt());
+        if (!jo["code"].isNull())
+            err.setCode((Error::Code) jo["code"].toInt());
 
-    if (!jo["desc"].isNull())
-        err.setDesc(jo["desc"].toString());
+        if (!jo["seq"].isNull())
+            err.setSeq(jo["seq"].toInt());
 
-    if (!jo["extra"].isNull())
-        err.setExtra(jo["extra"].toString());
+        if (!jo["desc"].isNull())
+            err.setDesc(jo["desc"].toString());
+
+        if (!jo["extra"].isNull())
+            err.setExtra(jo["extra"].toString());
+    }
 
 //    LIBENCLOUD_DBG("err: " << err.toString());
 
     // emit apiError, generic error and also state (for confirmation)
-    if (err != _error)
+    if ((!err.isValid() && _error.isValid()) ||
+            (err.isValid() && err != _error))
     {
         _error = err;
 

@@ -135,7 +135,10 @@ void MainWindow::_gotError (const libencloud::Error &error)
 {
     _error = error;
 
-    _errorText->setText(_error.getDesc() + "\n" +_error.getExtra());
+    if (!error.isValid())
+        _errorText->setText("");
+    else
+        _errorText->setText(_error.getDesc() + "\n" +_error.getExtra());
 }
 
 void MainWindow::_gotProgress (const libencloud::Progress &progress)

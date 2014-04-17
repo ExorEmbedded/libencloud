@@ -79,6 +79,12 @@ QString Error::toString () const
     return str;
 }
 
+QDebug operator << (QDebug d, const Error &error)
+{
+    d << error.toString();
+    return d;
+}
+
 Error::Code Error::getCode () const
 {
     return _code;
@@ -90,6 +96,7 @@ int Error::setCode (Error::Code code)
         goto err;
 
     _code = code;
+    _isValid = true;
 
     return 0;
 err:
@@ -116,6 +123,7 @@ QString Error::getDesc () const
 int Error::setDesc (const QString &desc)
 {
     _desc = desc;
+    _isValid = true;
 
     return 0;
 }
@@ -223,9 +231,6 @@ void Retry::start ()
     LIBENCLOUD_DBG("retrying in " << QString::number(secs) << " seconds");
 
     _timer.start(secs * 1000);
-
-err:
-    return;
 }
 
 void Retry::stop ()

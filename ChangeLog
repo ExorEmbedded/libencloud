@@ -1,6 +1,7 @@
 ChangeLog file for Endian libencloud
 
 libencloud 0.X.Y:
+	- api/status: empty errors not being reemitted
 	- conf: user/pass vs x509 auth is configurable
 	- error: new Retry object
 	- vpn: 'client' wasn't being dumped, handle retries
