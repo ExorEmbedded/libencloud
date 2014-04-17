@@ -27,6 +27,8 @@ EceSetup::EceSetup (Config *cfg)
     emit progress(Progress(tr("Initialising ECE Setup Module"), StateInit, getTotalSteps()));
 
     _initFsm();
+
+    connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
 }
 
 int EceSetup::start ()
@@ -42,8 +44,8 @@ int EceSetup::stop ()
 {
     LIBENCLOUD_TRACE;
 
+    _retry.stop();
     _fsm.stop();
-    // TODO handle stopped()
 
     return 0;
 }
@@ -75,7 +77,7 @@ void EceSetup::_stateEntered ()
             " previousState: " << _previousState);
 
     if (!_error)
-        _retry.reset();
+        _retry.stop();
 
     _previousState = state;
 
@@ -103,7 +105,7 @@ void EceSetup::_onErrorState ()
 
     _error = true;
 
-    _retry.schedule(this, SLOT(_onRetryTimeout()));
+    _retry.start();
 
     _errorState->addTransition(this, SIGNAL(retry()), _previousState);
 }

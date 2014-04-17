@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QString>
+#include <QTimer>
 #include <encloud/Common>
 
 namespace libencloud 
@@ -75,8 +76,10 @@ private:
 // setTimeout() sets plain constant retry (default)
 // setBackoff() sets base for exponential backoff retries 
 // All retries are single-shot.
-class LIBENCLOUD_DLLSPEC Retry
+class LIBENCLOUD_DLLSPEC Retry : public QObject
 {
+    Q_OBJECT
+
 public:
 
     enum {
@@ -85,26 +88,25 @@ public:
         BackoffMax = 300  // 5 minutes
     };
 
-    Retry() 
-        : _timeout(Timeout) 
-        , _base(-1) 
-        , _backoff(1)
-        , _max(BackoffMax)
-    { };
+    Retry ();
 
     void setTimeout (int timeout = Timeout);
     void setBackoff (int base = BackoffBase, int max = BackoffMax);
 
-    void schedule (QObject *receiver, const char *member);
+signals:
+    void timeout ();
 
-    // call this to reset exponential backoff
-    void reset ();
+public slots:
+
+    void start ();
+    void stop ();
 
 private:
     int _timeout;
     int _base;
     int _backoff;
     int _max;
+    QTimer _timer;
 };
 
 }  // namespace libencloud

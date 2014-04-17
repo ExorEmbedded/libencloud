@@ -174,6 +174,17 @@ QString Error::_code2Desc (Code code)
     return "";
 }
 
+Retry::Retry()
+    : _timeout(Timeout) 
+    , _base(-1)
+    , _backoff(1)
+    , _max(BackoffMax)
+{
+    _timer.setSingleShot(true);
+
+    connect(&_timer, SIGNAL(timeout()), this, SIGNAL(timeout()));
+}
+
 void Retry::setTimeout (int timeout)
 {
     LIBENCLOUD_ERR_IF (timeout <= 0);
@@ -194,12 +205,9 @@ err:
     return;
 }
 
-void Retry::schedule (QObject *receiver, const char *member)
+void Retry::start ()
 {
     int secs;
-
-    LIBENCLOUD_ERR_IF (receiver == NULL);
-    LIBENCLOUD_ERR_IF (member == NULL);
 
     if (_base > 0)  // exponential backoff
     {
@@ -214,16 +222,17 @@ void Retry::schedule (QObject *receiver, const char *member)
 
     LIBENCLOUD_DBG("retrying in " << QString::number(secs) << " seconds");
 
-    QTimer::singleShot(secs * 1000, receiver, member);
+    _timer.start(secs * 1000);
 
 err:
     return;
 }
 
-void Retry::reset ()
+void Retry::stop ()
 {
+    _timer.stop();
+
     _backoff = 1;
 }
-
 
 }  // namespace libencloud

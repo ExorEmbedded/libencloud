@@ -44,6 +44,7 @@ Cloud::Cloud (Config *cfg)
     connect(this, SIGNAL(authSupplied(Auth)), 
             _vpnManager, SLOT(authSupplied(Auth)));
 
+    connect(&_retry, SIGNAL(timeout()), SLOT(_onRetry()));
 err:
     return;
 }
@@ -69,6 +70,7 @@ int Cloud::stop()
 {
     LIBENCLOUD_TRACE;
 
+    _retry.stop();
     _vpnManager->detach();
     _vpnClient->stop();
 
@@ -123,7 +125,7 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
     // auto-retry only for *ECE
 #if !defined(LIBENCLOUD_MODE_QIC)
     _vpnClient->stop();
-    _retry.schedule(this, SLOT(_onRetry()));
+    _retry.start();
 #endif
     // QIC core does full stop()
 }
