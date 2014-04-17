@@ -15,6 +15,7 @@ public:
     Manager ();
     ~Manager ();
 
+    inline bool isValid ()              { return _isValid; };
     int run ();
     int setWindow (MainWindow *window);
 
@@ -29,13 +30,14 @@ private slots:
     void _statusApiState (libencloud::State state);
 
 private:
+    bool _isValid;
     MainWindow *_window;
 
     // encloud server and API handlers
-    libencloud::Server _server;
-    libencloud::StatusApi _statusApi;
-    libencloud::SetupApi _setupApi;
-    libencloud::CloudApi _cloudApi;
+    libencloud::Server *_server;
+    libencloud::StatusApi *_statusApi;
+    libencloud::SetupApi *_setupApi;
+    libencloud::CloudApi *_cloudApi;
     libencloud::State _prevState;
 };
 

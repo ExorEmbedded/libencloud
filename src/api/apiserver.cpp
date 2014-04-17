@@ -60,6 +60,7 @@ Server::~Server ()
 {
     LIBENCLOUD_TRACE;
 
+    stop();
     _delete();
 }
 
@@ -112,6 +113,8 @@ int Server::start ()
 {
     LIBENCLOUD_TRACE;
 
+    LIBENCLOUD_ERR_IF (!_isValid);
+
     if (_running)
         return 0;
 
@@ -142,7 +145,9 @@ int Server::stop ()
 {
     LIBENCLOUD_TRACE;
 
-    if (!_running) 
+    LIBENCLOUD_ERR_IF (!_isValid);
+
+    if (!_running)
         return 0;
 
     _localServer->stop();
@@ -153,6 +158,8 @@ int Server::stop ()
     _core->stop();
 
     return 0;
+err:
+    return ~0;
 }
 
 
@@ -162,6 +169,8 @@ int Server::stop ()
 
 void Server::_delete()
 {
+    LIBENCLOUD_TRACE;
+
     LIBENCLOUD_DELETE(_localServer);
     LIBENCLOUD_DELETE(_cloudServer);
     LIBENCLOUD_DELETE(_handler);

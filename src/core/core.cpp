@@ -30,6 +30,7 @@ Core::Core (Mode mode)
     , _cloudObj(NULL)
     , _setupState(&_setupSt)
     , _cloudState(&_cloudSt)
+    , _cloudApi(NULL)
     , _clientPort(-1)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
@@ -429,7 +430,7 @@ void Core::_actionRequest (const QString &action, const Params &params)
             case EncloudMode:
                 // by now we whould have received port setting from client
                 LIBENCLOUD_ERR_IF (_clientPort == -1);
-                _cloudApi.setPort(_clientPort);
+                _cloudApi->setPort(_clientPort);
                 break;
             case GuiMode:
                 break;
@@ -562,7 +563,7 @@ int Core::_initApi ()
     // Encloud Service forwards action requests to Gui via Cloud API
     if (_mode == EncloudMode)
         connect(this, SIGNAL(actionRequest(QString, libencloud::Params)), 
-                &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
+                _cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
 
     // else if (mode == GuiMode) signal is caught by Gui
 

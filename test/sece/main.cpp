@@ -11,6 +11,7 @@ int main (int argc, char **argv)
     MainWindow mainWindow;
     Manager manager;
 
+    SECE_ERR_IF (!manager.isValid());
     SECE_ERR_IF (manager.setWindow(&mainWindow));
     SECE_ERR_IF (manager.run());
 

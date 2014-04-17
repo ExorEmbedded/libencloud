@@ -93,7 +93,7 @@ private:
     QState _setupSt, *_setupState;
     QState _cloudSt, *_cloudState;
 
-    CloudApi _cloudApi;
+    CloudApi *_cloudApi;
     int _clientPort;
     Watchdog _clientWatchdog;
 
