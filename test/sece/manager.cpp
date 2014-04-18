@@ -14,7 +14,7 @@ Manager::Manager()
     , _statusApi(NULL)
     , _setupApi(NULL)
     , _cloudApi(NULL)
-    , _prevState(libencloud::StateIdle)
+    , _apiState(libencloud::StateIdle)
 {
     SECE_TRACE;
 
@@ -34,12 +34,18 @@ Manager::Manager()
     // <= Setup API
     connect(_statusApi, SIGNAL(apiState(libencloud::State)),
             this, SLOT(_statusApiState(libencloud::State)));
+    connect(_statusApi, SIGNAL(apiNeed(QString)),
+            this, SLOT(_statusApiNeed(QString)));
 
     // <= Cloud API
     connect(this, SIGNAL(actionRequest(QString, libencloud::Params)),
             _cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
 
     // => GUI in setWindow()
+
+    connect(&_needTimer, SIGNAL(timeout()), this,
+            SLOT(_needTimerTimeout()));
+    _needTimer.start(3000);
 
     _isValid = true;
 
@@ -66,19 +72,31 @@ int Manager::setWindow (MainWindow *window)
 {
     SECE_ERR_IF (window == NULL);
 
+    //
     // MainWindow -> Manager
+    //
     connect(window, SIGNAL(toggle()),
             this, SLOT(_toggle()));
 
+    // license requests directed to GUI
+    connect(this, SIGNAL(licenseRequest()),
+            window, SLOT(licenseRequest()));
+
+    // supplied licenses handled locally and forwarded from GUI to Setup API
+    connect(window, SIGNAL(licenseSupply(QUuid)),
+            this, SLOT(_licenseSupply(QUuid)));
+    connect(window, SIGNAL(licenseSupply(QUuid)),
+            _setupApi, SLOT(licenseSupply(QUuid)));
+
+    //
     // API -> MainWindow
+    //
     connect(_statusApi, SIGNAL(apiState(libencloud::State)),
             window, SLOT(_stateChanged(libencloud::State)));
     connect(_statusApi, SIGNAL(error(libencloud::Error)),
             window, SLOT(_gotError(libencloud::Error)));
     connect(_statusApi, SIGNAL(apiProgress(libencloud::Progress)),
             window, SLOT(_gotProgress(libencloud::Progress)));
-    connect(_statusApi, SIGNAL(apiNeed(QString)),
-            window, SLOT(_gotNeed(QString)));
 
     _window = window;
 
@@ -111,7 +129,7 @@ void Manager::_toggle()
 {
     SECE_TRACE;
 
-    switch (_prevState)
+    switch (_apiState)
     {
         case libencloud::StateIdle:
             _start();
@@ -141,5 +159,39 @@ void Manager::_statusApiState (libencloud::State state)
 {
     SECE_DBG(libencloud::stateToString(state));
 
-    _prevState = state;
+    _apiState = state;
+}
+
+// Note: license 'need' is emitted by API only once until request is fulfilled
+// => changes can be missed if modal dialogs are active => use _needTimerTimeout
+void Manager::_statusApiNeed (const QString &what)
+{
+    SECE_DBG(what);
+
+    _need = what;
+}
+
+// License received from user - restart
+void Manager::_licenseSupply (const QUuid &uuid)
+{
+    SECE_UNUSED(uuid);
+
+    _start();
+}
+
+// Check and handle 'need's periodically
+void Manager::_needTimerTimeout ()
+{
+    // SECE handles only license 'needs'
+    if (_need != "license")
+        return;
+
+    // license request are handled only while not running
+    if (_apiState != libencloud::StateIdle &&
+            _apiState != libencloud::StateError)
+        return;
+
+    SECE_DBG("need: " << _need);
+
+    emit licenseRequest();
 }

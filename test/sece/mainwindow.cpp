@@ -1,4 +1,6 @@
+#include <QInputDialog>
 #include <QLayout>
+#include <QLineEdit>
 #include "common.h"
 #include "mainwindow.h"
 
@@ -148,7 +150,27 @@ void MainWindow::_gotProgress (const libencloud::Progress &progress)
     _progressText->setText(_progress.toString());
 }
 
-void MainWindow::_gotNeed (const QString &need)
+void MainWindow::licenseRequest ()
 {
-    SECE_DBG(need);
+    bool ok;
+    QString lic;
+    QUuid uuid;
+
+    do
+    {
+        lic = QInputDialog::getText(this,
+                    tr("License required"),
+                    tr("Please enter a valid license UUID:"),
+                    QLineEdit::Normal,
+                    "01234567-89ab-cdef-0123-456789abcdef",
+                    &ok);
+
+        uuid = QUuid(lic);
+    } 
+    while (ok && uuid.isNull());
+
+    // if OK is pressed and license is valid, we send out license info to
+    // Encloud Service via Setup API
+    if (ok)
+        emit licenseSupply(uuid);
 }

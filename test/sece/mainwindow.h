@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QUuid>
 #include <QVBoxLayout>
 #include <encloud/Common>
 #include <encloud/Error>
@@ -22,12 +23,15 @@ public:
 
 signals:
     void toggle ();
+    void licenseSupply (const QUuid &license);
+
+public slots:
+    void licenseRequest ();
 
 private slots:
     void _stateChanged (libencloud::State state);
     void _gotError (const libencloud::Error &error);
     void _gotProgress (const libencloud::Progress &error);
-    void _gotNeed (const QString &need);
 
 private:
     libencloud::State _state;

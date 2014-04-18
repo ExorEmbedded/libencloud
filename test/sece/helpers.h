@@ -5,7 +5,7 @@
 #include <QDateTime>
 #include <QThread>
 
-#define SECE_UNUSED(x)   (x=x)
+#define SECE_UNUSED(x)   Q_UNUSED(x)
 
 // from <sys/syslog.h>
 #define SECE_LOG_EMERG   0   /* system is unusable */

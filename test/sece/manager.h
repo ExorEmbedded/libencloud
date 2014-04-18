@@ -1,6 +1,7 @@
 #ifndef _SECE_MANAGER_H_
 #define _SECE_MANAGER_H_
 
+#include <QUuid>
 #include <encloud/Server>
 #include <encloud/Api/StatusApi>
 #include <encloud/Api/SetupApi>
@@ -22,12 +23,16 @@ public:
 signals:
     void actionRequest (const QString &action, const libencloud::Params &params);
     void stateChanged (libencloud::State state);
+    void licenseRequest ();
 
 private slots:
     void _toggle ();
     void _start ();
     void _stop ();
     void _statusApiState (libencloud::State state);
+    void _statusApiNeed (const QString &what);
+    void _licenseSupply (const QUuid &uuid);
+    void _needTimerTimeout ();
 
 private:
     bool _isValid;
@@ -38,7 +43,10 @@ private:
     libencloud::StatusApi *_statusApi;
     libencloud::SetupApi *_setupApi;
     libencloud::CloudApi *_cloudApi;
-    libencloud::State _prevState;
+    libencloud::State _apiState;
+
+    QString _need;
+    QTimer _needTimer;
 };
 
 #endif  // _SECE_MANAGER_H_
