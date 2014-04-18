@@ -19,6 +19,7 @@ MainWindow::MainWindow()
     , _progressText(NULL)
     , _errorLabel(NULL)
     , _errorText(NULL)
+    , _waitingForUser(false)
 {
     SECE_TRACE;
 
@@ -156,6 +157,12 @@ void MainWindow::licenseRequest ()
     QString lic;
     QUuid uuid;
 
+    // avoid duplicate signals due to modal dialog
+    if (_waitingForUser)
+        return;
+
+    _waitingForUser = true;
+
     do
     {
         lic = QInputDialog::getText(this,
@@ -173,4 +180,6 @@ void MainWindow::licenseRequest ()
     // Encloud Service via Setup API
     if (ok)
         emit licenseSupply(uuid);
+
+    _waitingForUser = false;
 }

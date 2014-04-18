@@ -47,6 +47,8 @@ private:
     QTextEdit *_progressText;
     QLabel *_errorLabel;
     QTextEdit *_errorText;
+
+    bool _waitingForUser;
 };
 
 #endif  // _SECE_MAINWINDOW_H_
