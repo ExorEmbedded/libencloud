@@ -87,7 +87,7 @@ int RetrCertMsg::_packRequest ()
     long len;
 
 #ifdef LIBENCLOUD_MODE_SECE
-    _license = QUuid(_cfg->settings->value("lic").toString());
+    _license = QUuid(_cfg->sysSettings->value("lic").toString());
     LIBENCLOUD_ERR_IF (_license.isNull());
 
     _hwInfo = utils::getHwInfo();

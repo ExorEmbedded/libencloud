@@ -8,6 +8,7 @@ namespace libencloud {
 /* Set defaults from defaults.h definitions */
 Config::Config ()
     : settings(NULL)
+    , sysSettings(NULL)
 {
     QString sep = "/";
 
@@ -35,6 +36,10 @@ Config::Config ()
     // data are package-specific on win
 
     settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    LIBENCLOUD_ERR_IF (settings == NULL);
+
+    sysSettings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    LIBENCLOUD_ERR_IF (sysSettings == NULL);
 
 #ifdef LIBENCLOUD_MODE_ECE
     config.poiPath = QFileInfo(_dataPrefix + LIBENCLOUD_POI_FILE);
@@ -63,11 +68,15 @@ Config::Config ()
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
 
     config.logLevel = LIBENCLOUD_LOG_LEV;
+
+err:
+    return;
 }
 
 Config::~Config()
 {
     LIBENCLOUD_DELETE(settings);
+    LIBENCLOUD_DELETE(sysSettings);
 }
 
 QString Config::dump ()
@@ -91,6 +100,7 @@ QString Config::dump ()
     ts << "sbinPrefix=" << _sbinPrefix << endl;
     ts << "dataPrefix=" << _dataPrefix << endl;
     ts << "settings=" << settings->fileName() << endl;
+    ts << "sysSettings=" << sysSettings->fileName() << endl;
 
     ts << libencloud::json::serialize(_json, ok);
 

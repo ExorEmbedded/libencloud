@@ -62,9 +62,9 @@ void RetrInfoMsg::licenseReceived (const QUuid &uuid)
 
     LIBENCLOUD_DBG("uuid: " << license);
 
-    _cfg->settings->setValue("lic", license);
-    _cfg->settings->sync();
-    LIBENCLOUD_ERR_MSG_IF (_cfg->settings->status() != QSettings::NoError, 
+    _cfg->sysSettings->setValue("lic", license);
+    _cfg->sysSettings->sync();
+    LIBENCLOUD_ERR_MSG_IF (_cfg->sysSettings->status() != QSettings::NoError, 
             "could not write configuration to file - check permissions!");
 err:
     return;
@@ -95,7 +95,7 @@ err:
 int RetrInfoMsg::_packRequest ()
 {
 #ifdef LIBENCLOUD_MODE_SECE
-    _license = QUuid(_cfg->settings->value("lic").toString());
+    _license = QUuid(_cfg->sysSettings->value("lic").toString());
 
     if (_license.isNull()) 
     { 

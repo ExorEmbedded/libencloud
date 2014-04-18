@@ -69,6 +69,7 @@ public:
     /* Configuration objects are publicly accessible */
     libencloud_config_t config;
     QSettings *settings;
+    QSettings *sysSettings;
     libencloud_crypto_t crypto;
 
     /* Path to configuration file */
