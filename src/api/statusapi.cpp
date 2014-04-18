@@ -180,6 +180,8 @@ int StatusApi::_parseNeed (const QVariant &v)
     {
         needs = v.toString().split(" ");
 
+        //LIBENCLOUD_DBG("_needs: " << _needs << ", needs: " << needs);
+
         if (needs != _needs)
         {
             foreach (QString n, needs)
@@ -188,7 +190,7 @@ int StatusApi::_parseNeed (const QVariant &v)
 
             _needs = needs;
         }
-    } 
+    }
 
     return 0;
 }

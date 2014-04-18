@@ -266,6 +266,18 @@ void Core::_errorReceived (const libencloud::Error &err)
    // while ECE and SECE keep on retrying automatically (in internal modules)
 #if defined(LIBENCLOUD_MODE_QIC)
     stop();
+#else
+    // the only exception is for needs which must be fulfilled
+    switch (err.getCode())
+    {
+        // user must provide license via Setup API and reconnect so stop
+        // Encloud and don't emit any errors
+        case Error::CodeServerLicenseInvalid:
+            stop();
+            return;
+        default:
+            break;
+    }
 #endif
 
     emit stateChanged(StateError);
@@ -297,7 +309,7 @@ void Core::_authSupplied (const Auth &auth)
     LIBENCLOUD_DBG(auth.toString());
 
     // proxy settings handled globally
-    switch (auth.getId()) 
+    switch (auth.getId())
     {
         case Auth::SwitchboardId:
             _sbAuth = auth;

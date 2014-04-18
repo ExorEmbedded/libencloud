@@ -30,10 +30,9 @@ Error::Error (Code code, QString extra)
     _desc = _code2Desc(code);
     LIBENCLOUD_ERR_IF (setExtra(extra));
 
-    LIBENCLOUD_DBG(toString());
-
     _isValid = true;
 
+    LIBENCLOUD_DBG(*this);
 err:
     return;
 }
@@ -43,11 +42,10 @@ Error::Error (const QString &msg)
     , _code(CodeUndefined)
     , _seq(++__seq)
 {
-    LIBENCLOUD_DBG(msg);
-
     _desc = msg;
-
     _isValid = true;
+
+    LIBENCLOUD_DBG(*this);
 }
 
 bool Error::isValid () const   { return _isValid; }
@@ -150,11 +148,13 @@ QString Error::_code2Desc (Code code)
     {
         // emitted when no specific error code is given
         case CodeUndefined:
-            return QObject::tr("Generic Error");
+            return QObject::tr("Undefined Error");
 
         // 0xx
         case CodeSuccess:
             return QObject::tr("Operation Successful");
+        case CodeGeneric:
+            return QObject::tr("Generic Error");
         case CodeSystemError:
             return QObject::tr("System Error - please check resource status");
 
@@ -177,6 +177,8 @@ QString Error::_code2Desc (Code code)
         // 1xxx
         case CodeServerError:
             return QObject::tr("Generic Server Error");
+        case CodeServerLicenseInvalid:
+            return QObject::tr("Server reported Invalid License");
     }
 
     return "";

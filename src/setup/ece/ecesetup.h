@@ -77,6 +77,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _onErrorState ();
+    void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
 
 private:
@@ -104,7 +105,8 @@ private:
 
     QState _checkExpirySt, *_checkExpiryState;
 
-    bool _error;
+    bool _isError;
+    Error _error;
     Retry _retry;
 };
 

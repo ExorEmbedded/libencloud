@@ -34,8 +34,8 @@ int RetrInfoMsg::process ()
     {
         case 0:  // ok - continue on
             break;
-        case 1:  // data needed - emit a silent error
-            emit error(Error());
+        case 1:  // data needed - don't emit errors here otherwise ecesetup
+                 // will keep on retrying - data must be enered by user first
             goto err;
         default:  // otherwise emit a nonsilent error
             EMIT_ERROR_ERR_IF (1);
@@ -138,7 +138,13 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     errString = jo["error"].toString();
     if (!errString.isEmpty())
     {
-        LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
+        if (errString == "Invalid license")
+        {
+            LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
+            emit need("license");
+        }
+        else
+            LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
         goto err;
     }
 

@@ -20,7 +20,7 @@ EceSetup::EceSetup (Config *cfg)
     , _retrCertState(&_retrCertSt)
     , _retrConfState(&_retrConfSt)
     , _checkExpiryState(&_checkExpirySt)
-    , _error(false)
+    , _isError(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -76,7 +76,7 @@ void EceSetup::_stateEntered ()
     LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ") " <<
             " previousState: " << _previousState);
 
-    if (!_error)
+    if (!_isError)
         _retry.stop();
 
     _previousState = state;
@@ -94,7 +94,7 @@ void EceSetup::_stateExited ()
 
     LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ")");
 
-    _error = false;
+    _isError = false;
 }
 
 void EceSetup::_onErrorState ()
@@ -103,11 +103,27 @@ void EceSetup::_onErrorState ()
 
     LIBENCLOUD_DBG("state: " << state);
 
-    _error = true;
+    _isError = true;
 
-    _retry.start();
+    switch (_error.getCode())
+    {
+        // user intervention required 
+        case Error::CodeServerLicenseInvalid:
+            break;
 
-    _errorState->addTransition(this, SIGNAL(retry()), _previousState);
+        // keep on retrying
+        default:
+            _errorState->addTransition(this, SIGNAL(retry()), _previousState);
+            _retry.start();
+            break;
+    }
+}
+
+void EceSetup::_onError (const libencloud::Error &err)
+{
+    LIBENCLOUD_DBG(err);
+
+    emit error((_error = err));
 }
 
 void EceSetup::_onRetryTimeout ()
@@ -137,7 +153,7 @@ int EceSetup::_initFsm ()
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
     _initMsg(_retrInfoMsg);
-    connect(&_retrInfoMsg, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
+    connect(&_retrInfoMsg, SIGNAL(error(libencloud::Error)), this, SLOT(_onError(libencloud::Error)));
     connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
     // only SECE needs license, which is received via setup module
 #ifdef LIBENCLOUD_MODE_SECE
@@ -150,7 +166,7 @@ int EceSetup::_initFsm ()
     _retrInfoState->addTransition(&_retrInfoMsg, SIGNAL(processed()), _retrCertState);
 
     _initMsg(_retrCertMsg);
-    connect(&_retrCertMsg, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
+    connect(&_retrCertMsg, SIGNAL(error(libencloud::Error)), this, SLOT(_onError(libencloud::Error)));
     connect(_retrCertState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrCertState, SIGNAL(entered()), &_retrCertMsg, SLOT(process()));
     connect(_retrCertState, SIGNAL(exited()), this, SLOT(_stateExited()));
@@ -158,7 +174,7 @@ int EceSetup::_initFsm ()
     _retrCertState->addTransition(&_retrCertMsg, SIGNAL(processed()), _retrConfState);
 
     _initMsg(_retrConfMsg);
-    connect(&_retrConfMsg, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
+    connect(&_retrConfMsg, SIGNAL(error(libencloud::Error)), this, SLOT(_onError(libencloud::Error)));
     connect(_retrConfState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_retrConfState, SIGNAL(entered()), &_retrConfMsg, SLOT(process()));
     connect(_retrConfState, SIGNAL(exited()), this, SLOT(_stateExited()));

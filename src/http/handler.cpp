@@ -67,6 +67,7 @@ int HttpHandler::setLicense (const QString &license)
     LIBENCLOUD_ERR_MSG_IF (uuid.isNull(), "invalid license received: "
             << license);
 
+    removeNeed("license");
     emit licenseSend(uuid);
 
     return 0;
@@ -97,10 +98,10 @@ int HttpHandler::setAuth (const Auth &auth)
         switch (auth.getId())
         {
             case Auth::SwitchboardId:
-                _needs.removeAll("sb_auth");
+                removeNeed("sb_auth");
                 break;
             case Auth::ProxyId:
-                _needs.removeAll("proxy_auth");
+                removeNeed("proxy_auth");
                 break;
             default:
                 LIBENCLOUD_ERR_IF (1);

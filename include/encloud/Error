@@ -15,23 +15,27 @@ class LIBENCLOUD_DLLSPEC Error
 public:
 
     typedef enum {
-        CodeUndefined =         -1,
+        CodeUndefined =             -1,
 
-        CodeSuccess =           0,
-        CodeSystemError =       1,
+        CodeSuccess =               0,
+        CodeGeneric =               1,
+        CodeSystemError =           2,
 
-        CodeServiceUnreach =    100,
+        CodeServiceUnreach =        100,
 
-        CodeServerUnreach =     200,
+        CodeServerUnreach =         200,
 
-        CodeAuthFailed =        300,
+        CodeAuthFailed =            300,
 
-        CodeProxyAuthFailed =   500,
+        CodeProxyAuthFailed =       500,
 
-        CodeServerError =       1000,
+        CodeServerError =           1000,
+        CodeServerLicenseInvalid =  1001,
 
-        CodeFirst =             CodeSuccess,
-        CodeLast =              CodeAuthFailed
+        // *NOTE* always update CodeLast to value above!!!
+
+        CodeFirst =                 CodeSuccess,
+        CodeLast =                  CodeServerLicenseInvalid
     } Code;
 
     // Default constructor (unhandled error)

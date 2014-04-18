@@ -4,7 +4,7 @@ libencloud 0.X.Y:
 	- api/status: empty errors not being reemitted
 	- *ece: don't getCertificate if we already have a valid one;
 	  fail if getInfo yields valid=false
-	- sece: license is now a SystemScope QSetting
+	- sece: license is now a SystemScope QSetting; improved license handling
 	- conf: user/pass vs x509 auth is configurable
 	- error: new Retry object
 	- vpn: 'client' wasn't being dumped, handle retries
