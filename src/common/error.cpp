@@ -155,6 +155,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Operation Successful");
         case CodeGeneric:
             return QObject::tr("Generic Error");
+        case CodeTimeout:
+            return QObject::tr("Core Timeout - please check server logs");
         case CodeSystemError:
             return QObject::tr("System Error - please check resource status");
 

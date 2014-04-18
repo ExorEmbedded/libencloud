@@ -8,6 +8,8 @@ libencloud configuration
 * Sample:
 
 {
+  "timeout" : 60,                               # maximum time for cloud connections (seconds, default=60)
+
   "bind" : "all",                               # bind to all interfaces (testing)
                                                 # otherwise binds only to localhost and tap interface
 
@@ -16,8 +18,6 @@ libencloud configuration
   "sb" : {                                      # global SB settings 
     "url" : "https://switchboard-host"
   },
-
-  "timeout" : 3,                                # exponential base for retry in seconds
 
   "csr" : {                                     # certificate Request template
     "tmpl" : "csr-tmpl.json"              

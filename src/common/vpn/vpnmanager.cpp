@@ -18,9 +18,12 @@ VpnManager::VpnManager (const Config *config)
     , st(StateDetached)
     , socket(NULL)
     , attachRetries(0)
-    , stateTimer(NULL)
 {
     LIBENCLOUD_TRACE;
+
+    connect(&this->stateTimer, SIGNAL(timeout()), this, SLOT(stateTimeout()));
+    connect(&this->connTimer, SIGNAL(timeout()), this, SLOT(connTimeout()));
+    this->connTimer.setSingleShot(true);
 }
 
 VpnManager::~VpnManager ()
@@ -53,6 +56,8 @@ QString VpnManager::errorString (Error err)
             return tr("Error in socket communication");
         case AuthFailedError:
             return tr("Authentication failed");
+        case ConnTimeout:
+            return tr("Connection timeout");
     }
 
     return "";
@@ -108,11 +113,8 @@ void VpnManager::attach (VpnClient *client, QString host, int port)
     this->socket->connectToHost(this->host, this->port);
     LIBENCLOUD_ERR_IF (!this->socket->isValid());
 
-    this->stateTimer = new QTimer(this);
-    LIBENCLOUD_ERR_IF (this->stateTimer == NULL);
-
-    connect(this->stateTimer, SIGNAL(timeout()), this, SLOT(stateTimeout()));
-    this->stateTimer->start(LIBENCLOUD_VPNMANAGER_STATE_PERIOD);
+    this->stateTimer.start(LIBENCLOUD_VPNMANAGER_STATE_PERIOD);
+    this->connTimer.start(cfg->config.timeout * 1000);
 
     return;
 err:
@@ -130,7 +132,7 @@ void VpnManager::detach ()
 
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_DELETE (this->stateTimer);
+    this->stateTimer.stop();
 
     if (this->socket) 
     {
@@ -286,6 +288,7 @@ void VpnManager::parseLineState (QByteArray line)
     }
     else if (qstrcmp(state, "CONNECTED") == 0)
     {
+        this->connTimer.stop();
         this->client->setState(VpnClient::StateConnected);
 
         if (words[3] != this->assignedIp)
@@ -363,6 +366,13 @@ void VpnManager::stateTimeout ()
     this->socket->flush();
 }
 
+void VpnManager::connTimeout ()
+{
+    LIBENCLOUD_EMIT_ERR(sigError((this->err = ConnTimeout)));
+err:
+    return;
+}
+
 void VpnManager::hostFound ()
 {
     LIBENCLOUD_TRACE;
@@ -425,8 +435,13 @@ void VpnManager::socketError (QAbstractSocket::SocketError err)
             QTimer::singleShot(1000, this, SLOT(retryAttach()));
             return; // remain in attaching state
         default:
-            // e.g. RemoteHostClosedError happens when client fails
-            LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
+            // if it exists, previous error is more significant because all
+            // errors trigger manager socket error when client is stopped
+            if (this->err != NoError)
+                LIBENCLOUD_EMIT_ERR(sigError(this->err));
+            else
+                // e.g. RemoteHostClosedError happens when client fails
+                LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
             break;
     }
 err:

@@ -19,7 +19,8 @@ public:
 
         CodeSuccess =               0,
         CodeGeneric =               1,
-        CodeSystemError =           2,
+        CodeTimeout =               2,
+        CodeSystemError =           3,
 
         CodeServiceUnreach =        100,
 

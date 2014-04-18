@@ -121,30 +121,50 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
         msg += "\n\n" + errMsg;
 
     emit error(Error(msg));
+    _restart();
+}
 
+// manager socket failures are handled internally and timeout handled here -
+// all other errors caught by _vpnClientErr()
+void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
+{
+    QString msg;
+
+    switch (err)
+    {
+        case VpnManager::ConnTimeout:
+
+            emit error(Error(Error::CodeTimeout));
+            _restart();
+            break;
+
+        default:
+            msg = VpnManager::errorString(err);
+            if (errMsg != "")
+                msg += "\n\n" + errMsg;
+
+            emit error(Error(msg));
+            break;
+    }
+}
+
+void Cloud::_onRetry ()
+{
+    _vpnClient->start();
+}
+
+//
+// private methods
+//
+
+void Cloud::_restart ()
+{
     // auto-retry only for *ECE
 #if !defined(LIBENCLOUD_MODE_QIC)
     _vpnClient->stop();
     _retry.start();
 #endif
     // QIC core does full stop()
-}
-
-// manager socket failures are handled internally - all other errors caught by _vpnClientErr()
-void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
-{
-    QString msg;
-
-    msg = VpnManager::errorString(err);
-    if (errMsg != "")
-        msg += "\n\n" + errMsg;
-
-    emit error(Error(msg));
-}
-
-void Cloud::_onRetry ()
-{
-    _vpnClient->start();
 }
 
 } // namespace libencloud

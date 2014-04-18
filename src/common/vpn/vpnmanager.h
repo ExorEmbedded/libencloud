@@ -29,6 +29,7 @@ public:
         UnhandledError,
         SocketError,
         AuthFailedError,
+        ConnTimeout
     }
     Error;
 
@@ -65,6 +66,7 @@ public slots:
 private slots:
     void retryAttach ();
     void stateTimeout ();
+    void connTimeout ();
     void hostFound ();
     void connected ();
     void disconnected ();
@@ -89,7 +91,8 @@ private:
     QString host;
     int port;
 
-    QTimer *stateTimer;
+    QTimer stateTimer;
+    QTimer connTimer;
     QString assignedIp;
 
     Auth _sbAuth;

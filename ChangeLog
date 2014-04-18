@@ -7,7 +7,7 @@ libencloud 0.X.Y:
 	- sece: license is now a SystemScope QSetting; improved license handling
 	- conf: user/pass vs x509 auth is configurable
 	- error: new Retry object
-	- vpn: 'client' wasn't being dumped, handle retries
+	- vpn: 'client' wasn't being dumped, handle retries and timeout
 	- test: scripts/vpncli.sh extensions for *ECE testing; SECE sample wip
 
 libencloud 0.6.1 (15/04/2014):

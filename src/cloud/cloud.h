@@ -42,6 +42,8 @@ private slots:
     void _onRetry ();
 
 private:
+    void _restart ();
+
     Config *_cfg;
     VpnClient *_vpnClient;
     VpnManager *_vpnManager;
