@@ -1,16 +1,10 @@
 - ssl: CA support/check
 - qic: listen port to registry and notification to Switchboard;
-  fix bad auth / cancel cases and reuse creds
-  setup config retrieval; proxies;
 - actions: check effectively running pids
-- new error handling                                                    [2]
 - server: check Content-Length
 - cloud: first message not routed properly?
-- ece/sece: initialisation-host and operation-host from Cert
-    => json in notes field
-  license/qsettings: per-user or per-machine?
+- license/qsettings: per-user or per-machine?
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
-- backoff: support cancellation
 - deps: qjson build
 - test: ece (SB missing cert type/label management?), sece, qic, proxy
 - other: pimpl-based private interface hiding
