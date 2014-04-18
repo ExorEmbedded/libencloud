@@ -133,6 +133,7 @@ void VpnManager::detach ()
     LIBENCLOUD_TRACE;
 
     this->stateTimer.stop();
+    this->connTimer.stop();
 
     if (this->socket) 
     {
