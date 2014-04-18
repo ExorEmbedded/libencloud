@@ -190,6 +190,14 @@ int StatusApi::_parseNeed (const QVariant &v)
 
             _needs = needs;
         }
+    } 
+    else 
+    {
+        if (!_needs.isEmpty())
+        {
+            emit apiNeed("");
+            _needs.clear();
+        }
     }
 
     return 0;

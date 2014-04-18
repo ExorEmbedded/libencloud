@@ -1,7 +1,7 @@
 ChangeLog file for Endian libencloud
 
 libencloud 0.X.Y:
-	- api/status: empty errors not being reemitted
+	- api/status: empty errors and need not being reemitted
 	- *ece: don't getCertificate if we already have a valid one;
 	  fail if getInfo yields valid=false
 	- sece: license is now a SystemScope QSetting; improved license handling
