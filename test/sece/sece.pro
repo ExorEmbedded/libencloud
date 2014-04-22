@@ -2,6 +2,9 @@ include(../../common.pri)
 
 TEMPLATE = app
 
+# external prog - don't exports dlls
+DEFINES -= _LIBENCLOUD_LIB_
+
 QT += gui
 
 TARGET = sece
@@ -19,18 +22,10 @@ INCLUDEPATH += $$SRCBASEDIR/src/
 DEPENDPATH += $$SRCBASEDIR/src/
 
 # libencloud
-win32 {
-    *-g++* {
-        # MinGW
-        LIBS += $$SRCBASEDIR/src/$$DESTDIR/libencloud0.a
-    }
-    *-msvc* {
-        # MSVC
-        LIBS += $$SRCBASEDIR/src/$$DESTDIR/encloud.lib
-    }
-} else {
-    LIBS += -L$$SRCBASEDIR/src/ -lencloud
-}
+LIBS = -L$$SRCBASEDIR/src/$$DESTDIR -lencloud
+
+target.path = $${BINDIR}
+INSTALLS += target
 
 # command to run upon 'make check'
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc

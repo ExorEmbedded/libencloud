@@ -5,9 +5,7 @@ TEMPLATE = subdirs
 SUBDIRS += include
 SUBDIRS += src
 SUBDIRS += etc
-unix {
-    SUBDIRS += test
-}
+SUBDIRS += test
 
 # tests depend on build
 check.depends = all

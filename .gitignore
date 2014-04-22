@@ -18,10 +18,8 @@ Makefile
 Makefile.Debug
 Makefile.Release
 build/
-/src/debug/
-/src/release/
-/test/unit/unit
-/test/sece/sece
+debug/
+release/
 /bindings/libencloud.py
 /bindings/*_wrap.c
 /bindings/build
