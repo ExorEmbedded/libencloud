@@ -79,9 +79,14 @@ int QicSetup::stop ()
     return 0;
 }
 
-const VpnConfig *QicSetup::getVpnConfig ()
+const VpnConfig *QicSetup::getVpnConfig () const
 {
     return _setupMsg.getVpnConfig();
+}
+
+const VpnConfig *QicSetup::getFallbackVpnConfig () const
+{
+    return _setupMsg.getFallbackVpnConfig();
 }
 
 int QicSetup::getTotalSteps() const

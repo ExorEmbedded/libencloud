@@ -18,7 +18,8 @@ class SetupMsg : public QObject, public MessageInterface
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
-    const VpnConfig *getVpnConfig ();
+    const VpnConfig *getVpnConfig () const;
+    const VpnConfig *getFallbackVpnConfig () const;
 
 signals:
     void error (const libencloud::Error &err);
@@ -46,6 +47,7 @@ private:
 
     //response outputs
     VpnConfig _vpnConfig;
+    VpnConfig _fallbackVpnConfig;
     QSslCertificate _caCert;
     QVariantMap _serverConfig;
 };

@@ -247,12 +247,21 @@ void Core::_setupCompleted ()
     LIBENCLOUD_TRACE;
 
     const VpnConfig *vpnConfig = _setup->getVpnConfig();
+    const VpnConfig *fallbackVpnConfig = _setup->getFallbackVpnConfig();
+
     LIBENCLOUD_EMIT_ERR_IF (vpnConfig == NULL, 
             error(Error(tr("No Cloud configuration from Setup Module"))));
-
-    // write retrieved configuration to file
-    LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(_cfg->config.vpnConfPath.absoluteFilePath()),
+    LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(
+                _cfg->config.vpnConfPath.absoluteFilePath()),
             error(Error(tr("Failed writing configuration to file"))));
+
+    if (fallbackVpnConfig && fallbackVpnConfig->isValid())
+    {
+        LIBENCLOUD_DBG("Fallback configuration found");
+        LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
+                    _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
+                error(Error(tr("Failed writing fallback configuration to file"))));
+    }
 err:
     return;
 }
@@ -542,6 +551,7 @@ int Core::_initCloud ()
 
     _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
+    _cloud->setSetup(_setup);
 
     _cloudObj = dynamic_cast<QObject *>(_cloud);
     LIBENCLOUD_ERR_IF (_cloudObj == NULL);

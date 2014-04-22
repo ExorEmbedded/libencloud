@@ -14,7 +14,7 @@ class RetrConfMsg : public QObject, public MessageInterface
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
-    const VpnConfig *getVpnConfig ();
+    const VpnConfig *getVpnConfig () const;
 
 signals:
     void error (const libencloud::Error &err);

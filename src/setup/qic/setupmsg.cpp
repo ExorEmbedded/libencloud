@@ -14,9 +14,14 @@ namespace libencloud {
 // public methods
 //
 
-const VpnConfig *SetupMsg::getVpnConfig ()
+const VpnConfig *SetupMsg::getVpnConfig () const
 {
     return &_vpnConfig;
+}
+
+const VpnConfig *SetupMsg::getFallbackVpnConfig () const
+{
+    return &_fallbackVpnConfig;
 }
 
 //
@@ -159,6 +164,13 @@ int SetupMsg::_decodeResponse (const QString &response)
     _vpnConfig = VpnConfig(json["openvpn_conf"].toString(), _cfg);
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
             error(Error(tr("VPN Configuration from Switchboard not valid"))));
+
+    if (!json["fallback_openvpn_conf"].isNull())
+    {
+        _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString(), _cfg);
+        LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
+                error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
+    }
 
     // and CA certificate
     _caCert = QSslCertificate(json["openvpn_cert"].toString().toAscii());

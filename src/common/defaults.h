@@ -68,6 +68,7 @@
 #define LIBENCLOUD_OP_KEY_FILE          "op_key.pem"
 #define LIBENCLOUD_VPN_EXE_FILE         "openvpn" LIBENCLOUD_EXE
 #define LIBENCLOUD_VPN_CONF_FILE        "openvpn.conf"
+#define LIBENCLOUD_VPN_FALLBACK_CONF_FILE       "openvpn-fallback.conf"
 #define LIBENCLOUD_VPN_MGMT_HOST        LIBENCLOUD_LOCALHOST
 #define LIBENCLOUD_VPN_MGMT_PORT        1195
 #define LIBENCLOUD_VPN_VERBOSITY        2

@@ -64,6 +64,7 @@ Config::Config ()
 
     config.vpnExePath = QFileInfo(_sbinPrefix + LIBENCLOUD_VPN_EXE_FILE);
     config.vpnConfPath = QFileInfo(_dataPrefix + LIBENCLOUD_VPN_CONF_FILE);
+    config.fallbackVpnConfPath = QFileInfo(_dataPrefix + LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
     config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
 
@@ -224,6 +225,9 @@ int Config::_parseVpn (const QVariantMap &jo)
 
     if (!jo["conf"].isNull())
         config.vpnConfPath = _joinPaths(_dataPrefix, jo["conf"].toString());
+
+    if (!jo["fallback_conf"].isNull())
+        config.fallbackVpnConfPath = _joinPaths(_dataPrefix, jo["fallback_conf"].toString());
 
     if (!jo["mgmt"].toMap()["port"].isNull())
         config.vpnMgmtPort = jo["mgmt"].toMap()["port"].toInt();

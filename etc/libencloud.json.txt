@@ -50,6 +50,7 @@ libencloud configuration
   "vpn" : {                                     # OpenVPN configuration file
     "exe" : "openvpn",           
     "conf" : "openvpn.conf"
+    "fallback_conf" : "openvpn-fallback.conf"   # OpenVPN fallback configuration file
   },
 
   "log" : {

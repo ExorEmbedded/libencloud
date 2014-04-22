@@ -11,6 +11,8 @@ namespace libencloud {
 
 Cloud::Cloud (Config *cfg) 
     : _cfg(cfg)
+    , _setup(NULL)
+    , _isFallback(false)
     , _vpnClient(NULL)
     , _vpnManager(NULL)
 {
@@ -49,7 +51,7 @@ err:
     return;
 }
 
-Cloud::~Cloud() 
+Cloud::~Cloud ()
 {
     LIBENCLOUD_TRACE;
 
@@ -57,16 +59,18 @@ Cloud::~Cloud()
     LIBENCLOUD_DELETE(_vpnManager);
 }
 
-int Cloud::start() 
+int Cloud::start (bool fallback) 
 {
     LIBENCLOUD_TRACE;
 
-    _vpnClient->start();
+    _isFallback = fallback;
+
+    _vpnClient->start(fallback);
 
 	return 0;
 }
 
-int Cloud::stop() 
+int Cloud::stop () 
 {
     LIBENCLOUD_TRACE;
 
@@ -77,7 +81,7 @@ int Cloud::stop()
 	return 0;
 }
 
-int Cloud::getTotalSteps() const
+int Cloud::getTotalSteps () const
 {
     return VpnClient::StateLast - VpnClient::StateFirst + 1;
 }
@@ -121,7 +125,8 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
         msg += "\n\n" + errMsg;
 
     emit error(Error(msg));
-    _restart();
+
+    _restart(_isFallback);
 }
 
 // manager socket failures are handled internally and timeout handled here -
@@ -134,8 +139,18 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
     {
         case VpnManager::ConnTimeout:
 
-            emit error(Error(Error::CodeTimeout));
-            _restart();
+            // If a valid fallback configuration has been received from
+            // Switchboard and we haven't tried it yet, use it
+            if (!_isFallback && _setup && _setup->getFallbackVpnConfig()->isValid())
+            {
+                LIBENCLOUD_DBG("Retrying with fallback configuration");
+                _restart(true, true);
+            }
+            else
+            {
+                emit error(Error(Error::CodeTimeout));
+                _restart();
+            }
             break;
 
         default:
@@ -150,20 +165,30 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
 
 void Cloud::_onRetry ()
 {
-    _vpnClient->start();
+    _vpnClient->start(_isFallback);
 }
 
 //
 // private methods
 //
 
-void Cloud::_restart ()
+// *ECE always retries automatically, QIC does only if forced
+void Cloud::_restart (bool fallback, bool force)
 {
-    // auto-retry only for *ECE
+//    LIBENCLOUD_DBG("fallback: " << fallback << ", force: " << force);
+
+    _isFallback = fallback;
+
 #if !defined(LIBENCLOUD_MODE_QIC)
-    _vpnClient->stop();
-    _retry.start();
+    force = true;
 #endif
+
+    if (force)
+    {
+        stop();
+        _retry.start();
+    }
+    
     // QIC core does full stop()
 }
 

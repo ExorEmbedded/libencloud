@@ -34,7 +34,8 @@ public:
     int start ();
     int stop ();
 
-    const VpnConfig *getVpnConfig ();
+    const VpnConfig *getVpnConfig () const;
+    const VpnConfig *getFallbackVpnConfig () const;
 
     int getTotalSteps() const;
 

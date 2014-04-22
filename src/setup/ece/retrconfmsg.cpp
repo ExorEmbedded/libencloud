@@ -10,7 +10,7 @@ namespace libencloud {
 // public methods
 //
 
-const VpnConfig *RetrConfMsg::getVpnConfig ()
+const VpnConfig *RetrConfMsg::getVpnConfig () const
 {
     return &_vpnConfig;
 }

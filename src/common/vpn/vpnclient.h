@@ -63,8 +63,8 @@ public:
 
     static bool checkState (VpnClient::State state);
 
-    QStringList getArgs (void);
-    void start (void);
+    QStringList getArgs (const QString &vpnConfigPath);
+    void start (bool fallback = false);
     void stop (void);
 
 signals:

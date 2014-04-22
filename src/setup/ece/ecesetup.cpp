@@ -50,9 +50,15 @@ int EceSetup::stop ()
     return 0;
 }
 
-const VpnConfig *EceSetup::getVpnConfig ()
+const VpnConfig *EceSetup::getVpnConfig () const
 {
     return _retrConfMsg.getVpnConfig();
+}
+
+// Switchboard TODO?
+const VpnConfig *EceSetup::getFallbackVpnConfig () const
+{
+    return NULL;
 }
 
 int EceSetup::getTotalSteps() const

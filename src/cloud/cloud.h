@@ -10,6 +10,7 @@
 #include <common/config.h>
 #include <common/vpn/vpnclient.h>
 #include <common/vpn/vpnmanager.h>
+#include <setup/setup.h>
 
 namespace libencloud {
 
@@ -21,7 +22,9 @@ public:
     Cloud (Config *cfg);
     ~Cloud ();
 
-    int start ();
+    inline void setSetup (SetupInterface *setup)        { _setup = setup; };
+
+    int start (bool fallback = false);
     int stop ();
 
     int getTotalSteps() const;
@@ -42,9 +45,11 @@ private slots:
     void _onRetry ();
 
 private:
-    void _restart ();
+    void _restart (bool fallback = false, bool force = false);
 
     Config *_cfg;
+    SetupInterface *_setup;
+    bool _isFallback;
     VpnClient *_vpnClient;
     VpnManager *_vpnManager;
     Retry _retry;

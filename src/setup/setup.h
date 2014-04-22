@@ -22,7 +22,8 @@ public:
     virtual int start () = 0;
     virtual int stop () = 0;
 
-    virtual const VpnConfig *getVpnConfig () = 0;
+    virtual const VpnConfig *getVpnConfig () const = 0;
+    virtual const VpnConfig *getFallbackVpnConfig () const = 0;
 
     virtual int getTotalSteps() const = 0;
 

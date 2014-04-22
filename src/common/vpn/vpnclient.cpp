@@ -120,7 +120,7 @@ bool VpnClient::checkState (VpnClient::State state)
 }
 
 // These values override configuration received from Switchboard
-QStringList VpnClient::getArgs (void)
+QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 {
     QStringList args;
     QString configPath;
@@ -129,7 +129,7 @@ QStringList VpnClient::getArgs (void)
 
     args << "--log" << getCommonAppDataDir() + "openvpn-log.txt";
 
-    configPath = _cfg->config.vpnConfPath.absoluteFilePath();
+    configPath = vpnConfigPath;
     args << "--config" << configPath;
 
     //
@@ -194,10 +194,11 @@ err:
     return QStringList();
 }
 
-void VpnClient::start (void)
+void VpnClient::start (bool fallback)
 {
     QStringList args;
     QString path;
+    QString configPath;
     QFileInfo file;
 
     LIBENCLOUD_TRACE;
@@ -215,7 +216,12 @@ void VpnClient::start (void)
 
     enableTap();
 
-    args = getArgs();
+    if (fallback)
+        configPath = _cfg->config.fallbackVpnConfPath.absoluteFilePath();
+    else
+        configPath = _cfg->config.vpnConfPath.absoluteFilePath();
+
+    args = getArgs(configPath);
     if (args.empty())
     {
         LIBENCLOUD_DBG("invalid arguments");
@@ -224,7 +230,7 @@ void VpnClient::start (void)
 
     path = _cfg->config.vpnExePath.absoluteFilePath();
 
-    LIBENCLOUD_DBG("path: " << path);
+    LIBENCLOUD_DBG("fallback: " << fallback << ", path: " << path);
 
     file = QFileInfo(path);
     LIBENCLOUD_EMIT_ERR_IF (!file.isFile() || !file.isExecutable(),
