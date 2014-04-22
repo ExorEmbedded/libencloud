@@ -188,10 +188,13 @@ void Manager::_needTimerTimeout ()
 
     // license request are handled only while not running
     if (_apiState != libencloud::StateIdle &&
+            _apiState != libencloud::StateSetup &&
             _apiState != libencloud::StateError)
         return;
 
     SECE_DBG("need: " << _need);
 
+    // stop *ECE API, otherwise it will keep on retrying
+    _stop();
     emit licenseRequest();
 }
