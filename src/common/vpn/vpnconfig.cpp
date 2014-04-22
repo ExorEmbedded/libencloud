@@ -9,7 +9,7 @@ namespace libencloud {
 //
 
 VpnConfig::VpnConfig ()
-    : _valid(true)
+    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -18,7 +18,7 @@ VpnConfig::VpnConfig ()
 
 // From ECE-style map with overrides from local configuration
 VpnConfig::VpnConfig (const QVariantMap &vm, Config *cfg)
-    : _valid(true)
+    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -26,15 +26,14 @@ VpnConfig::VpnConfig (const QVariantMap &vm, Config *cfg)
     LIBENCLOUD_ERR_IF (fromMap(vm));
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
 
-    return;
+    _valid = true;
 err:
-    _valid = false;
     return ;
 }
 
 // From QIC-style string with overrides from local configuration
 VpnConfig::VpnConfig (const QString &s, Config *cfg)
-    : _valid(true)
+    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -43,10 +42,9 @@ VpnConfig::VpnConfig (const QString &s, Config *cfg)
     LIBENCLOUD_ERR_IF (fromString(s));
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
 
-    return;
+    _valid = true;
 err:
-    _valid = false;
-    return ;
+    return;
 }
 
 bool VpnConfig::isValid () const
@@ -96,6 +94,7 @@ int VpnConfig::fromCfg (Config *cfg)
     _data["cert"] << cfg->config.sslOp.certPath.absoluteFilePath();
     _data["key"] << cfg->config.sslOp.keyPath.absoluteFilePath();
 
+    _valid = true;
     return 0;
 }
 
