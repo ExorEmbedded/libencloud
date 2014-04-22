@@ -52,6 +52,7 @@ protected:
     void readRoutes ();
     void addRoute (const QString &endpoint);
     void delRoute (const QString &endpoint);
+    QPair<QString,QString> parseNetdef (const QString &netdef);
 
     ProcessManager *_processManager;
     bool _processManagerInternal;

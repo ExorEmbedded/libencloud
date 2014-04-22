@@ -1,3 +1,4 @@
+#include <QHostAddress>
 #include <QRegExp>
 #include <QTimer>
 #include <encloud/Manager/NetworkManager>
@@ -113,7 +114,9 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
     // remove previous endpoints that are no longer in connectedEndpoints
     foreach (QString endpoint, _previousEndpoints)
     {
-        if (currentRoutes.contains(endpoint) &&
+        QPair<QString,QString> ipmask = parseNetdef(endpoint);
+
+        if (currentRoutes.contains(ipmask.first) &&
                     !_connectedEndpoints.contains(endpoint))
         {
             delRoute(endpoint);
@@ -127,7 +130,9 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
         if (endpoint == "")
             continue;
 
-        if (!currentRoutes.contains(endpoint))
+        QPair<QString,QString> ipmask = parseNetdef(endpoint);
+
+        if (!currentRoutes.contains(ipmask.first))
         {
             addRoute(endpoint);
             if (!_previousEndpoints.contains(endpoint))
@@ -160,20 +165,69 @@ void NetworkManager::readRoutes ()
 
 void NetworkManager::addRoute (const QString &endpoint)
 {
+    QPair<QString,QString> ipmask = parseNetdef(endpoint);
+
+    LIBENCLOUD_ERR_IF ((ipmask == QPair<QString,QString>()));
+
 #ifdef Q_OS_WIN
-    _processManager->start("route", "ADD " + endpoint + " MASK 255.255.255.255 " + _gateway);
+    _processManager->start("route", "ADD " + ipmask.first +
+            " MASK " + ipmask.second + " " +  _gateway);
 #else
-    _processManager->start("route", "add " + endpoint + " gw " + _gateway);
+    if (ipmask.second == "255.255.255.255")
+        _processManager->start("route", "add " + ipmask.first +
+                " gw " + _gateway);
+    else
+        _processManager->start("route", "add -net " + ipmask.first +
+                " netmask " + ipmask.second + " gw " + _gateway);
 #endif
+
+err:
+    return;
 }
 
 void NetworkManager::delRoute (const QString &endpoint)
 {
+    QPair<QString,QString> ipmask = parseNetdef(endpoint);
+
+    LIBENCLOUD_ERR_IF ((ipmask == QPair<QString,QString>()));
+
 #ifdef Q_OS_WIN
-    _processManager->start("route", "DELETE " + endpoint);
+    if (ipmask.second == "255.255.255.255")
+        _processManager->start("route", "DELETE " + ipmask.first);
+    else
+        _processManager->start("route", "DELETE " + ipmask.first +
+                " MASK " + ipmask.second);
 #else
-    _processManager->start("route", "del " + endpoint);
+    if (ipmask.second == "255.255.255.255")
+        _processManager->start("route", "del " + ipmask.first);
+    else
+        _processManager->start("route", "del -net " + ipmask.first +
+                " netmask " + ipmask.second);
 #endif
+
+err:
+    return;
+}
+
+QPair<QString,QString> NetworkManager::parseNetdef (const QString &netdef)
+{
+    QStringList ipmask = netdef.split("/");
+    QString ip, mask = "255.255.255.255";
+
+    LIBENCLOUD_ERR_IF (ipmask.count() < 1);
+
+    ip = ipmask[0];
+    LIBENCLOUD_ERR_IF (QHostAddress(ip).isNull());
+
+    if (ipmask.count() == 2)
+    {
+        mask = ipmask[1];
+        LIBENCLOUD_ERR_IF (QHostAddress(mask).isNull());
+    }
+
+    return QPair<QString,QString>(ip, mask);
+err:
+    return QPair<QString,QString>();
 }
 
 }  // namespace libencloud
