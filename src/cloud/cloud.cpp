@@ -141,7 +141,8 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
 
             // If a valid fallback configuration has been received from
             // Switchboard and we haven't tried it yet, use it
-            if (!_isFallback && _setup && _setup->getFallbackVpnConfig()->isValid())
+            if (!_isFallback && _setup && _setup->getFallbackVpnConfig() &&
+                    _setup->getFallbackVpnConfig()->isValid())
             {
                 LIBENCLOUD_DBG("Retrying with fallback configuration");
                 _restart(true, true);
