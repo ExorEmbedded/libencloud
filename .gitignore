@@ -23,6 +23,8 @@ release/
 /bindings/libencloud.py
 /bindings/*_wrap.c
 /bindings/build
+/test/sece/sece
+/test/unit/unit
 
 # dist-generated files
 /libencloud-*

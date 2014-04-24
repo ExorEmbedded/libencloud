@@ -124,7 +124,7 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
     if (errMsg != "")
         msg += "\n\n" + errMsg;
 
-    emit error(Error(msg));
+    emit error(Error(Error::CodeClientFailure, msg));
 
     _restart(_isFallback);
 }
@@ -149,7 +149,7 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
             }
             else
             {
-                emit error(Error(Error::CodeTimeout));
+                emit error(Error(Error::CodeClientTimeout));
                 _restart();
             }
             break;
@@ -159,7 +159,7 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
             if (errMsg != "")
                 msg += "\n\n" + errMsg;
 
-            emit error(Error(msg));
+            emit error(Error(Error::CodeClientFailure, msg));
             break;
     }
 }

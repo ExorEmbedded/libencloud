@@ -13,9 +13,10 @@ namespace libencloud
 
 int Error::__seq = 0;
 
+// Null Error
 Error::Error ()
     : _isValid(false)
-    , _code(CodeUndefined)
+    , _code(CodeNull)
     , _seq(++__seq)
 {
     _desc = _code2Desc(_code);
@@ -23,7 +24,7 @@ Error::Error ()
 
 Error::Error (Code code, QString extra)
     : _isValid(false)
-    , _code(CodeUndefined)
+    , _code(CodeNull)
     , _seq(++__seq)
 {
     LIBENCLOUD_ERR_IF (setCode(code));
@@ -37,9 +38,10 @@ err:
     return;
 }
 
+// Message defined, but no error code -> Generic
 Error::Error (const QString &msg)
     : _isValid(false)
-    , _code(CodeUndefined)
+    , _code(CodeGeneric)
     , _seq(++__seq)
 {
     _desc = msg;
@@ -147,16 +149,14 @@ QString Error::_code2Desc (Code code)
     switch (code)
     {
         // emitted when no specific error code is given
-        case CodeUndefined:
-            return QObject::tr("Undefined Error");
+        case CodeNull:     
+            return QObject::tr("Null Error");
 
         // 0xx
         case CodeSuccess:
             return QObject::tr("Operation Successful");
         case CodeGeneric:
             return QObject::tr("Generic Error");
-        case CodeTimeout:
-            return QObject::tr("Core Timeout - please check server logs");
         case CodeSystemError:
             return QObject::tr("System Error - please check resource status");
 
@@ -167,20 +167,24 @@ QString Error::_code2Desc (Code code)
         // 2xx
         case CodeServerUnreach:
             return QObject::tr("Server Unreachable");
+        case CodeServerError:
+            return QObject::tr("Generic Server Error");
+        case CodeServerLicenseInvalid:
+            return QObject::tr("Server reported Invalid License");
 
         // 3xx
         case CodeAuthFailed:
             return QObject::tr("Server Authentication Failure - please check credentials");
 
-        // 5xx
+        // 4xx
         case CodeProxyAuthFailed:
             return QObject::tr("Proxy Authentication Failure - please check credentials");
 
-        // 1xxx
-        case CodeServerError:
-            return QObject::tr("Generic Server Error");
-        case CodeServerLicenseInvalid:
-            return QObject::tr("Server reported Invalid License");
+        // 5xx
+        case CodeClientFailure:
+            return QObject::tr("Client Failure");
+        case CodeClientTimeout:
+            return QObject::tr("Client Timeout");
     }
 
     return "";

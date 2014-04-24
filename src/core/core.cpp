@@ -269,7 +269,7 @@ err:
 // Forward error state and message to http handler
 void Core::_errorReceived (const libencloud::Error &err)
 {
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG(err);
 
    // QIC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically (in internal modules)

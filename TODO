@@ -1,5 +1,3 @@
-- error: use CodeGeneric instead of default contructor for undefined errors
-         and rename CodeUndefined -> CodeNull
 - ssl: CA support/check
 - qic: listen port to registry and notification to Switchboard;
 - actions: check effectively running pids

@@ -8,7 +8,7 @@ libencloud 0.X.Y:
 	  fail if getInfo yields valid=false
 	- sece: license is now a SystemScope QSetting; improved license handling
 	- conf: user/pass vs x509 auth is configurable
-	- error: new Retry object
+	- error: new Retry object, improved handling of CodeNull vs CodeGeneric errors
 	- vpn: 'client' wasn't being dumped, handle retries and timeout
 	- test: scripts/vpncli.sh extensions for *ECE testing; SECE sample wip
 
