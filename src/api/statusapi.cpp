@@ -13,7 +13,7 @@ namespace libencloud {
 StatusApi::StatusApi ()
     : Api ()
     , _state (StateNone)
-    , _isFallback (false)
+    , _isFallback (-1)
 {
     LIBENCLOUD_TRACE;
 
@@ -181,8 +181,8 @@ int StatusApi::_parseFallback (const QVariant &v)
     if (!v.isNull())
         b = v.toBool();
 
-    if (b != _isFallback)
-        emit apiFallback((_isFallback = b));
+    if ((int)b != _isFallback)
+        emit apiFallback((_isFallback = (int)b));
 
     return 0;
 }
