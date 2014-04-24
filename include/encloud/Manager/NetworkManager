@@ -39,7 +39,9 @@ signals:
     void sigError (NetworkManager::Error err, QString msg = "");
 
 public:
-    void setGateway (const QString &externalAddr, const QString &internalAddr);
+    void setGateway (const QString &addr);
+    void setFallbackGateway (const QString &addr);
+    void setFallback (bool fallback);
     void syncRoutes (const QStringList &connectedEndpoints);
 
     // get/set
@@ -57,7 +59,9 @@ protected:
     ProcessManager *_processManager;
     bool _processManagerInternal;
     QProcess *_process;
+    QString _gw;
     QString _gateway;
+    QString _fallbackGateway;
     QStringList _connectedEndpoints;
     QStringList _previousEndpoints;
 };

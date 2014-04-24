@@ -3,7 +3,8 @@ ChangeLog file for Endian libencloud
 libencloud 0.X.Y:
 	- Create routes not only for individual IP address but also for network [CONNECT-124]
 	- Handle Switchboard fallback server [CONNECT-114]
-	- api/status: empty errors and need not being reemitted
+	- api/status: new "fallback" boolean field; empty errors and need not being reemitted
+	- api/setup: internal_ip => openvpn_internal_ip, fallback_openvpn_internal_ip
 	- *ece: don't getCertificate if we already have a valid one;
 	  fail if getInfo yields valid=false
 	- sece: license is now a SystemScope QSetting; improved license handling

@@ -107,6 +107,7 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
             break;
         case VpnClient::StateConnected:
             emit stateChanged(StateCloud);
+            emit fallback(_isFallback);
             break;
         default:
             break;

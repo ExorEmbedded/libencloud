@@ -158,6 +158,8 @@ int Core::attachServer (Server *server)
             obj, SLOT(_coreStateChanged(State)));
     connect(this, SIGNAL(progress(Progress)), 
             obj, SLOT(_coreProgressReceived(Progress)));
+    connect(this, SIGNAL(fallback(bool)), 
+            obj, SLOT(_coreFallbackReceived(bool)));
     connect(this, SIGNAL(need(QString)), 
             obj, SLOT(_needReceived(QString)));
 
@@ -264,6 +266,15 @@ void Core::_setupCompleted ()
     }
 err:
     return;
+}
+
+void Core::_fallback (bool isFallback)
+{
+    LIBENCLOUD_DBG("fallback: " << isFallback);
+
+    _networkManager->setFallback(isFallback);
+
+    emit fallback(isFallback);
 }
 
 // Forward error state and message to http handler
@@ -383,9 +394,11 @@ void Core::_serverConfigReceived (const QVariant &variant)
     LIBENCLOUD_ERR_IF (serverMap["server"].isNull());
     serverMap = serverMap["server"].toMap();
 
-    LIBENCLOUD_ERR_IF (serverMap["internal_ip"].isNull());
+    LIBENCLOUD_ERR_IF (serverMap["openvpn_internal_ip"].isNull());
+    _networkManager->setGateway(serverMap["openvpn_internal_ip"].toString());
 
-    _networkManager->setGateway("", serverMap["internal_ip"].toString());
+    if (!serverMap["fallback_openvpn_internal_ip"].isNull())
+        _networkManager->setFallbackGateway(serverMap["fallback_openvpn_internal_ip"].toString());
 err:
     return;
 }
@@ -553,6 +566,8 @@ int Core::_initCloud ()
             this, SIGNAL(stateChanged(State)));
     connect(this, SIGNAL(stateChanged(State)), 
             this, SLOT(_stateChanged(State)));
+    connect(_cloudObj, SIGNAL(fallback(bool)), 
+            this, SLOT(_fallback(bool)));
 
     // progress signal handling
     connect(_cloudObj, SIGNAL(progress(Progress)), 

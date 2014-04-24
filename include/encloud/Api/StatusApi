@@ -43,6 +43,7 @@ signals:
     void apiState (libencloud::State st);
     void apiError (const libencloud::Error &err);
     void apiProgress (const libencloud::Progress &progress);
+    void apiFallback (bool isFallback);
     void apiNeed (const QString &need);
 
     //
@@ -63,6 +64,7 @@ protected:
     int _parseState (const QVariant &v);
     int _parseError (const QVariant &v);
     int _parseProgress (const QVariant &v);
+    int _parseFallback (const QVariant &v);
     int _parseNeed (const QVariant &v);
 
     QTimer _pollTimer;
@@ -71,6 +73,7 @@ protected:
     State _state;
     Error _error;
     Progress _progress;
+    bool _isFallback;
     QStringList _needs;
 };
 

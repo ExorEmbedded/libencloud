@@ -50,7 +50,8 @@
                     "step": 2,                  # current step number 
                     "step": 5                   # total number of steps
                 },
-            "need" : "license sb_auth"          # OPTIONAL list of space-separated "need" strings
+                "fallback" : true,              # OPTIONAL (default=false) true if fallback VPN server is being used
+                "need" : "license sb_auth"      # OPTIONAL list of space-separated "need" strings
         })'                                     jo be fulfilled via API. Possible values:
                                                 "license", "sb_auth", "proxy_auth"
 
@@ -98,7 +99,8 @@
                  "time" : 1396014836.523807,        # When the config data was received
                  "server" : {
                      "uuid" : "<uuid>",
-                     "internal_ip" : "192.168.50.1"
+                     "openvpn_internal_ip" : "192.168.150.1",
+                     "fallback_openvpn_internal_ip" : "192.168.151.1"
                      "available_pages" : { "settings" : "/manage/access/settings/standalone/",      # [...]
                  },
                  "client" : {

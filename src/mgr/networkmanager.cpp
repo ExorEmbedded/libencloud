@@ -26,6 +26,9 @@ NetworkManager::NetworkManager (ProcessManager *processManager)
 
         _processManagerInternal = true;
     }
+
+    // default to no fallback (primary gateway)
+    setFallback(false);
 err:
     return;
 }
@@ -56,20 +59,41 @@ QString NetworkManager::errorString (Error err)
     return "";
 }
 
-void NetworkManager::setGateway (const QString &externalAddr, const QString &internalAddr)
+void NetworkManager::setGateway (const QString &addr)
 {
-    Q_UNUSED(externalAddr);
+    LIBENCLOUD_DBG("addr: " << addr);
 
-    LIBENCLOUD_DBG("addr: " << internalAddr);
+    LIBENCLOUD_ERR_IF (QHostAddress(addr).isNull());
 
-    _gateway = internalAddr;
+    _gateway = addr;
+err:
+    return;
+}
+
+void NetworkManager::setFallbackGateway (const QString &addr)
+{
+    LIBENCLOUD_DBG("addr: " << addr);
+
+    LIBENCLOUD_ERR_IF (QHostAddress(addr).isNull());
+
+    _fallbackGateway = addr;
+err:
+    return;
+}
+
+void NetworkManager::setFallback (bool fallback)
+{
+    if (!fallback)
+        _gw = _gateway;
+    else 
+        _gw = _fallbackGateway;
 }
 
 void NetworkManager::syncRoutes (const QStringList &connectedEndpoints)
 {
-    LIBENCLOUD_RETURN_IF (_gateway == "", );
+    LIBENCLOUD_RETURN_IF (_gw == "", );
 
-    LIBENCLOUD_DBG("gateway: " << _gateway << ", endpoints: " << connectedEndpoints);
+    LIBENCLOUD_DBG("gateway: " << _gw << ", endpoints: " << connectedEndpoints);
 
     _connectedEndpoints = connectedEndpoints;
 
@@ -171,14 +195,14 @@ void NetworkManager::addRoute (const QString &endpoint)
 
 #ifdef Q_OS_WIN
     _processManager->start("route", "ADD " + ipmask.first +
-            " MASK " + ipmask.second + " " +  _gateway);
+            " MASK " + ipmask.second + " " +  _gw);
 #else
     if (ipmask.second == "255.255.255.255")
         _processManager->start("route", "add " + ipmask.first +
-                " gw " + _gateway);
+                " gw " + _gw);
     else
         _processManager->start("route", "add -net " + ipmask.first +
-                " netmask " + ipmask.second + " gw " + _gateway);
+                " netmask " + ipmask.second + " gw " + _gw);
 #endif
 
 err:

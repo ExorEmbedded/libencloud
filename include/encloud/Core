@@ -48,6 +48,7 @@ signals:
     void error (const libencloud::Error &err);
     void stateChanged (State state);
     void progress (const Progress &p);
+    void fallback (bool isFallback);
     void need (const QString &what);
     void authSupplied (const Auth &auth);
     void serverConfigSupply (const QVariant &variant);
@@ -58,6 +59,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
+    void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
     void _progressReceived (const Progress &p);
     void _authSupplied (const Auth &auth);

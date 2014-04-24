@@ -40,11 +40,9 @@ public:
 
     // attributes used by HTTP API handlers
     const Error &getCoreError () const;
-
     State getCoreState () const;
-
     Progress getCoreProgress () const;
-
+    bool getFallback () const;
     QString getNeed () const;
     void removeNeed (const QString &what);
 
@@ -76,6 +74,7 @@ private slots:
     void _coreErrorReceived (const libencloud::Error &err);
     void _coreStateChanged (State state);
     void _coreProgressReceived (const Progress &progress);
+    void _coreFallbackReceived (bool isFallback);
     void _needReceived (const QString &what);
     void _serverConfigReceived (const QVariant &config);
 
@@ -85,6 +84,7 @@ private:
     Error _coreError;
     State _coreState;
     Progress _coreProgress;
+    bool _isFallback;
     QStringList _needs;
 
     QUuid _poi;

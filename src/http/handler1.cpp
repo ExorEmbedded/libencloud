@@ -106,6 +106,9 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
                 j["progress"] = jMap;
             }
 
+            if (_parent->getFallback())
+                j["fallback"] = true;
+
             if (_parent->getNeed() != "")
                 j["need"] = _parent->getNeed();
 

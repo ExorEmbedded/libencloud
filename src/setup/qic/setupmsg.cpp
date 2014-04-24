@@ -182,7 +182,9 @@ int SetupMsg::_decodeResponse (const QString &response)
     _serverConfig["time"] = json["time"];
 
     map["uuid"] = json["uuid"];
-    map["internal_ip"] = json["vpn_server_ip"];
+    map["openvpn_internal_ip"] = json["openvpn_internal_ip"];
+    if (!json["fallback_openvpn_internal_ip"].isNull())
+        map["fallback_openvpn_internal_ip"] = json["fallback_openvpn_internal_ip"];
     map["available_pages"] = json["available_pages"];
     _serverConfig["server"] = map;
 

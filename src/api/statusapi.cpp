@@ -13,6 +13,7 @@ namespace libencloud {
 StatusApi::StatusApi ()
     : Api ()
     , _state (StateNone)
+    , _isFallback (false)
 {
     LIBENCLOUD_TRACE;
 
@@ -75,6 +76,7 @@ void StatusApi::_clientComplete (const QString &response)
     LIBENCLOUD_ERR_IF (_parseState(jo["state"]));
     LIBENCLOUD_ERR_IF (_parseError(jo["error"]));
     LIBENCLOUD_ERR_IF (_parseProgress(jo["progress"]));
+    LIBENCLOUD_ERR_IF (_parseFallback(jo["fallback"]));
     LIBENCLOUD_ERR_IF (_parseNeed(jo["need"]));
 err:
     return;
@@ -168,6 +170,19 @@ int StatusApi::_parseProgress (const QVariant &v)
 
     if (p != _progress)
         emit apiProgress((_progress = p));
+
+    return 0;
+}
+
+int StatusApi::_parseFallback (const QVariant &v)
+{
+    bool b = false;
+
+    if (!v.isNull())
+        b = v.toBool();
+
+    if (b != _isFallback)
+        emit apiFallback((_isFallback = b));
 
     return 0;
 }

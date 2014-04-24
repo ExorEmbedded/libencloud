@@ -20,6 +20,7 @@ namespace libencloud {
 
 HttpHandler::HttpHandler ()
     : _coreState(StateNone)
+    , _isFallback(false)
 {
     LIBENCLOUD_TRACE;
 }
@@ -32,6 +33,7 @@ HttpHandler::~HttpHandler ()
 const Error &HttpHandler::getCoreError () const     { return _coreError; }
 State HttpHandler::getCoreState () const            { return _coreState; }
 Progress HttpHandler::getCoreProgress () const      { return _coreProgress; }
+bool HttpHandler::getFallback () const              { return _isFallback; }
 QString HttpHandler::getNeed () const               { return _needs.join(" "); }
 
 void HttpHandler::removeNeed (const QString &what)
@@ -188,6 +190,13 @@ void HttpHandler::_coreProgressReceived (const Progress &progress)
     LIBENCLOUD_TRACE;
 
     _coreProgress = progress;
+}
+
+void HttpHandler::_coreFallbackReceived (bool isFallback)
+{
+    LIBENCLOUD_DBG("isFallback: " << isFallback);
+
+    _isFallback = isFallback;
 }
 
 void HttpHandler::_needReceived (const QString &what)
