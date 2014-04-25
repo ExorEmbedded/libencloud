@@ -18,9 +18,11 @@ Manager::Manager()
 {
     SECE_TRACE;
 
+#ifdef SECE_DISABLE_SERVICE
     _server = new libencloud::Server;
     SECE_ERR_IF (_server == NULL);
     SECE_ERR_IF (!_server->isValid());
+#endif
 
     _statusApi = new libencloud::StatusApi;
     SECE_ERR_IF (_statusApi == NULL);
@@ -112,7 +114,9 @@ int Manager::run()
     if (_window)
         _window->show();
 
+#ifdef SECE_DISABLE_SERVICE
     _server->start();
+#endif
 
     // no need for SetupApi/portSupply(): on controlled devices we can assume
     // fixed port for Encloud service
