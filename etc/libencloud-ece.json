@@ -4,12 +4,14 @@
   },
 
   "ssl_init" : {
+    "auth" : "x509",
     "ca" : "init_ca.pem",
     "cert" : "init_cert.pem",
     "key" : "init_key.pem"
   },
 
   "ssl_op" : {
+    "auth" : "x509",
     "ca" : "op_ca.pem",
     "cert" : "op_cert.pem",
     "key" : "op_key.pem"
