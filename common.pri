@@ -38,7 +38,7 @@ PRODUCT_ENCLOUD="Encloud"
 PRODUCT_SECE="SECE"  # FIXME
 
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.6.2
+VERSION = 0.6.3
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 VERSION_TAG = Beta  # Dev version - comment this for official release!
 
