@@ -8,8 +8,15 @@ modeece: CONFFILE = libencloud-ece.json
 conf.path = $${CONFDIR}
 conf.files += $${CONFFILE}
 
+DDIR = $$(INSTALL_ROOT)$${CONFDIR}
+FROM = $${DDIR}/$${CONFFILE}
+TO = $${DDIR}/libencloud.json
+
+win32:FROM ~= s,/,\\,g
+win32:TO ~= s,/,\\,g
+
 post.path = $${CONFDIR}
-post.extra = $${CMD_MV} ${INSTALL_ROOT}/$${CONFDIR}/$${CONFFILE} ${INSTALL_ROOT}/$${CONFDIR}/libencloud.json
+post.extra = $${QMAKE_MOVE} $${FROM} $${TO}
 
 INSTALLS += conf
 INSTALLS += post

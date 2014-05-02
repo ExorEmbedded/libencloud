@@ -154,15 +154,6 @@ windows {  # used only for dev - installer handles positioning on target
     CONFDIR = /etc/encloud
 }
 
-# platform-specific commands
-windows {
-    CMD_CP = copy
-    CMD_MV = move
-} else {
-    CMD_CP = cp
-    CMD_MV = mv
-}
-
 # keep build files separate from sources
 UI_DIR = build/uics
 MOC_DIR = build/mocs
