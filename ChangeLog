@@ -2,6 +2,7 @@ ChangeLog file for Endian libencloud
 
 libencloud 0.6.X:
 	- yocto: allow compilation of tests without QtGui (CONFIG += nogui)
+	- build: fix header install paths
 
 libencloud 0.6.2 (28/04/14):
 	- Create routes not only for individual IP address but also for network [CONNECT-124]
