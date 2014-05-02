@@ -19,14 +19,13 @@
 #   nosetup     no setup module (e.g. VPN client/manager only)
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 #   noapi       no API module (Qt-based HTTP client for Encloud Service)
-
+#   nogui       totally disable Qt Gui modally (also in tests)
 
 # Local configuration overrides. Sample content:
 #     CONFIG += endian
 #     CONFIG += modeqic
 LOCALCONFIG=$$(HOME)/.qmake.pri
 exists($${LOCALCONFIG}): include($${LOCALCONFIG})
-
 
 #
 # global defs

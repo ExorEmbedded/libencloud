@@ -1,7 +1,10 @@
+include(../common.pri)
+
 TEMPLATE = subdirs
 
 unix:SUBDIRS += unit
-SUBDIRS += sece
+
+!nogui:SUBDIRS += sece
 
 # do nothing
 check.commands = true
