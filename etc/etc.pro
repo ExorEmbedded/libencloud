@@ -8,7 +8,11 @@ modeece: CONFFILE = libencloud-ece.json
 conf.path = $${CONFDIR}
 conf.files += $${CONFFILE}
 
-DDIR = $$(INSTALL_ROOT)$${CONFDIR}
+win32 {
+    DDIR = $${CONFDIR}
+} else {
+    DDIR = ${INSTALL_ROOT}/$${CONFDIR}
+}
 FROM = $${DDIR}/$${CONFFILE}
 TO = $${DDIR}/libencloud.json
 
