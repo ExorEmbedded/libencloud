@@ -147,11 +147,20 @@ windows {  # used only for dev - installer handles positioning on target
     BINDIR = $${INSTALLDIR}/bin
     CONFDIR = $${INSTALLDIR}/$${PKGNAME}/etc
 } else {  # used for dev and production
-    INSTALLDIR = /usr/local
+    INSTALLDIR = /usr
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
     CONFDIR = /etc/encloud
+}
+
+# platform-specific commands
+windows {
+    CMD_CP = copy
+    CMD_MV = move
+} else {
+    CMD_CP = cp
+    CMD_MV = mv
 }
 
 # keep build files separate from sources

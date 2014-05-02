@@ -2,9 +2,14 @@ include(../common.pri)
 
 TEMPLATE = subdirs
 
-FILES += *.json
+modeqic: CONFFILE = libencloud-qic.json
+modeece: CONFFILE = libencloud-ece.json
 
-# configuration file installation
 conf.path = $${CONFDIR}
-conf.files = $${FILES}
-#INSTALLS += conf
+conf.files += $${CONFFILE}
+
+post.path = $${CONFDIR}
+post.extra = $${CMD_MV} ${INSTALL_ROOT}/$${CONFDIR}/$${CONFFILE} ${INSTALL_ROOT}/$${CONFDIR}/libencloud.json
+
+INSTALLS += conf
+INSTALLS += post
