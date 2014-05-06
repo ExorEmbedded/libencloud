@@ -127,7 +127,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     QString caCertPath;
     VpnConfig config;
 
-    args << "--log" << getCommonAppDataDir() + "openvpn-log.txt";
+    args << "--log" << _cfg->logPrefix + LIBENCLOUD_VPN_LOG_FILE;
 
     configPath = vpnConfigPath;
     args << "--config" << configPath;

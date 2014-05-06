@@ -16,22 +16,23 @@ Config::Config ()
     QString progFiles = QString(qgetenv("ProgramFiles"));
 
     // main prefix and binaries are product-specific (e.g. 4iConnect)
-    _prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
-    _sbinPrefix = _prefix + sep + LIBENCLOUD_SBIN_PREFIX;
+    prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
+    sbinPrefix = prefix + sep + LIBENCLOUD_SBIN_PREFIX;
 
     // configuration is package-specific (e.g. 4iConnect\libencloud) under %ProgramFiles%
-    _confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
+    confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
 
 #else  // Linux - absolute paths
-    _prefix = LIBENCLOUD_PREFIX_PATH;
-    _confPrefix = LIBENCLOUD_ETC_PREFIX;
-    _sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
+    prefix = LIBENCLOUD_PREFIX_PATH;
+    confPrefix = LIBENCLOUD_ETC_PREFIX;
+    sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
 #endif
 
-    _dataPrefix = getCommonAppDataDir();
+    dataPrefix = getCommonAppDataDir();
+    logPrefix = getCommonLogDir();
 
-    filePath = QFileInfo(_confPrefix + sep + QString(LIBENCLOUD_CONF_FILE));
+    filePath = QFileInfo(confPrefix + sep + QString(LIBENCLOUD_CONF_FILE));
 
     // data are package-specific on win
 
@@ -42,29 +43,29 @@ Config::Config ()
     LIBENCLOUD_ERR_IF (sysSettings == NULL);
 
 #ifdef LIBENCLOUD_MODE_ECE
-    config.poiPath = QFileInfo(_dataPrefix + LIBENCLOUD_POI_FILE);
+    config.poiPath = QFileInfo(dataPrefix + LIBENCLOUD_POI_FILE);
 #endif
 
     config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
     config.timeout = LIBENCLOUD_TIMEOUT;
 
-    config.csrTmplPath = QFileInfo(_dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
+    config.csrTmplPath = QFileInfo(dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
 
     config.sslInit.auth = LIBENCLOUD_AUTH_USERPASS;
-    config.sslInit.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslInit.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
-    config.sslInit.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
+    config.sslInit.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
+    config.sslInit.certPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
+    config.sslInit.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
 
     config.sslOp.auth = LIBENCLOUD_AUTH_USERPASS;
-    config.sslOp.caPath = QFileInfo(_dataPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslOp.certPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_CERT_FILE);
-    config.sslOp.keyPath = QFileInfo(_dataPrefix + LIBENCLOUD_OP_KEY_FILE);
+    config.sslOp.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
+    config.sslOp.certPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_CERT_FILE);
+    config.sslOp.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_KEY_FILE);
 
     config.rsaBits = LIBENCLOUD_RSA_BITS;
 
-    config.vpnExePath = QFileInfo(_sbinPrefix + LIBENCLOUD_VPN_EXE_FILE);
-    config.vpnConfPath = QFileInfo(_dataPrefix + LIBENCLOUD_VPN_CONF_FILE);
-    config.fallbackVpnConfPath = QFileInfo(_dataPrefix + LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
+    config.vpnExePath = QFileInfo(sbinPrefix + LIBENCLOUD_VPN_EXE_FILE);
+    config.vpnConfPath = QFileInfo(dataPrefix + LIBENCLOUD_VPN_CONF_FILE);
+    config.fallbackVpnConfPath = QFileInfo(dataPrefix + LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
     config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
 
@@ -96,10 +97,11 @@ QString Config::dump ()
 #elif defined(LIBENCLOUD_MODE_SECE)
     ts << "mode=SECE" << endl;
 #endif
-    ts << "prefix=" << _prefix << endl;
-    ts << "confPrefix=" << _confPrefix << endl;
-    ts << "sbinPrefix=" << _sbinPrefix << endl;
-    ts << "dataPrefix=" << _dataPrefix << endl;
+    ts << "prefix=" << prefix << endl;
+    ts << "confPrefix=" << confPrefix << endl;
+    ts << "sbinPrefix=" << sbinPrefix << endl;
+    ts << "dataPrefix=" << dataPrefix << endl;
+    ts << "logPrefix=" << logPrefix << endl;
     ts << "settings=" << settings->fileName() << endl;
     ts << "sysSettings=" << sysSettings->fileName() << endl;
 
@@ -134,7 +136,7 @@ int Config::_parse (const QVariantMap &jo)
 
 #ifdef LIBENCLOUD_MODE_ECE
     if (!jo["poi"].isNull())
-        config.poiPath = _joinPaths(_dataPrefix, \
+        config.poiPath = _joinPaths(dataPrefix, \
                 jo["poi"].toString());
 #endif
 
@@ -142,7 +144,7 @@ int Config::_parse (const QVariantMap &jo)
         config.timeout = jo["timeout"].toInt();
 
     if (!jo["csr"].toMap()["tmpl"].isNull())
-        config.csrTmplPath = _joinPaths(_dataPrefix, \
+        config.csrTmplPath = _joinPaths(dataPrefix, \
                 jo["csr"].toMap()["tmpl"].toString());
 
     if (!jo["sb"].isNull())
@@ -199,13 +201,13 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
     }
 
     if (!jo["ca"].isNull())
-        sc.caPath = _joinPaths(_dataPrefix, jo["ca"].toString());
+        sc.caPath = _joinPaths(dataPrefix, jo["ca"].toString());
 
     if (!jo["cert"].isNull())
-        sc.certPath = _joinPaths(_dataPrefix, jo["cert"].toString());
+        sc.certPath = _joinPaths(dataPrefix, jo["cert"].toString());
 
     if (!jo["key"].isNull())
-        sc.keyPath = _joinPaths(_dataPrefix, jo["key"].toString());
+        sc.keyPath = _joinPaths(dataPrefix, jo["key"].toString());
 
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
@@ -221,13 +223,13 @@ err:
 int Config::_parseVpn (const QVariantMap &jo)
 {
     if (!jo["path"].isNull())
-        config.vpnExePath = _joinPaths(_sbinPrefix, jo["path"].toString());
+        config.vpnExePath = _joinPaths(sbinPrefix, jo["path"].toString());
 
     if (!jo["conf"].isNull())
-        config.vpnConfPath = _joinPaths(_dataPrefix, jo["conf"].toString());
+        config.vpnConfPath = _joinPaths(dataPrefix, jo["conf"].toString());
 
     if (!jo["fallback_conf"].isNull())
-        config.fallbackVpnConfPath = _joinPaths(_dataPrefix, jo["fallback_conf"].toString());
+        config.fallbackVpnConfPath = _joinPaths(dataPrefix, jo["fallback_conf"].toString());
 
     if (!jo["mgmt"].toMap()["port"].isNull())
         config.vpnMgmtPort = jo["mgmt"].toMap()["port"].toInt();

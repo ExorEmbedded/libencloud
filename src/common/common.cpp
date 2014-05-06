@@ -48,4 +48,14 @@ err:
 #endif
 }
 
+LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package)
+{
+#ifdef Q_OS_WIN32
+    return getCommonAppDataDir(package);
+#else  // Q_OS_UNIX
+    LIBENCLOUD_UNUSED(package);
+    return QString(LIBENCLOUD_LOG_PREFIX);
+#endif
+}
+
 }  // namespace libencloud

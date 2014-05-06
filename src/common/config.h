@@ -76,6 +76,12 @@ public:
     /* Path to configuration file */
     QFileInfo filePath;
 
+    QString prefix;
+    QString confPrefix;
+    QString sbinPrefix;
+    QString dataPrefix;
+    QString logPrefix;
+
 private:
     int _parse (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
@@ -87,11 +93,6 @@ private:
     QString _joinPaths (const QString &s1, const QString &s2);
 
     QVariant _json;
-
-    QString _prefix;
-    QString _confPrefix;
-    QString _sbinPrefix;
-    QString _dataPrefix;
 };
 
 } // namespace libencloud
