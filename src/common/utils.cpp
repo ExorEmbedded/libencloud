@@ -69,7 +69,8 @@ LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode)
 
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 {
-    LIBENCLOUD_RETURN_IF (!fi.isFile(), NULL);
+    if (fi.isFile())
+        return NULL;
 
     QByteArray ba;
     QString fn = fi.absoluteFilePath();
