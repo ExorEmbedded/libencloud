@@ -3,7 +3,7 @@ include(../common.pri)
 TEMPLATE = subdirs
 
 modeqic: CONFFILE = libencloud-qic.json
-modeece: CONFFILE = libencloud-ece.json
+modeece|modesece: CONFFILE = libencloud-ece.json
 
 conf.path = $${CONFDIR}
 conf.files += $${CONFFILE}
