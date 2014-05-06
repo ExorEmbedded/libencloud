@@ -107,7 +107,10 @@ DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
     DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
 }
 exists(".git") {
-    DEFINES += LIBENCLOUD_REVISION=\\\"$$system(git rev-parse --short HEAD)\\\"
+    REVISION=$$system(git rev-parse --short HEAD)
+    DEFINES += LIBENCLOUD_REVISION=\\\"$${REVISION}\\\"
+} else {
+    DEFINES += LIBENCLOUD_REVISION=\\\"$$cat(.revision)\\\"
 }
 DEFINES += LIBENCLOUD_PKGNAME=\\\"$${PKGNAME}\\\"
 DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"

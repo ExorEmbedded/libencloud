@@ -14,6 +14,7 @@ moc_*.cpp
 *.pro.user
 
 # build-generated files
+.revision
 Makefile
 Makefile.Debug
 Makefile.Release

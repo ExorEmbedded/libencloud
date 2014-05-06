@@ -3,6 +3,7 @@ ChangeLog file for Endian libencloud
 libencloud 0.6.X:
 	- yocto: allow compilation of tests without QtGui (CONFIG += nogui)
 	- build: fix header install paths, INSTALLDIR=/usr (unix), install test and config
+	  use .revision if .git does not exist (build from dist)
 	- test/sece: SECE_DISABLE_SERVICE by default, comment it to use external service
 	- config: make all prefixes public, += logPrefix
 	- unix: /var/log/encloud for logs, /var/efw/encloud for storage  
