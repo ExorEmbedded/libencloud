@@ -7,7 +7,7 @@
 // include all API versions from here
 #include "handler1.h"
 
-#define LIBENCLOUD_HANDLER_PATH_REGEX          "/api_v(\\d+)/(.*)"
+#define LIBENCLOUD_HANDLER_PATH_REGEX          "/api_v(\\d+)/([^?]*)"
 
 #define LIBENCLOUD_HANDLER_ERR_IF(cond,status) \
     do { \

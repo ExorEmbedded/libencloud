@@ -42,11 +42,15 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
 
     path = QDir(request.getUrl()).absolutePath();
     LIBENCLOUD_ERR_IF (path.indexOf(versionRx) < 0);
+    LIBENCLOUD_ERR_IF (versionRx.captureCount() < 2);
 
     version = versionRx.cap(1);
     LIBENCLOUD_ERR_IF (version.toInt() != API_VERSION_1);
 
     action = versionRx.cap(2);
+
+    //LIBENCLOUD_DBG("path: " << path);
+    //LIBENCLOUD_DBG("action: " << action);
 
     // jsonp handling
     //response.getHeaders()->set("Content-Type", "application/json");
