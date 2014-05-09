@@ -47,6 +47,8 @@ int QicSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
+    _clear();
+
     QVariantMap data;
     data["in"] = true;
 
@@ -67,6 +69,8 @@ int QicSetup::start ()
 int QicSetup::stop ()
 {
     LIBENCLOUD_TRACE;
+
+    _clear();
 
     QVariantMap data;
     data["in"] = false;
@@ -118,6 +122,21 @@ int QicSetup::_initMsg (MessageInterface &msg)
     msg.setClient(&_client);
 
     return 0;
+}
+
+// Clear all Switchboard-generated data
+void QicSetup::_clear ()
+{
+    if (QFile::exists(_cfg->config.sslInit.caPath.absoluteFilePath()))
+        LIBENCLOUD_ERR_IF (!QFile::remove(_cfg->config.sslInit.caPath.absoluteFilePath()));
+    if (QFile::exists(_cfg->config.sslOp.caPath.absoluteFilePath()))
+        LIBENCLOUD_ERR_IF (!QFile::remove(_cfg->config.sslOp.caPath.absoluteFilePath()));
+    if (QFile::exists(_cfg->config.vpnConfPath.absoluteFilePath()))
+        LIBENCLOUD_ERR_IF (!QFile::remove(_cfg->config.vpnConfPath.absoluteFilePath()));
+    if (QFile::exists(_cfg->config.fallbackVpnConfPath.absoluteFilePath()))
+        LIBENCLOUD_ERR_IF (!QFile::remove(_cfg->config.fallbackVpnConfPath.absoluteFilePath()));
+err:
+    return;
 }
 
 } // namespace libencloud

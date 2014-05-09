@@ -51,6 +51,9 @@ int HttpServer::start (const QHostAddress &address, quint16 port)
     enum { MAX_ATTEMPTS = 10 };
     int i;
 
+    if (isListening())
+        return 0;
+
     // no setting - scan for a free port
     for (i = 0; i < MAX_ATTEMPTS && !listen(address, port); i++, port++) 
         ;

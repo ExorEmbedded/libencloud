@@ -64,6 +64,7 @@ private slots:
 
 private:
     int _initMsg (MessageInterface &msg);
+    void _clear ();
 
     SetupMsg _setupMsg;
     LoginMsg _loginMsg;
