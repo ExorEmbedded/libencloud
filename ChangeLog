@@ -1,6 +1,7 @@
 ChangeLog file for Endian libencloud
 
 libencloud 0.6.X:
+	- [CONNECT-133] Remove data from previous connection
 	- yocto: allow compilation of tests without QtGui (CONFIG += nogui)
 	- build: fix header install paths, INSTALLDIR=/usr (unix), install test and config
 	  generate .revision and use it if .git does not exist (build from dist)
@@ -10,8 +11,8 @@ libencloud 0.6.X:
 	- unix: /var/log/encloud for logs, /var/efw/encloud for storage  
 
 libencloud 0.6.2 (28/04/14):
-	- Create routes not only for individual IP address but also for network [CONNECT-124]
-	- Handle Switchboard fallback server [CONNECT-114]
+	- [CONNECT-124] Create routes not only for individual IP address but also for network
+	- [CONNECT-114] Handle Switchboard fallback server
 	- api/status: new "fallback" boolean field; empty errors and need not being reemitted
 	- api/setup: internal_ip => openvpn_internal_ip, fallback_openvpn_internal_ip
 	- *ece: don't getCertificate if we already have a valid one;
@@ -23,12 +24,12 @@ libencloud 0.6.2 (28/04/14):
 	- test: scripts/vpncli.sh extensions for *ECE testing; SECE sample wip
 
 libencloud 0.6.1 (15/04/2014):
-	- custom ProxyFactory to avoid proxying localhost requests;
-	  handle global proxy settings in core [CONNECT-106]
+	- [CONNECT-106] custom ProxyFactory to avoid proxying localhost requests;
+	  handle global proxy settings in core
 	- auth: typeFromQt(), typeToQt(), toString()
 	- proxy: toString()
-	- vpn: improved process failure handling; error showing Proxy + UDP not allowed;
-	  added parsing from file to VpnConfig and refactoring [CONNECT-121]
+	- [CONNECT-121] vpn: improved process failure handling; error showing Proxy + UDP not allowed;
+	  added parsing from file to VpnConfig and refactoring
 	- test: added sample SECE client
 
 libencloud 0.6 (02/04/2014):
