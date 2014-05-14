@@ -19,10 +19,10 @@ namespace libencloud {
 //
 
 HttpHandler::HttpHandler ()
-    : _coreState(StateNone)
-    , _isFallback(false)
 {
     LIBENCLOUD_TRACE;
+
+    _clear();
 }
 
 HttpHandler::~HttpHandler ()
@@ -182,6 +182,15 @@ void HttpHandler::_coreStateChanged (State state)
 {
     LIBENCLOUD_TRACE;
 
+    switch (state)
+    {
+        case libencloud::StateIdle:
+            _clear();
+            break;
+        default:
+            break;
+    }
+
     _coreState = state;
 }
 
@@ -217,6 +226,13 @@ void HttpHandler::_serverConfigReceived (const QVariant &config)
 //
 // private methods
 //
+
+void HttpHandler::_clear()
+{
+    _coreState = StateNone;
+    _isFallback = false;
+    _serverConfig.clear();
+}
 
 // return new instance of specific api handler given version 
 // delete when finished

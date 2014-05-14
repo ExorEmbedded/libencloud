@@ -18,6 +18,7 @@ class SetupMsg : public QObject, public MessageInterface
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
+    int clear ();
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
 
@@ -42,7 +43,6 @@ private:
     int _unpackResponse ();
 
     //request inputs
-    bool _in;
     Auth _sbAuth;
 
     //response outputs

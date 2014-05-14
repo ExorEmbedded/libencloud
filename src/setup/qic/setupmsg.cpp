@@ -15,6 +15,21 @@ namespace libencloud {
 // public methods
 //
 
+int SetupMsg::clear ()
+{
+    LIBENCLOUD_TRACE;
+
+    MessageInterface::clear();
+
+    _sbAuth = Auth();
+    _vpnConfig.clear();
+    _fallbackVpnConfig.clear();
+    _caCert.clear();
+    _serverConfig.clear();
+
+    return 0;
+}
+
 const VpnConfig *SetupMsg::getVpnConfig () const
 {
     return &_vpnConfig;

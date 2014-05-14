@@ -16,6 +16,7 @@ public:
     // use compiler-default
     //VpnConfig &operator=(const VpnConfig vc);
 
+    int clear ();
     bool isValid () const;
     int fromMap (const QVariantMap &vm);
     int fromString (const QString &s);
@@ -28,8 +29,6 @@ public:
     QStringList get (const QString &key) const;
 
 private:
-    int init ();
-
     bool _valid;
     QString _string;
 

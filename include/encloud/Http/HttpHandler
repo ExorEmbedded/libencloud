@@ -79,6 +79,7 @@ private slots:
     void _serverConfigReceived (const QVariant &config);
 
 private:
+    void _clear ();
     HttpAbstractHandler *_versionToApiHandler (ApiVersion version);   
 
     Error _coreError;

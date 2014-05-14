@@ -9,20 +9,18 @@ namespace libencloud {
 //
 
 VpnConfig::VpnConfig ()
-    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
-    init();
+    clear();
 }
 
 // From ECE-style map with overrides from local configuration
 VpnConfig::VpnConfig (const QVariantMap &vm, Config *cfg)
-    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
-    init();
+    clear();
     LIBENCLOUD_ERR_IF (fromMap(vm));
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
 
@@ -33,11 +31,10 @@ err:
 
 // From QIC-style string with overrides from local configuration
 VpnConfig::VpnConfig (const QString &s, Config *cfg)
-    : _valid(false)
 {
     LIBENCLOUD_TRACE;
 
-    init();
+    clear();
 
     LIBENCLOUD_ERR_IF (fromString(s));
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
@@ -46,6 +43,17 @@ VpnConfig::VpnConfig (const QString &s, Config *cfg)
 err:
     return;
 }
+
+int VpnConfig::clear ()
+{
+    _valid = false;
+    _string = "";
+    _data.clear();
+    _data["client"] = QStringList();
+
+    return 0;
+}
+
 
 bool VpnConfig::isValid () const
 {
@@ -195,12 +203,5 @@ QStringList VpnConfig::get (const QString &key) const
 //
 // private methods
 //
-
-int VpnConfig::init ()
-{
-    _data["client"] = QStringList();
-
-    return 0;
-}
 
 } // namespace libencloud

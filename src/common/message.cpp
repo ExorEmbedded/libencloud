@@ -9,6 +9,15 @@ namespace libencloud {
 // public methods
 //
 
+int MessageInterface::clear ()
+{
+    _cfg = NULL;
+    _client = NULL;
+    _data.clear();
+
+    return 0;
+}
+
 int MessageInterface::setConfig (Config *cfg)
 {
     LIBENCLOUD_ERR_IF (cfg == NULL);

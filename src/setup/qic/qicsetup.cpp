@@ -71,6 +71,8 @@ int QicSetup::stop ()
     LIBENCLOUD_TRACE;
 
     _clear();
+    _setupMsg.clear();
+    _initMsg(_setupMsg);
 
     QVariantMap data;
     data["in"] = false;
