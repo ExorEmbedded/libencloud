@@ -52,10 +52,6 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
     //LIBENCLOUD_DBG("path: " << path);
     //LIBENCLOUD_DBG("action: " << action);
 
-    // jsonp handling
-    //response.getHeaders()->set("Content-Type", "application/json");
-    response.getHeaders()->set("Content-Type", "application/javascript");
-
     if (action == LIBENCLOUD_HANDLER_STATUS_PATH)
         return _handle_status(request, response);
     else if (action == LIBENCLOUD_HANDLER_AUTH_PATH)
@@ -79,6 +75,11 @@ err:
 
 int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &response)
 {
+    QUrl url;
+
+    LIBENCLOUD_TRACE;
+    url.setEncodedQuery((*request.getContent()).toAscii());
+
     switch (httpMethodFromString(request.getMethod()))
     {
         case LIBENCLOUD_HTTP_METHOD_GET:
@@ -118,9 +119,7 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
 
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
-
-            response.setContent("jsonpCallback(" + content + ")");
-
+            _setContent(request, response, content);
             break;
         }
         default:
@@ -136,7 +135,10 @@ err:
 
 int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &response)
 {
+    QUrl url;
+
     LIBENCLOUD_TRACE;
+    url.setEncodedQuery((*request.getContent()).toAscii());
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -144,13 +146,11 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
 #ifdef LIBENCLOUD_MODE_QIC
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QUrl url;
             QString id, type, user, pass, aurl;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-            url.setEncodedQuery((*request.getContent()).toAscii());
 
             LIBENCLOUD_HANDLER_ERR_IF (
                     ((id = url.queryItemValue("id")) == ""),
@@ -196,7 +196,10 @@ err:
 
 int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &response)
 {
+    QUrl url;
+
     LIBENCLOUD_TRACE;
+    url.setEncodedQuery((*request.getContent()).toAscii());
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -211,9 +214,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
-
-            response.setContent("jsonpCallback(" + content + ")");
-  
+            _setContent(request, response, content);
             break;
         }
 #endif
@@ -221,13 +222,11 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 #ifdef LIBENCLOUD_MODE_SECE
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QUrl url;
             QString val;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-            url.setEncodedQuery((*request.getContent()).toAscii());
 
             if ((val = url.queryItemValue("license")) != "")
             {
@@ -245,13 +244,11 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 #ifdef LIBENCLOUD_MODE_QIC
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QUrl url;
             QString val;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-            url.setEncodedQuery((*request.getContent()).toAscii());
 
             if ((val = url.queryItemValue("clientPort")) != "")
             {
@@ -275,9 +272,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
-
-            response.setContent("jsonpCallback(" + content + ")");
-  
+            _setContent(request, response, content);
             break;
         }
 #endif
@@ -296,19 +291,20 @@ err:
 
 int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &response)
 {
+    QUrl url;
+
     LIBENCLOUD_TRACE;
+    url.setEncodedQuery((*request.getContent()).toAscii());
 
     switch (httpMethodFromString(request.getMethod()))
     {
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QUrl url;
             QString val;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-            url.setEncodedQuery((*request.getContent()).toAscii());
 
             if ((val = url.queryItemValue("action")) != "")
             {
@@ -333,6 +329,22 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
     return 0;
 err:
     return ~0;
+}
+
+void ApiHandler1::_setContent (const HttpRequest &request, HttpResponse &response, const QString &content)
+{
+    QString jsonpCallback = QUrl(request.getUrl()).queryItemValue("callback");
+
+    if (jsonpCallback != "")
+    {
+        response.getHeaders()->set("Content-Type", "application/javascript");
+        response.setContent(jsonpCallback + "(" + content + ")");
+    }
+    else
+    {
+        response.getHeaders()->set("Content-Type", "application/json");
+        response.setContent(content);
+    }
 }
 
 }  // namespace libencloud

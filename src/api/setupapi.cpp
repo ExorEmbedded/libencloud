@@ -115,7 +115,7 @@ void SetupApi::_clientComplete (const QString &response)
         case PoiRetrieveType:
         {
             bool ok;
-            QVariantMap jo = json::parseJsonp(response, ok).toMap();
+            QVariantMap jo = json::parse(response, ok).toMap();
 
             LIBENCLOUD_ERR_IF (!ok);
             LIBENCLOUD_ERR_IF (jo["poi"].isNull());
@@ -133,7 +133,7 @@ void SetupApi::_clientComplete (const QString &response)
         {
             bool ok;
 
-            QVariant config = json::parseJsonp(response, ok);
+            QVariant config = json::parse(response, ok);
             LIBENCLOUD_ERR_IF (!ok);
 
             emit configReceived(Api::SuccessRc, config);

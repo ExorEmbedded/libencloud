@@ -2,6 +2,7 @@ ChangeLog file for Endian libencloud
 
 libencloud 0.6.X:
 	- [CONNECT-133] Remove data from previous connection
+	- [CONNECT-135] API: Use JSONP instead of JSON only if requested
 	- yocto: allow compilation of tests without QtGui (CONFIG += nogui)
 	- build: fix header install paths, INSTALLDIR=/usr (unix), install test and config
 	  generate .revision and use it if .git does not exist (build from dist)

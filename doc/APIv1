@@ -4,13 +4,6 @@
 ==================
 
 
-[ Important Notes ]
-
-     - responses return json wrapped in a javascript function (JSONP handling
-     to bypass same-origin policy), so the returned Content-Type is
-     application/javascript, not application/json.
-
-
 [  Type definitions ]
 
      <uuid>     e.g.  "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
@@ -36,7 +29,7 @@
                         3      Connecting      (orange)
                         4      Connected       (green)
 
-    e.g.    'jsonpCallback({
+    e.g.    '{
                 "state" : 1,                    # string representation of state
                 "error" : {                     # OPTIONAL: defined if state == 1 (StateError)
                     "code" : 123,               # error code (Please refer to <encloud/Error> for definition)
@@ -52,8 +45,8 @@
                 },
                 "fallback" : true,              # OPTIONAL (default=false) true if fallback VPN server is being used
                 "need" : "license sb_auth"      # OPTIONAL list of space-separated "need" strings
-        })'                                     jo be fulfilled via API. Possible values:
-                                                "license", "sb_auth", "proxy_auth"
+            }'                                  # to be fulfilled via API. Possible values:
+                                                # "license", "sb_auth", "proxy_auth"
 
 
 [ Authentication/Login API ]
@@ -76,9 +69,9 @@
 
     Def "poi"           proof of identity returned by ECE for Switchboard association
 
-    e.g.    'jsonpCallback({
+    e.g.    '{
                  "poi" : "<uuid>"
-             })'
+             }'
 
 * POST <e_url>/api_v1/setup                 Client: SECE          
 
@@ -95,7 +88,7 @@
 
 * GET <e_url>/api_v1/setup                  Client: QIC
 
-    e.g.    'jsonpCallback({
+    e.g.    '{
                  "time" : 1396014836.523807,        # When the config data was received
                  "server" : {
                      "uuid" : "<uuid>",
@@ -106,7 +99,7 @@
                  "client" : {
                     "already_connected" : false,
                  }
-             })'
+             }'
 
 
 [ Cloud API ]
@@ -133,6 +126,7 @@
     Notes: 
         * ID = name+endpoint
 
+
 [ Error Handling ]
 
 Possible HTTP Statuses return as a result of GET/POST:
@@ -142,3 +136,19 @@ Possible HTTP Statuses return as a result of GET/POST:
      - LIBENCLOUD_HTTP_STATUS_NOTFOUND
 
 Application errors are available "State Retrieval API" above.
+
+
+[ Other Notes ]
+
+By default, the Content-type of responses is application/json:
+
+e.g.    '{ ... }'
+
+Optionally (if requests contains the "callback" parameter), responses will
+contain json wrapped in a javascript function (JSONP handling to bypass
+same-origin policy). In such case the returned Content-Type will be
+application/javascript.
+
+e.g.    'myJsonpCallback({ ... })'
+
+        , where callback="myJsonpCallback"

@@ -70,7 +70,7 @@ void StatusApi::_clientComplete (const QString &response)
 
 //    LIBENCLOUD_DBG("response: " << response);
 
-    jo = json::parseJsonp(response, ok).toMap();
+    jo = json::parse(response, ok).toMap();
     LIBENCLOUD_ERR_IF (!ok);
 
     LIBENCLOUD_ERR_IF (_parseState(jo["state"]));

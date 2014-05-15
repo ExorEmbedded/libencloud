@@ -132,7 +132,6 @@ int HttpHandler::setAction (const QString &action, const Params &params)
     return 0;
 }
 
-// JSONP support (bypass same-origin policy)
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 {
     HttpAbstractHandler *apiHandler = NULL;
