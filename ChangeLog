@@ -1,6 +1,6 @@
 ChangeLog file for Endian libencloud
 
-libencloud 0.6.X:
+libencloud 0.6.3 (27/05/2014):
 	- [CONNECT-133] Remove data from previous connection
 	- [CONNECT-135] API: Use JSONP instead of JSON only if requested
 	- yocto: allow compilation of tests without QtGui (CONFIG += nogui)
@@ -11,7 +11,7 @@ libencloud 0.6.X:
 	- http: GET params ending up in action string
 	- unix: /var/log/encloud for logs, /var/efw/encloud for storage  
 
-libencloud 0.6.2 (28/04/14):
+libencloud 0.6.2 (28/04/2014):
 	- [CONNECT-124] Create routes not only for individual IP address but also for network
 	- [CONNECT-114] Handle Switchboard fallback server
 	- api/status: new "fallback" boolean field; empty errors and need not being reemitted
