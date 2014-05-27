@@ -6,6 +6,7 @@
 // logging: Qt4 forces usage of globals with qInstallMsgHandler()
 static QTextStream *g_svcLogText = NULL;
 static void __log_handler (QtMsgType type, const char *msg);
+static QtMsgHandler __default_log_handler = NULL;
 
 namespace libencloud {
 
@@ -54,7 +55,11 @@ int Logger::open ()
     logText.setDevice(&logFile);
     g_svcLogText = &logText;
 
-    qInstallMsgHandler(__log_handler);
+    QtMsgHandler prev_log_handler = qInstallMsgHandler(__log_handler);
+    // Save default qt log handler
+    if (prev_log_handler != __log_handler) {
+        __default_log_handler = prev_log_handler;
+    }
 
     _isValid = true;
     return 0;
@@ -101,4 +106,8 @@ static void __log_handler (QtMsgType type, const char *msg)
         return;
 
     *g_svcLogText << msg << endl;
+
+    if (__default_log_handler) {
+        __default_log_handler(type, msg);
+    }
 }

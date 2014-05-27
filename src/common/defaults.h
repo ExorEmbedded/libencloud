@@ -4,6 +4,27 @@
 #include <encloud/Common>
 
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
+
+#ifdef LIBENCLOUD_USE_ABOUT
+
+#include "../about/about.h"
+
+#define LIBENCLOUD_APP_FULL             LibEncloudFullAppName( LIBENCLOUD_PKGNAME )
+
+// e.g Endian/4iConnect, Exor/JMConnect
+static char libEncloudProductDirBuffer [256];
+#define LIBENCLOUD_PRODUCTDIR           LibEncloudProductDir(libEncloudProductDirBuffer, LIBENCLOUD_PRODUCT)
+
+// e.g Endian/4iConnect/libencloud | Exor/JMConnect/libencloud
+static char libEncloudInstallDirBuffer [512];
+#define LIBENCLOUD_INSTALLDIR           LibEncloudInstallDir(libEncloudInstallDirBuffer, LIBENCLOUD_PRODUCT, LIBENCLOUD_APP)
+
+// tap device - MUST match name defined in CheckTap
+static char libEncloudTapNameBuffer [256];
+#define LIBENCLOUD_TAPNAME              LibEncloudTapName(libEncloudTapNameBuffer, LIBENCLOUD_PRODUCT)
+
+#else
+
 #define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
 
 // e.g Endian/4iConnect, Exor/JMConnect
@@ -12,15 +33,17 @@
 // e.g Endian/4iConnect/libencloud | Exor/JMConnect/libencloud
 #define LIBENCLOUD_INSTALLDIR           LIBENCLOUD_PRODUCTDIR "/" LIBENCLOUD_APP
 
+// tap device - MUST match name defined in CheckTap
+#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_PRODUCT
+
+#endif
+
 #ifndef LIBENCLOUD_REVISION
 #  define LIBENCLOUD_REVISION           ""
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION
 #else
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " rev" LIBENCLOUD_REVISION
 #endif
-
-// tap device - MUST match name defined in CheckTap
-#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_PRODUCT
 
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
 

@@ -20,7 +20,7 @@ win32:FROM ~= s,/,\\,g
 win32:TO ~= s,/,\\,g
 
 post.path = $${CONFDIR}
-post.extra = $${QMAKE_MOVE} $${FROM} $${TO}
+post.extra = $${QMAKE_MOVE} "\"$${FROM}\"" "\"$${TO}\""
 
 INSTALLS += conf
 INSTALLS += post

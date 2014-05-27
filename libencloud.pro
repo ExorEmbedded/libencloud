@@ -3,6 +3,7 @@ include(common.pri)
 TEMPLATE = subdirs
 
 SUBDIRS += include
+SUBDIRS += about
 SUBDIRS += src
 SUBDIRS += etc
 SUBDIRS += test
