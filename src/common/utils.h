@@ -18,7 +18,7 @@ LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode);
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi);
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid);
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
-LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out);
+LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait = true);
 
 } // namespace utils
 } // namespace libencloud

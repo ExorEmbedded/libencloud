@@ -378,7 +378,8 @@ void VpnClient::disableTap()
 
     args << "disable";
 
-    LIBENCLOUD_ERR_IF (utils::execute(path, args, out));
+    // wait = false to speed up disconnect [CONNECT-115]
+    LIBENCLOUD_ERR_IF (utils::execute(path, args, out, false));
 err:
 #endif  // LIBENCLOUD_MODE_QIC
 #endif  // Q_OS_WIN
