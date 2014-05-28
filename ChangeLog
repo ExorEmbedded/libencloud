@@ -1,5 +1,8 @@
 ChangeLog file for Endian libencloud
 
+libencloud 0.6.X:
+	- [CONNECT-115] Slow disconnect on w32
+
 libencloud 0.6.3 (27/05/2014):
 	- [CONNECT-133] Remove data from previous connection
 	- [CONNECT-135] API: Use JSONP instead of JSON only if requested

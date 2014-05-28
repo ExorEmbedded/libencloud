@@ -102,7 +102,7 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
                         );
 }
 
-int execute (QString path, QStringList args, QString &out)
+int execute (QString path, QStringList args, QString &out, bool wait)
 {
     QProcess p;
 
@@ -110,8 +110,11 @@ int execute (QString path, QStringList args, QString &out)
 
     p.start(path, args);
 
-    p.waitForFinished(-1);  // failure not critical
-    LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit);
+    if (wait)
+    {
+        p.waitForFinished(-1);  // failure not critical
+        LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit);
+    }
 
     out = p.readAll();
 
