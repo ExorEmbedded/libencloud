@@ -2,6 +2,7 @@ ChangeLog file for Endian libencloud
 
 libencloud 0.6.X:
 	- [CONNECT-115] Slow disconnect on w32
+	- [CONNECT-142] Support for N-branding (about module)
 
 libencloud 0.6.3 (27/05/2014):
 	- [CONNECT-133] Remove data from previous connection
