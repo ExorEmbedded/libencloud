@@ -20,6 +20,9 @@
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 #   noapi       no API module (Qt-based HTTP client for Encloud Service)
 #   nogui       totally disable Qt Gui modally (also in tests)
+#
+# [ About definitions ]
+#   about       use brand info from about dll, instead of using default for major brand (exor/endian)
 
 # Local configuration overrides. Sample content:
 #     CONFIG += endian
@@ -66,6 +69,15 @@ debug:unix {
     QMAKE_CXXFLAGS += -g 
 }
 
+# Suffix for libraries compiled with debug symbols
+win32{
+    CONFIG(debug,debug|release) {
+        DBG_SUFFIX = d
+    }
+} else {
+    DBG_SUFFIX =
+}
+
 modeqic {
     DEFINES += LIBENCLOUD_MODE_QIC
     endian {
@@ -90,6 +102,8 @@ modeqic {
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
+
+about       { DEFINES += LIBENCLOUD_USE_ABOUT }
 
 # Platform-specific config and macros
 win32 {
@@ -145,10 +159,10 @@ DEPENDPATH += $${INCLUDEPATH}
 # install dirs
 windows {  # used only for dev - installer handles positioning on target
            # and runtime paths are defined in src/common/defaults.h
-    INSTALLDIR = $${PROGDIR}
-    LIBDIR = $${INSTALLDIR}/bin
-    BINDIR = $${INSTALLDIR}/bin
-    CONFDIR = $${INSTALLDIR}/$${PKGNAME}/etc
+    INSTALLDIR = "$${PROGDIR}"
+    LIBDIR = "$${INSTALLDIR}/bin"
+    BINDIR = "$${INSTALLDIR}/bin"
+    CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"
 } else {  # used for dev and production
     INSTALLDIR = /usr
     LIBDIR = $${INSTALLDIR}/lib

@@ -22,7 +22,8 @@ INCLUDEPATH += $$SRCBASEDIR/src/
 DEPENDPATH += $$SRCBASEDIR/src/
 
 # libencloud
-LIBS = -L$$SRCBASEDIR/src/$$DESTDIR -lencloud
+LIBS = -L$$SRCBASEDIR/src/$$DESTDIR
+LIBS += -lencloud$$DBG_SUFFIX
 
 target.path = $${BINDIR}
 INSTALLS += target
