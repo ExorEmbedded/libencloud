@@ -13,17 +13,8 @@ win32 {
 CONFIG -= gui
 CONFIG += console
 
-win32 {
-    CONFIG(debug,debug|release) {
-        TARGET = aboutd
-    } else {
-        TARGET = about
-        DESTDIR = $$DESTDIR/$$BRAND
-    }
-} else {
-    TARGET = about
-    DESTDIR = $$DESTDIR/$$BRAND
-}
+TARGET = about$$DBG_SUFFIX
+DESTDIR = $$DESTDIR/$$BRAND
 
 warning($$DESTDIR)
 

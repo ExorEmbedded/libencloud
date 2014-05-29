@@ -9,11 +9,7 @@ win32 {
     # disable number in mingw output (libencloud0.dll vs libencloud.dll)
     TARGET_EXT = .dll
 
-    CONFIG(debug,debug|release) {
-        TARGET = encloudd
-    } else {
-        TARGET = encloud
-    }
+    TARGET = encloud$${DBG_SUFFIX}
 } else {
     CONFIG += shared
 }
@@ -159,8 +155,7 @@ SOURCES += http/*.cpp
 win32 {
     LIBS += -lshfolder
 
-    CONFIG(debug,debug|release):PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/aboutd.lib
-    else:PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about.lib
+    PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.lib
 
     LIBS += $$PRE_TARGETDEPS
 } else {

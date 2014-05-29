@@ -69,6 +69,15 @@ debug:unix {
     QMAKE_CXXFLAGS += -g 
 }
 
+# Suffix for libraries compiled with debug symbols
+win32{
+    CONFIG(debug,debug|release) {
+        DBG_SUFFIX = d
+    }
+} else {
+    DBG_SUFFIX =
+}
+
 modeqic {
     DEFINES += LIBENCLOUD_MODE_QIC
     endian {
