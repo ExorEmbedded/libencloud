@@ -2,7 +2,7 @@ include(../common.pri)
 
 TEMPLATE = subdirs
 
-unix:SUBDIRS += unit
+SUBDIRS += unit
 
 !nogui:SUBDIRS += sece
 

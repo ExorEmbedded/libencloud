@@ -2,11 +2,14 @@ include(../../common.pri)
 
 TEMPLATE = app
 
+# external prog - don't exports dlls
+DEFINES -= _LIBENCLOUD_LIB_
+
+TARGET = unit
+
 CONFIG += gui
 CONFIG += console
 CONFIG += qtestlib
-
-TARGET = unit
 
 SOURCES += main.cpp
 
@@ -25,27 +28,12 @@ SOURCES += crypto.cpp
 
 HEADERS += test.h
 
-windows {
-    # this is required in order to use bio functions of openssl dll
-    SOURCES += $$OPENSSLPATH\\include\\openssl\\applink.c
-}
-
 INCLUDEPATH += $$SRCBASEDIR/src/
 DEPENDPATH += $$SRCBASEDIR/src/
 
 # libencloud
-win32 {
-    *-g++* {
-        # MinGW
-        LIBS += $$SRCBASEDIR/src/$$DESTDIR/libencloud0.a
-    }
-    *-msvc* {
-        # MSVC
-        LIBS += $$SRCBASEDIR/src/$$DESTDIR/encloud.lib
-    }
-} else {
-    LIBS += -L$$SRCBASEDIR/src/ -lencloud
-}
+LIBS += -L$$SRCBASEDIR/src/$$DESTDIR
+LIBS += -lencloud$$DBG_SUFFIX
 
 # json - external linkage only for QJson
 contains(CONFIG, qjson) {
@@ -56,10 +44,11 @@ contains(CONFIG, qjson) {
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
 check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 
+target.path = $${BINDIR}
+INSTALLS += target
+
 unix {
-    target.path = $${BINDIR}
     post.path = $${BINDIR}
     post.extra = $${QMAKE_MOVE} "\"${INSTALL_ROOT}/$${BINDIR}/$${TARGET}\"" "\"${INSTALL_ROOT}/$${BINDIR}/libencloud-test\""
-    INSTALLS += target
     INSTALLS += post
 }
