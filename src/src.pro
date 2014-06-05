@@ -158,9 +158,7 @@ win32 {
     PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.lib
 
     LIBS += $$PRE_TARGETDEPS
-} else {
-    LIBS+= $$SRCBASEDIR/about/$$DESTDIR/about.lib
-}
+} 
 
 # installation
 target.path = $$LIBDIR

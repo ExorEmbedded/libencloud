@@ -47,6 +47,7 @@ int Logger::setExtraMode (QIODevice::OpenModeFlag flags)
 
 int Logger::open ()
 {
+    QtMsgHandler prev_log_handler;
     LIBENCLOUD_DBG("path: " << _path);
 
     logFile.setFileName(_path);
@@ -55,7 +56,7 @@ int Logger::open ()
     logText.setDevice(&logFile);
     g_svcLogText = &logText;
 
-    QtMsgHandler prev_log_handler = qInstallMsgHandler(__log_handler);
+    prev_log_handler = qInstallMsgHandler(__log_handler);
     // Save default qt log handler
     if (prev_log_handler != __log_handler) {
         __default_log_handler = prev_log_handler;
