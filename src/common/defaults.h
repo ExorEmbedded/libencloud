@@ -12,12 +12,15 @@
 #define LIBENCLOUD_APP_FULL             LibEncloudFullAppName( LIBENCLOUD_PKGNAME )
 
 // e.g Endian/4iConnect, Exor/JMConnect
+static char libEncloudProductDirBuffer [256];
 #define LIBENCLOUD_PRODUCTDIR           LibEncloudProductDir(libEncloudProductDirBuffer, LIBENCLOUD_PRODUCT)
 
 // e.g Endian/4iConnect/libencloud | Exor/JMConnect/libencloud
+static char libEncloudInstallDirBuffer [512];
 #define LIBENCLOUD_INSTALLDIR           LibEncloudInstallDir(libEncloudInstallDirBuffer, LIBENCLOUD_PRODUCT, LIBENCLOUD_APP)
 
 // tap device - MUST match name defined in CheckTap
+static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_TAPNAME              LibEncloudTapName(libEncloudTapNameBuffer, LIBENCLOUD_PRODUCT)
 
 #else

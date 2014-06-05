@@ -3,19 +3,7 @@
 #include <QDebug>
 #include <string.h>
 
-static char libEncloudProductDirBuffer [256];
-static char libEncloudInstallDirBuffer [512];
-static char libEncloudTapNameBuffer [256];
-
 LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudOrganization = BRAND_ORGANIZATION;
-
-// Not used - just make compiler happy
-void libEncloudAbout()
-{
-    Q_UNUSED(libEncloudProductDirBuffer);
-    Q_UNUSED(libEncloudInstallDirBuffer);
-    Q_UNUSED(libEncloudTapNameBuffer);
-}
 
 LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudProductDir(char* buffer, const char* productName)
 {
