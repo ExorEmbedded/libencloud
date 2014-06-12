@@ -182,9 +182,9 @@ QString Error::_code2Desc (Code code)
 
         // 5xx
         case CodeClientFailure:
-            return QObject::tr("Client Failure");
+            return QObject::tr("VPN Client Failure");
         case CodeClientTimeout:
-            return QObject::tr("Client Timeout");
+            return QObject::tr("VPN Client Timeout");
     }
 
     return "";
