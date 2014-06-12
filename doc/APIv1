@@ -104,6 +104,14 @@
 
 [ Cloud API ]
 
+* POST <e_url>/api_v1/cloud                  Client: *
+
+    Def "auth_type"      set cloud authentication method: 'x509', 'user-pass' (default)
+    Def "auth_format"    set authentication format (valid only for 'auth_type=x509'): 'pkcs12', 'cert-key' (default)
+
+    e.g.                 auth_type=x509&auth_format=pkcs12
+
+
 * POST <e_url>/api_v1/cloud
 
     Def "action"        Operation:                  Clients:

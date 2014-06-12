@@ -195,6 +195,8 @@ int Core::attachServer (Server *server)
 
     connect(obj, SIGNAL(actionRequest(QString, Params)), 
             this, SLOT(_actionRequest(QString, Params)));
+    connect(obj, SIGNAL(configSupplied(QVariant)),
+            _cfg, SLOT(receive(QVariant)));
 
     // attach core configuration
     server->_cfg = _cfg;

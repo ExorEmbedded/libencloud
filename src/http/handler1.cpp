@@ -1,3 +1,4 @@
+#define LIBENCLOUD_DISABLE_TRACE
 #include <encloud/Http/HttpHandler>
 #include <encloud/Json>
 #include <common/common.h>
@@ -14,10 +15,6 @@
 #define LIBENCLOUD_HANDLER_AUTH_PATH    "auth"
 #define LIBENCLOUD_HANDLER_SETUP_PATH   "setup"
 #define LIBENCLOUD_HANDLER_CLOUD_PATH   "cloud"
-
-// disable heavy tracing
-#undef LIBENCLOUD_TRACE 
-#define LIBENCLOUD_TRACE do {} while(0)
 
 namespace libencloud {
 
@@ -301,21 +298,32 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QString val;
+            QString authType;
+            QString authFormat;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
+            if (!url.hasQueryItem("auth_type") &&
+                    !url.hasQueryItem("auth_format") &&
+                    !url.hasQueryItem("action"))
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+
+            authType = url.queryItemValue("auth_type");
+            authFormat = url.queryItemValue("auth_format");
+
+            if (authType != "" || authFormat != "")
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setCloudAuthInfo(authType, authFormat),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
             if ((val = url.queryItemValue("action")) != "")
             {
                 url.removeQueryItem("action");
-
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setAction(val, url.queryItems()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
-            }
-            else
-            {
-                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
 
             break;

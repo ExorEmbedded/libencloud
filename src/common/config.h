@@ -21,9 +21,11 @@ typedef struct
 {
     QUrl sbUrl;
     QString auth;
+    QString authFormat;
     QFileInfo caPath;
     QFileInfo certPath;
     QFileInfo keyPath;
+    QFileInfo p12Path;
 } 
 libencloud_config_ssl_t;
 
@@ -56,8 +58,10 @@ typedef struct
 }
 libencloud_config_t;
 
-class Config
+class Config : public QObject
 {
+    Q_OBJECT
+
 public:
     Config ();
     ~Config ();
@@ -82,7 +86,11 @@ public:
     QString dataPrefix;
     QString logPrefix;
 
-private:
+protected slots:
+
+    void receive (const QVariant &cfg); 
+
+protected:
     int _parse (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
     int _parseSslInit (const QVariantMap &jo);

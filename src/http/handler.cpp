@@ -132,6 +132,20 @@ int HttpHandler::setAction (const QString &action, const Params &params)
     return 0;
 }
 
+int HttpHandler::setCloudAuthInfo (const QString &type, const QString &format)
+{
+    QVariantMap cfg;
+    QVariantMap sslOpMap;
+
+    sslOpMap["auth"] = type;
+    sslOpMap["auth_format"] = format;
+    cfg["ssl_op"] = sslOpMap;
+
+    emit configSupplied(cfg);
+
+    return 0;
+}
+
 int HttpHandler::handle (const HttpRequest &request, HttpResponse &response)
 {
     HttpAbstractHandler *apiHandler = NULL;
