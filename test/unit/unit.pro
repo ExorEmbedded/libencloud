@@ -16,13 +16,16 @@ SOURCES += main.cpp
 SOURCES += api.cpp
 HEADERS += api.h
 
+SOURCES += crypto.cpp
+
 SOURCES += proxy.cpp
 HEADERS += proxy.h
 
 SOURCES += json.cpp
 HEADERS += json.h
 
-SOURCES += crypto.cpp
+SOURCES += utils.cpp
+HEADERS += utils.h
 
 #SOURCES += libencloud.cpp
 
