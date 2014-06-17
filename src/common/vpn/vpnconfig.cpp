@@ -98,10 +98,6 @@ int VpnConfig::fromCfg (Config *cfg)
     if (cfg == NULL)
         return 0;
     
-    _data["ca"] << cfg->config.sslOp.caPath.absoluteFilePath();
-    _data["cert"] << cfg->config.sslOp.certPath.absoluteFilePath();
-    _data["key"] << cfg->config.sslOp.keyPath.absoluteFilePath();
-
     _valid = true;
     return 0;
 }
