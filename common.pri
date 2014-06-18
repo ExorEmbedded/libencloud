@@ -29,6 +29,8 @@
 #     CONFIG += modeqic
 LOCALCONFIG=$$(HOME)/.qmake.pri
 exists($${LOCALCONFIG}): include($${LOCALCONFIG})
+LOCALCONFIG=.qmake.pri
+exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 
 #
 # global defs
