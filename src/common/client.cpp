@@ -33,7 +33,11 @@ void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QB
         const QSslConfiguration &conf)
 {
     CLIENT_DBG("url: " << url.toString());
-    CLIENT_DBG(" ### >>>>> ### " << params.toString());
+
+    QUrl dparams(params);
+    dparams.removeAllQueryItems("password");
+
+    CLIENT_DBG(" ### >>>>> ### " << dparams.toString());
 
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
