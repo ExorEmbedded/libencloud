@@ -20,6 +20,7 @@
 #   nocloud     no VPN module (e.g. Switchboard setup + external client)
 #   noapi       no API module (Qt-based HTTP client for Encloud Service)
 #   nogui       totally disable Qt Gui modally (also in tests)
+#   notest      don't build tests
 #
 # [ About definitions ]
 #   about       use brand info from about dll, instead of using default for major brand (exor/endian)

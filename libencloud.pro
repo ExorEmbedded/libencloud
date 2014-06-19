@@ -6,7 +6,8 @@ SUBDIRS += include
 SUBDIRS += about
 SUBDIRS += src
 SUBDIRS += etc
-SUBDIRS += test
+
+!notest:SUBDIRS += test
 
 # tests depend on build
 check.depends = all
