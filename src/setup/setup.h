@@ -46,6 +46,7 @@ signals:
     //
 
     virtual void authSupplied (const Auth &auth) = 0; 
+    virtual void verifyCAForward (bool b) = 0; 
 
 #ifdef LIBENCLOUD_MODE_SECE
     virtual void licenseForward (const QUuid &uuid) = 0;

@@ -14,7 +14,9 @@
 namespace libencloud {
 
 Client::Client ()
-    : _debug (true)
+    : _verifyCA(true)
+    , _debug(true)
+    , _sslError(false)
 {
     connect(&_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
@@ -22,6 +24,13 @@ Client::Client ()
             SLOT(_sslErrors(QNetworkReply *,QList<QSslError>)));
     connect(&_qnam, SIGNAL(finished(QNetworkReply *)), this,
             SLOT(_finished(QNetworkReply *)));
+}
+
+void Client::setVerifyCA (bool b) 
+{
+    LIBENCLOUD_DBG("b: " << b);
+
+    _verifyCA = b;
 }
 
 void Client::setDebug (bool b) 
@@ -37,6 +46,7 @@ void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QB
 
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
+    _sslError = false;
 
     request.setSslConfiguration(conf);
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
@@ -80,17 +90,25 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
 { 
     QList<QSslError> ignoreErrors;
 
-    foreach (QSslError err, errors) 
+    foreach (QSslError err, errors)
     {
         switch (err.error())
         {
             case QSslError::SelfSignedCertificateInChain:
+                if (_verifyCA)
+                {
+                    LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed)));
+                    _sslError = true;
+                    break;
+                }
+                // else follow through/ignore
             case QSslError::HostNameMismatch:
                 CLIENT_DBG("IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
                 ignoreErrors.append(err);
                 break;
             default:
-                LIBENCLOUD_ERR("QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                EMIT_ERROR("QSslError (" + QString::number(err.error()) + "): " + err.errorString()); 
+                _sslError = true;
                 break;
 
 #if 0
@@ -101,8 +119,6 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
     }
 
     reply->ignoreSslErrors(ignoreErrors);
-
-    // Don't emit anything here - remainings error are caught in _networkError()
 }
 
 void Client::_networkError (QNetworkReply::NetworkError err)
@@ -114,6 +130,13 @@ void Client::_networkError (QNetworkReply::NetworkError err)
     switch (err)
     {
         case 1:  // make compiler happy
+        case QNetworkReply::SslHandshakeFailedError:
+
+            // already emitted in _sslErrors()
+            if (_sslError)
+                break;
+
+            // else follow through
         default:
             LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, reply->errorString())));
             break;

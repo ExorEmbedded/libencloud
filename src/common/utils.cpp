@@ -85,6 +85,23 @@ err:
     return NULL;
 }
 
+LIBENCLOUD_DLLSPEC QString bool2String (bool b)
+{
+    return (b ? "true" : "false");
+}
+
+LIBENCLOUD_DLLSPEC int string2Bool (const QString &s, bool &b)
+{
+    if (QString::compare(s, "true", Qt::CaseInsensitive) == 0)
+        b = true;
+    else if (QString::compare(s, "false", Qt::CaseInsensitive) == 0)
+        b = false;
+    else 
+        return ~0;  // failure
+
+    return 0;  // success
+}
+
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 {
     return uuid.toString().remove('{').remove('}').toUpper();

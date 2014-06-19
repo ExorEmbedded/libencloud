@@ -204,22 +204,24 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
     switch (httpMethodFromString(request.getMethod()))
     {
 
-#ifdef LIBENCLOUD_MODE_ECE
+#if !defined(LIBENCLOUD_MODE_SECE)
         case LIBENCLOUD_HTTP_METHOD_GET:
         {
-            QVariantMap j;
             bool ok;
-  
+#if defined(LIBENCLOUD_MODE_ECE)
+            QVariantMap j;
             j["poi"] = utils::uuid2String(_parent->getPoi());
-
+#elif defined(LIBENCLOUD_MODE_QIC)
+            QVariant j = _parent->getServerConfig();
+#endif
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+
             _setContent(request, response, content);
             break;
         }
 #endif
 
-#ifdef LIBENCLOUD_MODE_SECE
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QString val;
@@ -228,56 +230,30 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
-            if ((val = url.queryItemValue("license")) != "")
+            if ((val = url.queryItemValue("verifyCA")) != "")
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setVerifyCA(val),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            }
+#if defined(LIBENCLOUD_MODE_SECE)
+            else if ((val = url.queryItemValue("license")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
-            else
-            {
-                LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
-            }
-        }
-        break;
-#endif
-
-#ifdef LIBENCLOUD_MODE_QIC
-        case LIBENCLOUD_HTTP_METHOD_POST:
-        {
-            QString val;
-
-            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
-                        "application/x-www-form-urlencoded",
-                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
-
-            if ((val = url.queryItemValue("clientPort")) != "")
+#elif defined(LIBENCLOUD_MODE_QIC)
+            else if ((val = url.queryItemValue("clientPort")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
+#endif
             else
             {
                 LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
-
             break;
         }
-#endif
-
-#ifdef LIBENCLOUD_MODE_QIC
-        case LIBENCLOUD_HTTP_METHOD_GET:
-        {
-            QVariant j = _parent->getServerConfig();
-            bool ok;
-
-            QString content = json::serialize(j, ok);
-            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
-            _setContent(request, response, content);
-            break;
-        }
-#endif
-
-        case -1:  // make compiler happy
         default:
             LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
     }

@@ -46,6 +46,8 @@ public:
     QString getNeed () const;
     void removeNeed (const QString &what);
 
+    int setVerifyCA (const QString &boolean);
+
 #ifdef LIBENCLOUD_MODE_ECE
     const QUuid &getPoi () const;
     int setPoi (const QUuid &uuid);
@@ -61,6 +63,8 @@ public:
     int setAction (const QString &action, const Params &params);
 
 signals:
+
+    void verifyCASend (bool b);
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseSend (const QUuid &uuid);
@@ -88,6 +92,7 @@ private:
     bool _isFallback;
     QStringList _needs;
 
+    bool _verifyCA;
     QUuid _poi;
 
     QVariant _serverConfig;

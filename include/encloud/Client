@@ -20,7 +20,10 @@ class LIBENCLOUD_DLLSPEC Client : public QObject
 
 public:
     Client ();
-    void setDebug (bool b);
+
+    void setVerifyCA (bool b = true);
+    void setDebug (bool b = true);
+
     void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers, 
             const QSslConfiguration &conf);
 
@@ -35,7 +38,9 @@ protected slots:
     void _finished (QNetworkReply *reply);
 
 protected:
+    bool _verifyCA;
     bool _debug;
+    bool _sslError;
     QNetworkAccessManager _qnam;
 };
 
