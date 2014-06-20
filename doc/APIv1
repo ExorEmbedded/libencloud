@@ -6,7 +6,8 @@
 
 [  Type definitions ]
 
-     <uuid>     e.g.  "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
+     <bool>     Boolean - "true" | "false"
+     <uuid>     Universally Unique Identifier - e.g. "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
      <sb_url>   Switchboard URL
      <e_url>    Encloud URL
 
@@ -65,23 +66,30 @@
 
 [ Setup API ]             
 
+* POST <e_url>/api_v1/setup                 Client: *
+
+    Def "verifyCA"      <bool,default=true> whether to verify CA certificate when connecting to Server
+
+    e.g.                verifyCA=false
+
+
 * GET <e_url>/api_v1/setup                  Client: ECE
 
-    Def "poi"           proof of identity returned by ECE for Switchboard association
+    Def "poi"           <uuid> proof of identity returned by ECE for Switchboard association
 
     e.g.    '{
-                 "poi" : "<uuid>"
+                 "poi" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
              }'
 
 * POST <e_url>/api_v1/setup                 Client: SECE          
 
-    Def "license"       license entered by user to activate SECE
+    Def "license"       <uuid> license entered by user to activate SECE
 
-    e.g.                license=<uuid>
+    e.g.                license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
 * POST <e_url>/api_v1/setup                 Client: QIC
 
-    Def "clientPort"    Port at which client can be reached - set by GUI and used by Encloud 
+    Def "clientPort"    <int> Port at which client can be reached - set by GUI and used by Encloud 
                         to forward application open/close requests via Cloud API
 
     e.g.                clientPort=12345
@@ -91,7 +99,7 @@
     e.g.    '{
                  "time" : 1396014836.523807,        # When the config data was received
                  "server" : {
-                     "uuid" : "<uuid>",
+                     "uuid" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
                      "openvpn_internal_ip" : "192.168.150.1",
                      "fallback_openvpn_internal_ip" : "192.168.151.1"
                      "available_pages" : { "settings" : "/manage/access/settings/standalone/",      # [...]

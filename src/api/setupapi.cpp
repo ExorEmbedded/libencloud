@@ -1,6 +1,7 @@
 #include <encloud/Api/SetupApi>
 #include <common/common.h>
 #include <common/config.h>
+#include <common/utils.h>
 #include <api/api.h>
 
 namespace libencloud {
@@ -21,6 +22,22 @@ SetupApi::SetupApi ()
 SetupApi::~SetupApi ()
 {
     LIBENCLOUD_TRACE;
+}
+
+void SetupApi::verifyCASupply (bool b)
+{
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
+
+    _params.clear();
+    _params.addQueryItem("verifyCA", utils::bool2String(b));
+
+    _msgType = VerifyCASupplyType;
+
+    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::poiRetrieve ()
@@ -91,6 +108,9 @@ void SetupApi::_error (const libencloud::Error &err)
 
     switch (_msgType)
     {
+        case VerifyCASupplyType:
+            emit verifyCASent(Api::ErrorRc);
+            break;
         case PoiRetrieveType:
             emit poiReceived(Api::ErrorRc);
             break;

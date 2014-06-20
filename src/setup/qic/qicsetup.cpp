@@ -31,6 +31,8 @@ QicSetup::QicSetup (Config *cfg)
             this, SIGNAL(authRequired(Auth::Id)));
     connect(this, SIGNAL(authSupplied(Auth)),
             &_setupMsg, SLOT(authSupplied(Auth)));
+    connect(this, SIGNAL(verifyCAForward(bool)),
+            &_setupMsg, SLOT(verifyCASupplied(bool)));
     connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
             this, SIGNAL(serverConfigSupply(QVariant)));
 
@@ -56,6 +58,11 @@ int QicSetup::start ()
     _loginMsg.setData(data);
     _loginMsg.process();
 #endif
+
+    // TODO linux/w32: grab CA certificate from Connect if supplied
+    QFile::copy("/var/lib/4ic/" + QString(LIBENCLOUD_INIT_CA_FILE),
+            _cfg->config.sslInit.caPath.absoluteFilePath());
+    // !TODO
 
     if (_setupMsg.process())
         return ~0;
@@ -126,7 +133,7 @@ int QicSetup::_initMsg (MessageInterface &msg)
     return 0;
 }
 
-// Clear all Switchboard-generated data
+// Clear all generated data
 void QicSetup::_clear ()
 {
     if (QFile::exists(_cfg->config.sslInit.caPath.absoluteFilePath()))

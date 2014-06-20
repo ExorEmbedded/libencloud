@@ -24,8 +24,9 @@ public:
         CodeServiceUnreach =        100,
 
         CodeServerUnreach =         200,
-        CodeServerError =           201,
-        CodeServerLicenseInvalid =  202,
+        CodeServerVerifyFailed =    201,
+        CodeServerError =           202,
+        CodeServerLicenseInvalid =  203,
 
         CodeAuthFailed =            300,
 

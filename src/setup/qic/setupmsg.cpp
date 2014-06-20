@@ -1,4 +1,5 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
+#include <QSslCertificate>
 #include <QVariantMap>
 #include <common/common.h>
 #include <common/config.h>
@@ -15,6 +16,12 @@ namespace libencloud {
 // public methods
 //
 
+SetupMsg::SetupMsg ()
+    : MessageInterface()
+{
+    clear();
+}
+
 int SetupMsg::clear ()
 {
     LIBENCLOUD_TRACE;
@@ -22,6 +29,7 @@ int SetupMsg::clear ()
     MessageInterface::clear();
 
     _sbAuth = Auth();
+    _verifyCA = true;
     _vpnConfig.clear();
     _fallbackVpnConfig.clear();
     _caCert.clear();
@@ -51,9 +59,11 @@ int SetupMsg::process ()
     QUrl url;
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
-    QSslConfiguration config;
+    QSslConfiguration sslconf;
     QString authData;
     QString headerData;
+    QSslCertificate cert;
+    QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
 
     if (!_sbAuth.isValid())
     {
@@ -76,12 +86,16 @@ int SetupMsg::process ()
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QIC;
     headers["Authorization"] =  headerData.toLocal8Bit();
 
+    // Initialization CA cert verification
+    sslconf.setCaCertificates(cas);
+
     // setup signals from client
     disconnect(_client, 0, this, 0);
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
-    _client->run(url, params, headers, config);
+    _client->setVerifyCA(_verifyCA);
+    _client->run(url, params, headers, sslconf);
 
     return 0;
 err:
@@ -101,6 +115,13 @@ void SetupMsg::authSupplied (const Auth &auth)
             // Qt Proxy is handled globally in core
             break;
     }
+}
+
+void SetupMsg::verifyCASupplied (bool b)
+{
+    LIBENCLOUD_DBG("b: " << b);
+
+    _verifyCA = b;
 }
 
 //

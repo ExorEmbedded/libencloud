@@ -167,6 +167,8 @@ QString Error::_code2Desc (Code code)
         // 2xx
         case CodeServerUnreach:
             return QObject::tr("Server Unreachable");
+        case CodeServerVerifyFailed:
+            return QObject::tr("Failed verifying Server - check CA certificate");
         case CodeServerError:
             return QObject::tr("Generic Server Error");
         case CodeServerLicenseInvalid:

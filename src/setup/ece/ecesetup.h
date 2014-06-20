@@ -64,6 +64,7 @@ signals:
     // core -> setup -> internal
     //
     void authSupplied (const Auth &auth);  
+    virtual void verifyCAForward (bool b);
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (const QUuid &uuid);

@@ -163,6 +163,9 @@ int Core::attachServer (Server *server)
     connect(this, SIGNAL(need(QString)), 
             obj, SLOT(_needReceived(QString)));
 
+    connect(obj, SIGNAL(verifyCASend(bool)),
+            _setupObj, SIGNAL(verifyCAForward(bool)));
+
 #ifdef LIBENCLOUD_MODE_SECE
     connect(obj, SIGNAL(licenseSend(QUuid)), 
             _setupObj, SIGNAL(licenseForward(QUuid)));

@@ -1,3 +1,4 @@
+#define LIBENCLOUD_DISABLE_TRACE
 #include <QDir>
 #include <QRegExp>
 #include <encloud/Http/HttpHandler>
@@ -5,12 +6,6 @@
 #include <common/config.h>
 #include <common/utils.h>
 #include <http/handler.h>
-
-// disable heavy tracing
-#if 1
-#undef LIBENCLOUD_TRACE 
-#define LIBENCLOUD_TRACE LIBENCLOUD_NOP
-#endif
 
 namespace libencloud {
 
@@ -41,6 +36,21 @@ void HttpHandler::removeNeed (const QString &what)
     LIBENCLOUD_TRACE;
 
     _needs.removeAll(what);
+}
+
+int HttpHandler::setVerifyCA (const QString &boolean)
+{
+    bool b;
+
+    LIBENCLOUD_DBG("b: " << boolean);
+
+    LIBENCLOUD_ERR_IF (utils::string2Bool(boolean, b));
+
+    emit verifyCASend(b);
+
+    return 0;
+err:
+    return ~0;
 }
 
 #ifdef LIBENCLOUD_MODE_ECE
