@@ -1,9 +1,12 @@
-#include "config.h"
-#include "helpers.h"
-
-//static void __msgHandler (QtMsgType type, const char *msg);
+#include <common/config.h>
+#include <common/helpers.h>
+#include <common/utils.h>
 
 namespace libencloud {
+
+//
+// public methods
+//
 
 /* Set defaults from defaults.h definitions */
 Config::Config ()
@@ -52,14 +55,18 @@ Config::Config ()
     config.csrTmplPath = QFileInfo(dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
 
     config.sslInit.auth = LIBENCLOUD_AUTH_USERPASS;
+    config.sslInit.authFormat = LIBENCLOUD_AUTH_CERTKEY;
     config.sslInit.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
     config.sslInit.certPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
     config.sslInit.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
+    config.sslInit.p12Path = QFileInfo(dataPrefix + LIBENCLOUD_INIT_P12_FILE);
 
     config.sslOp.auth = LIBENCLOUD_AUTH_USERPASS;
+    config.sslOp.authFormat = LIBENCLOUD_AUTH_CERTKEY;
     config.sslOp.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
     config.sslOp.certPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_CERT_FILE);
     config.sslOp.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_KEY_FILE);
+    config.sslOp.p12Path = QFileInfo(dataPrefix + LIBENCLOUD_OP_P12_FILE);
 
     config.rsaBits = LIBENCLOUD_RSA_BITS;
 
@@ -129,6 +136,27 @@ err:
     return ~0;
 }
 
+//
+// protected slots
+//
+
+void Config::receive (const QVariant &cfg)
+{
+    LIBENCLOUD_DBG("cfg: " << cfg);
+
+    utils::variantMerge(_json, cfg);
+
+//    LIBENCLOUD_DBG("new cfg: " << dump());
+
+    LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+err:
+    return;
+}
+
+//
+// protected methods
+//
+
 int Config::_parse (const QVariantMap &jo)
 {
     if (!jo["bind"].isNull())
@@ -197,7 +225,15 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
     if (!jo["auth"].isNull())
     {
         sc.auth = jo["auth"].toString();
-        LIBENCLOUD_ERR_IF (sc.auth != "user-pass" && sc.auth != "x509");
+        LIBENCLOUD_ERR_IF (sc.auth != LIBENCLOUD_AUTH_USERPASS &&
+                sc.auth != LIBENCLOUD_AUTH_X509);
+    }
+
+    if (!jo["auth_format"].isNull())
+    {
+        sc.authFormat = jo["auth_format"].toString();
+        LIBENCLOUD_ERR_IF (sc.authFormat != LIBENCLOUD_AUTH_CERTKEY &&
+                sc.authFormat != LIBENCLOUD_AUTH_PKCS12);
     }
 
     if (!jo["ca"].isNull())
@@ -208,6 +244,9 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 
     if (!jo["key"].isNull())
         sc.keyPath = _joinPaths(dataPrefix, jo["key"].toString());
+
+    if (!jo["p12"].isNull())
+        sc.p12Path = _joinPaths(dataPrefix, jo["p12"].toString());
 
     sc.sbUrl = jo["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())

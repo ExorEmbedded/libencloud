@@ -142,5 +142,47 @@ err:
     return ~0;
 }
 
+static QVariantMap _mapMerge (const QVariantMap &m1, const QVariantMap &m2)
+{
+    QVariantMap m = m1;
+
+    for (QVariantMap::const_iterator iter = m2.begin();
+        iter != m2.end();
+        ++iter)
+        m[iter.key()] = iter.value();
+
+    return m;
+}
+
+LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
+{
+    QVariantMap mTo = to.toMap();
+    QVariantMap mFrom = from.toMap();
+
+    for (QVariantMap::const_iterator iter = mFrom.begin();
+        iter != mFrom.end();
+        ++iter)
+    {
+        if (iter.value().canConvert<QVariantMap>())
+        {
+            variantMerge(
+                    qvariant_cast<QVariantMap>(to)[iter.key()],
+                    iter.value()
+                    );
+
+            mTo[iter.key()] = _mapMerge(
+                    mTo[iter.key()].toMap(),
+                    iter.value().toMap()
+                    );
+        }
+        else
+        {
+            mTo[iter.key()] = iter.value();
+        }
+    }
+
+    to = mTo;
+}
+
 } // namespace utils
 } // namespace libencloud

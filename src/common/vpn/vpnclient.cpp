@@ -140,11 +140,25 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--management-forget-disconnect";
     args << "--management-query-passwords";
 
-    if (_cfg->config.sslOp.auth == "user-pass")
-        args << "--auth-user-pass";
-
     caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
     args << "--ca" << caCertPath;
+
+    if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
+    {
+        args << "--auth-user-pass";
+    }
+    else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
+    {
+        if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
+        {
+            args << "--cert" << _cfg->config.sslOp.certPath.absoluteFilePath();
+            args << "--key" << _cfg->config.sslOp.keyPath.absoluteFilePath();
+        }
+        else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
+        {
+            args << "--pkcs12" << _cfg->config.sslOp.p12Path.absoluteFilePath();
+        }
+    }
 
     QUrl proxyUrl = proxyAuth.getUrl();
 

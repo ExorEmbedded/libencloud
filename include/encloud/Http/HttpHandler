@@ -58,6 +58,10 @@ public:
     int setClientPort (int port);
     int setAuth (const Auth &auth);
     const QVariant &getServerConfig () const;
+
+    //
+    // cloud
+    //
     int setAction (const QString &action, const Params &params);
     int setConfig (const QVariant &config);
 
@@ -69,6 +73,10 @@ signals:
 
     void clientPortSend (int port);
     void authSupplied (const Auth &auth);
+
+    //
+    // cloud
+    //
     void actionRequest (const QString &action, const Params &params);
     void configSupplied (const QVariant &config);
 

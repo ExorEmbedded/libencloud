@@ -271,7 +271,6 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
             if ((val = url.queryItemValue("action")) != "")
             {
                 url.removeQueryItem("action");
-
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setAction(val, url.queryItems()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }

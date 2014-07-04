@@ -219,6 +219,12 @@ void VpnManager::parseLinePass (QByteArray rest)
 
         sendAuth("Auth", _sbAuth.getUser(), _sbAuth.getPass());
     }
+    else if (qstrcmp(rest, "Need 'Private Key' password") == 0)  // PKCS12
+    {
+        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid(), authRequired(Auth::SwitchboardId));
+
+        sendAuth("Private Key", "", _sbAuth.getPass());
+    }
     else if (qstrcmp(rest, "Need 'HTTP Proxy' username/password") == 0)
     {
         LIBENCLOUD_EMIT_ERR_IF (!_proxyAuth.isValid(), authRequired(Auth::ProxyId));
@@ -233,6 +239,7 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else
     {
+        LIBENCLOUD_DBG("rest: " << rest);
         LIBENCLOUD_EMIT_ERR(sigError((this->err = UnhandledError)));
     }
 err:
@@ -316,8 +323,12 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
     QTextStream ts(this->socket);
 
-    ts << "username '" << type << "' " << user << "\r\n";
-    ts << "password '" << type << "' " << pass << "\r\n";
+    if (user != "")
+        ts << "username '" << type << "' " << user << "\r\n";
+
+    if (pass != "")
+        ts << "password '" << type << "' " << pass << "\r\n";
+
     this->socket->flush();
 }
 
