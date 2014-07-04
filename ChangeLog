@@ -1,5 +1,8 @@
 ChangeLog file for Endian libencloud
 
+libencloud 0.7:
+	- client: new get(), post() functions
+
 libencloud 0.6.4 (10/06/2014):
 	- [CONNECT-115] Slow disconnect on w32
 	- [CONNECT-142] Support for N-branding (about module)

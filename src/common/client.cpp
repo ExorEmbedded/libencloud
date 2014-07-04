@@ -38,34 +38,60 @@ void Client::setDebug (bool b)
     _debug = b;
 }
 
-void Client::run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
+void Client::run (const QUrl &url, const QUrl &params,
+		const QMap<QByteArray, QByteArray> &headers, const QSslConfiguration &conf)
+{
+	_send(MSG_TYPE_NONE, url, headers, params.encodedQuery(), conf);
+}
+
+void Client::get (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
         const QSslConfiguration &conf)
 {
+	_send(MSG_TYPE_GET, url, headers, "", conf);
+}
+
+void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+        const QByteArray &data, const QSslConfiguration &conf)
+{
+	_send(MSG_TYPE_POST, url, headers, data, conf);
+}
+
+void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+		const QByteArray &data, const QSslConfiguration &conf)
+{
     CLIENT_DBG("url: " << url.toString());
-    CLIENT_DBG(" ### >>>>> ### " << params.toString());
+    CLIENT_DBG(" ### >>>>> ### " << data);
 
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
     _sslError = false;
 
     request.setSslConfiguration(conf);
+
+    // default headers
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
     request.setRawHeader("Host", url.host().toAscii());
+    if ((msgType == MSG_TYPE_POST) ||
+            (msgType == MSG_TYPE_NONE && !data.isEmpty()))
+        request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 
     // override with passed custom headers
     for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
         request.setRawHeader(mi.key(), mi.value());
 
-    if (params.isEmpty())
+    if ((msgType == MSG_TYPE_GET) ||
+            (msgType == MSG_TYPE_NONE && data.isEmpty()))
     {
         EMIT_ERROR_ERR_IF ((reply = _qnam.get(request)) == NULL,
                 tr("Client failed creating GET request"));
     }
-    else
+    else if ((msgType == MSG_TYPE_POST) ||
+            (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
-        request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
-        EMIT_ERROR_ERR_IF ((reply = _qnam.post(request, params.encodedQuery())) == NULL,
+        EMIT_ERROR_ERR_IF ((reply = _qnam.post(request, data)) == NULL,
                 tr("Client falied creating POST request"));
+    } else {
+        LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
     }
 
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 

@@ -21,17 +21,34 @@ class LIBENCLOUD_DLLSPEC Client : public QObject
 public:
     Client ();
 
+	typedef enum {
+		MSG_TYPE_NONE,
+		MSG_TYPE_GET,
+		MSG_TYPE_POST
+	} MsgType;
+
     void setVerifyCA (bool b = true);
     void setDebug (bool b = true);
 
-    void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers, 
+	// GET if no params are provided, otherwise POST them (form)
+    void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
             const QSslConfiguration &conf);
+
+	// GET
+    void get (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+			const QSslConfiguration &conf);
+
+	// POST generic data
+    void post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+			const QByteArray &data, const QSslConfiguration &conf);
 
 signals:
     void error (const libencloud::Error &err);
     void complete (const QString &reponse);
 
 protected slots:
+    void _send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+			const QByteArray &data, const QSslConfiguration &conf);
     void _proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenticator *authenticator);
     void _sslErrors (QNetworkReply *reply, const QList<QSslError> &errors);
     void _networkError (QNetworkReply::NetworkError err);
