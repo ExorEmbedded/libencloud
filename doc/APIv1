@@ -21,7 +21,7 @@
 
 [ State Retrieval ]
 
-* GET <e_url>/api_v1/status
+* GET <e_url>/api/v1/status
 
     Def "state"        -1      None
                         0      Idle            (grey)
@@ -52,7 +52,7 @@
 
 [ Authentication/Login API ]
 
-* POST <e_url>/api_v1/auth
+* POST <e_url>/api/v1/auth
 
     e.g. 1              id=proxy&type=http&url=<url>&user=myuser&pass=mypass
     e.g. 2              id=sb&url=<url>&user=myuser&pass=mypass
@@ -66,7 +66,7 @@
 
 [ Setup API ]             
 
-* GET <e_url>/api_v1/setup                  Client: ECE
+* GET <e_url>/api/v1/setup                  Client: ECE
 
     Def "poi"           <uuid> proof of identity returned by ECE for Switchboard association
 
@@ -74,20 +74,20 @@
                  "poi" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
              }'
 
-* POST <e_url>/api_v1/setup                 Client: SECE          
+* POST <e_url>/api/v1/setup                 Client: SECE          
 
     Def "license"       <uuid> license entered by user to activate SECE
 
     e.g.                license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
-* POST <e_url>/api_v1/setup                 Client: QIC
+* POST <e_url>/api/v1/setup                 Client: QIC
 
     Def "clientPort"    <int> Port at which client can be reached - set by GUI and used by Encloud 
                         to forward application open/close requests via Cloud API
 
     e.g.                clientPort=12345
 
-* GET <e_url>/api_v1/setup                  Client: QIC
+* GET <e_url>/api/v1/setup                  Client: QIC
 
     e.g.    '{
                  "time" : 1396014836.523807,        # When the config data was received
@@ -105,7 +105,7 @@
 
 [ Cloud API ]
 
-* POST <e_url>/api_v1/cloud
+* POST <e_url>/api/v1/cloud
 
     Def "action"        Operation:                  Clients:
 
@@ -130,7 +130,7 @@
 
 [ Config API ]
 
-* POST <e_url>/api_v1/config
+* POST <e_url>/api/v1/config
 
    Content-Type = application/json
 
