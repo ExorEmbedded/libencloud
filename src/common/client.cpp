@@ -60,7 +60,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
 		const QByteArray &data, const QSslConfiguration &conf)
 {
     CLIENT_DBG("url: " << url.toString());
-    CLIENT_DBG(" ### >>>>> ### " << data);
+    //CLIENT_DBG(" ### >>>>> ### " << data);
 
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
