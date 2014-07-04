@@ -1,7 +1,6 @@
 #include <encloud/Api/CommonApi>
 #include <common/common.h>
 #include <common/config.h>
-#include <api/api.h>
 
 #define LIBENCLOUD_API_SETTINGS_TOUT   1000
 

@@ -131,6 +131,7 @@ SOURCES += core/core.cpp
     HEADERS += $${PUBINCLUDEDIR}/Api/AuthApi
     HEADERS += $${PUBINCLUDEDIR}/Api/CloudApi
     HEADERS += $${PUBINCLUDEDIR}/Api/CommonApi
+    HEADERS += $${PUBINCLUDEDIR}/Api/ConfigApi
     HEADERS += $${PUBINCLUDEDIR}/Api/SetupApi
     HEADERS += $${PUBINCLUDEDIR}/Api/StatusApi
     HEADERS += api/*.h

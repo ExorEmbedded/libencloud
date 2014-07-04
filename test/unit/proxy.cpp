@@ -1,7 +1,7 @@
 #include <QTimer>
+#include <encloud/Api/CommonApi>
 #include <common/common.h>
 #include <common/config.h>
-#include <api/api.h>
 #include "proxy.h"
 #include "test.h"
 

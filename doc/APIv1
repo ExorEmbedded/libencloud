@@ -66,13 +66,6 @@
 
 [ Setup API ]             
 
-* POST <e_url>/api_v1/setup                 Client: *
-
-    Def "verifyCA"      <bool,default=true> whether to verify CA certificate when connecting to Server
-
-    e.g.                verifyCA=false
-
-
 * GET <e_url>/api_v1/setup                  Client: ECE
 
     Def "poi"           <uuid> proof of identity returned by ECE for Switchboard association
@@ -135,6 +128,16 @@
         * ID = name+endpoint
 
 
+[ Config API ]
+
+* POST <e_url>/api_v1/config
+
+   Content-Type = application/json
+
+    e.g. 1              { "timeout" : "300" }
+    e.g. 2              { "ssl_op" : { "verify_ca" : "false" } }
+
+
 [ Error Handling ]
 
 Possible HTTP Statuses return as a result of GET/POST:
@@ -147,6 +150,13 @@ Application errors are available "State Retrieval API" above.
 
 
 [ Other Notes ]
+
+* Requests
+
+All POST requests have Content-Type 'application/x-www-form-urlencoded', unless
+otherwise specified.
+
+* Responses
 
 By default, the Content-type of responses is application/json:
 

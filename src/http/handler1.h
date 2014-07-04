@@ -23,6 +23,8 @@ private:
     int _handle_auth (const HttpRequest &request, HttpResponse &response);
     int _handle_setup (const HttpRequest &request, HttpResponse &response);
     int _handle_cloud (const HttpRequest &request, HttpResponse &response);
+    int _handle_config (const HttpRequest &request, HttpResponse &response);
+
     void _setContent (const HttpRequest &request, HttpResponse &response, const QString &content);
 
     HttpHandler *_parent;

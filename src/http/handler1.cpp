@@ -1,3 +1,5 @@
+#define LIBENCLOUD_DISABLE_TRACE
+#include <encloud/Api/CommonApi>
 #include <encloud/Http/HttpHandler>
 #include <encloud/Json>
 #include <common/common.h>
@@ -5,19 +7,6 @@
 #include <common/utils.h>
 #include <http/handler.h>
 #include <http/handler1.h>
-
-//
-// defines
-//
-
-#define LIBENCLOUD_HANDLER_STATUS_PATH  "status"
-#define LIBENCLOUD_HANDLER_AUTH_PATH    "auth"
-#define LIBENCLOUD_HANDLER_SETUP_PATH   "setup"
-#define LIBENCLOUD_HANDLER_CLOUD_PATH   "cloud"
-
-// disable heavy tracing
-#undef LIBENCLOUD_TRACE 
-#define LIBENCLOUD_TRACE do {} while(0)
 
 namespace libencloud {
 
@@ -52,14 +41,16 @@ int ApiHandler1::handle (const HttpRequest &request, HttpResponse &response)
     //LIBENCLOUD_DBG("path: " << path);
     //LIBENCLOUD_DBG("action: " << action);
 
-    if (action == LIBENCLOUD_HANDLER_STATUS_PATH)
+    if (action == LIBENCLOUD_API_STATUS)
         return _handle_status(request, response);
-    else if (action == LIBENCLOUD_HANDLER_AUTH_PATH)
+    else if (action == LIBENCLOUD_API_AUTH)
         return _handle_auth(request, response);
-    else if (action == LIBENCLOUD_HANDLER_SETUP_PATH)
+    else if (action == LIBENCLOUD_API_SETUP)
         return _handle_setup(request, response);
-    else if (action == LIBENCLOUD_HANDLER_CLOUD_PATH)
+    else if (action == LIBENCLOUD_API_CLOUD)
         return _handle_cloud(request, response);
+    else if (action == LIBENCLOUD_API_CONFIG)
+        return _handle_config(request, response);
     else 
         LIBENCLOUD_HANDLER_STATUS(LIBENCLOUD_HTTP_STATUS_NOTFOUND);
 
@@ -230,19 +221,14 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
-            if ((val = url.queryItemValue("verifyCA")) != "")
-            {
-                LIBENCLOUD_HANDLER_ERR_IF (_parent->setVerifyCA(val),
-                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
-            }
 #if defined(LIBENCLOUD_MODE_SECE)
-            else if ((val = url.queryItemValue("license")) != "")
+            if ((val = url.queryItemValue("license")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
 #elif defined(LIBENCLOUD_MODE_QIC)
-            else if ((val = url.queryItemValue("clientPort")) != "")
+            if ((val = url.queryItemValue("clientPort")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
@@ -305,6 +291,44 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
     return 0;
 err:
     return ~0;
+}
+
+int ApiHandler1::_handle_config (const HttpRequest &request, HttpResponse &response)
+{
+    LIBENCLOUD_TRACE;
+
+    switch (httpMethodFromString(request.getMethod()))
+    {
+        case LIBENCLOUD_HTTP_METHOD_POST:
+        {
+            QString js;
+            QVariant json;
+            bool ok;
+
+            LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
+                        "application/json",
+                    LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+
+    		js = (*request.getContent()).toAscii();
+			LIBENCLOUD_DBG("js: " << js);
+
+			json = json::parse(js, ok);
+            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+
+			_parent->setConfig(json);
+
+            break;
+        }
+        default:
+            LIBENCLOUD_HANDLER_ERR_IF (1, LIBENCLOUD_HTTP_STATUS_BADMETHOD);
+    }
+
+    // only reach here upon success
+    LIBENCLOUD_HANDLER_OK;
+    return 0;
+err:
+    return ~0;
+
 }
 
 void ApiHandler1::_setContent (const HttpRequest &request, HttpResponse &response, const QString &content)

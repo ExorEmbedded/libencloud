@@ -38,21 +38,6 @@ void HttpHandler::removeNeed (const QString &what)
     _needs.removeAll(what);
 }
 
-int HttpHandler::setVerifyCA (const QString &boolean)
-{
-    bool b;
-
-    LIBENCLOUD_DBG("b: " << boolean);
-
-    LIBENCLOUD_ERR_IF (utils::string2Bool(boolean, b));
-
-    emit verifyCASend(b);
-
-    return 0;
-err:
-    return ~0;
-}
-
 #ifdef LIBENCLOUD_MODE_ECE
 const QUuid &HttpHandler::getPoi  () const             { return _poi; }
 #endif
@@ -138,6 +123,13 @@ int HttpHandler::setAction (const QString &action, const Params &params)
     LIBENCLOUD_DBG("action: " << action << ", params: " << params);
 
     emit actionRequest(action, params);
+
+    return 0;
+}
+
+int HttpHandler::setConfig (const QVariant &config)
+{
+    emit configSupplied(config);
 
     return 0;
 }

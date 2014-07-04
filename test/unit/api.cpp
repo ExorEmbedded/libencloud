@@ -50,6 +50,12 @@ TestApi::TestApi ()
                 &_cloudApi, SLOT(actionRequest(QString, libencloud::Params)));
     connect(&_cloudApi, SIGNAL(actionSent(libencloud::Api::ResultCode)),
                 this, SLOT(_actionSent(libencloud::Api::ResultCode)));
+
+    TEST_MSG("testing Config API");
+    connect(this, SIGNAL(configSupply(QVariant)),
+                &_configApi, SLOT(configSupply(QVariant)));
+    connect(&_configApi, SIGNAL(configSent(libencloud::Api::ResultCode)),
+                this, SLOT(_configSent(libencloud::Api::ResultCode)));
 }
 
 void TestApi::run ()
@@ -86,6 +92,15 @@ void TestApi::run ()
     params.append(libencloud::Param("myKey2", "myVal2"));
 
     emit actionRequest("myAction", params);
+
+    LIBENCLOUD_DBG("Testing Config API");
+
+    QVariantMap configKey;
+    QVariantMap configSubKey;
+    configSubKey["lev"] = 7;
+    configKey["log"] = configSubKey;
+
+    emit configSupply(configKey);
 
     qApp->exec();
 }
@@ -138,6 +153,13 @@ void TestApi::_portSent (libencloud::Api::ResultCode rc)
 #endif
 
 void TestApi::_actionSent (libencloud::Api::ResultCode rc)
+{
+    QVERIFY (rc == libencloud::Api::SuccessRc);
+
+    LIBENCLOUD_DBG("rc: " << QString::number(rc));
+}
+
+void TestApi::_configSent (libencloud::Api::ResultCode rc)
 {
     QVERIFY (rc == libencloud::Api::SuccessRc);
 

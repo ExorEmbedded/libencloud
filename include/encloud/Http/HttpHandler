@@ -46,8 +46,6 @@ public:
     QString getNeed () const;
     void removeNeed (const QString &what);
 
-    int setVerifyCA (const QString &boolean);
-
 #ifdef LIBENCLOUD_MODE_ECE
     const QUuid &getPoi () const;
     int setPoi (const QUuid &uuid);
@@ -61,10 +59,9 @@ public:
     int setAuth (const Auth &auth);
     const QVariant &getServerConfig () const;
     int setAction (const QString &action, const Params &params);
+    int setConfig (const QVariant &config);
 
 signals:
-
-    void verifyCASend (bool b);
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseSend (const QUuid &uuid);
@@ -73,6 +70,7 @@ signals:
     void clientPortSend (int port);
     void authSupplied (const Auth &auth);
     void actionRequest (const QString &action, const Params &params);
+    void configSupplied (const QVariant &config);
 
 private slots:
     void _coreErrorReceived (const libencloud::Error &err);
@@ -92,7 +90,6 @@ private:
     bool _isFallback;
     QStringList _needs;
 
-    bool _verifyCA;
     QUuid _poi;
 
     QVariant _serverConfig;

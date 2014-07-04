@@ -1,0 +1,50 @@
+#ifndef _LIBENCLOUD_API_CONFIG_H_
+#define _LIBENCLOUD_API_CONFIG_H_
+
+#include <QObject>
+#include <encloud/Common>
+#include <encloud/Api/CommonApi>
+
+/**
+ * Qt helper to interact with Encloud's HTTP Config API.
+ * 
+ * Please refer to doc/APIv* for details.
+ */
+
+namespace libencloud {
+
+class LIBENCLOUD_DLLSPEC ConfigApi : public Api
+{
+    Q_OBJECT
+
+public:
+
+    ConfigApi ();
+    ~ConfigApi ();
+
+public slots:
+
+    //
+    // ALL
+    //
+
+    // returns 0 on success, non-zero on failure
+    int configSupply (const QVariant &config);
+
+signals:
+
+    //
+    // ALL
+    // 
+
+    void configSent (libencloud::Api::ResultCode rc);
+
+protected slots:
+
+    void _error (const libencloud::Error &err);
+    void _clientComplete (const QString &response);
+};
+
+}  // namespace libencloud
+
+#endif  // _LIBENCLOUD_API_CONFIG_H_

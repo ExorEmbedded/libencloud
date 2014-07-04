@@ -2,7 +2,6 @@
 #include <encloud/Api/StatusApi>
 #include <common/common.h>
 #include <common/config.h>
-#include <api/api.h>
 
 namespace libencloud {
 

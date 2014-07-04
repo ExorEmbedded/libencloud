@@ -5,6 +5,7 @@ TEMPLATE = subdirs
 HEADERS += AuthApi
 HEADERS += CloudApi
 HEADERS += CommonApi
+HEADERS += ConfigApi
 HEADERS += SetupApi
 HEADERS += StatusApi
 

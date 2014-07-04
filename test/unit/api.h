@@ -7,6 +7,7 @@
 #include <encloud/Api/CommonApi>
 #include <encloud/Api/AuthApi>
 #include <encloud/Api/CloudApi>
+#include <encloud/Api/ConfigApi>
 #include <encloud/Api/SetupApi>
 #include <encloud/Api/StatusApi>
 
@@ -37,6 +38,12 @@ signals:
 
     void actionRequest (const QString &action, const libencloud::Params &params);
 
+    //
+    // Config Api
+    //
+
+    void configSupply (const QVariant &config);
+
 private slots:
     void run();
 
@@ -66,11 +73,13 @@ private slots:
 #endif
 
     void _actionSent (libencloud::Api::ResultCode rc);
+    void _configSent (libencloud::Api::ResultCode rc);
 
 private:
     libencloud::StatusApi _statusApi;
     libencloud::SetupApi _setupApi;
     libencloud::CloudApi _cloudApi;
+    libencloud::ConfigApi _configApi;
 };
 
 #endif

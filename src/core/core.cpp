@@ -4,13 +4,13 @@
 #include <encloud/Core>
 #include <encloud/Progress>
 #include <encloud/Proxy>
+#include <encloud/Api/CommonApi>
 #include <common/config.h>
 #include <common/crypto.h>
 #include <common/utils.h>
 #include <setup/qic/qicsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
-#include <api/api.h>
 
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg);

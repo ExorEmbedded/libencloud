@@ -13,7 +13,7 @@ libencloud configuration
   "bind" : "all",                               # bind to all interfaces (testing)
                                                 # otherwise binds only to localhost and tap interface
 
-  "poi" : "poi",                                # Proof of Identity (ECE only)
+  "poi" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"    # Proof of Identity (ECE only)
 
   "sb" : {                                      # global SB settings 
     "url" : "https://switchboard-host"

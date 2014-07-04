@@ -27,11 +27,6 @@ public:
 public slots:
 
     //
-    // ALL
-    //
-    void verifyCASupply (bool b);
-
-    //
     // ECE-only
     //
     void poiRetrieve ();
@@ -48,12 +43,6 @@ public slots:
     void configRetrieve ();
 
 signals:
-
-    //
-    // ALL
-    // 
-
-    void verifyCASent (libencloud::Api::ResultCode rc);
 
     //
     // ECE-only
@@ -86,7 +75,6 @@ protected:
     typedef enum 
     {
         NoneType,
-        VerifyCASupplyType,
         PoiRetrieveType,
         LicenseSupplyType,
         PortSupplyType,
