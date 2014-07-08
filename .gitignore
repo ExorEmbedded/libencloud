@@ -27,6 +27,7 @@ release/
 /bindings/build
 /test/sece/sece
 /test/unit/unit
+/test/unit-sec/unit-sec
 
 # dist-generated files
 /libencloud-*

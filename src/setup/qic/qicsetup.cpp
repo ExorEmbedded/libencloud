@@ -121,7 +121,6 @@ void QicSetup::_onProcessed ()
 int QicSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
-    msg.setClient(&_client);
 
     return 0;
 }

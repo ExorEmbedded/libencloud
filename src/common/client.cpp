@@ -18,6 +18,8 @@ Client::Client ()
     , _debug(true)
     , _sslError(false)
 {
+    LIBENCLOUD_TRACE;
+    
     connect(&_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
     connect(&_qnam, SIGNAL(sslErrors(QNetworkReply *,QList<QSslError>)), this,
@@ -67,7 +69,8 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     _sslError = false;
 
     if (conf.caCertificates().count()) {
-        LIBENCLOUD_DBG("CA Cert issuer: " << conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
+        LIBENCLOUD_DBG("CA Cert issuer: " <<
+                conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
     }
     request.setSslConfiguration(conf);
 

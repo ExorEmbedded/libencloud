@@ -204,7 +204,6 @@ int EceSetup::_initFsm ()
 int EceSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
-    msg.setClient(&_client);
 
     return 0;
 }

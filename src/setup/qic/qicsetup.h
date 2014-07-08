@@ -68,7 +68,6 @@ private:
 
     SetupMsg _setupMsg;
     LoginMsg _loginMsg;
-    Client _client;
 };
 
 } // namespace libencloud

@@ -23,7 +23,8 @@ int RetrInfoMsg::process ()
     QSslConfiguration config;
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
-    EMIT_ERROR_ERR_IF (_client == NULL);
+    LIBENCLOUD_DELETE (_client);
+    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
 
     EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
 
@@ -49,6 +50,7 @@ int RetrInfoMsg::process ()
 
     return 0;
 err:
+    LIBENCLOUD_DELETE(_client);
     return ~0;
 }
 
@@ -73,15 +75,13 @@ err:
 // 
 void RetrInfoMsg::_clientComplete (const QString &response)
 {
-    // stop listening to signals from client
-    disconnect(_client, 0, this, 0);
-
     // signals are emitted internally
     LIBENCLOUD_ERR_IF (_decodeResponse(response));
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
 err:
+    _client->deleteLater();
     return;
 }
 

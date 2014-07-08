@@ -87,7 +87,6 @@ private:
     Progress _stateToProgress (QState *state);
 
     QStateMachine _fsm;
-    Client _client;
 
     QState *_initialState;
     QState *_completedState;

@@ -76,7 +76,8 @@ int SetupMsg::process ()
     headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
-    EMIT_ERROR_ERR_IF (_client == NULL);
+    LIBENCLOUD_DELETE (_client);
+    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
     
     url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QIC_CONFIG_URL);
@@ -91,7 +92,6 @@ int SetupMsg::process ()
     sslconf.setCaCertificates(cas);
 
     // setup signals from client
-    disconnect(_client, 0, this, 0);
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
@@ -100,6 +100,7 @@ int SetupMsg::process ()
 
     return 0;
 err:
+    LIBENCLOUD_DELETE(_client);
     return ~0;
 }
 
@@ -125,14 +126,13 @@ void SetupMsg::_clientComplete (const QString &response)
 {
     LIBENCLOUD_TRACE;
 
-    // stop listening to signals from client
-    disconnect(_client, 0, this, 0);
-
     LIBENCLOUD_ERR_IF (_decodeResponse(response));
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
+
 err:
+    _client->deleteLater();
     return;
 }
 
