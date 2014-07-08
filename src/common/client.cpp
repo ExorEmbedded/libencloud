@@ -66,6 +66,9 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkReply *reply = NULL;
     _sslError = false;
 
+    if (conf.caCertificates().count()) {
+        LIBENCLOUD_DBG("CA Cert issuer: " << conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
+    }
     request.setSslConfiguration(conf);
 
     // default headers

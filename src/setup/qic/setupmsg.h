@@ -33,7 +33,6 @@ signals:
 public slots:
     int process ();
     void authSupplied (const Auth &auth);
-    void verifyCASupplied (bool b);
 
 private slots:
     void _clientComplete (const QString &response);
@@ -46,7 +45,6 @@ private:
 
     //request inputs
     Auth _sbAuth;
-    bool _verifyCA;
 
     //response outputs
     VpnConfig _vpnConfig;

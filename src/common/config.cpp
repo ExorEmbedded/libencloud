@@ -35,7 +35,7 @@ Config::Config ()
     dataPrefix = getCommonAppDataDir();
     logPrefix = getCommonLogDir();
 
-    filePath = QFileInfo(confPrefix + sep + QString(LIBENCLOUD_CONF_FILE));
+    filePath = _joinPaths(confPrefix, QString(LIBENCLOUD_CONF_FILE));
 
     // data are package-specific on win
 
@@ -44,39 +44,6 @@ Config::Config ()
 
     sysSettings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (sysSettings == NULL);
-
-#ifdef LIBENCLOUD_MODE_ECE
-    config.poiPath = QFileInfo(dataPrefix + LIBENCLOUD_POI_FILE);
-#endif
-
-    config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
-    config.timeout = LIBENCLOUD_TIMEOUT;
-
-    config.csrTmplPath = QFileInfo(dataPrefix + LIBENCLOUD_CSRTMPL_FILE);
-
-    config.sslInit.auth = LIBENCLOUD_AUTH_USERPASS;
-    config.sslInit.authFormat = LIBENCLOUD_AUTH_CERTKEY;
-    config.sslInit.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslInit.certPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CERT_FILE);
-    config.sslInit.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_KEY_FILE);
-    config.sslInit.p12Path = QFileInfo(dataPrefix + LIBENCLOUD_INIT_P12_FILE);
-
-    config.sslOp.auth = LIBENCLOUD_AUTH_USERPASS;
-    config.sslOp.authFormat = LIBENCLOUD_AUTH_CERTKEY;
-    config.sslOp.caPath = QFileInfo(dataPrefix + LIBENCLOUD_INIT_CA_FILE);
-    config.sslOp.certPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_CERT_FILE);
-    config.sslOp.keyPath = QFileInfo(dataPrefix + LIBENCLOUD_OP_KEY_FILE);
-    config.sslOp.p12Path = QFileInfo(dataPrefix + LIBENCLOUD_OP_P12_FILE);
-
-    config.rsaBits = LIBENCLOUD_RSA_BITS;
-
-    config.vpnExePath = QFileInfo(sbinPrefix + LIBENCLOUD_VPN_EXE_FILE);
-    config.vpnConfPath = QFileInfo(dataPrefix + LIBENCLOUD_VPN_CONF_FILE);
-    config.fallbackVpnConfPath = QFileInfo(dataPrefix + LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
-    config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
-    config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
-
-    config.logLevel = LIBENCLOUD_LOG_LEV;
 
 err:
     return;
@@ -128,6 +95,7 @@ int Config::loadFromFile ()
         LIBENCLOUD_DBG("Failed parsing config file: " << filePath.absoluteFilePath());
         goto err;
     }
+    _jsonOrig = _json;
 
     LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
 
@@ -144,11 +112,22 @@ void Config::receive (const QVariant &cfg)
 {
     LIBENCLOUD_DBG("cfg: " << cfg);
 
-    utils::variantMerge(_json, cfg);
+    LIBENCLOUD_ERR_IF (cfg.isNull());
 
-//    LIBENCLOUD_DBG("new cfg: " << dump());
+    // reset requested
+    if (cfg.toMap().isEmpty())
+    {
+        _json = _jsonOrig;
+    }
+    else
+    {
+        utils::variantMerge(_json, cfg);
+    }
+
+    LIBENCLOUD_DBG("new cfg: " << dump());
 
     LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+
 err:
     return;
 }
@@ -159,43 +138,44 @@ err:
 
 int Config::_parse (const QVariantMap &jo)
 {
-    if (!jo["bind"].isNull())
+    if (jo["bind"].isNull())
+        config.bind = "";  // binds only to localhost and tap
+    else
         config.bind = jo["bind"].toString();
 
 #ifdef LIBENCLOUD_MODE_ECE
-    if (!jo["poi"].isNull())
+    if (jo["poi"].isNull())
+        config.poiPath = _joinPaths(dataPrefix, LIBENCLOUD_POI_FILE);
+    else
         config.poiPath = _joinPaths(dataPrefix, \
                 jo["poi"].toString());
 #endif
 
-    if (!jo["timeout"].isNull())
+    if (jo["timeout"].isNull())
+        config.timeout = LIBENCLOUD_TIMEOUT;
+    else
         config.timeout = jo["timeout"].toInt();
 
-    if (!jo["csr"].toMap()["tmpl"].isNull())
+    if (jo["csr"].toMap()["tmpl"].isNull())
+        config.csrTmplPath = _joinPaths(dataPrefix, LIBENCLOUD_CSRTMPL_FILE);
+    else
         config.csrTmplPath = _joinPaths(dataPrefix, \
                 jo["csr"].toMap()["tmpl"].toString());
 
-    if (!jo["sb"].isNull())
-        LIBENCLOUD_ERR_IF (_parseSb(jo["sb"].toMap()));
+    LIBENCLOUD_ERR_IF (_parseSb(jo));
+    LIBENCLOUD_ERR_IF (_parseSsl(jo, config.ssl));
 
-    if (!jo["ssl_init"].isNull())
-        LIBENCLOUD_ERR_IF (_parseSslInit(jo["ssl_init"].toMap()));
-
-    if (!jo["ssl_op"].isNull())
-        LIBENCLOUD_ERR_IF (_parseSslOp(jo["ssl_op"].toMap()));
-
-    if (!jo["rsa"].toMap()["bits"].isNull())
+    if (jo["rsa"].toMap()["bits"].isNull())
+        config.rsaBits = LIBENCLOUD_RSA_BITS;
+    else
     {
         config.rsaBits = jo["rsa"].toMap()["bits"].toInt();
         LIBENCLOUD_ERR_MSG_IF ((config.rsaBits == 0 || (config.rsaBits % 512) != 0),
                 "rsa bits must be a multiple of 512!");
     }
 
-    if (!jo["vpn"].isNull())
-        LIBENCLOUD_ERR_IF (_parseVpn(jo["vpn"].toMap()));
-
-    if (!jo["log"].isNull())
-        LIBENCLOUD_ERR_IF (_parseLog(jo["log"].toMap()));
+    LIBENCLOUD_ERR_IF (_parseVpn(jo));
+    LIBENCLOUD_ERR_IF (_parseLog(jo));
 
     return 0;
 err:
@@ -204,56 +184,98 @@ err:
 
 int Config::_parseSb (const QVariantMap &jo)
 {
-    if (!jo["url"].isNull())
-        config.sbUrl = jo["url"].toString();
+    config.sbUrl = QUrl(LIBENCLOUD_SB_URL);
+
+    if (jo["sb"].isValid())
+    {
+        QVariantMap jot = jo["sb"].toMap();
+
+        if (jot["url"].isValid())
+            config.sbUrl = jot["url"].toString();
+    }
 
     return 0;
 }
 
-int Config::_parseSslInit (const QVariantMap &jo)
-{
-    return _parseSsl(jo, config.sslInit);
-}
-
-int Config::_parseSslOp (const QVariantMap &jo)
-{
-    return _parseSsl(jo, config.sslOp);
-}
-
 int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 {
-    if (!jo["auth"].isNull())
+    QVariantMap jot;
+
+    if (&sc == &config.ssl)
     {
-        sc.auth = jo["auth"].toString();
+        sc.sbUrl = QUrl(LIBENCLOUD_SB_URL);
+        sc.auth = LIBENCLOUD_AUTH_USERPASS;
+        sc.authFormat = LIBENCLOUD_AUTH_CERTKEY;
+        sc.verifyCA = true;
+        sc.caPath = _joinPaths(dataPrefix, LIBENCLOUD_CA_FILE);
+        sc.certPath = _joinPaths(dataPrefix, LIBENCLOUD_CERT_FILE);
+        sc.keyPath = _joinPaths(dataPrefix, LIBENCLOUD_KEY_FILE);
+        sc.p12Path = _joinPaths(dataPrefix, LIBENCLOUD_P12_FILE);
+
+        jot = jo["ssl"].toMap();
+    }
+    else if (&sc == &config.sslInit)
+    {
+        sc = config.ssl;
+        sc.caPath = _joinPaths(dataPrefix, LIBENCLOUD_INIT_CA_FILE);
+        sc.certPath = _joinPaths(dataPrefix, LIBENCLOUD_INIT_CERT_FILE);
+        sc.keyPath = _joinPaths(dataPrefix, LIBENCLOUD_INIT_KEY_FILE);
+        sc.p12Path = _joinPaths(dataPrefix, LIBENCLOUD_INIT_P12_FILE);
+
+        jot = jo["init"].toMap();
+    }
+    else if (&sc == &config.sslOp)
+    {
+        sc = config.ssl;
+        sc.caPath = _joinPaths(dataPrefix, LIBENCLOUD_OP_CA_FILE);
+        sc.certPath = _joinPaths(dataPrefix, LIBENCLOUD_OP_CERT_FILE);
+        sc.keyPath = _joinPaths(dataPrefix, LIBENCLOUD_OP_KEY_FILE);
+        sc.p12Path = _joinPaths(dataPrefix, LIBENCLOUD_OP_P12_FILE);
+
+        jot = jo["op"].toMap();
+    }
+
+    if (jot["auth"].isValid())
+    {
+        sc.auth = jot["auth"].toString();
         LIBENCLOUD_ERR_IF (sc.auth != LIBENCLOUD_AUTH_USERPASS &&
                 sc.auth != LIBENCLOUD_AUTH_X509);
     }
 
-    if (!jo["auth_format"].isNull())
+    if (jot["auth_format"].isValid())
     {
-        sc.authFormat = jo["auth_format"].toString();
+        sc.authFormat = jot["auth_format"].toString();
         LIBENCLOUD_ERR_IF (sc.authFormat != LIBENCLOUD_AUTH_CERTKEY &&
                 sc.authFormat != LIBENCLOUD_AUTH_PKCS12);
     }
 
-    if (!jo["ca"].isNull())
-        sc.caPath = _joinPaths(dataPrefix, jo["ca"].toString());
+    if (jot["verify_ca"].isValid())
+        sc.verifyCA = jot["verify_ca"].toBool();
 
-    if (!jo["cert"].isNull())
-        sc.certPath = _joinPaths(dataPrefix, jo["cert"].toString());
+    if (jot["ca"].isValid())
+        sc.caPath = _joinPaths(dataPrefix, jot["ca"].toString());
 
-    if (!jo["key"].isNull())
-        sc.keyPath = _joinPaths(dataPrefix, jo["key"].toString());
+    if (jot["cert"].isValid())
+        sc.certPath = _joinPaths(dataPrefix, jot["cert"].toString());
 
-    if (!jo["p12"].isNull())
-        sc.p12Path = _joinPaths(dataPrefix, jo["p12"].toString());
+    if (jot["key"].isValid())
+        sc.keyPath = _joinPaths(dataPrefix, jot["key"].toString());
 
-    sc.sbUrl = jo["sb"].toMap()["url"].toString();
+    if (jot["p12"].isValid())
+        sc.p12Path = _joinPaths(dataPrefix, jot["p12"].toString());
+
+    sc.sbUrl = jot["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
         sc.sbUrl = config.sbUrl;
     LIBENCLOUD_ERR_MSG_IF (sc.sbUrl.isEmpty(),
             "sb url undefined!");
 
+    if (&sc == &config.ssl)
+    {
+        LIBENCLOUD_ERR_IF (_parseSsl(jot, config.sslInit));
+        LIBENCLOUD_ERR_IF (_parseSsl(jot, config.sslOp));
+    }
+   
     return 0;
 err:
     return ~0;
@@ -261,47 +283,70 @@ err:
 
 int Config::_parseVpn (const QVariantMap &jo)
 {
-    if (!jo["path"].isNull())
-        config.vpnExePath = _joinPaths(sbinPrefix, jo["path"].toString());
+    config.vpnExePath = _joinPaths(sbinPrefix, LIBENCLOUD_VPN_EXE_FILE);
+    config.vpnConfPath = _joinPaths(dataPrefix, LIBENCLOUD_VPN_CONF_FILE);
+    config.fallbackVpnConfPath = _joinPaths(dataPrefix, LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
+    config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
+    config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
+    config.vpnArgs = "";
 
-    if (!jo["conf"].isNull())
-        config.vpnConfPath = _joinPaths(dataPrefix, jo["conf"].toString());
+    if (jo["vpn"].isNull())
+        return 0;
 
-    if (!jo["fallback_conf"].isNull())
-        config.fallbackVpnConfPath = _joinPaths(dataPrefix, jo["fallback_conf"].toString());
+    QVariantMap jot =  jo["vpn"].toMap();
 
-    if (!jo["mgmt"].toMap()["port"].isNull())
-        config.vpnMgmtPort = jo["mgmt"].toMap()["port"].toInt();
+    if (jot["path"].isValid())
+        config.vpnExePath = _joinPaths(sbinPrefix, jot["path"].toString());
 
-    if (!jo["verb"].isNull())
-        config.vpnVerbosity = jo["verb"].toInt();
+    if (jot["conf"].isValid())
+        config.vpnConfPath = _joinPaths(dataPrefix, jot["conf"].toString());
 
-    if (!jo["args"].isNull())
-        config.vpnArgs = jo["args"].toString();
+    if (jot["fallback_conf"].isValid())
+        config.fallbackVpnConfPath = _joinPaths(dataPrefix, jot["fallback_conf"].toString());
+
+    if (jot["mgmt"].toMap()["port"].isValid())
+        config.vpnMgmtPort = jot["mgmt"].toMap()["port"].toInt();
+
+    if (jot["verb"].isValid())
+        config.vpnVerbosity = jot["verb"].toInt();
+
+    if (jot["args"].isValid())
+        config.vpnArgs = jot["args"].toString();
 
     return 0;
 }
 
 int Config::_parseLog (const QVariantMap &jo)
 {
-    if (!jo["lev"].isNull())
-    {
-        config.logLevel = jo["lev"].toInt();
-        LIBENCLOUD_ERR_MSG_IF ((config.logLevel < 0 || config.logLevel > 7),
-                "log level must be between 0 and 7!");
+    config.logLevel = LIBENCLOUD_LOG_LEV;
 
-        // set this value globally for log macros
-        g_libencloudLogLev = config.logLevel;
+    if (jo["log"].isValid()) 
+    {
+        QVariantMap jot = jo["log"].toMap();
+
+        if (jot["lev"].isValid())
+        {
+            config.logLevel = jot["lev"].toInt();
+            LIBENCLOUD_ERR_MSG_IF ((config.logLevel < 0 || config.logLevel > 7),
+                    "log level must be between 0 and 7!");
+        }
     }
+
+    // set this value globally for log macros
+    g_libencloudLogLev = config.logLevel;
 
     return 0;
 err:
     return ~0;
 }
 
-QString Config::_joinPaths (const QString &s1, const QString &s2)
+// Add prefix to path only if path is relative.
+QString Config::_joinPaths (const QString &prefix, const QString &path)
 {
-    return QDir::cleanPath(s1 + QDir::separator() + s2);
+    if (QDir(path).isAbsolute())
+        return path;
+    
+    return QDir::cleanPath(prefix + QDir::separator() + path);
 }
 
 } // namespace libencloud

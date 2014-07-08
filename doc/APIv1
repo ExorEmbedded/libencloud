@@ -135,7 +135,7 @@
    Content-Type = application/json
 
     e.g. 1              { "timeout" : "300" }
-    e.g. 2              { "ssl_op" : { "verify_ca" : "false" } }
+    e.g. 2              { "ssl" : { "verify_ca" : "false" } }
 
 
 [ Error Handling ]

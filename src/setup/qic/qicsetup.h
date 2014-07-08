@@ -58,7 +58,6 @@ signals:
     // core -> setup -> internal
     //
     void authSupplied (const Auth &auth);  
-    virtual void verifyCAForward (bool b);
 
 private slots:
     void _onProcessed ();

@@ -4,6 +4,7 @@ libencloud 0.7:
 	- api: new Config API (json)
 	- api: rename '/api_v1' => '/api/v1'
 	- client: new get(), post() functions
+	- config: "init"/"op" under new "ssl" key, handle absolute and relative paths
 
 libencloud 0.6.4 (10/06/2014):
 	- [CONNECT-115] Slow disconnect on w32

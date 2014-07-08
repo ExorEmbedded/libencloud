@@ -22,6 +22,7 @@ typedef struct
     QUrl sbUrl;
     QString auth;
     QString authFormat;
+    bool verifyCA;
     QFileInfo caPath;
     QFileInfo certPath;
     QFileInfo keyPath;
@@ -41,6 +42,7 @@ typedef struct
     int timeout;
     QFileInfo csrTmplPath;
 
+    libencloud_config_ssl_t ssl;
     libencloud_config_ssl_t sslInit;
     libencloud_config_ssl_t sslOp;
 
@@ -98,9 +100,10 @@ protected:
     int _parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
     int _parseVpn (const QVariantMap &jo);
     int _parseLog (const QVariantMap &jo);
-    QString _joinPaths (const QString &s1, const QString &s2);
+    QString _joinPaths (const QString &prefix, const QString &path);
 
     QVariant _json;
+    QVariant _jsonOrig;
 };
 
 } // namespace libencloud

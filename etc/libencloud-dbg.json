@@ -6,18 +6,20 @@
     "url" : "https://switchboard-host/"
   },
 
-  "ssl_init" : {
-    "ca" : "init_ca.pem",
-    "cert" : "init_cert.pem",
-    "key" : "init_key.pem"
+  "ssl" : {
+    "init" : {
+      "ca" : "init_ca.pem",
+      "cert" : "init_cert.pem",
+      "key" : "init_key.pem"
+    },
+  
+    "op" : {
+      "ca" : "op_ca.pem",
+      "cert" : "op_cert.pem",
+      "key" : "op_key.pem"
+    },
   },
-
-  "ssl_op" : {
-    "ca" : "op_ca.pem",
-    "cert" : "op_cert.pem",
-    "key" : "op_key.pem"
-  },
-
+  
   "log" : {
     "lev" : 7
   }

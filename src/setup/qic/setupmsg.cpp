@@ -29,7 +29,6 @@ int SetupMsg::clear ()
     MessageInterface::clear();
 
     _sbAuth = Auth();
-    _verifyCA = true;
     _vpnConfig.clear();
     _fallbackVpnConfig.clear();
     _caCert.clear();
@@ -63,6 +62,8 @@ int SetupMsg::process ()
     QString authData;
     QString headerData;
     QSslCertificate cert;
+    
+    LIBENCLOUD_DBG("CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
     QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
 
     if (!_sbAuth.isValid())
@@ -94,7 +95,7 @@ int SetupMsg::process ()
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
-    _client->setVerifyCA(_verifyCA);
+    _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
     _client->run(url, params, headers, sslconf);
 
     return 0;
@@ -115,13 +116,6 @@ void SetupMsg::authSupplied (const Auth &auth)
             // Qt Proxy is handled globally in core
             break;
     }
-}
-
-void SetupMsg::verifyCASupplied (bool b)
-{
-    LIBENCLOUD_DBG("b: " << b);
-
-    _verifyCA = b;
 }
 
 //

@@ -1,7 +1,7 @@
 libencloud configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-* Notes: 
+* Notes:
     - basically all fields are optional
     - comments are *not* valid Json
 
@@ -23,24 +23,38 @@ libencloud configuration
     "tmpl" : "csr-tmpl.json"              
   },
 
-  "ssl_init" : {                                # initialization channel setup
-    "sb" : {
-      "url" : "https://initialization-host/"    # override sb host
-    },
-    "auth" : "x509",                            # "user-pass" (default), "x509"
-    "ca" : "init_ca.pem",                       # RECOMMENDED
-    "cert" : "init_cert.pem",                   # required for "auth" = "x509"
-    "key" : "init_key.pem"                      # required for "auth" = "x509"
-  },
+  "ssl" : {                                       
 
-  "ssl_op" : {                                  # operation channel setup
     "sb" : {
-      "url" : "https://operation-host/"         # override sb host
+      "url" : "https://switchboard-host"          # override sb host
     },
-    "auth" : "x509",                            # "user-pass" (default), "x509"
-    "ca" : "op_ca.pem",                         # RECOMMENDED
-    "cert" : "op_cert.pem",                     # required for "auth" = "x509"
-    "key" : "op_key.pem"                        # required for "auth" = "x509"
+    "auth" : "x509",                              # "user-pass" (default), "x509"
+    "verify_ca" : "false",                        # "true" (default), "false"
+    "ca" : "ca.pem",                              # REQUIRED for "auth" = "x509"
+    "cert" : "cert.pem",                          # REQUIRED for "auth" = "x509"
+    "key" : "key.pem"                             # REQUIRED for "auth" = "x509"
+
+    "init" : {                                      # initialization channel overrides
+      "sb" : {
+        "url" : "https://initialization-host/"      # override sb host
+      },
+      "auth" : "x509",                              # "user-pass" (default), "x509"
+      "verify_ca" : "false",                        # "true" (default), "false"
+      "ca" : "init_ca.pem",                         # REQUIRED for "auth" = "x509"
+      "cert" : "init_cert.pem",                     # REQUIRED for "auth" = "x509"
+      "key" : "init_key.pem"                        # REQUIRED for "auth" = "x509"
+    },
+  
+    "op" : {                                        # operation channel overrides
+      "sb" : {
+        "url" : "https://operation-host/"           # override sb host
+      },
+      "auth" : "x509",                              # "user-pass" (default), "x509"
+      "verify_ca" : "false",                        # "true" (default), "false"
+      "ca" : "op_ca.pem",                           # REQUIRED for "auth" = "x509"
+      "cert" : "op_cert.pem",                       # REQUIRED for "auth" = "x509"
+      "key" : "op_key.pem"                          # REQUIRED for "auth" = "x509"
+    }
   },
 
   "rsa" : {                                     # key size for generated RSA keys

@@ -1,4 +1,5 @@
 #include <QTimer>
+#include <encloud/Common>
 #include <common/common.h>
 #include <common/config.h>
 #include "api.h"
@@ -93,14 +94,7 @@ void TestApi::run ()
 
     emit actionRequest("myAction", params);
 
-    LIBENCLOUD_DBG("Testing Config API");
-
-    QVariantMap configKey;
-    QVariantMap configSubKey;
-    configSubKey["lev"] = 7;
-    configKey["log"] = configSubKey;
-
-    emit configSupply(configKey);
+    _testConfig();
 
     qApp->exec();
 }
@@ -164,4 +158,29 @@ void TestApi::_configSent (libencloud::Api::ResultCode rc)
     QVERIFY (rc == libencloud::Api::SuccessRc);
 
     LIBENCLOUD_DBG("rc: " << QString::number(rc));
+}
+
+void TestApi::_testConfig ()
+{
+    LIBENCLOUD_DBG("Testing Config API");
+
+    QVariantMap configKey;
+    QVariantMap configSubKey;
+    QVariantMap sslSubKey;
+
+    configKey["timeout"] = 300;
+
+    configSubKey["lev"] = 7;
+    configKey["log"] = configSubKey;
+
+    sslSubKey["verify_ca"] = "false";
+    configKey["ssl"] = sslSubKey;
+
+    emit configSupply(configKey);
+
+    LIBENCLOUD_DBG("clearing config");
+
+    emit configSupply(QVariantMap());
+
+    return;
 }

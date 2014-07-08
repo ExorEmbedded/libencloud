@@ -76,6 +76,8 @@ private slots:
     void _configSent (libencloud::Api::ResultCode rc);
 
 private:
+    void _testConfig();
+
     libencloud::StatusApi _statusApi;
     libencloud::SetupApi _setupApi;
     libencloud::CloudApi _cloudApi;
