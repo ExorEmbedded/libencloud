@@ -28,7 +28,7 @@ signals:
     void licenseSupply (const QUuid &uuid);
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
     void portSupply (int);
 #endif
 
@@ -68,7 +68,7 @@ private slots:
     void _licenseSent (libencloud::Api::ResultCode rc);
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
     void _portSent (libencloud::Api::ResultCode rc);
 #endif
 

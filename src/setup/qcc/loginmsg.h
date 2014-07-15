@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_LOGINMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_QCC_LOGINMSG_H_
 
 #include <QString>
 #include <QVariant>
@@ -8,8 +8,8 @@
 #include <common/message.h>
 #include <common/vpn/vpnconfig.h>
 
-#define LIBENCLOUD_SETUP_QIC_LOGIN_URL        "/manage/access/login/"
-#define LIBENCLOUD_SETUP_QIC_LOGOUT_URL        "/manage/access/logout/"
+#define LIBENCLOUD_SETUP_QCC_LOGIN_URL        "/manage/access/login/"
+#define LIBENCLOUD_SETUP_QCC_LOGOUT_URL        "/manage/access/logout/"
 
 namespace libencloud {
 
@@ -42,4 +42,4 @@ private:
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QIC_LOGINMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_LOGINMSG_H_ */

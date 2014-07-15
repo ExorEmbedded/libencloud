@@ -174,14 +174,14 @@ void Cloud::_onRetry ()
 // private methods
 //
 
-// *ECE always retries automatically, QIC does only if forced
+// *ECE always retries automatically, QCC does only if forced
 void Cloud::_restart (bool fallback, bool force)
 {
 //    LIBENCLOUD_DBG("fallback: " << fallback << ", force: " << force);
 
     _isFallback = fallback;
 
-#if !defined(LIBENCLOUD_MODE_QIC)
+#if !defined(LIBENCLOUD_MODE_QCC)
     force = true;
 #endif
 
@@ -191,7 +191,7 @@ void Cloud::_restart (bool fallback, bool force)
         _retry.start();
     }
     
-    // QIC core does full stop()
+    // QCC core does full stop()
 }
 
 } // namespace libencloud

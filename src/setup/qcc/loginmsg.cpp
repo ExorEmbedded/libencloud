@@ -3,7 +3,7 @@
 #include <common/common.h>
 #include <common/config.h>
 #include <common/utils.h>
-#include <setup/qic/loginmsg.h>
+#include <setup/qcc/loginmsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
 #define EMIT_ERROR_ERR_IF(cond) \
@@ -46,15 +46,15 @@ int LoginMsg::process ()
     {
         params.addQueryItem("emi_username", _sbAuth.getUser());
         params.addQueryItem("emi_password", _sbAuth.getPass());
-        url.setPath(LIBENCLOUD_SETUP_QIC_LOGIN_URL);
+        url.setPath(LIBENCLOUD_SETUP_QCC_LOGIN_URL);
     }
     else
-        url.setPath(LIBENCLOUD_SETUP_QIC_LOGOUT_URL);
+        url.setPath(LIBENCLOUD_SETUP_QCC_LOGOUT_URL);
 
     LIBENCLOUD_DBG("url: " << url);
 
     // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QIC;
+    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
     headers["Authorization"] =  headerData.toLocal8Bit();
 
     // setup signals from client

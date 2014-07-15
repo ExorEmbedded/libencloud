@@ -134,7 +134,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
     switch (httpMethodFromString(request.getMethod()))
     {
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QString id, type, user, pass, aurl;
@@ -202,7 +202,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
 #if defined(LIBENCLOUD_MODE_ECE)
             QVariantMap j;
             j["poi"] = utils::uuid2String(_parent->getPoi());
-#elif defined(LIBENCLOUD_MODE_QIC)
+#elif defined(LIBENCLOUD_MODE_QCC)
             QVariant j = _parent->getServerConfig();
 #endif
             QString content = json::serialize(j, ok);
@@ -227,7 +227,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
-#elif defined(LIBENCLOUD_MODE_QIC)
+#elif defined(LIBENCLOUD_MODE_QCC)
             if ((val = url.queryItemValue("clientPort")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),

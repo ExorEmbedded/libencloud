@@ -54,7 +54,7 @@ public:
     Api ();
     virtual ~Api ();
 
-    // QIC-only: needs to be run once to get encloud settings
+    // QCC-only: needs to be run once to get encloud settings
     int init ();
 
     void setHost (const QString &host);
@@ -67,7 +67,7 @@ public:
     static const QUrl &getUrl ();
 
 signals:
-    // QIC-only: other clients won't need to wait for settings (fixed port allocation)
+    // QCC-only: other clients won't need to wait for settings (fixed port allocation)
     void gotSettings ();
 
 //

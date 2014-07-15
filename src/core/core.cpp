@@ -8,7 +8,7 @@
 #include <common/config.h>
 #include <common/crypto.h>
 #include <common/utils.h>
-#include <setup/qic/qicsetup.h>
+#include <setup/qcc/qccsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>
 
@@ -168,7 +168,7 @@ int Core::attachServer (Server *server)
             _setupObj, SIGNAL(licenseForward(QUuid)));
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
     connect(obj, SIGNAL(clientPortSend(int)), 
             this, SLOT(_clientPortReceived(int)));
     connect(this, SIGNAL(serverConfigSupply(QVariant)), 
@@ -284,9 +284,9 @@ void Core::_errorReceived (const libencloud::Error &err)
 {
     LIBENCLOUD_DBG(err);
 
-   // QIC stops progress upon critical errors for user intervention
+   // QCC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically (in internal modules)
-#if defined(LIBENCLOUD_MODE_QIC)
+#if defined(LIBENCLOUD_MODE_QCC)
     stop();
 #endif
 
@@ -511,8 +511,8 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
-#if defined(LIBENCLOUD_MODE_QIC)
-    _setup = new QicSetup(_cfg);
+#if defined(LIBENCLOUD_MODE_QCC)
+    _setup = new QccSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
     _setup = new EceSetup(_cfg);
 #endif

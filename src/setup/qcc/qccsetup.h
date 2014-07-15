@@ -1,16 +1,16 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QIC_H_
-#define _LIBENCLOUD_PRIV_SETUP_QIC_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_H_
+#define _LIBENCLOUD_PRIV_SETUP_QCC_H_
 
 #include <QtPlugin>
 #include <encloud/Client>
 #include <common/message.h>
 #include <setup/setup.h>
-#include <setup/qic/setupmsg.h>
-#include <setup/qic/loginmsg.h>
+#include <setup/qcc/setupmsg.h>
+#include <setup/qcc/loginmsg.h>
 
 namespace libencloud {
 
-class QicSetup : public QObject, public SetupInterface
+class QccSetup : public QObject, public SetupInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::SetupInterface)
@@ -29,7 +29,7 @@ public:
         StateLast = StateReceived
     } State;
 
-    QicSetup (Config *cfg);
+    QccSetup (Config *cfg);
 
     int start ();
     int stop ();
@@ -72,4 +72,4 @@ private:
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QIC_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_H_ */

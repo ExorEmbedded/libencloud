@@ -1,6 +1,8 @@
 ChangeLog file for Endian libencloud
 
 libencloud 0.7:
+	- [CONNECT-144] renaming: modeqic => modeqcc, qic => qcc,
+	  4iconnect => ConnectClient
 	- api: new Config API (json)
 	- api: rename '/api_v1' => '/api/v1'
 	- client: new get(), post() functions

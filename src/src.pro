@@ -103,9 +103,9 @@ SOURCES += core/core.cpp
 !nosetup {
     HEADERS += setup/setup.h
     SOURCES += setup/setup.cpp
-    modeqic {
-        HEADERS += setup/qic/*.h
-        SOURCES += setup/qic/*.cpp
+    modeqcc {
+        HEADERS += setup/qcc/*.h
+        SOURCES += setup/qcc/*.cpp
     }
     modeece | modesece {
         HEADERS += setup/ece/*.h

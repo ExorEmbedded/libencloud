@@ -38,8 +38,8 @@ TestApi::TestApi ()
                 this, SLOT(_licenseSent(libencloud::Api::ResultCode)));
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
-    TEST_MSG("testing QIC API");
+#ifdef LIBENCLOUD_MODE_QCC
+    TEST_MSG("testing QCC API");
     connect(this, SIGNAL(portSupply(int)),
                 &_setupApi, SLOT(portSupply(int)));
     connect(&_setupApi, SIGNAL(portSent(libencloud::Api::ResultCode)),
@@ -82,7 +82,7 @@ void TestApi::run ()
     emit licenseSupply(QUuid("94C97E4B-AB8C-4DD6-B06B-EF3E18ED2D83"));
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
     emit portSupply(12345);
 #endif
 
@@ -137,7 +137,7 @@ void TestApi::_licenseSent (libencloud::Api::ResultCode rc)
 }
 #endif
 
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
 void TestApi::_portSent (libencloud::Api::ResultCode rc)
 {
     QVERIFY (rc == libencloud::Api::SuccessRc);

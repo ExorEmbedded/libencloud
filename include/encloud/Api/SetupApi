@@ -37,7 +37,7 @@ public slots:
     void licenseSupply (const QUuid &uuid);
 
     //
-    // QIC-only
+    // QCC-only
     //
     void portSupply (int port);
     void configRetrieve ();
@@ -59,7 +59,7 @@ signals:
     void licenseSent (libencloud::Api::ResultCode rc);
 
     //
-    // QIC-only
+    // QCC-only
     //
     void portSent (libencloud::Api::ResultCode rc);
     void configReceived (libencloud::Api::ResultCode rc,

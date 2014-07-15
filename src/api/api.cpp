@@ -34,9 +34,9 @@ int Api::init ()
     if (__settings != NULL)
         return 0;
 
-    // QIC needs to wait for encloud port settings;
+    // QCC needs to wait for encloud port settings;
     // other products use fixed port
-#ifdef LIBENCLOUD_MODE_QIC
+#ifdef LIBENCLOUD_MODE_QCC
     LIBENCLOUD_DBG("Creating shared Settings object");
 
     // API settings have System Scope (used by Encloud Service)

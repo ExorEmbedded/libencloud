@@ -29,7 +29,7 @@ err:
     return ;
 }
 
-// From QIC-style string with overrides from local configuration
+// From QCC-style string with overrides from local configuration
 VpnConfig::VpnConfig (const QString &s, Config *cfg)
 {
     LIBENCLOUD_TRACE;

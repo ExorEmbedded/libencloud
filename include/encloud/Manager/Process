@@ -31,7 +31,7 @@ public:
         StateIdle = 0,      // stopped (initial, error state)
         StateStarting,      // about to launch process
         StateStarted,       // process has started
-        StateZombie         // this state is entered Q4IC_PROCESS_ZOMBIE_TOUT ms after finished
+        StateZombie         // this state is entered LIBENCLOUD_PROCESS_ZOMBIE_TOUT ms after finished
     }
     State;
 

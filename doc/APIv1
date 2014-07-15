@@ -80,14 +80,14 @@
 
     e.g.                license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
 
-* POST <e_url>/api/v1/setup                 Client: QIC
+* POST <e_url>/api/v1/setup                 Client: QCC
 
     Def "clientPort"    <int> Port at which client can be reached - set by GUI and used by Encloud 
                         to forward application open/close requests via Cloud API
 
     e.g.                clientPort=12345
 
-* GET <e_url>/api/v1/setup                  Client: QIC
+* GET <e_url>/api/v1/setup                  Client: QCC
 
     e.g.    '{
                  "time" : 1396014836.523807,        # When the config data was received
@@ -118,7 +118,7 @@
     e.g. 1              action=start
     e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
 
-    encloud -> gui (QIC):
+    encloud -> gui (QCC):
 
     e.g. 3              action=open&name=myApp&endpoint=myEndpoint&remark=myRemark&path=
                             /%HOME_PATH%/to/File&args=param1%20param2

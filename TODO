@@ -1,10 +1,10 @@
 - ssl: CA support/check
-- qic: listen port to registry and notification to Switchboard;
+- qcc: listen port to registry and notification to Switchboard;
 - actions: check effectively running pids
 - server: check Content-Length
 - cloud: first message not routed properly?
 - license/qsettings: per-user or per-machine?
 - cert/license expiry/renewal in ece/setup (data from retrinfomsg)
 - deps: qjson build
-- test: ece (SB missing cert type/label management?), sece, qic, proxy
+- test: ece (SB missing cert type/label management?), sece, qcc, proxy
 - other: pimpl-based private interface hiding

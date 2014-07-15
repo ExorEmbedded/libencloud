@@ -18,11 +18,11 @@ Config::Config ()
 #ifdef Q_OS_WIN32  // relative paths
     QString progFiles = QString(qgetenv("ProgramFiles"));
 
-    // main prefix and binaries are product-specific (e.g. 4iConnect)
+    // main prefix and binaries are product-specific (e.g. ConnectClient)
     prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
     sbinPrefix = prefix + sep + LIBENCLOUD_SBIN_PREFIX;
 
-    // configuration is package-specific (e.g. 4iConnect\libencloud) under %ProgramFiles%
+    // configuration is package-specific (e.g. ConnectClient\libencloud) under %ProgramFiles%
     confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
 
@@ -64,8 +64,8 @@ QString Config::dump ()
     ts << "dumping configuration:";
     ts << endl;
 
-#if defined(LIBENCLOUD_MODE_QIC)
-    ts << "mode=QIC" << endl;
+#if defined(LIBENCLOUD_MODE_QCC)
+    ts << "mode=QCC" << endl;
 #elif defined(LIBENCLOUD_MODE_ECE)
     ts << "mode=ECE" << endl;
 #elif defined(LIBENCLOUD_MODE_SECE)
