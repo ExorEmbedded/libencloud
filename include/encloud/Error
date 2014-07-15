@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_ERROR_H_
 #define _LIBENCLOUD_ERROR_H_
 
+#include <QDebug>
 #include <QObject>
 #include <QString>
 #include <QTimer>
@@ -55,7 +56,7 @@ public:
     bool operator == (const Error &e) const;
     bool operator != (const Error &e) const;
     QString toString () const;
-    friend QDebug operator << (QDebug d, const Error &error);
+    friend LIBENCLOUD_DLLSPEC QDebug operator << (QDebug d, const Error &error);
 
     Code getCode () const;
     int setCode (Code code);

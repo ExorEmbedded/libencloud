@@ -1,5 +1,6 @@
 #include <QTimer>
 #include <encloud/Common>
+#include <encloud/Error>
 #include <common/common.h>
 #include <common/config.h>
 #include "sec.h"
