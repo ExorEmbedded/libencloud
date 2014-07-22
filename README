@@ -38,7 +38,7 @@ Windows
 =======
 
 Install qt 4.8 (MinGW or VS2008 version) and qtcreator (or sdk) from here http://qt-project.org/downloads/
-Install openssl 1.0.1e from here http://slproweb.com/download/Win32OpenSSL-1_0_1e.exe
+Install openssl 1.0.1h from here http://slproweb.com/download/Win32OpenSSL-1_0_1h.exe
 	, choosing DLLs installed to OpenSSL bin dir (not system)
 
 Open the project file with qtcreator and select the kit (MinGW or VS2008).

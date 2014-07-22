@@ -10,6 +10,7 @@ libencloud 0.7:
 	- setup: avoid reusing client objects to prevent QNetworkAccessManager from
 	  caching CA certificates
 	- LIBENCLOUD_TIMEOUT = 60 (was 30)
+	- deps: use openssl 1.0.1h
 
 libencloud 0.6.4 (10/06/2014):
 	- [CONNECT-115] Slow disconnect on w32
