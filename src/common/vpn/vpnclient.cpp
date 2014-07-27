@@ -1,10 +1,10 @@
 #include <QNetworkProxy>
 #include <QSslCertificate>
+#include <encloud/Utils>
 #include <common/vpn/vpnconfig.h>
 #include <common/vpn/vpnclient.h>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 
 namespace libencloud {
 

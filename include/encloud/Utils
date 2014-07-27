@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_PRIV_UTILS_H
-#define _LIBENCLOUD_PRIV_UTILS_H
+#ifndef _LIBENCLOUD_UTILS_H_
+#define _LIBENCLOUD_UTILS_H_
 
 #include <QDateTime>
 #include <QFile>
@@ -26,11 +26,12 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid);
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
 
-LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait = true);
+LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out,
+        bool wait = true, bool debug = true);
 
 LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from);
 
 } // namespace utils
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_HELPERS_H_ */
+#endif  /* _LIBENCLOUD_UTILS_H_ */

@@ -1,8 +1,8 @@
+#include <encloud/Crypto>
 #include <openssl/x509v3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <common/crypto.h>
 #include "test.h"
 
 #ifdef Q_OS_WIN

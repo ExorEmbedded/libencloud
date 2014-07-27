@@ -1,10 +1,10 @@
 #define LIBENCLOUD_DISABLE_TRACE
 #include <QDir>
 #include <QRegExp>
+#include <encloud/Utils>
 #include <encloud/Http/HttpHandler>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 #include <http/handler.h>
 
 namespace libencloud {

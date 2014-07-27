@@ -1,3 +1,4 @@
+#include <QStringList>
 #include <string.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
@@ -5,10 +6,96 @@
 #include <openssl/pem.h>
 #include <openssl/conf.h>
 #include <openssl/x509v3.h>
+#include <encloud/Common>
+#include <encloud/Crypto>
+#include <encloud/Utils>
 #include "common.h"
 #include "config.h"
-#include "crypto.h"
-#include <encloud/Common>
+
+//
+// C++ API
+//
+
+namespace libencloud {
+namespace crypto {
+
+static QString _opensslPath()
+{
+#ifdef Q_OS_WIN32
+    return getBinDir() + "/openssl.exe";
+#else
+    return "/usr/bin/openssl";
+#endif
+}
+
+int certToString (const QString &path, QString &out, bool verbose)
+{
+    QStringList args;
+
+    args << "x509";
+    args << "-text";
+    args << "-in" << path;
+
+    LIBENCLOUD_ERR_IF (utils::execute(_opensslPath(), args, out, verbose));
+
+    return 0;
+err:
+    return ~0;
+}
+
+static int _p12Cmd (const QString &p12Path, const QString &password, const QStringList &extraArgs)
+{
+    QStringList args;
+    QString out;
+
+    args << "pkcs12";
+    args << "-nodes";
+    args << "-in" << p12Path;
+    args << "-passin" << "pass:" + password;
+
+    args.append(extraArgs);
+
+    return utils::execute(_opensslPath(), args, out, false);
+}
+
+int p12SaveCa (const QString &p12Path, const QString &password, const QString &caPath)
+{
+    QStringList extraArgs;
+
+    extraArgs << "-out" << caPath;
+    extraArgs << "-nokeys";
+    extraArgs << "-cacerts";
+
+    return (_p12Cmd(p12Path, password, extraArgs));
+}
+
+int p12SaveCert (const QString &p12Path, const QString &password, const QString &certPath)
+{
+    QStringList extraArgs;
+
+    extraArgs << "-out" << certPath;
+    extraArgs << "-nokeys";
+    extraArgs << "-clcerts";
+
+    return (_p12Cmd(p12Path, password, extraArgs));
+}
+
+int p12SaveKey (const QString &p12Path, const QString &password, const QString &keyPath)
+{
+    QStringList extraArgs;
+
+    extraArgs << "-out" << keyPath;
+    extraArgs << "-nocerts";
+
+    return (_p12Cmd(p12Path, password, extraArgs));
+}
+
+}  // namespace crypto
+}  // namespace libencloud
+
+//
+// C API
+//
 
 static X509_REQ *__make_req (libencloud_crypto_t *ec, EVP_PKEY *pkey);
 

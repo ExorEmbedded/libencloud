@@ -1,7 +1,7 @@
+#include <encloud/Utils>
 #include <encloud/Api/SetupApi>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 
 namespace libencloud {
 

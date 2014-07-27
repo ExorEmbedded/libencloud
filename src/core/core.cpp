@@ -1,13 +1,13 @@
 #include <openssl/x509v3.h>
 #include <QUuid>
-#include <encloud/Info>
 #include <encloud/Core>
+#include <encloud/Crypto>
+#include <encloud/Info>
 #include <encloud/Progress>
 #include <encloud/Proxy>
+#include <encloud/Utils>
 #include <encloud/Api/CommonApi>
 #include <common/config.h>
-#include <common/crypto.h>
-#include <common/utils.h>
 #include <setup/qcc/qccsetup.h>
 #include <setup/ece/ecesetup.h>
 #include <cloud/cloud.h>

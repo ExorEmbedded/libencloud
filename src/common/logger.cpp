@@ -1,7 +1,7 @@
 #include <encloud/Logger>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 
 // logging: Qt4 forces usage of globals with qInstallMsgHandler()
 static QTextStream *g_svcLogText = NULL;

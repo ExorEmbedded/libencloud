@@ -27,8 +27,6 @@ HEADERS += json.h
 SOURCES += utils.cpp
 HEADERS += utils.h
 
-#SOURCES += libencloud.cpp
-
 HEADERS += test.h
 
 INCLUDEPATH += $$SRCBASEDIR/src/

@@ -6,6 +6,7 @@ HEADERS += Auth
 HEADERS += Client
 HEADERS += Common
 HEADERS += Core
+HEADERS += Crypto
 HEADERS += Error
 HEADERS += Info
 HEADERS += Json
@@ -14,6 +15,7 @@ HEADERS += Progress
 HEADERS += Proxy
 HEADERS += Server
 HEADERS += State
+HEADERS += Utils
 HEADERS += Watchdog
 
 SUBDIRS += Api

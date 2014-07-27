@@ -1,6 +1,6 @@
+#include <encloud/Utils>
 #include <common/config.h>
 #include <common/helpers.h>
-#include <common/utils.h>
 
 namespace libencloud {
 

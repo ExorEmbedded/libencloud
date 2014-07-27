@@ -10,8 +10,8 @@
 #include <QString>
 #include <QUrl>
 #include <encloud/Common>
+#include <encloud/Crypto>
 #include <encloud/Json>
-#include "crypto.h"
 #include "defaults.h"
 #include "helpers.h"
 

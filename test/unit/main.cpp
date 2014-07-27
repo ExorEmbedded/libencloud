@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include <QtTest>
 #include <encloud/Common>
-#include <common/utils.h>
+#include <encloud/Utils>
 #include <common/config.h>
 #include "test.h"
 #include "utils.h"

@@ -73,10 +73,8 @@ contains(CONFIG, qjson) {
     LIBS += -lqjson
 }
 
-HEADERS += common/utils.h
 SOURCES += common/utils.cpp
 
-HEADERS += common/crypto.h
 SOURCES += common/crypto.cpp
 
 !nocloud {

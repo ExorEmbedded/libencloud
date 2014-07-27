@@ -1,6 +1,6 @@
-#include "utils.h"
+#include <encloud/Crypto>
+#include <encloud/Utils>
 #include "helpers.h"
-#include "crypto.h"
 #include "config.h"
 
 namespace libencloud {
@@ -119,23 +119,27 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
                         );
 }
 
-int execute (QString path, QStringList args, QString &out, bool wait)
+int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
 {
     QProcess p;
 
-    LIBENCLOUD_DBG("path: " << path << " args: " << args);
+    if (debug)
+        LIBENCLOUD_DBG(qPrintable(path) << " " << qPrintable(args.join(" ")));
 
     p.start(path, args);
 
     if (wait)
     {
         p.waitForFinished(-1);  // failure not critical
-        LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit);
+
+        LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit ||
+                p.exitCode());
     }
 
     out = p.readAll();
 
-    LIBENCLOUD_DBG("out: " << out);
+    if (debug)
+        LIBENCLOUD_DBG("out: " << out);
 
     return 0;
 err:

@@ -1,8 +1,8 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
 #include <QVariantMap>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 #include <setup/qcc/loginmsg.h>
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted

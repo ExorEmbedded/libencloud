@@ -2,9 +2,9 @@
 #include <encloud/Api/CommonApi>
 #include <encloud/Http/HttpHandler>
 #include <encloud/Json>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
-#include <common/utils.h>
 #include <http/handler.h>
 #include <http/handler1.h>
 

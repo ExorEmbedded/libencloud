@@ -1,7 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_CLOUD_VPNCONFIG_H_
 #define _LIBENCLOUD_PRIV_CLOUD_VPNCONFIG_H_
 
-#include <common/utils.h>
+#include <encloud/Utils>
 #include <common/config.h>
 
 namespace libencloud {

@@ -2,12 +2,28 @@
  * Helper crypto lib.
  */
 
-#ifndef _LIBENCLOUD_PRIV_CRYPTO_H_
-#define _LIBENCLOUD_PRIV_CRYPTO_H_
+#ifndef _LIBENCLOUD_CRYPTO_H_
+#define _LIBENCLOUD_CRYPTO_H_
 
 #include <encloud/Common>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
+
+namespace libencloud {
+namespace crypto {
+    
+LIBENCLOUD_DLLSPEC int certToString (const QString &path, QString &out,
+        bool verbose = false);
+
+LIBENCLOUD_DLLSPEC int p12SaveCa (const QString &p12Path,
+        const QString &password, const QString &caPath);
+LIBENCLOUD_DLLSPEC int p12SaveCert (const QString &p12Path,
+        const QString &password, const QString &certPath);
+LIBENCLOUD_DLLSPEC int p12SaveKey (const QString &p12Path,
+        const QString &password, const QString &keyPath);
+
+}  // namespace crypto
+}  // namespace libencloud
 
 #ifdef __cplusplus
 extern "C" {
