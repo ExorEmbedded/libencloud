@@ -21,14 +21,10 @@ namespace crypto {
 
 static QString _opensslPath()
 {
-#ifdef Q_OS_WIN32
-    return getBinDir() + "/openssl.exe";
-#else
-    return "/usr/bin/openssl";
-#endif
+    return getBinDir() + "/openssl" + LIBENCLOUD_EXE;
 }
 
-int certToString (const QString &path, QString &out, bool verbose)
+int certToString (const QString &path, QString &out)
 {
     QStringList args;
 
@@ -36,11 +32,7 @@ int certToString (const QString &path, QString &out, bool verbose)
     args << "-text";
     args << "-in" << path;
 
-    LIBENCLOUD_ERR_IF (utils::execute(_opensslPath(), args, out, verbose));
-
-    return 0;
-err:
-    return ~0;
+    return utils::execute(_opensslPath(), args, out, true, false);
 }
 
 static int _p12Cmd (const QString &p12Path, const QString &password, const QStringList &extraArgs)
@@ -55,7 +47,7 @@ static int _p12Cmd (const QString &p12Path, const QString &password, const QStri
 
     args.append(extraArgs);
 
-    return utils::execute(_opensslPath(), args, out, false);
+    return utils::execute(_opensslPath(), args, out, true, false);
 }
 
 int p12SaveCa (const QString &p12Path, const QString &password, const QString &caPath)

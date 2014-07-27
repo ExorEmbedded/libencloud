@@ -71,12 +71,14 @@ static char libEncloudTapNameBuffer [256];
 #ifdef Q_OS_WIN32  // relative paths - refer to src/common/config.cpp
 #  define LIBENCLOUD_EXE                ".exe"
 #  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
-#  define LIBENCLOUD_SBIN_PREFIX        "\\bin\\"   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
+#  define LIBENCLOUD_BIN_PREFIX         "\\bin\\"   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
+#  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
 #  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
 #  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
 #else  // unix - absolute paths
 #  define LIBENCLOUD_EXE                ""
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
+#  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
 #  define LIBENCLOUD_DATA_PREFIX        "/var/efw/encloud/"
 #  define LIBENCLOUD_LOG_PREFIX         "/var/log/encloud/"

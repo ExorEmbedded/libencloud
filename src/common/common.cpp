@@ -8,6 +8,8 @@
 
 namespace libencloud {
 
+static const QString sep = "/";
+
 LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
 {
     foreach (Param param, params)
@@ -17,10 +19,18 @@ LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
     return "";
 }
 
+LIBENCLOUD_DLLSPEC QString getBinDir (QString package)
+{
+#ifdef Q_OS_WIN32
+    return qGetEnv("ProgramFiles") + sep + LIBENCLOUD_BIN_PREFIX;
+#else  // Q_OS_UNIX
+    LIBENCLOUD_UNUSED(package);
+    return QString(LIBENCLOUD_BIN_PREFIX);
+#endif
+}
+
 LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 {
-    const QString sep = "/";
-
 #ifdef Q_OS_WIN32
     QString s;
     char szPath[MAX_PATH];

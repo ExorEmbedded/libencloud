@@ -123,6 +123,8 @@ int execute (QString path, QStringList args, QString &out, bool wait, bool debug
 {
     QProcess p;
 
+    LIBENCLOUD_ERR_IF (!QFileInfo(path).isExecutable());
+
     if (debug)
         LIBENCLOUD_DBG(qPrintable(path) << " " << qPrintable(args.join(" ")));
 
@@ -131,7 +133,7 @@ int execute (QString path, QStringList args, QString &out, bool wait, bool debug
     if (wait)
     {
         p.waitForFinished(-1);  // failure not critical
-
+        
         LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit ||
                 p.exitCode());
     }
