@@ -29,10 +29,12 @@ libencloud configuration
       "url" : "https://switchboard-host"          # override sb host
     },
     "auth" : "x509",                              # "user-pass" (default), "x509"
+    "authFormat" : "cert-key",                    # "cert-key" (default), "pkcs12" - OPTIONAL, only for "auth" = "x509"
     "verify_ca" : "false",                        # "true" (default), "false"
-    "ca" : "ca.pem",                              # REQUIRED for "auth" = "x509"
-    "cert" : "cert.pem",                          # REQUIRED for "auth" = "x509"
-    "key" : "key.pem"                             # REQUIRED for "auth" = "x509"
+    "ca" : "ca.pem",                              # REQUIRED for "auth" = "x509" / "cert-key"
+    "cert" : "cert.pem",                          # REQUIRED for "auth" = "x509" / "cert-key"
+    "key" : "key.pem"                             # REQUIRED for "auth" = "x509" / "cert-key"
+    "p12" : "auth.p12"                            # REQUIRED for "auth" = "x509" / "pkcs12"
 
     "init" : {                                      # initialization channel overrides
       "sb" : {
@@ -40,9 +42,10 @@ libencloud configuration
       },
       "auth" : "x509",                              # "user-pass" (default), "x509"
       "verify_ca" : "false",                        # "true" (default), "false"
-      "ca" : "init_ca.pem",                         # REQUIRED for "auth" = "x509"
-      "cert" : "init_cert.pem",                     # REQUIRED for "auth" = "x509"
-      "key" : "init_key.pem"                        # REQUIRED for "auth" = "x509"
+      "ca" : "init_ca.pem",                         # REQUIRED for "auth" = "x509" / "cert-key"
+      "cert" : "init_cert.pem",                     # REQUIRED for "auth" = "x509" / "cert-key"
+      "key" : "init_key.pem"                        # REQUIRED for "auth" = "x509" / "cert-key"
+      "p12" : "init.p12"                            # REQUIRED for "auth" = "x509" / "pkcs12"
     },
   
     "op" : {                                        # operation channel overrides
@@ -51,9 +54,10 @@ libencloud configuration
       },
       "auth" : "x509",                              # "user-pass" (default), "x509"
       "verify_ca" : "false",                        # "true" (default), "false"
-      "ca" : "op_ca.pem",                           # REQUIRED for "auth" = "x509"
-      "cert" : "op_cert.pem",                       # REQUIRED for "auth" = "x509"
-      "key" : "op_key.pem"                          # REQUIRED for "auth" = "x509"
+      "ca" : "op_ca.pem",                           # REQUIRED for "auth" = "x509" / "cert-key"
+      "cert" : "op_cert.pem",                       # REQUIRED for "auth" = "x509" / "cert-key"
+      "key" : "op_key.pem"                          # REQUIRED for "auth" = "x509" / "cert-key"
+      "p12" : "op.p12"                              # REQUIRED for "auth" = "x509" / "pkcs12"
     }
   },
 
