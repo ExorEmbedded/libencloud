@@ -8,6 +8,12 @@
 namespace libencloud 
 {
 
+/**
+ * Authentication object used to communicate credentials for:
+ *   - user/pass-based SSL and VPN connections
+ *   - user/pass-based proxy authentication
+ *   - decryption of PKCS12 files which contain X509 certificates/keys
+ */
 class LIBENCLOUD_DLLSPEC Auth
 {
 public:
@@ -22,25 +28,35 @@ public:
     }
     Id;
 
-    // only used for ProxyId
     typedef enum
     {
         NoneType = -1,
-        HttpType,
-        SocksType,
+
+        //
+        // (id == SwitchboardId)
+        //
+        UserpassType = 0,
+        CertificateType,
+        
+        //
+        // (id == ProxyId)
+        //
+        HttpProxyType = 10,
+        SocksProxyType,
         FirstType = NoneType,
-        LastType = SocksType
+        LastType = SocksProxyType
     }
     Type;
 
     Auth ();
     Auth (Id id, Type type = NoneType, QString url = "",
-            QString user = "", QString pass = "");
+            QString user = "", QString pass = "", QString path = "");
     Auth (const QString &id, QString type = "", QString url = "",
-            QString user = "", QString pass = "");
+            QString user = "", QString pass = "", QString path = "");
 
     bool isValid () const;
     QString toString () const;
+    friend LIBENCLOUD_DLLSPEC QDebug operator << (QDebug d, const Auth &auth);
 
     Id getId () const;
     int setId (Id id);
@@ -63,6 +79,9 @@ public:
     const QString &getPass () const;
     int setPass (const QString &pass);
 
+    const QString &getPath () const;
+    int setPath (const QString &path);
+
 protected:
     bool _valid;
     Id _id;
@@ -70,6 +89,7 @@ protected:
     QString _url;
     QString _user;
     QString _pass;
+    QString _path;
 };
 
 }  // namespace libencloud

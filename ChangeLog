@@ -1,10 +1,11 @@
 ChangeLog file for Endian libencloud
 
 libencloud 0.7:
+	- [CONNECT-131] Certificate-based VPN authentication
 	- [CONNECT-144] renaming: modeqic => modeqcc, qic => qcc,
 	  4iconnect => ConnectClient
-	- api: new Config API (json)
-	- api: rename '/api_v1' => '/api/v1'
+	- api: new Config API (json); rename '/api_v1' => '/api/v1'; 
+	  extra path parameter for x509 auth
 	- client: new get(), post() functions
 	- utils: interface is now public
 	- crypto: interface is now public, added new functions certToString(),

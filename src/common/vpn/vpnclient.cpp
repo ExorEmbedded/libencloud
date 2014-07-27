@@ -164,10 +164,10 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     switch (proxyAuth.getType())
     {
-        case (Auth::SocksType):
+        case (Auth::SocksProxyType):
             args << "--socks-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
             break;
-        case (Auth::HttpType):
+        case (Auth::HttpProxyType):
             args << "--http-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
             args << "auto";
 

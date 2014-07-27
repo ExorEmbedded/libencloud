@@ -12,8 +12,7 @@
 namespace libencloud {
 namespace crypto {
     
-LIBENCLOUD_DLLSPEC int certToString (const QString &path, QString &out,
-        bool verbose = false);
+LIBENCLOUD_DLLSPEC int certToString (const QString &path, QString &out);
 
 LIBENCLOUD_DLLSPEC int p12SaveCa (const QString &p12Path,
         const QString &password, const QString &caPath);

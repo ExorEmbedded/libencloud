@@ -40,6 +40,7 @@ void AuthApi::authSupply (const Auth &auth)
     _params.addQueryItem("url", auth.getUrl());
     _params.addQueryItem("user", auth.getUser());
     _params.addQueryItem("pass", auth.getPass());
+    _params.addQueryItem("path", auth.getPath());
 
     _client.run(url, _params, _headers, _config);
 }

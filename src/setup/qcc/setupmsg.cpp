@@ -1,5 +1,6 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
 #include <QSslCertificate>
+#include <QSslKey>
 #include <QVariantMap>
 #include <encloud/Utils>
 #include <common/common.h>
@@ -59,8 +60,6 @@ int SetupMsg::process ()
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration sslconf;
-    QString authData;
-    QString headerData;
     QSslCertificate cert;
     
     LIBENCLOUD_DBG("CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
@@ -72,24 +71,57 @@ int SetupMsg::process ()
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
-    authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
-    headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
-
     EMIT_ERROR_ERR_IF (_cfg == NULL);
+
     LIBENCLOUD_DELETE (_client);
-    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
+    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
+
+    // Switchboard is strict on this
+    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
+
+    // Initialization CA cert verification
+    sslconf.setCaCertificates(cas);
+
+    switch (_sbAuth.getType())
+    {
+        case Auth::UserpassType:
+        {
+            QString authData;
+            QString headerData;
+            authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
+            headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
+            headers["Authorization"] =  headerData.toLocal8Bit();
+            break;
+        }
+        case Auth::CertificateType:
+        {
+            QString p12Path = _sbAuth.getPath();
+            QString password = _sbAuth.getPass();
+            QTemporaryFile certFile;
+            QTemporaryFile keyFile;
+
+            EMIT_ERROR_ERR_IF (!certFile.open());
+            EMIT_ERROR_ERR_IF (crypto::p12SaveCert(p12Path, password, certFile.fileName()));
+            QSslCertificate cert(&certFile);
+            EMIT_ERROR_ERR_IF (cert.isNull());
+
+            EMIT_ERROR_ERR_IF (!keyFile.open());
+            EMIT_ERROR_ERR_IF (crypto::p12SaveKey(p12Path, password, keyFile.fileName()));
+            QSslKey key(&keyFile, QSsl::Rsa);
+            EMIT_ERROR_ERR_IF (key.isNull());
+
+            sslconf.setLocalCertificate(cert);
+            sslconf.setPrivateKey(key);
+            break;
+        }
+        default:
+            EMIT_ERROR_ERR_IF(1);
+    }
     
     url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QCC_CONFIG_URL);
 
     LIBENCLOUD_DBG("url: " << url);
-
-    // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
-    headers["Authorization"] =  headerData.toLocal8Bit();
-
-    // Initialization CA cert verification
-    sslconf.setCaCertificates(cas);
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
@@ -132,7 +164,7 @@ void SetupMsg::_clientComplete (const QString &response)
     emit processed();
 
 err:
-    _client->deleteLater();
+    sender()->deleteLater();
     return;
 }
 

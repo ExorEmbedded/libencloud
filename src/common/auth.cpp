@@ -17,7 +17,7 @@ Auth::Auth ()
 }
 
 Auth::Auth (Id id, Type type, QString url, 
-        QString user, QString pass)
+        QString user, QString pass, QString path)
     : _valid(false)
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
@@ -26,7 +26,8 @@ Auth::Auth (Id id, Type type, QString url,
             setType(type) ||
             setUrl(url) ||
             setUser(user) ||
-            setPass(pass))
+            setPass(pass) || 
+            setPath(path))
         goto err;
 
     _valid = true;
@@ -36,7 +37,7 @@ err:
 }
 
 Auth::Auth (const QString &id, QString type, QString url, 
-        QString user, QString pass)
+        QString user, QString pass, QString path)
     : _valid(false)
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
@@ -45,7 +46,8 @@ Auth::Auth (const QString &id, QString type, QString url,
             setStrType(type) ||
             setUrl(url) ||
             setUser(user) ||
-            setPass(pass))
+            setPass(pass) ||
+            setPath(path))
         goto err;
 
     _valid = true;
@@ -63,13 +65,21 @@ QString Auth::toString () const
 {
     QString s;
 
-    s += "id: " + getStrId() + ", ";
-    s += "type: " + getStrType() + ", ";
-    s += "url: " + getUrl() + ", ";
-    s += "user: " + getUser() + ", ";
-    s += "pass: <not shown>";
+    s += "valid: " +    QString::number(isValid()) + ", ";
+    s += "id: " +       getStrId() + ", ";
+    s += "type: " +     getStrType() + ", ";
+    s += "url: " +      getUrl() + ", ";
+    s += "user: " +     getUser() + ", ";
+    s += "pass: <not shown>, ";
+    s += "path: " +     getPath();
 
     return s;
+}
+
+QDebug operator << (QDebug d, const Auth &auth)
+{
+    d << auth.toString();
+    return d;
 }
 
 Auth::Id Auth::getId () const
@@ -131,9 +141,13 @@ const QString Auth::getStrType () const
 {
     switch (_type) 
     {
-        case Auth::HttpType:
+        case Auth::UserpassType:
+            return "user-pass";
+        case Auth::CertificateType:
+            return "x509";
+        case Auth::HttpProxyType:
             return "http";
-        case Auth::SocksType:
+        case Auth::SocksProxyType:
             return "socks";
         default:
             return "";
@@ -144,10 +158,14 @@ int Auth::setStrType (const QString &type)
 {
     if (type == "")
         _type = Auth::NoneType;
+    else if (type == "user-pass")
+        _type = Auth::UserpassType;
+    else if (type == "x509")
+        _type = Auth::CertificateType;
     else if (type == "http")
-        _type = Auth::HttpType;
+        _type = Auth::HttpProxyType;
     else if (type == "socks")
-        _type = Auth::SocksType;
+        _type = Auth::SocksProxyType;
     else
         return ~0;
 
@@ -159,9 +177,9 @@ Auth::Type Auth::typeFromQt (QNetworkProxy::ProxyType type)
     switch (type)
     {
         case QNetworkProxy::HttpProxy:
-            return Auth::HttpType;
+            return Auth::HttpProxyType;
         case QNetworkProxy::Socks5Proxy:
-            return Auth::SocksType;
+            return Auth::SocksProxyType;
         default:
             return Auth::NoneType;
     }
@@ -171,9 +189,9 @@ QNetworkProxy::ProxyType Auth::typeToQt (Type type)
 {
     switch (type)
     {
-        case Auth::HttpType:
+        case Auth::HttpProxyType:
             return QNetworkProxy::HttpProxy;
-        case Auth::SocksType:
+        case Auth::SocksProxyType:
             return QNetworkProxy::Socks5Proxy;
         default:
             return QNetworkProxy::NoProxy;
@@ -202,7 +220,7 @@ const QString &Auth::getUser () const
 
 int Auth::setUser (const QString &user)
 {
-    if (user == "")
+    if (_type != CertificateType && user == "")
         return ~0;
 
     _user = user;
@@ -215,12 +233,29 @@ const QString &Auth::getPass () const
     return _pass;
 }
 
+/* Password-based auth or password to decrypt PKCS12 */
 int Auth::setPass (const QString &pass)
 {
     if (pass == "")
         return ~0;
 
     _pass = pass;
+
+    return 0;
+}
+
+const QString &Auth::getPath () const
+{
+    return _path;
+}
+
+/* Password-based auth or password to decrypt PKCS12 */
+int Auth::setPath (const QString &path)
+{
+    if (_type == CertificateType && path == "")
+        return ~0;
+
+    _path = path;
 
     return 0;
 }

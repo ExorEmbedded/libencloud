@@ -5,8 +5,9 @@
 #include <common/config.h>
 #include "sec.h"
 
-#define TEST_URL "https://192.168.122.247/some/invalid/url"
-#define CA_CERT  "/tmp/ca.pem"
+#define TEST_URL        "https://192.168.122.247/some/invalid/url"
+#define TEST_CA_CERT    "/tmp/ca.pem"
+#define TEST_P12        "/tmp/test.p12"
 
 TestSec::TestSec ()
     : _client(NULL)
@@ -33,7 +34,7 @@ void TestSec::_testClient ()
 {
     static int i = 0;
     QMap<QByteArray, QByteArray> headers;
-    QList<QSslCertificate> cas(QSslCertificate::fromPath(CA_CERT));
+    QList<QSslCertificate> cas(QSslCertificate::fromPath(TEST_CA_CERT));
     QSslConfiguration sslconf;
 
     LIBENCLOUD_DELETE(_client);

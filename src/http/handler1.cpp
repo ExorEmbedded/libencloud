@@ -137,7 +137,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
 #ifdef LIBENCLOUD_MODE_QCC
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QString id, type, user, pass, aurl;
+            QString id, type, user, pass, path, aurl;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
@@ -160,8 +160,9 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
             aurl = url.queryItemValue("url");
             user = url.queryItemValue("user");
             pass = url.queryItemValue("pass");
+            path = url.queryItemValue("path");
 
-            Auth auth(id, type, aurl, user, pass);
+            Auth auth(id, type, aurl, user, pass, path);
 
             /* allow empty credentials for reset
             LIBENCLOUD_HANDLER_ERR_IF (!auth.isValid(),
