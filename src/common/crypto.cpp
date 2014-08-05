@@ -19,6 +19,46 @@
 namespace libencloud {
 namespace crypto {
 
+int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
+        QByteArray> &headers, QSslConfiguration &sslconf)
+{
+    switch (auth.getType())
+    {
+        case Auth::UserpassType:
+        {
+            headers["Authorization"] =  crypto::userpassToBasic(
+                    auth.getUser(), auth.getPass()).toLocal8Bit();
+            break;
+        }
+        case Auth::CertificateType:
+        {
+            QString p12Path = auth.getPath();
+            QString password = auth.getPass();
+
+            sslconf.setLocalCertificate(crypto::p12GetCert(p12Path, password));
+            sslconf.setPrivateKey(crypto::p12GetKey(p12Path, password));
+            break;
+        }
+        default:
+            return ~0;
+    }
+    
+    url.setUrl(auth.getUrl());
+
+    return 0;
+} 
+
+QString userpassToBasic (const QString &user, const QString &pass)
+{
+    QString authData;
+    QString headerData;
+
+    authData = user + ":" + pass;
+    headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
+
+    return headerData;
+}
+
 static QString _opensslPath()
 {
     return getBinDir() + "/openssl" + LIBENCLOUD_EXE;
@@ -50,6 +90,21 @@ static int _p12Cmd (const QString &p12Path, const QString &password, const QStri
     return utils::execute(_opensslPath(), args, out, true, false);
 }
 
+LIBENCLOUD_DLLSPEC QSslCertificate p12GetCa (const QString &p12Path,
+        const QString &password)
+{
+    QTemporaryFile certFile;
+    QSslCertificate cert(&certFile);
+
+    LIBENCLOUD_ERR_IF (!certFile.open());
+    LIBENCLOUD_ERR_IF (crypto::p12SaveCa(p12Path, password, certFile.fileName()));
+    LIBENCLOUD_ERR_IF (cert.isNull());
+
+    return cert;
+err:
+    return QSslCertificate();
+}
+
 int p12SaveCa (const QString &p12Path, const QString &password, const QString &caPath)
 {
     QStringList extraArgs;
@@ -61,6 +116,21 @@ int p12SaveCa (const QString &p12Path, const QString &password, const QString &c
     return (_p12Cmd(p12Path, password, extraArgs));
 }
 
+LIBENCLOUD_DLLSPEC QSslCertificate p12GetCert (const QString &p12Path,
+        const QString &password)
+{
+    QTemporaryFile certFile;
+    QSslCertificate cert(&certFile);
+
+    LIBENCLOUD_ERR_IF (!certFile.open());
+    LIBENCLOUD_ERR_IF (crypto::p12SaveCert(p12Path, password, certFile.fileName()));
+    LIBENCLOUD_ERR_IF (cert.isNull());
+
+    return cert;
+err:
+    return QSslCertificate();
+}
+
 int p12SaveCert (const QString &p12Path, const QString &password, const QString &certPath)
 {
     QStringList extraArgs;
@@ -70,6 +140,22 @@ int p12SaveCert (const QString &p12Path, const QString &password, const QString 
     extraArgs << "-clcerts";
 
     return (_p12Cmd(p12Path, password, extraArgs));
+}
+
+LIBENCLOUD_DLLSPEC QSslKey p12GetKey (const QString &p12Path,
+        const QString &password)
+{
+    QTemporaryFile keyFile;
+    QSslKey key(&keyFile, QSsl::Rsa);
+
+    LIBENCLOUD_ERR_IF (!keyFile.open());
+    LIBENCLOUD_ERR_IF (crypto::p12SaveKey(p12Path, password, keyFile.fileName()));
+    LIBENCLOUD_ERR_IF (key.isNull());
+
+    return key;
+
+err:
+    return QSslKey();
 }
 
 int p12SaveKey (const QString &p12Path, const QString &password, const QString &keyPath)

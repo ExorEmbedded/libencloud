@@ -22,14 +22,10 @@ int LoginMsg::process ()
     QUrl url;
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
-    QSslConfiguration config;
-    QString authData;
-    QString headerData;
+    QSslConfiguration sslconf;
+    QSslCertificate cert;
     QVariantMap data = _data.toMap();
-
-    EMIT_ERROR_ERR_IF (_cfg == NULL);
-    LIBENCLOUD_DELETE (_client);
-    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
+    QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
 
     if (!_sbAuth.isValid())
     {
@@ -37,10 +33,19 @@ int LoginMsg::process ()
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
-    authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
-    headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
+    EMIT_ERROR_ERR_IF (_cfg == NULL);
 
-    url.setUrl(_sbAuth.getUrl());
+    LIBENCLOUD_DELETE (_client);
+    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
+
+    // Switchboard is strict on this
+    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
+
+    // Initialization CA cert verification
+    sslconf.setCaCertificates(cas);
+
+    // Setup authentication data
+    EMIT_ERROR_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
 
     if (data["in"].toBool())
     {
@@ -53,15 +58,12 @@ int LoginMsg::process ()
 
     LIBENCLOUD_DBG("url: " << url);
 
-    // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
-    headers["Authorization"] =  headerData.toLocal8Bit();
-
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
-    _client->run(url, params, headers, config);
+    _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
+    _client->run(url, params, headers, sslconf);
 
     return 0;
 err:

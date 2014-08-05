@@ -1,6 +1,4 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
-#include <QSslCertificate>
-#include <QSslKey>
 #include <QVariantMap>
 #include <encloud/Utils>
 #include <common/common.h>
@@ -82,43 +80,9 @@ int SetupMsg::process ()
     // Initialization CA cert verification
     sslconf.setCaCertificates(cas);
 
-    switch (_sbAuth.getType())
-    {
-        case Auth::UserpassType:
-        {
-            QString authData;
-            QString headerData;
-            authData = _sbAuth.getUser() + ":" + _sbAuth.getPass();
-            headerData = "Basic " + QByteArray(authData.toLocal8Bit().toBase64());
-            headers["Authorization"] =  headerData.toLocal8Bit();
-            break;
-        }
-        case Auth::CertificateType:
-        {
-            QString p12Path = _sbAuth.getPath();
-            QString password = _sbAuth.getPass();
-            QTemporaryFile certFile;
-            QTemporaryFile keyFile;
+    // Setup authentication data
+    EMIT_ERROR_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
 
-            EMIT_ERROR_ERR_IF (!certFile.open());
-            EMIT_ERROR_ERR_IF (crypto::p12SaveCert(p12Path, password, certFile.fileName()));
-            QSslCertificate cert(&certFile);
-            EMIT_ERROR_ERR_IF (cert.isNull());
-
-            EMIT_ERROR_ERR_IF (!keyFile.open());
-            EMIT_ERROR_ERR_IF (crypto::p12SaveKey(p12Path, password, keyFile.fileName()));
-            QSslKey key(&keyFile, QSsl::Rsa);
-            EMIT_ERROR_ERR_IF (key.isNull());
-
-            sslconf.setLocalCertificate(cert);
-            sslconf.setPrivateKey(key);
-            break;
-        }
-        default:
-            EMIT_ERROR_ERR_IF(1);
-    }
-    
-    url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QCC_CONFIG_URL);
 
     LIBENCLOUD_DBG("url: " << url);

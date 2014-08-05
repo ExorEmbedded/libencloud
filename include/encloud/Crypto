@@ -5,21 +5,49 @@
 #ifndef _LIBENCLOUD_CRYPTO_H_
 #define _LIBENCLOUD_CRYPTO_H_
 
+#include <QByteArray>
+#include <QSslCertificate>
+#include <QSslConfiguration>
+#include <QSslKey>
+#include <QUrl>
+#include <encloud/Auth>
 #include <encloud/Common>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
 
 namespace libencloud {
 namespace crypto {
+
+//
+// Generic helpers
+//
+
+LIBENCLOUD_DLLSPEC int configFromAuth (const Auth &auth, QUrl &url,
+        QMap<QByteArray, QByteArray> &headers, QSslConfiguration
+        &sslconf);
     
+LIBENCLOUD_DLLSPEC QString userpassToBasic (const QString &user, const QString &pass);
+
 LIBENCLOUD_DLLSPEC int certToString (const QString &path, QString &out);
+
+//
+// PKCS#12 helpers
+//
 
 LIBENCLOUD_DLLSPEC int p12SaveCa (const QString &p12Path,
         const QString &password, const QString &caPath);
+LIBENCLOUD_DLLSPEC QSslCertificate p12GetCa (const QString &p12Path,
+        const QString &password);
+
 LIBENCLOUD_DLLSPEC int p12SaveCert (const QString &p12Path,
         const QString &password, const QString &certPath);
+LIBENCLOUD_DLLSPEC QSslCertificate p12GetCert (const QString &p12Path,
+        const QString &password);
+
 LIBENCLOUD_DLLSPEC int p12SaveKey (const QString &p12Path,
         const QString &password, const QString &keyPath);
+LIBENCLOUD_DLLSPEC QSslKey p12GetKey (const QString &p12Path,
+        const QString &password);
 
 }  // namespace crypto
 }  // namespace libencloud
