@@ -156,12 +156,29 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
 void Client::_networkError (QNetworkReply::NetworkError err)
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *> (sender());
+    QString extraMsg;
+    QVariantMap json;
+    bool ok;
 
-    CLIENT_DBG("err: " << reply->errorString());
+    CLIENT_DBG("err: " << QString::number(err));
+
+    // get message from Switchboard
+    extraMsg = reply->readAll();
+    json = json::parse(extraMsg, ok).toMap();
+
+    // default to errorString() if json error is not present or invalid
+    if (extraMsg == "" || json.isEmpty() || !ok || json["error"].isNull())
+        extraMsg = reply->errorString();
+    else
+        extraMsg = json["error"].toString();
 
     switch (err)
     {
-        case 1:  // make compiler happy
+        case QNetworkReply::UnknownContentError:
+        case QNetworkReply::ProtocolFailure:
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerError, extraMsg)));
+            break;
+
         case QNetworkReply::SslHandshakeFailedError:
 
             // already emitted in _sslErrors()
@@ -170,7 +187,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
             // else follow through
         default:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, reply->errorString())));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg)));
             break;
     }
 }
