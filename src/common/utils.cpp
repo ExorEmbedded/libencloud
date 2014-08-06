@@ -148,14 +148,42 @@ err:
     return ~0;
 }
 
-static QVariantMap _mapMerge (const QVariantMap &m1, const QVariantMap &m2)
+static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
 {
-    QVariantMap m = m1;
+    QVariantMap m = to;
 
-    for (QVariantMap::const_iterator iter = m2.begin();
-        iter != m2.end();
+    //LIBENCLOUD_DBG("to: " << to);
+    //LIBENCLOUD_DBG("from: " << from);
+
+    for (QVariantMap::const_iterator iter = from.begin();
+        iter != from.end();
         ++iter)
-        m[iter.key()] = iter.value();
+    {
+        //LIBENCLOUD_DBG("insert: " << iter.key() << " = " << iter.value());
+
+        QVariantMap fromMap = from[iter.key()].toMap();
+        QVariantMap newMap = m[iter.key()].toMap();
+
+        if (!newMap.isEmpty() && !fromMap.isEmpty())
+        {
+
+            for (QVariantMap::const_iterator iter2 = fromMap.begin();
+                    iter2 != fromMap.end();
+                    ++iter2)
+                newMap.insert(iter2.key(), iter2.value());
+
+            //LIBENCLOUD_DBG("fromMap: " << fromMap);
+            //LIBENCLOUD_DBG("newMap: " << newMap);
+
+            m[iter.key()] = newMap;
+        }
+        else 
+        {
+            m[iter.key()] = iter.value();
+        }
+    }
+
+    //LIBENCLOUD_DBG("m: " << m);
 
     return m;
 }
@@ -164,6 +192,9 @@ LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
 {
     QVariantMap mTo = to.toMap();
     QVariantMap mFrom = from.toMap();
+
+    //LIBENCLOUD_DBG("TO: " << to);
+    //LIBENCLOUD_DBG("FROM: " << from);
 
     for (QVariantMap::const_iterator iter = mFrom.begin();
         iter != mFrom.end();
@@ -181,7 +212,7 @@ LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
                     iter.value().toMap()
                     );
         }
-        else
+        else  // not a map - simple copy
         {
             mTo[iter.key()] = iter.value();
         }

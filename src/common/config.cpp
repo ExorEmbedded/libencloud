@@ -124,7 +124,7 @@ void Config::receive (const QVariant &cfg)
         utils::variantMerge(_json, cfg);
     }
 
-    LIBENCLOUD_DBG("new cfg: " << dump());
+    //LIBENCLOUD_DBG("new cfg: " << dump());
 
     LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
 
