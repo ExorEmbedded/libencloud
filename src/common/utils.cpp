@@ -7,7 +7,7 @@ namespace libencloud {
 namespace utils {
 
 /** \brief Hardware info used for Subject CN which has maximum 64 chars => return an MD5 checksum! */
-QString getHwInfo (void)
+LIBENCLOUD_DLLSPEC QString getHwInfo (void)
 {
     char *s = NULL;
     QString res;
@@ -36,7 +36,7 @@ err:
     return NULL;
 }
 
-QDateTime pytime2DateTime (QString pydate)
+LIBENCLOUD_DLLSPEC QDateTime pytime2DateTime (QString pydate)
 {
     // grab only finite part of float, convert to int64 then multiply by 1000 for fromMSecsSinceEpoch()
     return QDateTime::fromMSecsSinceEpoch(pydate.split(".")[0].toLongLong(NULL, 10)*1000);
@@ -119,7 +119,7 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
                         );
 }
 
-int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
+LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
 {
     QProcess p;
 

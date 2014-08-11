@@ -141,6 +141,9 @@ windows{
     isEmpty(OPENSSLPATH){
         OPENSSLPATH="c:\\openssl"
     }
+    !exists($$OPENSSLPATH) {
+        error("Missing openssl dependency - expected in $$OPENSSL_PATH") 
+    }
     INCLUDEPATH += "$$OPENSSLPATH\\include\\"
     LIBS += $$OPENSSLPATH\\lib\\libeay32.lib
 } else {
