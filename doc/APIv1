@@ -138,6 +138,7 @@
 
     e.g. 1              { "timeout" : "300" }
     e.g. 2              { "ssl" : { "verify_ca" : "false" } }
+    e.g. 3              { "log" : { "lev" : "7" } }
 
 
 [ Error Handling ]
