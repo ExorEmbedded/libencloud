@@ -30,7 +30,7 @@ int loadSslConfig (ProtocolType proto, Config *cfg, QUrl &url, QSslConfiguration
     // get CA cert(s)
     QSslCertificate ca;
     QList<QSslCertificate> cas(ca.fromPath(sslconfig->caPath.absoluteFilePath()));
-    LIBENCLOUD_DBG_IF (cas.empty(), "WARNING: missing CA cert!");
+    LIBENCLOUD_DBG_MSG_IF (cas.empty(), "WARNING: missing CA cert!");
 
     //log disabled by default due to small leak in QSslCertificate::subjectInfo()
 #if 0
