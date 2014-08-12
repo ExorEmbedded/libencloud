@@ -19,12 +19,14 @@ LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
     return "";
 }
 
-LIBENCLOUD_DLLSPEC QString getBinDir (QString package)
+/* \brief Where to look for application binaries (based on product) */
+LIBENCLOUD_DLLSPEC QString getBinDir ()
 {
 #ifdef Q_OS_WIN32
-    return qgetenv("ProgramFiles") + sep + LIBENCLOUD_BIN_PREFIX;
+    return qgetenv("ProgramFiles") + sep + \
+        QString(LIBENCLOUD_PRODUCTDIR) + sep + \
+        QString(LIBENCLOUD_BIN_PREFIX) + sep;
 #else  // Q_OS_UNIX
-    LIBENCLOUD_UNUSED(package);
     return QString(LIBENCLOUD_BIN_PREFIX);
 #endif
 }

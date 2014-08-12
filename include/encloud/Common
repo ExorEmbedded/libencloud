@@ -48,9 +48,9 @@ typedef QPair<QString, QString> Param;
 typedef QList<Param> Params;
 LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key);
 
-// win32: %ProgramFiles%/ORG/PRODUCT/PACKAGE
+// win32: %ProgramFiles%/ORG/PRODUCT/bin
 // unix: BIN_PREFIX
-LIBENCLOUD_DLLSPEC QString getBinDir (QString package = "");
+LIBENCLOUD_DLLSPEC QString getBinDir ();
 
 // win32: COMMON_APPDATA/ORG/PRODUCT/PACKAGE
 // unix: DATA_PREFIX
