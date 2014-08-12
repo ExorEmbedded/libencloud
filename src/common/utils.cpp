@@ -122,8 +122,9 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
 {
     QProcess p;
+    QFileInfo fi(path);
 
-    LIBENCLOUD_ERR_IF (!QFileInfo(path).isExecutable());
+    LIBENCLOUD_ERR_IF (!fi.isFile() || !fi.isExecutable());
 
     if (debug)
         LIBENCLOUD_DBG(qPrintable(path) << " " << qPrintable(args.join(" ")));
