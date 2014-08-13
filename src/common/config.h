@@ -68,9 +68,9 @@ public:
     Config ();
     ~Config ();
 
-    /* Configuration loading */
+    /* Configuration loading and debugging */
     int loadFromFile ();
-    static QVariantMap fileToJson (QString filename);
+    QVariant getVariant ();
     QString dump ();
 
     /* Configuration objects are publicly accessible */

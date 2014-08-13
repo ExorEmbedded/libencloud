@@ -123,6 +123,15 @@ int HttpHandler::setAction (const QString &action, const Params &params)
     return 0;
 }
 
+QVariant HttpHandler::getConfig () const
+{
+    LIBENCLOUD_ERR_IF (g_libencloudCfg == NULL);
+
+    return QVariant(g_libencloudCfg->getVariant());
+err:
+    return QVariant();
+}
+
 int HttpHandler::setConfig (const QVariant &config)
 {
     emit configSupplied(config);

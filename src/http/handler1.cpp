@@ -299,6 +299,17 @@ int ApiHandler1::_handle_config (const HttpRequest &request, HttpResponse &respo
 
     switch (httpMethodFromString(request.getMethod()))
     {
+        case LIBENCLOUD_HTTP_METHOD_GET:
+        {
+            QVariant config = _parent->getConfig();
+            bool ok;
+
+            QString content = json::serialize(config, ok);
+            LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
+            _setContent(request, response, content);
+
+            break;
+        }
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QString js;

@@ -63,6 +63,11 @@ public:
     // cloud
     //
     int setAction (const QString &action, const Params &params);
+
+    //
+    // config
+    //
+    QVariant getConfig () const;
     int setConfig (const QVariant &config);
 
 signals:

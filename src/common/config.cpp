@@ -55,6 +55,11 @@ Config::~Config()
     LIBENCLOUD_DELETE(sysSettings);
 }
 
+QVariant Config::getVariant ()
+{
+    return _json;
+}
+
 QString Config::dump ()
 {
     QString s;

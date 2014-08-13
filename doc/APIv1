@@ -132,6 +132,13 @@
 
 [ Config API ]
 
+* GET <e_url>/api/v1/config
+
+    e.g.    '{
+                 "log" : { "lev" : 3 }
+            '}
+
+
 * POST <e_url>/api/v1/config
 
    Content-Type = application/json
