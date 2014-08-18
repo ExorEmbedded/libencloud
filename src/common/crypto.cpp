@@ -34,18 +34,27 @@ int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
         {
             QString p12Path = auth.getPath();
             QString password = auth.getPass();
+            QSslCertificate cert = crypto::p12GetCert(p12Path, password);
+            QSslKey key = crypto::p12GetKey(p12Path, password);
 
-            sslconf.setLocalCertificate(crypto::p12GetCert(p12Path, password));
-            sslconf.setPrivateKey(crypto::p12GetKey(p12Path, password));
+            LIBENCLOUD_DBG("password: " << password);
+
+            LIBENCLOUD_ERR_IF (cert.isNull());
+            LIBENCLOUD_ERR_IF (key.isNull());
+
+            sslconf.setLocalCertificate(cert);
+            sslconf.setPrivateKey(key);
             break;
         }
         default:
-            return ~0;
+            goto err;
     }
     
     url.setUrl(auth.getUrl());
 
     return 0;
+err:
+    return ~0;
 } 
 
 QString userpassToBasic (const QString &user, const QString &pass)
@@ -120,10 +129,12 @@ LIBENCLOUD_DLLSPEC QSslCertificate p12GetCert (const QString &p12Path,
         const QString &password)
 {
     QTemporaryFile certFile;
-    QSslCertificate cert(&certFile);
+    QSslCertificate cert;
 
     LIBENCLOUD_ERR_IF (!certFile.open());
     LIBENCLOUD_ERR_IF (crypto::p12SaveCert(p12Path, password, certFile.fileName()));
+
+    cert = QSslCertificate(&certFile);
     LIBENCLOUD_ERR_IF (cert.isNull());
 
     return cert;
@@ -146,14 +157,15 @@ LIBENCLOUD_DLLSPEC QSslKey p12GetKey (const QString &p12Path,
         const QString &password)
 {
     QTemporaryFile keyFile;
-    QSslKey key(&keyFile, QSsl::Rsa);
+    QSslKey key;
 
     LIBENCLOUD_ERR_IF (!keyFile.open());
     LIBENCLOUD_ERR_IF (crypto::p12SaveKey(p12Path, password, keyFile.fileName()));
+
+    key = QSslKey(&keyFile, QSsl::Rsa);
     LIBENCLOUD_ERR_IF (key.isNull());
 
     return key;
-
 err:
     return QSslKey();
 }

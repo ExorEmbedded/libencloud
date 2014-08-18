@@ -123,6 +123,8 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
 {
     QProcess p;
     QFileInfo fi(path);
+    QProcess::ExitStatus exitStatus;
+    int exitCode;
 
     LIBENCLOUD_ERR_IF (!fi.isFile() || !fi.isExecutable());
 
@@ -134,9 +136,16 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
     if (wait)
     {
         p.waitForFinished(-1);  // failure not critical
+
+        exitStatus = p.exitStatus();
+        exitCode = p.exitCode();
+
+        if (debug)
+            LIBENCLOUD_DBG("exitStatus: " << QString::number(exitStatus) <<
+                           " exitCode: " << QString::number(exitCode));
         
-        LIBENCLOUD_ERR_IF (p.exitStatus() != QProcess::NormalExit ||
-                p.exitCode());
+        LIBENCLOUD_ERR_IF (exitStatus != QProcess::NormalExit);
+        LIBENCLOUD_ERR_IF (exitCode);
     }
 
     out = p.readAll();

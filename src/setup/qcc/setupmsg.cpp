@@ -72,7 +72,6 @@ int SetupMsg::process ()
     EMIT_ERROR_ERR_IF (_cfg == NULL);
 
     LIBENCLOUD_DELETE (_client);
-    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
@@ -81,11 +80,14 @@ int SetupMsg::process ()
     sslconf.setCaCertificates(cas);
 
     // Setup authentication data
-    EMIT_ERROR_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
+    LIBENCLOUD_EMIT_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf),
+            error(Error(Error::CodeBadCredentials)));
 
     url.setPath(LIBENCLOUD_SETUP_QCC_CONFIG_URL);
 
     LIBENCLOUD_DBG("url: " << url);
+
+    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));

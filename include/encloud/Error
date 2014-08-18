@@ -21,6 +21,7 @@ public:
         CodeSuccess =               0,
         CodeGeneric =               1,
         CodeSystemError =           2,
+        CodeBadCredentials =        10,
 
         CodeServiceUnreach =        100,
 

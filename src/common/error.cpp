@@ -159,6 +159,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Generic Error");
         case CodeSystemError:
             return QObject::tr("System Error - please check resource status");
+        case CodeBadCredentials:
+            return QObject::tr("Please check credentials");
 
         // 1xx
         case CodeServiceUnreach:
