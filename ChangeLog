@@ -1,6 +1,6 @@
 ChangeLog file for Endian libencloud
 
-libencloud 0.7:
+libencloud 0.7 (19/08/2014):
 	- [CONNECT-131] Certificate-based VPN authentication
 	- [CONNECT-144] renaming: modeqic => modeqcc, qic => qcc,
 	  4iconnect => ConnectClient
