@@ -10,7 +10,7 @@ win32 {
 } else {
     DDIR = ${INSTALL_ROOT}/$${CONFDIR}
 }
-FROM = $${CONFDIR}/$${CONFFILE}
+FROM = $${CONFFILE}
 TO = $${DDIR}/libencloud.json
 
 win32:FROM ~= s,/,\\,g
