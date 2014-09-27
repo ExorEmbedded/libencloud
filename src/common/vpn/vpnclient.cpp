@@ -146,6 +146,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
     {
         args << "--auth-user-pass";
+        args << "--auth-nocache";
     }
     else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
     {
