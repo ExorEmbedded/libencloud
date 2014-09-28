@@ -33,7 +33,7 @@ void SetupApi::poiRetrieve ()
 
     _msgType = PoiRetrieveType;
 
-    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] poi url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }
@@ -49,7 +49,7 @@ void SetupApi::licenseSupply (const QUuid &uuid)
 
     _msgType = LicenseSupplyType;
 
-    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] license url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }
@@ -65,7 +65,7 @@ void SetupApi::portSupply (int port)
 
     _msgType = PortSupplyType;
 
-    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] port url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }
@@ -80,14 +80,14 @@ void SetupApi::configRetrieve ()
 
     _msgType = ConfigRetrieveType;
 
-    LIBENCLOUD_DBG("url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] config url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }
 
 void SetupApi::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("err: " << err.toString());
+    LIBENCLOUD_DBG("[SetupApi] error: " << err.toString());
 
     switch (_msgType)
     {

@@ -31,7 +31,7 @@ void AuthApi::authSupply (const Auth &auth)
 
     url.setPath(LIBENCLOUD_API_AUTH_PATH);
 
-    LIBENCLOUD_DBG("url: " << url.toString() << 
+    LIBENCLOUD_DBG("[AuthApi] auth url: " << url.toString() << 
             ", auth: " << auth.toString());
 
     _params.clear();
@@ -51,7 +51,7 @@ void AuthApi::authSupply (const Auth &auth)
 
 void AuthApi::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("err: " << err.toString());
+    LIBENCLOUD_DBG("[AuthApi] error: " << err.toString());
 
     emit authSent(Api::ErrorRc);
 }

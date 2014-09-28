@@ -97,7 +97,7 @@ int Config::loadFromFile ()
     _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok);
     if (!ok || _json.isNull())
     {
-        LIBENCLOUD_DBG("Failed parsing config file: " << filePath.absoluteFilePath());
+        LIBENCLOUD_DBG("[Config] Failed parsing config file: " << filePath.absoluteFilePath());
         goto err;
     }
     _jsonOrig = _json;
@@ -115,7 +115,7 @@ err:
 
 void Config::receive (const QVariant &cfg)
 {
-    LIBENCLOUD_DBG("cfg: " << cfg);
+    LIBENCLOUD_DBG("[Config] cfg: " << cfg);
 
     LIBENCLOUD_ERR_IF (cfg.isNull());
 
@@ -129,7 +129,7 @@ void Config::receive (const QVariant &cfg)
         utils::variantMerge(_json, cfg);
     }
 
-    //LIBENCLOUD_DBG("new cfg: " << dump());
+    //LIBENCLOUD_DBG("[Config] new cfg: " << dump());
 
     LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
 

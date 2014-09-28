@@ -3,6 +3,7 @@
 
 #include <QFile>
 #include <QString>
+#include <QTcpServer>
 #include <QTextStream>
 #include <encloud/Common>
 
@@ -13,11 +14,17 @@
 #  define LIBENCLOUD_LOGGER_PATH  "/tmp/" LIBENCLOUD_PKGNAME "-log.txt"
 #endif
 
-/**
- * Sets up log handler for qDebug(), etc
- */
 namespace libencloud {
 
+/**
+ * The default behaviour of a Logger object is to simply install a custom
+ * message handler which writes to a file by using Qt's logging primitives
+ * qDebug(), qWarning(), etc. File logging can be customised via setPath() and
+ * setExtraMode().
+ * 
+ * The more advanced send() function can be used to send log messages to a
+ * remote listening LogListener which has been contacted via connect().
+ */
 class LIBENCLOUD_DLLSPEC Logger : public QObject
 {
     Q_OBJECT
@@ -28,6 +35,10 @@ public:
 
 public:
 
+    //
+    // file logging
+    //
+     
     // default is LIBENCLOUD_LOGGER_PATH
     int setPath (const QString &path);
 
@@ -37,18 +48,58 @@ public:
     // Note: to be called *after* open()
     bool isValid ();
 
+    //
+    // remote TCP logging
+    // 
+
+    int connectToListener (const QString &surl);
+
+    static int send (const QString &log);
+
 public slots:
     int open ();
     int close ();
 
-protected:
-    QString _path;
-    QIODevice::OpenModeFlag _extraMode;
+protected slots:
+    void _delayedConnect ();
+    void _clientStateChanged (QAbstractSocket::SocketState socketState);
+    void _clientConnected ();
+    void _clientError (QAbstractSocket::SocketError socketError);
 
+protected:
     bool _isValid;
 
-    QFile logFile;
-    QTextStream logText;
+    // file logging
+    QString _path;
+    QIODevice::OpenModeFlag _extraMode;
+    QFile _logFile;
+    QTextStream _logText;
+
+    // remote logging
+    static QTcpSocket *_client;
+};
+
+class LIBENCLOUD_DLLSPEC LogListener : public QTcpServer
+{
+    Q_OBJECT
+
+public:
+    LogListener();
+    ~LogListener();
+
+    int start (const QHostAddress &address, quint16 port);
+    int stop ();
+
+signals:
+    void log (const QString &line);
+
+protected:
+    void incomingConnection (int sd);
+
+private slots:
+    void _socketReadyRead ();
+    void _socketDisconnected ();
+    void _socketError (QAbstractSocket::SocketError socketError);
 };
 
 }  // namespace libencloud

@@ -33,7 +33,7 @@ Error::Error (Code code, QString extra)
 
     _isValid = true;
 
-    LIBENCLOUD_DBG(*this);
+    LIBENCLOUD_DBG("[Error] " << *this);
 err:
     return;
 }
@@ -47,7 +47,7 @@ Error::Error (const QString &msg)
     _desc = msg;
     _isValid = true;
 
-    LIBENCLOUD_DBG(*this);
+    LIBENCLOUD_DBG("[Error] " << *this);
 }
 
 bool Error::isValid () const   { return _isValid; }
@@ -240,7 +240,7 @@ void Retry::start ()
         secs = _timeout;
     }
 
-    LIBENCLOUD_DBG("retrying in " << QString::number(secs) << " seconds");
+    LIBENCLOUD_DBG("[Retry] in " << QString::number(secs) << " seconds");
 
     _timer.start(secs * 1000);
 }

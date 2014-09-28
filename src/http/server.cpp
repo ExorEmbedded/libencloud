@@ -59,9 +59,9 @@ int HttpServer::start (const QHostAddress &address, quint16 port)
         ;
     LIBENCLOUD_ERR_MSG_IF (i == MAX_ATTEMPTS,
             "Could not bind to any port - scanned " <<
-            QString::number(MAX_ATTEMPTS) << " ports from " << QString::number(port));
+            QString::number(MAX_ATTEMPTS) << " ports from " << QString::number(port - MAX_ATTEMPTS));
 
-    LIBENCLOUD_DBG("bound to port: " << QString::number(port));
+    LIBENCLOUD_DBG("[HttpServer] bound to port: " << QString::number(port));
 
     emit portBound(port);
 
@@ -164,7 +164,7 @@ void HttpServer::error (QAbstractSocket::SocketError socketError)
         case QAbstractSocket::RemoteHostClosedError:
             break;
         default:
-            LIBENCLOUD_DBG("err: " << QString::number(socket->error())
+            LIBENCLOUD_DBG("[HttpServer] err: " << QString::number(socket->error())
                     << " (" << socket->errorString() << ")");
     }
 

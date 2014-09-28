@@ -37,7 +37,7 @@ int Api::init ()
     // QCC needs to wait for encloud port settings;
     // other products use fixed port
 #ifdef LIBENCLOUD_MODE_QCC
-    LIBENCLOUD_DBG("Creating shared Settings object");
+    LIBENCLOUD_DBG("[Api] Creating shared Settings object");
 
     // API settings have System Scope (used by Encloud Service)
     __settings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
@@ -80,7 +80,7 @@ void Api::_settingsTimeout ()
 {
     if (!__settings->contains("port"))
     {
-        LIBENCLOUD_DBG("Waiting for Encloud Settings");
+        LIBENCLOUD_DBG("[Api] Waiting for Encloud Settings");
     }
     else 
     {
@@ -89,7 +89,7 @@ void Api::_settingsTimeout ()
         int port = __settings->value("port").toInt();
         __url.setPort(port);
 
-        LIBENCLOUD_DBG("Settings found - url: " << __url.toString());
+        LIBENCLOUD_DBG("[Api] Settings found - url: " << __url.toString());
 
         emit gotSettings();
     }

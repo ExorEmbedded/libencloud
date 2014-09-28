@@ -89,7 +89,7 @@ void VpnManager::attach (VpnClient *client, QString host, int port)
     LIBENCLOUD_RETURN_IF (client == NULL, );
     LIBENCLOUD_RETURN_IF (this->st == StateAttached, );
 
-    LIBENCLOUD_DBG("state: " << this->st << " host: " << host << " port: " << port);
+    LIBENCLOUD_DBG("[VPNManager] state: " << stateString(this->st) << " host: " << host << " port: " << port);
 
     detach(); // cleanup if we're reattaching
     this->st = StateAttaching;
@@ -137,7 +137,7 @@ void VpnManager::detach ()
 
     if (this->socket) 
     {
-        LIBENCLOUD_DBG("state: " << QString::number(this->socket->state()))
+        //LIBENCLOUD_DBG("[VPNManager] state: " << QString::number(this->socket->state()))
 
         if (this->socket->state() == QAbstractSocket::ConnectedState)
         {
@@ -172,7 +172,7 @@ void VpnManager::parseLine (QByteArray line)
     }
     else if (line.startsWith('>'))
     {
-        LIBENCLOUD_DBG("line: " << line);
+        LIBENCLOUD_DBG("[VPNManager] line: " << line);
 
         QByteArray msgType;
         QByteArray rest;
@@ -199,7 +199,7 @@ err:
 
 void VpnManager::parseLinePass (QByteArray rest)
 {
-//    LIBENCLOUD_DBG("rest: " << rest);
+//    LIBENCLOUD_DBG("[VPNManager] rest: " << rest);
 
     if (qstrcmp(rest, "Verification Failed: 'Auth'") == 0)
     {
@@ -239,7 +239,7 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else
     {
-        LIBENCLOUD_DBG("rest: " << rest);
+        LIBENCLOUD_DBG("[VPNManager] rest: " << rest);
         LIBENCLOUD_EMIT_ERR(sigError((this->err = UnhandledError)));
     }
 err:
@@ -316,7 +316,7 @@ err:
 
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
 {
-    LIBENCLOUD_DBG("type: " << type << " user: " << user << " pass: <not shown>");
+    LIBENCLOUD_DBG("[VPNManager] Sending auth type: " << type << " user: " << user << " pass: <not shown>");
 
     if (this->socket == NULL)
         return;
@@ -338,7 +338,7 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
 void VpnManager::authSupplied (const Auth &auth)
 {
-    LIBENCLOUD_DBG("type: " << auth.getType());
+    LIBENCLOUD_DBG("[VPNManager] type: " << auth.getType());
 
     switch (auth.getId())
     {
@@ -428,7 +428,7 @@ void VpnManager::bytesWritten (qint64 bytes)
 
 void VpnManager::socketError (QAbstractSocket::SocketError err)
 {
-    LIBENCLOUD_DBG("state: " << QString::number(this->st) << ", err: " << err);
+    LIBENCLOUD_DBG("[VPNManager] state: " << stateString(this->st) << ", err: " << err);
 
     // ignore errors if we're already detached
     LIBENCLOUD_RETURN_IF (this->st == StateDetached, );
@@ -438,12 +438,12 @@ void VpnManager::socketError (QAbstractSocket::SocketError err)
         case (QAbstractSocket::ConnectionRefusedError):
             if (this->attachRetries++ == LIBENCLOUD_VPNMANAGER_ATTACH_RETRIES)
             {
-                LIBENCLOUD_DBG("Reached maximum number retries - giving up");
+                LIBENCLOUD_DBG("[VPNManager] Reached maximum number retries - giving up");
                 this->attachRetries = 0;
                 LIBENCLOUD_EMIT_ERR(sigError((this->err = SocketError)));
                 break;
             }
-            LIBENCLOUD_DBG("Failed connecting to socket - retrying in 1 second");
+            LIBENCLOUD_DBG("[VPNManager] Failed connecting to socket - retrying in 1 second");
             QTimer::singleShot(1000, this, SLOT(retryAttach()));
             return; // remain in attaching state
         default:

@@ -34,7 +34,7 @@ int ConfigApi::configSupply (const QVariant &config)
 	QString js = json::serialize(config, ok);
 	LIBENCLOUD_ERR_IF (!ok);
 
-    LIBENCLOUD_DBG("url: " << url.toString() << ", data: " << js);
+    LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString() << ", data: " << js);
 
     _client.post(url, _headers, js.toAscii(), _config);
 
@@ -45,7 +45,7 @@ err:
 
 void ConfigApi::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("err: " << err.toString());
+    LIBENCLOUD_DBG("[ConfigApi] error: " << err.toString());
 
     emit configSent(Api::ErrorRc);
 }

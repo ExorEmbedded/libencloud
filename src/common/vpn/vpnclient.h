@@ -77,6 +77,7 @@ public slots:
 private slots:
     void processError (QProcess::ProcessError err);
     void processStarted ();
+    void processReadyRead ();
     void processFinished (int exitCode, QProcess::ExitStatus exitStatus);
 
 private:

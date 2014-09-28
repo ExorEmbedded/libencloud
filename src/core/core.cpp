@@ -214,7 +214,7 @@ err:
 
 void Core::_stateChanged (State state)
 {
-    LIBENCLOUD_DBG("state: " << QString::number(state) << " (" <<
+    LIBENCLOUD_DBG("[Core] state: " << QString::number(state) << " (" <<
             stateToString(state) << ")");
 
     // do stuff based on global state
@@ -224,7 +224,7 @@ void Core::_stateEntered ()
 {
     QState *state = qobject_cast<QState *>(sender());
 
-    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
+    LIBENCLOUD_DBG("[Core] state: " << state << " (" << _stateStr(state) << ")");
 
     if (state == _setupState)
     {
@@ -243,7 +243,7 @@ void Core::_stateExited ()
 {
     QState *state = qobject_cast<QState *>(sender());
 
-    LIBENCLOUD_DBG("state: " << state << " (" << _stateStr(state) << ")");
+    LIBENCLOUD_DBG("[Core] state: " << state << " (" << _stateStr(state) << ")");
 }
 
 void Core::_setupCompleted ()
@@ -261,7 +261,7 @@ void Core::_setupCompleted ()
 
     if (fallbackVpnConfig && fallbackVpnConfig->isValid())
     {
-        LIBENCLOUD_DBG("Fallback configuration found");
+        LIBENCLOUD_DBG("[Core] Fallback configuration found");
         LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
                     _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
                 error(Error(tr("Failed writing fallback configuration to file"))));
@@ -272,7 +272,7 @@ err:
 
 void Core::_fallback (bool isFallback)
 {
-    LIBENCLOUD_DBG("fallback: " << isFallback);
+    LIBENCLOUD_DBG("[Core] fallback: " << isFallback);
 
     _networkManager->setFallback(isFallback);
 
@@ -282,7 +282,7 @@ void Core::_fallback (bool isFallback)
 // Forward error state and message to http handler
 void Core::_errorReceived (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG(err);
+    LIBENCLOUD_DBG("[Core] " << err);
 
    // QCC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically (in internal modules)
@@ -307,7 +307,7 @@ void Core::_progressReceived (const Progress &p)
     pt.setTotal(_setup->getTotalSteps() + _cloud->getTotalSteps());
 #endif
 
-    LIBENCLOUD_DBG("descr: " << pt.getDesc() <<
+    LIBENCLOUD_DBG("[Core] descr: " << pt.getDesc() <<
                    " step: " << pt.getStep() <<
                    " total: " << pt.getTotal());
 
@@ -316,7 +316,7 @@ void Core::_progressReceived (const Progress &p)
 
 void Core::_authSupplied (const Auth &auth)
 {
-    LIBENCLOUD_DBG(auth.toString());
+    LIBENCLOUD_DBG("[Core] " << auth.toString());
 
     // proxy settings handled globally
     switch (auth.getId())
@@ -349,7 +349,7 @@ void Core::_authSupplied (const Auth &auth)
             if (_sbAuth.getUrl() != "")
                 _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
 
-            LIBENCLOUD_DBG("setting application proxy factory");
+            LIBENCLOUD_DBG("[Core] Setting application proxy factory");
 
             // lib takes ownership of our proxy factory
             QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
@@ -411,7 +411,7 @@ void Core::_clientPortReceived (int port)
     QString sp = QString::number(port);
     QUrl url;
 
-    LIBENCLOUD_DBG ("port: " << sp);
+    LIBENCLOUD_DBG ("[Core] port: " << sp);
 
     if (_clientWatchdog.isRunning())
         _clientWatchdog.stop();

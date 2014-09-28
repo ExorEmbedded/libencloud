@@ -23,7 +23,7 @@ LIBENCLOUD_DLLSPEC QString getHwInfo (void)
 #endif
     LIBENCLOUD_ERR_IF (hwInfo.isEmpty());
 
-    LIBENCLOUD_DBG("hwInfo=" << hwInfo);
+    LIBENCLOUD_DBG("[Utils] hwInfo: " << hwInfo);
 
     LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
@@ -74,7 +74,7 @@ LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 
     QByteArray ba;
     QString fn = fi.absoluteFilePath();
-    LIBENCLOUD_DBG("fn=" << fn);
+    LIBENCLOUD_DBG("[Utils] Reading file: " << fn);
     QFile f(fn);
 
     LIBENCLOUD_ERR_IF (!f.open(QIODevice::ReadOnly));
@@ -127,7 +127,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
     int exitCode;
 
     if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG) )
-        LIBENCLOUD_DBG(qPrintable(path) << " " << qPrintable(args.join(" ")));
+        LIBENCLOUD_DBG("[Utils] Exec "  << qPrintable(path) << " " << qPrintable(args.join(" ")));
 
     LIBENCLOUD_DBG_IF (!fi.isFile() || !fi.isExecutable());
 
@@ -141,7 +141,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
         exitCode = p.exitCode();
 
         if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG))
-            LIBENCLOUD_DBG("exitStatus: " << QString::number(exitStatus) <<
+            LIBENCLOUD_DBG("[Utils] Exec exitStatus: " << QString::number(exitStatus) <<
                            " exitCode: " << QString::number(exitCode));
         
         LIBENCLOUD_ERR_IF (exitStatus != QProcess::NormalExit);
@@ -151,7 +151,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
     out = p.readAll();
 
     if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG))
-        LIBENCLOUD_DBG("out: " << out);
+        LIBENCLOUD_DBG("[Utils] Exec output: " << out);
 
     return 0;
 err:

@@ -25,12 +25,11 @@ int loadSslConfig (ProtocolType proto, Config *cfg, QUrl &url, QSslConfiguration
     }
 
     url = sslconfig->sbUrl;
-    LIBENCLOUD_DBG("url=" << url.toString());
 
     // get CA cert(s)
     QSslCertificate ca;
     QList<QSslCertificate> cas(ca.fromPath(sslconfig->caPath.absoluteFilePath()));
-    LIBENCLOUD_DBG_MSG_IF (cas.empty(), "WARNING: missing CA cert!");
+    LIBENCLOUD_DBG_MSG_IF (cas.empty(), "[SSL] WARNING: missing CA cert!");
 
     //log disabled by default due to small leak in QSslCertificate::subjectInfo()
 #if 0
@@ -54,7 +53,9 @@ int loadSslConfig (ProtocolType proto, Config *cfg, QUrl &url, QSslConfiguration
     kfile.open(QIODevice::ReadOnly | QIODevice::Text);
     QSslKey key(&kfile, QSsl::Rsa);
     LIBENCLOUD_RETURN_MSG_IF (key.isNull(), ~0, "missing key!");
-    LIBENCLOUD_DBG("Key length=" << key.length() << " algorithm=" << key.algorithm());
+
+    LIBENCLOUD_DBG("[SSL] url=" << url.toString() << " Key length=" <<
+            key.length() << " algorithm=" << key.algorithm());
 
     sslcfg.setCaCertificates(cas);
     sslcfg.setLocalCertificate(certs.first());

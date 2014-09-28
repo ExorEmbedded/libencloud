@@ -1,5 +1,6 @@
 #include <QNetworkProxy>
 #include <QSslCertificate>
+#include <encloud/Logger>
 #include <encloud/Utils>
 #include <common/vpn/vpnconfig.h>
 #include <common/vpn/vpnclient.h>
@@ -107,7 +108,8 @@ void VpnClient::setState (VpnClient::State st)
     if (st == state())
         return;
 
-    LIBENCLOUD_DBG("state: " << QString::number(st));
+    LIBENCLOUD_DBG("[VPNClient] state: " << QString::number(st) <<
+            " (" << stateString(st) << ")");
 
     LIBENCLOUD_RETURN_IF (!VpnClient::checkState(st), );
 
@@ -127,7 +129,8 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     QString caCertPath;
     VpnConfig config;
 
-    args << "--log" << _cfg->logPrefix + LIBENCLOUD_VPN_LOG_FILE;
+    // we no longer log to file - messages are logged to encloud and forwarded to client
+    //args << "--log" << _cfg->logPrefix + LIBENCLOUD_VPN_LOG_FILE;
 
     configPath = vpnConfigPath;
     args << "--config" << configPath;
@@ -220,7 +223,7 @@ void VpnClient::start (bool fallback)
 
     if (this->process != NULL)
     {
-        LIBENCLOUD_DBG("already started");
+        LIBENCLOUD_DBG("[VPNClient] error: already started");
         return;
     }
 
@@ -239,13 +242,13 @@ void VpnClient::start (bool fallback)
     args = getArgs(configPath);
     if (args.empty())
     {
-        LIBENCLOUD_DBG("invalid arguments");
+        LIBENCLOUD_DBG("[VPNClient] error: invalid arguments");
         return;
     }
 
     path = _cfg->config.vpnExePath.absoluteFilePath();
 
-    LIBENCLOUD_DBG("fallback: " << fallback << ", path: " << path);
+    LIBENCLOUD_DBG("[VPNClient] fallback: " << fallback << ", path: " << path);
 
     file = QFileInfo(path);
     LIBENCLOUD_EMIT_ERR_IF (!file.isFile() || !file.isExecutable(),
@@ -255,16 +258,18 @@ void VpnClient::start (bool fallback)
     LIBENCLOUD_EMIT_ERR_IF (this->process == NULL,
             sigError(this->err = MemoryError));
 
-    this->process->setProcessChannelMode(QProcess::ForwardedChannels);
+    this->process->setProcessChannelMode(QProcess::MergedChannels);
 
     connect(this->process, SIGNAL(error(QProcess::ProcessError)), this,
             SLOT(processError(QProcess::ProcessError)));
     connect(this->process, SIGNAL(started()), this,
             SLOT(processStarted()));
+    connect(this->process, SIGNAL(readyRead()), this,
+            SLOT(processReadyRead()));
     connect(this->process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(processFinished(int, QProcess::ExitStatus)));
 
-    LIBENCLOUD_DBG("starting " << QString(path +
+    LIBENCLOUD_DBG("[VPNClient] Starting " << QString(path +
             "  " + args.join(" ")));
 
     this->process->start(path, args);
@@ -286,7 +291,7 @@ void VpnClient::stop (void)
 
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_DBG("state: " << QString::number(this->process->state()));
+    //LIBENCLOUD_DBG("[VPNClient] state: " << QString::number(this->process->state()));
 
     if (this->process->state() != QProcess::NotRunning)
     {
@@ -330,7 +335,7 @@ void VpnClient::processError (QProcess::ProcessError err)
 {
     QString errStr = this->process->errorString();
 
-    LIBENCLOUD_DBG("err: " << err << " (" << errStr << ")");
+    LIBENCLOUD_DBG("[VPNClient] error: " << err << " (" << errStr << ")");
 
     emit sigError((this->err = ProcessError), errStr);
 
@@ -343,6 +348,26 @@ void VpnClient::processStarted ()
     LIBENCLOUD_TRACE;
 
     emit stateChanged((this->st = StateStarted));
+}
+
+void VpnClient::processReadyRead ()
+{
+    QProcess *process = qobject_cast<QProcess *> (sender());
+    QString log = process->readAllStandardOutput() + process->readAllStandardError();
+
+    foreach  (QString line, log.split(QRegExp("[\r\n]"), QString::SkipEmptyParts))
+    {
+        // remove leading timestamp
+        line.remove(0, QString("Day Mon dd hh:mm:ss yyyy ").count()).prepend("[VPN] ");
+
+        //LIBENCLOUD_DBG("-> logger: " << line);
+
+        // send message to remote LogListener
+        LIBENCLOUD_ERR_IF(Logger::send(line));
+    }
+
+err:
+    return;
 }
 
 void VpnClient::processFinished (int exitCode, QProcess::ExitStatus exitStatus)

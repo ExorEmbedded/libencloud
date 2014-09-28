@@ -88,7 +88,7 @@ err:
 
 int HttpHandler::setAuth (const Auth &auth)
 {
-    LIBENCLOUD_DBG(auth.toString());
+    LIBENCLOUD_DBG("[Http] " << auth.toString());
 
     switch (auth.getId())
     {
@@ -116,7 +116,7 @@ const QVariant &HttpHandler::getServerConfig () const
 
 int HttpHandler::setAction (const QString &action, const Params &params)
 {
-    LIBENCLOUD_DBG("action: " << action << ", params: " << params);
+    LIBENCLOUD_DBG("[Http] " << "action: " << action << ", params: " << params);
 
     emit actionRequest(action, params);
 
@@ -209,14 +209,14 @@ void HttpHandler::_coreProgressReceived (const Progress &progress)
 
 void HttpHandler::_coreFallbackReceived (bool isFallback)
 {
-    LIBENCLOUD_DBG("isFallback: " << isFallback);
+    LIBENCLOUD_DBG("[Http] isFallback: " << isFallback);
 
     _isFallback = isFallback;
 }
 
 void HttpHandler::_needReceived (const QString &what)
 {
-    LIBENCLOUD_DBG("what: " << what);
+    LIBENCLOUD_DBG("[Http] what: " << what);
 
     if (!_needs.contains(what))
         _needs.append(what);
@@ -224,7 +224,7 @@ void HttpHandler::_needReceived (const QString &what)
 
 void HttpHandler::_serverConfigReceived (const QVariant &config)
 {
-    LIBENCLOUD_DBG("config: " << config);
+    LIBENCLOUD_DBG("[Http] config: " << config);
 
     _serverConfig = config;
 }

@@ -30,7 +30,7 @@ Client::Client ()
 
 void Client::setVerifyCA (bool b) 
 {
-    LIBENCLOUD_DBG("b: " << b);
+    LIBENCLOUD_DBG("[Client] verify CA: " << b);
 
     _verifyCA = b;
 }
@@ -61,7 +61,7 @@ void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 		const QByteArray &data, const QSslConfiguration &conf)
 {
-    CLIENT_DBG("url: " << url.toString());
+    CLIENT_DBG("[Client] to: " << url.toString());
     //CLIENT_DBG(" ### >>>>> ### " << data);
 
     QNetworkRequest request(url);
@@ -69,7 +69,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     _sslError = false;
 
     if (conf.caCertificates().count()) {
-        LIBENCLOUD_DBG("CA Cert issuer: " <<
+        LIBENCLOUD_DBG("[Client] CA Cert issuer: " <<
                 conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
     }
     request.setSslConfiguration(conf);
@@ -135,7 +135,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
                 }
                 // else follow through/ignore
             case QSslError::HostNameMismatch:
-                CLIENT_DBG("IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
                 ignoreErrors.append(err);
                 break;
             default:
@@ -144,7 +144,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
                 break;
 
 #if 0
-            CLIENT_DBG("Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
+            CLIENT_DBG("[Client] Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
                     " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
 #endif
         }
@@ -160,8 +160,6 @@ void Client::_networkError (QNetworkReply::NetworkError err)
     QVariantMap json;
     bool ok;
 
-    CLIENT_DBG("err: " << QString::number(err));
-
     // get message from Switchboard
     extraMsg = reply->readAll();
     json = json::parse(extraMsg, ok).toMap();
@@ -171,6 +169,8 @@ void Client::_networkError (QNetworkReply::NetworkError err)
         extraMsg = reply->errorString();
     else
         extraMsg = json["error"].toString();
+
+    CLIENT_DBG("[Client] error: " << extraMsg);
 
     switch (err)
     {
@@ -207,11 +207,11 @@ void Client::_finished (QNetworkReply *reply)
     //  - key values mismatch (99)
 
     LIBENCLOUD_ERR_MSG_IF (reply->error(),
-            "Error in reply (" << reply->error() << "): " << reply->errorString());
+            "[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
 
     response = reply->readAll();
 
-    CLIENT_DBG(" ### <<<<< ### " << response);
+    CLIENT_DBG("[Client] ### <<<<< ### " << response);
 
     reply->deleteLater();
 

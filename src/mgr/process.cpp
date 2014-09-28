@@ -80,7 +80,7 @@ bool Process::getDetached ()
 
 void Process::processError (QProcess::ProcessError err)
 {
-    LIBENCLOUD_DBG("err: " << err << " (" << _process->errorString() << ")") ;
+    LIBENCLOUD_DBG("[Process] err: " << err << " (" << _process->errorString() << ")") ;
 
     emit stateChanged((_state = StateIdle));
 }
@@ -106,7 +106,7 @@ err:
 
 void Process::processZombie ()
 {
-    LIBENCLOUD_DBG("path: " << _path << ", args: " << _args);
+    LIBENCLOUD_DBG("[Process] path: " << _path << ", args: " << _args);
 
     emit stateChanged((_state = StateZombie));
 }

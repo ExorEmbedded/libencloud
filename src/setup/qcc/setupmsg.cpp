@@ -85,7 +85,7 @@ int SetupMsg::process ()
 
     url.setPath(LIBENCLOUD_SETUP_QCC_CONFIG_URL);
 
-    LIBENCLOUD_DBG("url: " << url);
+    LIBENCLOUD_DBG("[Setup] Requesting configuration from URL: " << url);
 
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 

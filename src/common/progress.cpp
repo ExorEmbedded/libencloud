@@ -22,7 +22,7 @@ Progress::Progress (const QString &desc, int step, int total)
     LIBENCLOUD_ERR_IF (step <= 0);
     LIBENCLOUD_ERR_IF (total <= 0);
 
-    LIBENCLOUD_DBG(toString());
+    LIBENCLOUD_DBG("[Progress] " << toString());
 
     _isValid = true;
 

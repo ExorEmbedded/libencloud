@@ -16,7 +16,7 @@ ProcessManager::ProcessManager ()
 
 ProcessManager::~ProcessManager ()
 {
-    LIBENCLOUD_DBG("count: " << _processes.count());
+    LIBENCLOUD_DBG("[ProcessManager] count: " << QString::number(_processes.count()));
 
     qDeleteAll (_processes);
 }
@@ -69,7 +69,7 @@ QProcess *ProcessManager::startEx (bool detach, const QString &path, const QStri
     QProcess *qProcess = NULL;
     Process *process = NULL;
         
-    LIBENCLOUD_DBG("detach: " << detach << ", path: " << path << ", args: " << args);
+    LIBENCLOUD_DBG("[ProcessManager] Executing - detach: " << detach << ", path: " << path << ", args: " << args);
 
     process = new Process(path, args);
     LIBENCLOUD_ERR_IF (process == NULL);

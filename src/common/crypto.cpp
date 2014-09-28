@@ -37,7 +37,7 @@ int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
             QSslCertificate cert = crypto::p12GetCert(p12Path, password);
             QSslKey key = crypto::p12GetKey(p12Path, password);
 
-            LIBENCLOUD_DBG("password: " << password);
+            //LIBENCLOUD_DBG("[Crypto] password: " << password);
 
             LIBENCLOUD_ERR_IF (cert.isNull());
             LIBENCLOUD_ERR_IF (key.isNull());

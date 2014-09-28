@@ -61,7 +61,7 @@ QString NetworkManager::errorString (Error err)
 
 void NetworkManager::setGateway (const QString &addr)
 {
-    LIBENCLOUD_DBG("addr: " << addr);
+    LIBENCLOUD_DBG("[Network] gateway addr: " << addr);
 
     LIBENCLOUD_ERR_IF (QHostAddress(addr).isNull());
 
@@ -72,7 +72,7 @@ err:
 
 void NetworkManager::setFallbackGateway (const QString &addr)
 {
-    LIBENCLOUD_DBG("addr: " << addr);
+    LIBENCLOUD_DBG("[Network] fallback addr: " << addr);
 
     LIBENCLOUD_ERR_IF (QHostAddress(addr).isNull());
 
@@ -93,7 +93,7 @@ void NetworkManager::syncRoutes (const QStringList &connectedEndpoints)
 {
     LIBENCLOUD_RETURN_IF (_gw == "", );
 
-    LIBENCLOUD_DBG("gateway: " << _gw << ", endpoints: " << connectedEndpoints);
+    LIBENCLOUD_DBG("[Network] Syncing routes gateway: " << _gw << ", endpoints: " << connectedEndpoints);
 
     _connectedEndpoints = connectedEndpoints;
 
@@ -125,13 +125,13 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
             currentRoutes.append(regex.capturedTexts());
     }
 
-    LIBENCLOUD_DBG("previous: " << _previousEndpoints <<
+    LIBENCLOUD_DBG("[Network] previous: " << _previousEndpoints <<
                    " current: " << currentRoutes <<
                    " connected: " << _connectedEndpoints);
 
     if (_connectedEndpoints.empty())
     {
-        LIBENCLOUD_DBG("clearing previous endpoints");
+        LIBENCLOUD_DBG("[Network] Clearing previous endpoints");
         _previousEndpoints.clear();
     }
 

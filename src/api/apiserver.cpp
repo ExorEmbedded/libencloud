@@ -93,7 +93,7 @@ int Server::setInitialPort (int port)
 
 void Server::vpnIpAssigned (const QString &ip)
 {
-    LIBENCLOUD_DBG ("ip: " << ip);
+    LIBENCLOUD_DBG ("[ApiServer] Assigned ip: " << ip);
 
     if (_cloudServer == NULL)
         return;
@@ -123,12 +123,12 @@ int Server::start ()
     // initially listens only on local interface, unless configured differently
     if (_cfg && _cfg->config.bind == "all")
     {
-        LIBENCLOUD_DBG("Binding to all interfaces");
+        LIBENCLOUD_DBG("[ApiServer] Binding to all interfaces");
         _localServer->start(QHostAddress::Any, _port);
     }
     else
     {
-        LIBENCLOUD_DBG("Binding only to local interface");
+        LIBENCLOUD_DBG("[ApiServer] Binding only to local interface");
         _localServer->start(QHostAddress(LIBENCLOUD_SRV_LISTEN), _port);
     }
 
