@@ -40,6 +40,7 @@ public slots:
     // QCC-only
     //
     void portSupply (int port);
+    void logPortSupply (int port);
     void configRetrieve ();
 
 signals:
@@ -62,6 +63,7 @@ signals:
     // QCC-only
     //
     void portSent (libencloud::Api::ResultCode rc);
+    void logPortSent (libencloud::Api::ResultCode rc);
     void configReceived (libencloud::Api::ResultCode rc,
             const QVariant &config);
 
@@ -78,6 +80,7 @@ protected:
         PoiRetrieveType,
         LicenseSupplyType,
         PortSupplyType,
+        LogPortSupplyType,
         ConfigRetrieveType
     }
     MsgType; 

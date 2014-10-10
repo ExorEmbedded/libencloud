@@ -65,6 +65,7 @@ private slots:
     void _authSupplied (const Auth &auth);
     void _authRequired (Auth::Id id);
     void _clientPortReceived (int port);
+    void _logPortReceived (int port);
     void _serverConfigReceived (const QVariant &variant);
     void _actionRequest (const QString &action, const Params &params);
     void _clientDown ();
@@ -97,6 +98,7 @@ private:
 
     CloudApi *_cloudApi;
     int _clientPort;
+    int _logPort;
     Watchdog _clientWatchdog;
 
     NetworkManager *_networkManager;

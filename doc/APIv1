@@ -3,10 +3,15 @@
 | Encloud API v1 |
 ==================
 
+[ Updates ]
+
+    1.1:
+        - setup: logPort setting
 
 [  Type definitions ]
 
      <bool>     Boolean - "true" | "false"
+     <short>    Integer between 0 and 65535
      <uuid>     Universally Unique Identifier - e.g. "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
      <sb_url>   Switchboard URL
      <e_url>    Encloud URL
@@ -84,10 +89,14 @@
 
 * POST <e_url>/api/v1/setup                 Client: QCC
 
-    Def "clientPort"    <int> Port at which client can be reached - set by GUI and used by Encloud 
+    Def "clientPort"    <short> Port at which client can be reached - set by GUI and used by Encloud 
                         to forward application open/close requests via Cloud API
 
     e.g.                clientPort=12345
+
+    Def "logPort"       <short> Port at which LogListener can be reached - set by GUI and used by Encloud 
+
+    e.g.                logPort=12345
 
 * GET <e_url>/api/v1/setup                  Client: QCC
 

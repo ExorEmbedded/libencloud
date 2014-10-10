@@ -77,9 +77,22 @@ int HttpHandler::setClientPort (int port)
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (port < 0 || port > 65536);
+    LIBENCLOUD_ERR_IF (port <= 0 || port > 65535);
 
     emit clientPortSend(port);
+
+    return 0;
+err:
+    return ~0;
+}
+
+int HttpHandler::setLogPort (int port)
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (port <= 0 || port > 65535);
+
+    emit logPortSend(port);
 
     return 0;
 err:

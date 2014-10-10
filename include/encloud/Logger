@@ -52,7 +52,7 @@ public:
     // remote TCP logging
     // 
 
-    int connectToListener (const QString &surl);
+    static int connectToListener (const QString &surl);
 
     static int send (const QString &log);
 
@@ -61,7 +61,6 @@ public slots:
     int close ();
 
 protected slots:
-    void _delayedConnect ();
     void _clientStateChanged (QAbstractSocket::SocketState socketState);
     void _clientConnected ();
     void _clientError (QAbstractSocket::SocketError socketError);
@@ -91,6 +90,7 @@ public:
     int stop ();
 
 signals:
+    void portBound (int port);
     void log (const QString &line);
 
 protected:

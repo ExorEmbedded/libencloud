@@ -66,8 +66,6 @@ int Logger::open ()
         __default_log_handler = prev_log_handler;
     }
 
-    QTimer::singleShot(1000, this, SLOT(_delayedConnect()));
-
     _isValid = true;
 
     LIBENCLOUD_TRACE;
@@ -124,16 +122,6 @@ int Logger::connectToListener (const QString &surl)
     return 0;
 err:
     return ~0;
-}
-
-void Logger::_delayedConnect ()
-{
-    LIBENCLOUD_TRACE;
-
-    LIBENCLOUD_ERR_IF (connectToListener("tcp://127.0.0.1:4321"));
-
-err:
-    return;
 }
 
 QTcpSocket *Logger::_client = NULL;
@@ -219,7 +207,7 @@ int LogListener::start (const QHostAddress &address, quint16 port)
 
     LIBENCLOUD_DBG("[LogListener] Bound to port: " << QString::number(port));
 
-    //emit portBound(port);
+    emit portBound(port);
 
     return 0;
 err:
@@ -267,7 +255,7 @@ void LogListener::_socketDisconnected ()
 {
     LIBENCLOUD_TRACE;
 
-    QTcpSocket* socket = (QTcpSocket*)sender();
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     socket->deleteLater();
 }
 
@@ -275,7 +263,7 @@ void LogListener::_socketError (QAbstractSocket::SocketError socketError)
 {
     Q_UNUSED(socketError);
 
-    QTcpSocket *socket = (QTcpSocket*) sender();
+    QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
 
     LIBENCLOUD_DBG("[LogListener] error: " << QString::number(socket->error())
             << " (" << socket->errorString() << ")");

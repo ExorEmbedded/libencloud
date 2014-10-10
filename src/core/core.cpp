@@ -3,6 +3,7 @@
 #include <encloud/Core>
 #include <encloud/Crypto>
 #include <encloud/Info>
+#include <encloud/Logger>
 #include <encloud/Progress>
 #include <encloud/Proxy>
 #include <encloud/Utils>
@@ -32,6 +33,7 @@ Core::Core (Mode mode)
     , _cloudState(&_cloudSt)
     , _cloudApi(NULL)
     , _clientPort(-1)
+    , _logPort(-1)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
 {
@@ -171,6 +173,8 @@ int Core::attachServer (Server *server)
 #ifdef LIBENCLOUD_MODE_QCC
     connect(obj, SIGNAL(clientPortSend(int)), 
             this, SLOT(_clientPortReceived(int)));
+    connect(obj, SIGNAL(logPortSend(int)), 
+            this, SLOT(_logPortReceived(int)));
     connect(this, SIGNAL(serverConfigSupply(QVariant)), 
             obj, SLOT(_serverConfigReceived(QVariant)));
 #endif
@@ -411,7 +415,7 @@ void Core::_clientPortReceived (int port)
     QString sp = QString::number(port);
     QUrl url;
 
-    LIBENCLOUD_DBG ("[Core] port: " << sp);
+    LIBENCLOUD_DBG ("[Core] client port: " << sp);
 
     if (_clientWatchdog.isRunning())
         _clientWatchdog.stop();
@@ -426,6 +430,17 @@ void Core::_clientPortReceived (int port)
     // _clientDown() will be invoked upon down() signal
 
     _clientPort = port;
+}
+
+void Core::_logPortReceived (int port)
+{
+    QString sp = QString::number(port);
+
+    LIBENCLOUD_DBG ("[Core] log port: " << sp);
+
+    _logPort = port;
+
+    Logger::connectToListener("tcp://127.0.0.1:" + sp);
 }
 
 // This handler is triggered for all API receivers

@@ -56,6 +56,7 @@ public:
 #endif
 
     int setClientPort (int port);
+    int setLogPort (int port);
     int setAuth (const Auth &auth);
     const QVariant &getServerConfig () const;
 
@@ -77,6 +78,7 @@ signals:
 #endif
 
     void clientPortSend (int port);
+    void logPortSend (int port);
     void authSupplied (const Auth &auth);
 
     //

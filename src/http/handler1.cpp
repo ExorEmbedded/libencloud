@@ -233,6 +233,11 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
+            } 
+            else if ((val = url.queryItemValue("logPort")) != "")
+            {
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setLogPort(val.toInt()),
+                        LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
 #endif
             else

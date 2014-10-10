@@ -65,7 +65,23 @@ void SetupApi::portSupply (int port)
 
     _msgType = PortSupplyType;
 
-    LIBENCLOUD_DBG("[SetupApi] port url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] portSupply url: " << url.toString() << ", params: " << _params);
+
+    _client.run(url, _params, _headers, _config);
+}
+
+void SetupApi::logPortSupply (int port)
+{
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_SETUP_PATH);
+
+    _params.clear();
+    _params.addQueryItem("logPort", QString::number(port));
+
+    _msgType = LogPortSupplyType;
+
+    LIBENCLOUD_DBG("[SetupApi] logPortSupply url: " << url.toString() << ", params: " << _params);
 
     _client.run(url, _params, _headers, _config);
 }
@@ -100,6 +116,9 @@ void SetupApi::_error (const libencloud::Error &err)
         case PortSupplyType:
             emit portSent(Api::ErrorRc);
             break;
+        case LogPortSupplyType:
+            emit logPortSent(Api::ErrorRc);
+            break;
         case ConfigRetrieveType:
             emit configReceived(Api::ErrorRc, QVariant());
             break;
@@ -128,6 +147,9 @@ void SetupApi::_clientComplete (const QString &response)
             break;
         case PortSupplyType:
             emit portSent(Api::SuccessRc);
+            break;
+        case LogPortSupplyType:
+            emit logPortSent(Api::SuccessRc);
             break;
         case ConfigRetrieveType:
         {
