@@ -33,7 +33,8 @@ void SetupApi::poiRetrieve ()
 
     _msgType = PoiRetrieveType;
 
-    LIBENCLOUD_DBG("[SetupApi] poi url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] poi url: " << url.toString() <<
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }
@@ -49,7 +50,8 @@ void SetupApi::licenseSupply (const QUuid &uuid)
 
     _msgType = LicenseSupplyType;
 
-    LIBENCLOUD_DBG("[SetupApi] license url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] license url: " << url.toString() <<
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }
@@ -65,7 +67,8 @@ void SetupApi::portSupply (int port)
 
     _msgType = PortSupplyType;
 
-    LIBENCLOUD_DBG("[SetupApi] portSupply url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] portSupply url: " << url.toString() << 
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }
@@ -81,7 +84,8 @@ void SetupApi::logPortSupply (int port)
 
     _msgType = LogPortSupplyType;
 
-    LIBENCLOUD_DBG("[SetupApi] logPortSupply url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] logPortSupply url: " << url.toString() << 
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }
@@ -96,7 +100,8 @@ void SetupApi::configRetrieve ()
 
     _msgType = ConfigRetrieveType;
 
-    LIBENCLOUD_DBG("[SetupApi] config url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[SetupApi] config url: " << url.toString() <<
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }

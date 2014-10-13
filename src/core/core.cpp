@@ -286,7 +286,7 @@ void Core::_fallback (bool isFallback)
 // Forward error state and message to http handler
 void Core::_errorReceived (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("[Core] " << err);
+    LIBENCLOUD_DBG("[Core] " << err.toString());
 
    // QCC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically (in internal modules)
@@ -686,6 +686,9 @@ QString Core::_stateStr (QState *state)
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
 {
+#undef __LIBENCLOUD_MSG
+#define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
+
     LIBENCLOUD_RETURN_IF (n == NULL, ~0);
     LIBENCLOUD_RETURN_IF (arg == NULL, ~0);
 

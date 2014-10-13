@@ -47,7 +47,7 @@ public:
         StateExiting,
 
         StateFirst = StateConfigured,
-        StateLast = StateExiting
+        StateLast = StateConnected
     }
     State;
 

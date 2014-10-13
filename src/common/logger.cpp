@@ -100,6 +100,12 @@ bool Logger::isValid ()
     return _isValid;
 }
 
+bool Logger::connected ()
+{
+    return ((_client != NULL) && 
+            (_client->state() == QAbstractSocket::ConnectedState));
+}
+
 int Logger::connectToListener (const QString &surl)
 {
     LIBENCLOUD_DBG("[Logger] Connecting to listener: " << surl);
@@ -110,12 +116,6 @@ int Logger::connectToListener (const QString &surl)
 
     _client = new QTcpSocket();
     LIBENCLOUD_ERR_IF (_client == NULL);
-
-    connect(_client, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
-            this, SLOT(_clientStateChanged(QAbstractSocket::SocketState)));
-    connect(_client, SIGNAL(connected()), this, SLOT(_clientConnected()));
-    connect(_client, SIGNAL(error(QAbstractSocket::SocketError)),
-            this, SLOT(_clientError(QAbstractSocket::SocketError)));
 
     _client->connectToHost(QHostAddress(url.host()), url.port(), QIODevice::WriteOnly);
 
@@ -128,15 +128,13 @@ QTcpSocket *Logger::_client = NULL;
 
 int Logger::send (const QString &log)
 {
-    LIBENCLOUD_ERR_IF (_client == NULL);
-
-    LIBENCLOUD_ERR_IF (_client->state() != QAbstractSocket::ConnectedState);
+    if (_client == NULL ||
+            _client->state() != QAbstractSocket::ConnectedState)
+        return ~0;
 
     _client->write(qPrintable(log));
 
     return 0;
-err:
-    return ~0;
 }
 
 //

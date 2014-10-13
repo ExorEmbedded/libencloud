@@ -1,3 +1,4 @@
+#include <encloud/Logger>
 #include <encloud/Watchdog>
 #include <common/common.h>
 #include <common/config.h>
@@ -74,7 +75,13 @@ int Watchdog::stop ()
 
 void Watchdog::_timeout ()
 {
-//    LIBENCLOUD_TRACE;
+    // logging tests
+#if 0
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("[Watchdog] debug!!!!");
+    LIBENCLOUD_ERR("[Watchdog] ERR");
+    LIBENCLOUD_RETURN_IF(1 == 1, );
+#endif
     
     _client.run(_url, _params, _headers, _config);
 }

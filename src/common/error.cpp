@@ -33,7 +33,7 @@ Error::Error (Code code, QString extra)
 
     _isValid = true;
 
-    LIBENCLOUD_DBG("[Error] " << *this);
+    LIBENCLOUD_DBG("[Error] " << toString());
 err:
     return;
 }
@@ -47,7 +47,7 @@ Error::Error (const QString &msg)
     _desc = msg;
     _isValid = true;
 
-    LIBENCLOUD_DBG("[Error] " << *this);
+    LIBENCLOUD_DBG("[Error] " << toString());
 }
 
 bool Error::isValid () const   { return _isValid; }

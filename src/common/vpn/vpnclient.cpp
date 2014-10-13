@@ -232,6 +232,8 @@ void VpnClient::start (bool fallback)
             sigError(this->err = BadStateError),
             tr("Bad state: ") + QString::number(this->st), );
 
+    LIBENCLOUD_NOTICE("[VPNClient] Starting");
+
     enableTap();
 
     if (fallback)
@@ -269,7 +271,7 @@ void VpnClient::start (bool fallback)
     connect(this->process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
             SLOT(processFinished(int, QProcess::ExitStatus)));
 
-    LIBENCLOUD_DBG("[VPNClient] Starting " << QString(path +
+    LIBENCLOUD_DBG("[VPNClient] Running " << QString(path +
             "  " + args.join(" ")));
 
     this->process->start(path, args);
@@ -289,7 +291,7 @@ void VpnClient::stop (void)
             this->process == NULL)
         return;
 
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_NOTICE("[VPNClient] Stopping");
 
     //LIBENCLOUD_DBG("[VPNClient] state: " << QString::number(this->process->state()));
 
@@ -357,17 +359,18 @@ void VpnClient::processReadyRead ()
 
     foreach  (QString line, log.split(QRegExp("[\r\n]"), QString::SkipEmptyParts))
     {
+        //qDebug() << "line: " << line;
+
         // remove leading timestamp
-        line.remove(0, QString("Day Mon dd hh:mm:ss yyyy ").count()).prepend("[VPN] ");
+        QRegExp dateRE("^\\w{3} \\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\d{4} ");
 
-        //LIBENCLOUD_DBG("-> logger: " << line);
+        if (dateRE.indexIn(line) != -1)
+            line.remove(0, dateRE.matchedLength());
 
-        // send message to remote LogListener
-        LIBENCLOUD_ERR_IF(Logger::send(line));
+        //qDebug() << "newline: " << line;
+        
+        LIBENCLOUD_LOG(line.prepend("[VPN] "));
     }
-
-err:
-    return;
 }
 
 void VpnClient::processFinished (int exitCode, QProcess::ExitStatus exitStatus)

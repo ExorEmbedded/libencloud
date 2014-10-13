@@ -33,7 +33,8 @@ void CloudApi::actionRequest (const QString &action, const Params &params)
     foreach (Param param, params)
         _params.addQueryItem(param.first, param.second);
 
-    LIBENCLOUD_DBG("[CloudApi] action url: " << url.toString() << ", params: " << _params);
+    LIBENCLOUD_DBG("[CloudApi] action url: " << url.toString() << 
+            ", params: " << _params.toString());
 
     _client.run(url, _params, _headers, _config);
 }

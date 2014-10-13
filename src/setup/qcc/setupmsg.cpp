@@ -60,7 +60,8 @@ int SetupMsg::process ()
     QSslConfiguration sslconf;
     QSslCertificate cert;
     
-    LIBENCLOUD_DBG("CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
+    LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
+
     QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
 
     if (!_sbAuth.isValid())
@@ -85,7 +86,7 @@ int SetupMsg::process ()
 
     url.setPath(LIBENCLOUD_SETUP_QCC_CONFIG_URL);
 
-    LIBENCLOUD_DBG("[Setup] Requesting configuration from URL: " << url);
+    LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
 
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 

@@ -93,7 +93,8 @@ void NetworkManager::syncRoutes (const QStringList &connectedEndpoints)
 {
     LIBENCLOUD_RETURN_IF (_gw == "", );
 
-    LIBENCLOUD_DBG("[Network] Syncing routes gateway: " << _gw << ", endpoints: " << connectedEndpoints);
+    LIBENCLOUD_DBG("[Network] Syncing routes gateway: " << _gw << ", endpoints: " << 
+            connectedEndpoints.join(","));
 
     _connectedEndpoints = connectedEndpoints;
 
@@ -125,9 +126,9 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
             currentRoutes.append(regex.capturedTexts());
     }
 
-    LIBENCLOUD_DBG("[Network] previous: " << _previousEndpoints <<
-                   " current: " << currentRoutes <<
-                   " connected: " << _connectedEndpoints);
+    LIBENCLOUD_DBG("[Network] previous: " << _previousEndpoints.join(",") <<
+                   " current: " << currentRoutes.join(",") <<
+                   " connected: " << _connectedEndpoints.join(","));
 
     if (_connectedEndpoints.empty())
     {

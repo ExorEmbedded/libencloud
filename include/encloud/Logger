@@ -52,8 +52,8 @@ public:
     // remote TCP logging
     // 
 
+    static bool connected ();
     static int connectToListener (const QString &surl);
-
     static int send (const QString &log);
 
 public slots:

@@ -89,6 +89,8 @@ void VpnManager::attach (VpnClient *client, QString host, int port)
     LIBENCLOUD_RETURN_IF (client == NULL, );
     LIBENCLOUD_RETURN_IF (this->st == StateAttached, );
 
+    LIBENCLOUD_NOTICE("[VPNManager] Attaching");
+
     LIBENCLOUD_DBG("[VPNManager] state: " << stateString(this->st) << " host: " << host << " port: " << port);
 
     detach(); // cleanup if we're reattaching
@@ -338,7 +340,7 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
 void VpnManager::authSupplied (const Auth &auth)
 {
-    LIBENCLOUD_DBG("[VPNManager] type: " << auth.getType());
+    LIBENCLOUD_DBG("[VPNManager] type: " << auth.getStrType());
 
     switch (auth.getId())
     {

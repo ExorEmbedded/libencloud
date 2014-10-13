@@ -326,7 +326,7 @@ int ApiHandler1::_handle_config (const HttpRequest &request, HttpResponse &respo
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
     		js = (*request.getContent()).toAscii();
-			LIBENCLOUD_DBG("js: " << js);
+			LIBENCLOUD_DBG("[Http] js: " << js);
 
 			json = json::parse(js, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_BADREQUEST);

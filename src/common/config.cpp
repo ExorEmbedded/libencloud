@@ -115,9 +115,7 @@ err:
 
 void Config::receive (const QVariant &cfg)
 {
-    LIBENCLOUD_DBG("[Config] cfg: " << cfg);
-
-    LIBENCLOUD_ERR_IF (cfg.isNull());
+    //qDebug() << "cfg: " << cfg;
 
     // reset requested
     if (cfg.toMap().isEmpty())

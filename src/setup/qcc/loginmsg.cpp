@@ -56,7 +56,7 @@ int LoginMsg::process ()
     else
         url.setPath(LIBENCLOUD_SETUP_QCC_LOGOUT_URL);
 
-    LIBENCLOUD_DBG("[Setup] Requesting login at URL: " << url);
+    LIBENCLOUD_DBG("[Setup] Requesting login at URL: " << url.toString());
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));

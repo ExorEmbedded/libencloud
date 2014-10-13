@@ -12,6 +12,9 @@
 #include "common.h"
 #include "config.h"
 
+#undef __LIBENCLOUD_MSG
+#define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
+
 //
 // C++ API
 //

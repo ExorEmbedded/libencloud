@@ -129,7 +129,10 @@ const QVariant &HttpHandler::getServerConfig () const
 
 int HttpHandler::setAction (const QString &action, const Params &params)
 {
-    LIBENCLOUD_DBG("[Http] " << "action: " << action << ", params: " << params);
+#if 0
+    LIBENCLOUD_DBG("[Http] " << "action: " << action <<
+            ", params: " << params.join(","));
+#endif
 
     emit actionRequest(action, params);
 
@@ -237,7 +240,7 @@ void HttpHandler::_needReceived (const QString &what)
 
 void HttpHandler::_serverConfigReceived (const QVariant &config)
 {
-    LIBENCLOUD_DBG("[Http] config: " << config);
+    LIBENCLOUD_DBG("[Http] config: " << config.toString());
 
     _serverConfig = config;
 }

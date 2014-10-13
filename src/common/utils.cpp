@@ -126,7 +126,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
     QProcess::ExitStatus exitStatus;
     int exitCode;
 
-    if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG) )
+    if (debug)
         LIBENCLOUD_DBG("[Utils] Exec "  << qPrintable(path) << " " << qPrintable(args.join(" ")));
 
     LIBENCLOUD_DBG_IF (!fi.isFile() || !fi.isExecutable());
@@ -140,7 +140,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
         exitStatus = p.exitStatus();
         exitCode = p.exitCode();
 
-        if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG))
+        if (debug)
             LIBENCLOUD_DBG("[Utils] Exec exitStatus: " << QString::number(exitStatus) <<
                            " exitCode: " << QString::number(exitCode));
         
@@ -150,7 +150,7 @@ LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bo
 
     out = p.readAll();
 
-    if (debug || (LIBENCLOUD_LOGLEVEL > LIBENCLOUD_LOG_DEBUG))
+    if (debug)
         LIBENCLOUD_DBG("[Utils] Exec output: " << out);
 
     return 0;

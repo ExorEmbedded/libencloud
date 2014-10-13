@@ -61,7 +61,7 @@ err:
 
 void TestSec::_clientError (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("error: " << err);
+    LIBENCLOUD_DBG("error: " << err.toString());
 }
 
 void TestSec::_clientComplete (const QString &response)
