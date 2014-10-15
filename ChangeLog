@@ -1,7 +1,10 @@
 ChangeLog file for Endian libencloud
 
 next:
+
+libencloud 0.7.2 (15/10/2014):
 	- [CONNECT-165] Tell OpenVPN not to cache passwords in memory
+	- [CONNECT-152] Logging improvements and verbosity handling
 
 libencloud 0.7.1 (17/09/2014):
 	- #77 fixed tap rename issue (net.sh not found) and make install issue
