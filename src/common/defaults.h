@@ -45,6 +45,10 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_STRING             LIBENCLOUD_APP " v" LIBENCLOUD_VERSION " rev" LIBENCLOUD_REVISION
 #endif
 
+#ifndef LIBENCLOUD_VERSION_TAG
+#  define LIBENCLOUD_VERSION_TAG        ""
+#endif
+
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
 
 // do NOT change this - Switchboard relies on it!
