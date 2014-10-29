@@ -16,6 +16,7 @@ NetworkManager::NetworkManager (ProcessManager *processManager)
     : _processManager(NULL)
     , _processManagerInternal(false)
     , _process(NULL)
+    , _routesOperation(NoneOperation)
 {
     LIBENCLOUD_TRACE;
 
@@ -39,6 +40,14 @@ NetworkManager::~NetworkManager ()
 
     if (_processManagerInternal)
         LIBENCLOUD_DELETE(_processManager);
+}
+
+void NetworkManager::stop ()
+{
+    LIBENCLOUD_TRACE;
+
+    // remove all routes associated with current gateway (synchronous)
+    readRoutes(RemoveRoutesOperation, true);
 }
 
 QString NetworkManager::errorString (Error err)
@@ -98,8 +107,8 @@ void NetworkManager::syncRoutes (const QStringList &connectedEndpoints)
 
     _connectedEndpoints = connectedEndpoints;
 
-    // read routes asynchronously and sync routes in finishedReadRoutes()
-    readRoutes();
+    // read routes asynchronously and sync routes
+    readRoutes(UpdateRoutesOperation);
 }
 
 //
@@ -114,8 +123,26 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
             sigError(BadParamsError), );
 
     // read current routes from routing table
-    QString output = _process->readAllStandardOutput();
-    QRegExp regex("[0-9]+.[0-9]+.[0-9]+.[0-9]+");
+    readRoutesEx(_process);
+
+    // unblock further readRoutes()
+    _process = NULL;
+}
+
+//
+// protected methods
+//
+
+void NetworkManager::readRoutesEx (QProcess *process)
+{
+    //LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_EMIT_RETURN_IF (process == NULL,
+            sigError(BadParamsError), );
+
+    // read current routes from routing table
+    QString output = process->readAllStandardOutput();
+    QRegExp regex("(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)\\s+(\\d+)");
     QStringList currentRoutes;
 
     //LIBENCLOUD_DBG("output: " << output);
@@ -123,8 +150,25 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
     foreach (QString line, output.split('\n'))
     {
         if (regex.indexIn(line) != -1)
-            currentRoutes.append(regex.capturedTexts());
+        {
+            QString ip = regex.cap(1);
+            QString mask = regex.cap(2);
+            QString gateway = regex.cap(3);
+            QString interface = regex.cap(4);
+            QString metric = regex.cap(5);
+
+            if (_routesOperation == RemoveRoutesOperation &&
+                gateway == _gateway)
+                delRoute(ip);
+            else
+                currentRoutes.append(ip);
+        }
     }
+
+
+    if (_routesOperation != UpdateRoutesOperation)
+        return;
+    // else (_routesOperation == UpdateRoutesOperation) 
 
     LIBENCLOUD_DBG("[Network] previous: " << _previousEndpoints.join(",") <<
                    " current: " << currentRoutes.join(",") <<
@@ -165,18 +209,19 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
         }
     }
 
-    // unblock further readRoutes()
-    _process = NULL;
 }
 
-//
-// private methods
-//
-
-void NetworkManager::readRoutes ()
+void NetworkManager::readRoutes (Operation op, bool sync)
 {
     if (_process)
+    {
+        LIBENCLOUD_ERR("[Network] another process is already running!");
         return;
+    }
+
+    LIBENCLOUD_DBG("[Network] reading routes - sync: " << sync);
+
+    _routesOperation = op;
 
 #ifdef Q_OS_WIN
     _process = _processManager->start("route", "PRINT");
@@ -184,8 +229,21 @@ void NetworkManager::readRoutes ()
     _process = _processManager->start("route", "-n");
 #endif
 
-    connect(_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
-            SLOT(finishedReadRoutes(int, QProcess::ExitStatus)));
+    if (sync)
+    {
+        _process->waitForFinished(-1);
+
+        // read current routes from routing table
+        readRoutesEx(_process);
+
+        // unblock further readRoutes()
+        _process = NULL;
+    }
+    else
+    {
+        connect(_process, SIGNAL(finished(int, QProcess::ExitStatus)), this,
+                SLOT(finishedReadRoutes(int, QProcess::ExitStatus)));
+    }
 }
 
 void NetworkManager::addRoute (const QString &endpoint)

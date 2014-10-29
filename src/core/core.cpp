@@ -97,13 +97,17 @@ int Core::stop ()
     _fsm.stop();
     _clientWatchdog.stop();
 
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    _cloud->stop();
-#endif
+    // make sure routes are removed before client is stopped
+    _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
     _setup->stop();
 #endif
+
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    _cloud->stop();
+#endif
+
 
     emit stateChanged(StateIdle);
     emit progress(Progress());

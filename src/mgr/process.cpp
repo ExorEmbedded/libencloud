@@ -21,7 +21,7 @@ Process::Process (const QString &path, const QString &args)
 
 Process::~Process ()
 {
-    //LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("[Process] Destroying - path: " << _path << ", args: " << _args);
 
     stop();
 }
@@ -106,7 +106,7 @@ err:
 
 void Process::processZombie ()
 {
-    LIBENCLOUD_DBG("[Process] path: " << _path << ", args: " << _args);
+    //LIBENCLOUD_DBG("[Process] zombie path: " << _path << ", args: " << _args);
 
     emit stateChanged((_state = StateZombie));
 }
