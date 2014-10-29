@@ -1,9 +1,9 @@
 ChangeLog file for Endian libencloud
 
 next:
-	- [CONNECT-169] Rename to Endian Connect App and Endian Connect Service
 
 libencloud 0.7.3:
+	- [CONNECT-169] Rename to Endian Connect App and Endian Connect Service
 	- [CONNECT-149] Connect App sets up routes belonging to previous connection
 
 libencloud 0.7.2 (15/10/2014):
