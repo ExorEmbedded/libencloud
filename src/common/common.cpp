@@ -1,4 +1,5 @@
 #include <QObject>
+#include <QCoreApplication>
 #ifdef Q_OS_WIN32
 #  include <shlobj.h>
 #endif
@@ -23,9 +24,13 @@ LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
 LIBENCLOUD_DLLSPEC QString getBinDir ()
 {
 #ifdef Q_OS_WIN32
+#ifdef LIBENCLOUD_EXOR
+    return (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + sep;
+#else
     return qgetenv("ProgramFiles") + sep + \
         QString(LIBENCLOUD_PRODUCTDIR) + sep + \
         QString(LIBENCLOUD_BIN_PREFIX) + sep;
+#endif
 #else  // Q_OS_UNIX
     return QString(LIBENCLOUD_BIN_PREFIX);
 #endif

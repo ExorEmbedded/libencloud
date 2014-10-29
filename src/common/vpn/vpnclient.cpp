@@ -397,7 +397,11 @@ void VpnClient::enableTap()
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
 #ifdef LIBENCLOUD_MODE_QCC
+#ifdef LIBENCLOUD_EXOR
+    QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
+#else
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
+#endif
     QStringList args;
     QString out;
 
@@ -415,7 +419,11 @@ void VpnClient::disableTap()
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
 #ifdef LIBENCLOUD_MODE_QCC  
+#ifdef LIBENCLOUD_EXOR
+    QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
+#else
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
+#endif
     QStringList args;
     QString out;
 

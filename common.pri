@@ -52,6 +52,7 @@ endian {
     ORG = Endian
 } else:exor {
     ORG = Exor
+    DEFINES += LIBENCLOUD_EXOR
 } else {
     error("organisation must be defined (CONFIG += endian|exor)!")
 }
