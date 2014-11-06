@@ -251,8 +251,12 @@ void HttpHandler::_serverConfigReceived (const QVariant &config)
 
 void HttpHandler::_clear()
 {
+    _coreError = Error::CodeSuccess;
     _coreState = StateNone;
+    _coreProgress = Progress();
     _isFallback = false;
+    _needs.clear();
+    _poi = QUuid();
     _serverConfig.clear();
 }
 
