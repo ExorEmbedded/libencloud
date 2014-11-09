@@ -68,11 +68,13 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkReply *reply = NULL;
     _sslError = false;
 
+#ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
         LIBENCLOUD_DBG("[Client] CA Cert issuer: " <<
                 conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
     }
     request.setSslConfiguration(conf);
+#endif
 
     // default headers
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
@@ -120,6 +122,7 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
 
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
 { 
+#ifndef Q_OS_WINCE
     QList<QSslError> ignoreErrors;
 
     foreach (QSslError err, errors)
@@ -151,6 +154,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
     }
 
     reply->ignoreSslErrors(ignoreErrors);
+#endif
 }
 
 void Client::_networkError (QNetworkReply::NetworkError err)

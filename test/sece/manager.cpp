@@ -1,5 +1,7 @@
 #include <encloud/Error>
 #include <encloud/Progress>
+#include <QInputDialog>
+#include <QLineEdit>
 #include "common.h"
 #include "manager.h"
 
@@ -33,6 +35,12 @@ Manager::Manager()
     _cloudApi = new libencloud::CloudApi;
     SECE_ERR_IF (_cloudApi == NULL);
 
+    // Auth API
+    _authApi = new libencloud::AuthApi;
+    SECE_ERR_IF (_cloudApi == NULL);
+
+    _authApi->authSupply(  libencloud::Auth(libencloud::Auth::SwitchboardId, libencloud::Auth::UserpassType, "http://localhost/", "routing/gw", "exor123$") );
+
     // <= Setup API
     connect(_statusApi, SIGNAL(apiState(libencloud::State)),
             this, SLOT(_statusApiState(libencloud::State)));
@@ -53,6 +61,7 @@ Manager::Manager()
 
     return;
 err:
+    SECE_DELETE(_authApi);
     SECE_DELETE(_cloudApi);
     SECE_DELETE(_setupApi);
     SECE_DELETE(_statusApi);
@@ -64,6 +73,7 @@ Manager::~Manager()
 {
     SECE_TRACE;
 
+    SECE_DELETE(_authApi);
     SECE_DELETE(_cloudApi);
     SECE_DELETE(_setupApi);
     SECE_DELETE(_statusApi);
@@ -173,6 +183,33 @@ void Manager::_statusApiNeed (const QString &what)
     SECE_DBG(what);
 
     _need = what;
+    if (what == "sb_auth") {
+        static bool processingAuthRequest = false;
+        if (!processingAuthRequest) {
+            processingAuthRequest = true;
+            // prompt for user/password
+            QDialog dialog;
+            QLineEdit* user = new QLineEdit;
+            user->setPlaceholderText("User");
+            QLineEdit* pass = new QLineEdit;
+            pass->setPlaceholderText("Pass");
+
+            dialog.setLayout(new QVBoxLayout);
+            dialog.layout()->addWidget(user);
+            dialog.layout()->addWidget(pass);
+            dialog.exec();
+
+            qDebug() << "user " << user->text();
+            qDebug() << "pass " << pass->text();
+
+
+            libencloud::Auth auth(libencloud::Auth::SwitchboardId, libencloud::Auth::UserpassType, "http://localhost/", user->text(), pass->text());
+            _authApi->authSupply (auth);
+            processingAuthRequest = false;
+        } else {
+
+        }
+    }
 }
 
 // License received from user - restart

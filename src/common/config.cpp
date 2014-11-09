@@ -31,7 +31,10 @@ Config::Config ()
     confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
 #endif
-
+#elif defined Q_OS_WINCE
+    QString progFiles = (qApp ? qApp->applicationDirPath() : QDir::currentPath());
+    sbinPrefix = progFiles;
+    confPrefix = progFiles;
 #else  // Linux - absolute paths
     prefix = LIBENCLOUD_PREFIX_PATH;
     confPrefix = LIBENCLOUD_ETC_PREFIX;

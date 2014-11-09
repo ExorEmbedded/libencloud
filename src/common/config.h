@@ -10,7 +10,9 @@
 #include <QString>
 #include <QUrl>
 #include <encloud/Common>
+#ifndef Q_OS_WINCE
 #include <encloud/Crypto>
+#endif
 #include <encloud/Json>
 #include "defaults.h"
 #include "helpers.h"
@@ -77,7 +79,9 @@ public:
     libencloud_config_t config;
     QSettings *settings;
     QSettings *sysSettings;
+#ifndef Q_OS_WINCE
     libencloud_crypto_t crypto;
+#endif
 
     /* Path to configuration file */
     QFileInfo filePath;

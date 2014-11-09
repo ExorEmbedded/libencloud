@@ -2,6 +2,7 @@
 #include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
+#include <QTcpSocket>
 
 // logging: Qt4 forces usage of globals with qInstallMsgHandler()
 static QTextStream *g_svcLogText = NULL;
@@ -282,6 +283,21 @@ static void __log_handler (QtMsgType type, const char *msg)
     if (msg == NULL ||
             g_svcLogText == NULL)
         return;
+
+#ifdef Q_OS_WINCE // log rotation
+    static int totBytes = 0;
+    totBytes += strlen(msg);
+    if (totBytes > 200*1024) { // 200KB size rotation -> save old file in .0 and reopen a new file
+        QFile* f = (QFile*)g_svcLogText->device();
+        QString filename(f->fileName());
+        bool rc = QFile::remove(filename + ".0");
+        rc = QFile::copy(filename, filename + ".0");
+        f->close();
+        f->open(QIODevice::WriteOnly | QIODevice::Truncate);
+        g_svcLogText->setDevice(f);
+        totBytes = 0;
+    }
+#endif
 
     *g_svcLogText << msg << endl;
 

@@ -1,16 +1,14 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_H_
-#define _LIBENCLOUD_PRIV_SETUP_QCC_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_VPN_H_
+#define _LIBENCLOUD_PRIV_SETUP_VPN_H_
 
 #include <QtPlugin>
 #include <encloud/Client>
 #include <common/message.h>
 #include <setup/setup.h>
-#include <setup/qcc/setupmsg.h>
-#include <setup/qcc/loginmsg.h>
 
 namespace libencloud {
 
-class QccSetup : public SetupInterface
+class VpnSetup : public SetupInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::SetupInterface)
@@ -20,16 +18,12 @@ public:
         StateInvalid = -1,
         StateError = 0,
 
-        // used for steps
-        StateSetupMsg = 1,
-        StateReceived,
-
         // used for total count
-        StateFirst = StateSetupMsg,
-        StateLast = StateReceived
+        StateFirst = 1,
+        StateLast = StateFirst
     } State;
 
-    QccSetup (Config *cfg);
+    VpnSetup (Config *cfg);
 
     int start ();
     int stop ();
@@ -57,17 +51,13 @@ signals:
     //
     // core -> setup -> internal
     //
-    void authSupplied (const Auth &auth);  
+    void authSupplied (const Auth &auth);
 
-private slots:
-    void _onProcessed ();
 
 private:
-    int _initMsg (MessageInterface &msg);
     void _clear ();
-
-    SetupMsg _setupMsg;
-    LoginMsg _loginMsg;
+    VpnConfig _vpnConfig;
+    VpnConfig _vpnFallbackConfig;
 };
 
 } // namespace libencloud

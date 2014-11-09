@@ -2,8 +2,14 @@ include(../common.pri)
 
 TEMPLATE = subdirs
 
-SUBDIRS += unit
-SUBDIRS += unit-sec
+!wince {
+    !nodll {
+        !modevpn {
+            SUBDIRS += unit
+            SUBDIRS += unit-sec
+        }
+    }
+}
 
 !nogui:SUBDIRS += sece
 

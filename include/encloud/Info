@@ -1,5 +1,5 @@
-#ifndef _LIBENCLOUD_UTILS_H_
-#define _LIBENCLOUD_UTILS_H_
+#ifndef _LIBENCLOUD_INFO_H_
+#define _LIBENCLOUD_INFO_H_
 
 #include <QString>
 #include <encloud/Common>

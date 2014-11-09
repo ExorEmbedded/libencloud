@@ -6,6 +6,7 @@
 #include <encloud/Api/StatusApi>
 #include <encloud/Api/SetupApi>
 #include <encloud/Api/CloudApi>
+#include <encloud/Api/AuthApi>
 #include "mainwindow.h"
 
 class Manager : public QObject
@@ -44,6 +45,7 @@ private:
     libencloud::SetupApi *_setupApi;
     libencloud::CloudApi *_cloudApi;
     libencloud::State _apiState;
+    libencloud::AuthApi *_authApi;
 
     QString _need;
     QTimer _needTimer;

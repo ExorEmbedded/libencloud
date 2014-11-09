@@ -26,7 +26,7 @@ ApiVersion;
 
 class ApiHandler;
 
-class LIBENCLOUD_DLLSPEC HttpHandler : public QObject, public HttpAbstractHandler
+class LIBENCLOUD_DLLSPEC HttpHandler : public HttpAbstractHandler
 {
     Q_OBJECT;
 

@@ -45,7 +45,7 @@ int Process::stop ()
     if (_process)
     {
         _process->blockSignals(true);
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
         _process->kill();
 #else
         _process->terminate();

@@ -134,7 +134,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
     switch (httpMethodFromString(request.getMethod()))
     {
 
-#ifdef LIBENCLOUD_MODE_QCC
+#if defined(LIBENCLOUD_MODE_QCC) || defined(LIBENCLOUD_MODE_VPN)
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
             QString id, type, user, pass, path, aurl;
@@ -205,6 +205,8 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
             j["poi"] = utils::uuid2String(_parent->getPoi());
 #elif defined(LIBENCLOUD_MODE_QCC)
             QVariant j = _parent->getServerConfig();
+#elif defined(LIBENCLOUD_MODE_VPN)
+            QVariant j;
 #endif
             QString content = json::serialize(j, ok);
             LIBENCLOUD_HANDLER_ERR_IF (!ok, LIBENCLOUD_HTTP_STATUS_INTERNALERROR);
@@ -239,6 +241,8 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLogPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
+#elif defined(LIBENCLOUD_MODE_VPN)
+            if (0) {}
 #endif
             else
             {

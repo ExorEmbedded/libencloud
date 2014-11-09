@@ -13,7 +13,7 @@
 
 namespace libencloud {
 
-class SetupInterface
+class SetupInterface : public QObject
 {
 public:
     SetupInterface (Config *cfg);
