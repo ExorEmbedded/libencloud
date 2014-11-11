@@ -379,7 +379,7 @@ void VpnClient::processReadyRead ()
 
         //qDebug() << "newline: " << line;
         
-        LIBENCLOUD_LOG(line.prepend("[VPN] "));
+        __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
     }
 }
 

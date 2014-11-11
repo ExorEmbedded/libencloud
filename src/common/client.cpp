@@ -191,7 +191,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
 
             // else follow through
         default:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg)));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg + ", url: " + reply->url().toString())));
             break;
     }
 }
