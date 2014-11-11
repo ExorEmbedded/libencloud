@@ -11,7 +11,7 @@
 # 
 # Note: mode selection has implications on both behaviour and packaging!
 #
-#   modeqcc     Endian ConnectClient / Exor JMConnect mode
+#   modeqcc     Endian Connect App / Exor JMConnect mode
 #   modeece     Endian Cloud Enabler mode
 #   modesece    Software Endian Cloud Enabler mode
 #   modevpn     Only vpn manager with static ovpn file configuration
@@ -44,19 +44,45 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 #
 PKGNAME = libencloud
 
-PRODUCT_ECC="ConnectClient"
-PRODUCT_JMC="HMIConnect"
-PRODUCT_ENCLOUD="Encloud"
-PRODUCT_SECE="SECE"  # FIXME
-PRODUCT_VPN="OVPN"  # FIXME
+#PRODUCT_ECC="ConnectClient"
+#PRODUCT_JMC="HMIConnect"
+#PRODUCT_ENCLOUD="Encloud"
+#PRODUCT_SECE="SECE"  # FIXME
+#PRODUCT_VPN="OVPN"  # FIXME
 
+# [ client/package version ]
+# *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
+# used for version in User Agent - particularly important in modeqcc for
+# Switchboard update checks
+modeqcc {
+    endian {
+        PRODUCT_SRC = ../4iconnect
+    } else {
+        PRODUCT_SRC = ../jmconnect
+    }
+    include($${PRODUCT_SRC}/version.pri)
+} else {
+    # TODO grab version from other products or make configurable via json
+    VERSION = x.y.z
+}
+
+DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
+
+# [ libencloud version ] 
+# *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.7.2
+VERSION = 0.7.4
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
 
+DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
+!isEmpty(VERSION_TAG) {
+    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
+}
+
 endian {
     ORG = Endian
+    DEFINES += LIBENCLOUD_ENDIAN
 } else:exor {
     ORG = Exor
     DEFINES += LIBENCLOUD_EXOR
@@ -92,27 +118,29 @@ win32{
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
     endian {
-        PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_ECC}
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_ECC}\\\"
+        PRODUCT_DIR="ConnectApp"
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
     } else {
-        PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_JMC}
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_JMC}\\\"
+        PRODUCT_DIR="HMIConnect"
+        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
     }
 } else:modeece {
-    PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_ENCLOUD}
+    PRODUCT_DIR="Encloud"
     DEFINES += LIBENCLOUD_MODE_ECE
-    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_ENCLOUD}\\\"
+    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 } else:modesece {
-    PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_SECE}
+    PRODUCT_DIR="SECE"
     DEFINES += LIBENCLOUD_MODE_SECE
-    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_SECE}\\\"
+    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 } else:modevpn {
-    PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_VPN}
+    PRODUCT_DIR="OVPN"
     DEFINES += LIBENCLOUD_MODE_VPN
     DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_VPN}\\\"
 } else {
     error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
 }
+
+PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
@@ -131,10 +159,6 @@ win32 {
     CONFIG += qtjson  # GPL/self-contained
 }
 
-DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
-!isEmpty(VERSION_TAG) {
-    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
-}
 exists(".git") {
     REVISION=$$system(git rev-parse --short HEAD)
     DEFINES += LIBENCLOUD_REVISION=\\\"$${REVISION}\\\"

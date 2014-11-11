@@ -11,11 +11,11 @@
 
 #define LIBENCLOUD_APP_FULL             LibEncloudFullAppName( LIBENCLOUD_PKGNAME )
 
-// e.g Endian/ConnectClient, Exor/JMConnect
+// e.g Endian/ConnectApp, Exor/JMConnect
 static char libEncloudProductDirBuffer [256];
 #define LIBENCLOUD_PRODUCTDIR           LibEncloudProductDir(libEncloudProductDirBuffer, LIBENCLOUD_PRODUCT)
 
-// e.g Endian/ConnectClient/libencloud | Exor/JMConnect/libencloud
+// e.g Endian/ConnectApp/libencloud | Exor/JMConnect/libencloud
 static char libEncloudInstallDirBuffer [512];
 #define LIBENCLOUD_INSTALLDIR           LibEncloudInstallDir(libEncloudInstallDirBuffer, LIBENCLOUD_PRODUCT, LIBENCLOUD_APP)
 
@@ -27,10 +27,10 @@ static char libEncloudTapNameBuffer [256];
 
 #define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
 
-// e.g Endian/ConnectClient, Exor/JMConnect
+// e.g Endian/ConnectApp, Exor/JMConnect
 #define LIBENCLOUD_PRODUCTDIR           LIBENCLOUD_ORG "/" LIBENCLOUD_PRODUCT
 
-// e.g Endian/ConnectClient/libencloud | Exor/JMConnect/libencloud
+// e.g Endian/ConnectApp/libencloud | Exor/JMConnect/libencloud
 #define LIBENCLOUD_INSTALLDIR           LIBENCLOUD_PRODUCTDIR "/" LIBENCLOUD_APP
 
 // tap device - MUST match name defined in CheckTap
@@ -52,7 +52,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
 
 // do NOT change this - Switchboard relies on it!
-#define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect 3.0"     // TODO ConnectClient
+#define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION
 
 #define LIBENCLOUD_SB_URL               "https://switchboard-host/"
 

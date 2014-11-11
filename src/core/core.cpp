@@ -99,6 +99,9 @@ int Core::start ()
 
     _fsm.start();
 
+    if (_clientPort != -1)
+        _clientWatchdog.start();
+
     return 0;
 }
 
@@ -106,15 +109,21 @@ int Core::stop ()
 {
     LIBENCLOUD_TRACE;
 
+    if (_clientPort != -1)
+        _clientWatchdog.stop();
+
     _fsm.stop();
     _clientWatchdog.stop();
 
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    _cloud->stop();
-#endif
+    // make sure routes are removed before client is stopped
+    _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
     _setup->stop();
+#endif
+
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    _cloud->stop();
 #endif
 
     emit stateChanged(StateIdle);
@@ -429,7 +438,7 @@ err:
     return;
 }
 
-// Setup watchdog which disconnects upon close
+// Setup watchdog which is started/stopped according to core state
 void Core::_clientPortReceived (int port)
 {
     QString sp = QString::number(port);
@@ -437,16 +446,12 @@ void Core::_clientPortReceived (int port)
 
     LIBENCLOUD_DBG ("[Core] client port: " << sp);
 
-    if (_clientWatchdog.isRunning())
-        _clientWatchdog.stop();
-
     url.setScheme(LIBENCLOUD_API_SCHEME);
     url.setHost(LIBENCLOUD_API_HOST);
     url.setPort(port);
     url.setPath(LIBENCLOUD_API_STATUS_PATH);
 
     _clientWatchdog.setUrl(url);
-    _clientWatchdog.start();
     // _clientDown() will be invoked upon down() signal
 
     _clientPort = port;

@@ -75,9 +75,10 @@ int Watchdog::stop ()
 
 void Watchdog::_timeout ()
 {
+    LIBENCLOUD_TRACE;
+
     // logging tests
 #if 0
-    LIBENCLOUD_TRACE;
     LIBENCLOUD_DBG("[Watchdog] debug!!!!");
     LIBENCLOUD_ERR("[Watchdog] ERR");
     LIBENCLOUD_RETURN_IF(1 == 1, );

@@ -23,11 +23,11 @@ Config::Config ()
 #else
     QString progFiles = QString(qgetenv("ProgramFiles"));
 
-    // main prefix and binaries are product-specific (e.g. ConnectClient)
+    // main prefix and binaries are product-specific (e.g. ConnectApp)
     prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
     sbinPrefix = prefix + sep + LIBENCLOUD_SBIN_PREFIX;
 
-    // configuration is package-specific (e.g. ConnectClient\libencloud) under %ProgramFiles%
+    // configuration is package-specific (e.g. ConnectApp\libencloud) under %ProgramFiles%
     confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
 #endif

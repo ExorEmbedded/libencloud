@@ -77,6 +77,8 @@ int SetupMsg::process ()
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
 
+    LIBENCLOUD_DBG("[Setup] User Agent: " << headers["User-Agent"]);
+
     // Initialization CA cert verification
     sslconf.setCaCertificates(cas);
 

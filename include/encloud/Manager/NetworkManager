@@ -30,9 +30,22 @@ public:
     }
     Error;
 
+    typedef enum
+    {
+        NoneOperation = 0,
+
+        // sync routes based on connected endpoints
+        UpdateRoutesOperation,
+
+        // remove all routes related to current gateway
+        RemoveRoutesOperation
+    }
+    Operation;
+
     NetworkManager (ProcessManager *processManager = NULL);
     ~NetworkManager ();
 
+    void stop ();
     static QString errorString (Error err);
 
 signals:
@@ -51,7 +64,8 @@ protected slots:
     void finishedReadRoutes (int exitCode, QProcess::ExitStatus exitStatus);
 
 protected:
-    void readRoutes ();
+    void readRoutes (Operation op, bool sync = false);
+    void readRoutesEx (QProcess *process);
     void addRoute (const QString &endpoint);
     void delRoute (const QString &endpoint);
     QPair<QString,QString> parseNetdef (const QString &netdef);
@@ -64,6 +78,7 @@ protected:
     QString _fallbackGateway;
     QStringList _connectedEndpoints;
     QStringList _previousEndpoints;
+    Operation _routesOperation;
 };
 
 }  // namespace libencloud
