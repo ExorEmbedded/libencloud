@@ -38,10 +38,35 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 #
 PKGNAME = libencloud
 
+# [ client/package version ]
+# *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
+# used for version in User Agent - particularly important in modeqcc for
+# Switchboard update checks
+modeqcc {
+    endian {
+        PRODUCT_SRC = ../4iconnect
+    } else {
+        PRODUCT_SRC = ../jmconnect
+    }
+    include($${PRODUCT_SRC}/version.pri)
+} else {
+    # TODO grab version from other products or make configurable via json
+    VERSION = x.y.z
+}
+
+DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
+
+# [ libencloud version ] 
+# *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
 VERSION = 0.7.4
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
+
+DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
+!isEmpty(VERSION_TAG) {
+    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
+}
 
 endian {
     ORG = Endian
@@ -118,10 +143,6 @@ win32 {
     CONFIG += qtjson  # GPL/self-contained
 }
 
-DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
-!isEmpty(VERSION_TAG) {
-    DEFINES += LIBENCLOUD_VERSION_TAG=\\\"$${VERSION_TAG}\\\"
-}
 exists(".git") {
     REVISION=$$system(git rev-parse --short HEAD)
     DEFINES += LIBENCLOUD_REVISION=\\\"$${REVISION}\\\"
