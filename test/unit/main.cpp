@@ -31,6 +31,9 @@ int main (int argc, char *argv[])
 #ifdef Q_OS_WIN32
     qDebug() << "# OS: W32";
 #endif
+#ifdef Q_OS_WINCE
+    qDebug() << "# OS: WCE";
+#endif
 
     qDebug() << "# hw_info: " << libencloud::utils::getHwInfo();
 

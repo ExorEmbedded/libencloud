@@ -7,7 +7,7 @@
 
 namespace libencloud {
 
-class LIBENCLOUD_DLLSPEC HttpAbstractHandler
+class LIBENCLOUD_DLLSPEC HttpAbstractHandler : public QObject
 {
 public:
     virtual ~HttpAbstractHandler() {};

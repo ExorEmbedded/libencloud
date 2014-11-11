@@ -10,6 +10,8 @@
 // defaults
 #ifdef Q_OS_WIN32
 #  define LIBENCLOUD_LOGGER_PATH  "c:/" LIBENCLOUD_PKGNAME "-log.txt"
+#elif defined(Q_OS_WINCE)
+#  define LIBENCLOUD_LOGGER_PATH  "/flash/" LIBENCLOUD_PKGNAME "-log.txt"
 #else
 #  define LIBENCLOUD_LOGGER_PATH  "/tmp/" LIBENCLOUD_PKGNAME "-log.txt"
 #endif

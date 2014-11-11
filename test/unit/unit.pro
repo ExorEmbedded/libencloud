@@ -53,3 +53,18 @@ unix {
     post.extra = $${QMAKE_MOVE} "\"${INSTALL_ROOT}/$${BINDIR}/$${TARGET}\"" "\"${INSTALL_ROOT}/$${BINDIR}/libencloud-test\""
     INSTALLS += post
 }
+
+nodll {
+    DEFINES += LIBENCLOUD_DLLSPEC=
+    DEFINES += LIBENCLOUDABOUT_DLLSPEC=
+    # for SHGetFolderPath()
+    win32 {
+        !wince {
+            LIBS += -lshfolder
+        }
+    }
+
+    PRE_TARGETDEPS  += $$OUT_PWD/../../about/$$DESTDIR/about$${DBG_SUFFIX}.lib
+
+    LIBS += $$PRE_TARGETDEPS
+}

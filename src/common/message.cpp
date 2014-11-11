@@ -9,6 +9,13 @@ namespace libencloud {
 // public methods
 //
 
+MessageInterface::MessageInterface()
+    : _cfg(NULL)
+    , _client(NULL)
+{
+}
+
+
 int MessageInterface::clear ()
 {
     _cfg = NULL;

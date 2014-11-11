@@ -9,7 +9,7 @@
 #define LIBENCLOUD_MACRO_STR(x) _LIBENCLOUD_MACRO_STR(x)
 
 #ifndef LIBENCLOUD_DLLSPEC
-#  if defined(Q_OS_WIN32)
+#  if defined(Q_OS_WIN)
 #    if defined(_LIBENCLOUD_LIB_)
 #       define LIBENCLOUD_DLLSPEC __declspec(dllexport)
 #    else

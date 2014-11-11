@@ -12,6 +12,9 @@ VpnConfig::VpnConfig ()
 {
     LIBENCLOUD_TRACE;
 
+    _valid = false;
+    _file = false;
+
     clear();
 }
 
@@ -25,6 +28,7 @@ VpnConfig::VpnConfig (const QVariantMap &vm, Config *cfg)
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
 
     _valid = true;
+    _file = false;
 err:
     return ;
 }
@@ -40,6 +44,7 @@ VpnConfig::VpnConfig (const QString &s, Config *cfg)
     LIBENCLOUD_ERR_IF (fromCfg(cfg));
 
     _valid = true;
+    _file = false;
 err:
     return;
 }
@@ -47,6 +52,7 @@ err:
 int VpnConfig::clear ()
 {
     _valid = false;
+    _file = false;
     _string = "";
     _data.clear();
     _data["client"] = QStringList();
@@ -58,6 +64,11 @@ int VpnConfig::clear ()
 bool VpnConfig::isValid () const
 {
     return _valid;
+}
+
+bool VpnConfig::isFile () const
+{
+    return _file;
 }
 
 int VpnConfig::fromMap (const QVariantMap &vm)
@@ -143,6 +154,8 @@ int VpnConfig::fromFile (const QString &path)
 
     f.close();
 
+    _file = true;
+
     return 0;
 err:
     f.close();
@@ -161,6 +174,8 @@ int VpnConfig::toFile (const QString &path) const
     else  // created from map
     {
         QTextStream out(&s);
+        LIBENCLOUD_ERR_IF(!_data.contains("remote"));
+        LIBENCLOUD_ERR_IF(!_data.contains("port"));
 
         if (_data.contains("client"))
             out << "client" << endl;

@@ -143,8 +143,14 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--management-forget-disconnect";
     args << "--management-query-passwords";
 
+#ifndef LIBENCLOUD_MODE_VPN
     caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
     args << "--ca" << caCertPath;
+#endif
+
+#ifdef Q_OS_WINCE // redirect output to log
+    args << "--log" << "openvpnlog.log";
+#endif
 
     if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
     {
@@ -186,7 +192,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
             break;
     }
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN32
     args << "--dev-node" << LIBENCLOUD_TAPNAME;
 #endif
 
@@ -202,10 +208,12 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     // consistency checks
     //
     LIBENCLOUD_ERR_IF (config.fromFile(configPath));
+#ifndef LIBENCLOUD_MODE_VPN
     LIBENCLOUD_EMIT_ERR_IF (
             config.get("proto")[0] == "udp" &&
             proxyAuth.getType() != Auth::NoneType,
             sigError(this->err = ProxyNotAllowed, "Server must be configured to use TCP"));
+#endif
 
     return args;
 err:
@@ -244,7 +252,7 @@ void VpnClient::start (bool fallback)
     args = getArgs(configPath);
     if (args.empty())
     {
-        LIBENCLOUD_DBG("[VPNClient] error: invalid arguments");
+        LIBENCLOUD_DBG("[VPNClient] error: invalid arguments: " << configPath);
         return;
     }
 
@@ -260,7 +268,9 @@ void VpnClient::start (bool fallback)
     LIBENCLOUD_EMIT_ERR_IF (this->process == NULL,
             sigError(this->err = MemoryError));
 
+#ifndef Q_OS_WINCE
     this->process->setProcessChannelMode(QProcess::MergedChannels);
+#endif
 
     connect(this->process, SIGNAL(error(QProcess::ProcessError)), this,
             SLOT(processError(QProcess::ProcessError)));
@@ -298,7 +308,7 @@ void VpnClient::stop (void)
     if (this->process->state() != QProcess::NotRunning)
     {
         this->process->blockSignals(true);
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
         this->process->kill();
 #else
         this->process->terminate();
@@ -369,7 +379,7 @@ void VpnClient::processReadyRead ()
 
         //qDebug() << "newline: " << line;
         
-        LIBENCLOUD_LOG(line.prepend("[VPN] "));
+        __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
     }
 }
 
@@ -397,7 +407,11 @@ void VpnClient::enableTap()
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
 #ifdef LIBENCLOUD_MODE_QCC
+#ifdef LIBENCLOUD_EXOR
+    QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
+#else
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
+#endif
     QStringList args;
     QString out;
 
@@ -415,7 +429,11 @@ void VpnClient::disableTap()
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
 #ifdef LIBENCLOUD_MODE_QCC  
+#ifdef LIBENCLOUD_EXOR
+    QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
+#else
     QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
+#endif
     QStringList args;
     QString out;
 

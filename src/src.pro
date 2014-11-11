@@ -5,9 +5,14 @@ TEMPLATE = lib
 TARGET = encloud
 
 win32 {
-    CONFIG += dll
-    # disable number in mingw output (libencloud0.dll vs libencloud.dll)
-    TARGET_EXT = .dll
+    !nodll {
+        CONFIG += dll
+        # disable number in mingw output (libencloud0.dll vs libencloud.dll)
+        TARGET_EXT = .dll
+    } else {
+        CONFIG += staticlib
+        DEFINES += LIBENCLOUDABOUT_DLLSPEC=
+    }
 
     TARGET = encloud$${DBG_SUFFIX}
 } else {
@@ -75,11 +80,13 @@ contains(CONFIG, qjson) {
 
 SOURCES += common/utils.cpp
 
-SOURCES += common/crypto.cpp
+!wince {
+    SOURCES += common/crypto.cpp
+}
 
 !nocloud {
-    HEADERS += common/vpn/*.h
-    SOURCES += common/vpn/*.cpp
+    HEADERS += $${_PRO_FILE_PWD_}/common/vpn/*.h
+    SOURCES += $${_PRO_FILE_PWD_}/common/vpn/*.cpp
 }
 
 #
@@ -89,7 +96,7 @@ SOURCES += common/crypto.cpp
 HEADERS += $${PUBINCLUDEDIR}/Manager/NetworkManager
 HEADERS += $${PUBINCLUDEDIR}/Manager/ProcessManager
 HEADERS += $${PUBINCLUDEDIR}/Manager/Process
-SOURCES += mgr/*.cpp
+SOURCES += $${_PRO_FILE_PWD_}/mgr/*.cpp
 
 HEADERS += $${PUBINCLUDEDIR}/Core
 SOURCES += core/core.cpp
@@ -102,12 +109,16 @@ SOURCES += core/core.cpp
     HEADERS += setup/setup.h
     SOURCES += setup/setup.cpp
     modeqcc {
-        HEADERS += setup/qcc/*.h
-        SOURCES += setup/qcc/*.cpp
+        HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
+        SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
     }
     modeece | modesece {
-        HEADERS += setup/ece/*.h
-        SOURCES += setup/ece/*.cpp
+        HEADERS += $${_PRO_FILE_PWD_}/setup/ece/*.h
+        SOURCES += $${_PRO_FILE_PWD_}/setup/ece/*.cpp
+    }
+    modevpn {
+        HEADERS += $${_PRO_FILE_PWD_}/setup/vpn/*.h
+        SOURCES += $${_PRO_FILE_PWD_}/setup/vpn/*.cpp
     }
 }
 
@@ -116,8 +127,8 @@ SOURCES += core/core.cpp
 # 
 
 !nocloud {
-    HEADERS += cloud/*.h
-    SOURCES += cloud/*.cpp
+    HEADERS += $${_PRO_FILE_PWD_}/cloud/*.h
+    SOURCES += $${_PRO_FILE_PWD_}/cloud/*.cpp
 }
 
 #
@@ -132,7 +143,7 @@ SOURCES += core/core.cpp
     HEADERS += $${PUBINCLUDEDIR}/Api/ConfigApi
     HEADERS += $${PUBINCLUDEDIR}/Api/SetupApi
     HEADERS += $${PUBINCLUDEDIR}/Api/StatusApi
-    SOURCES += api/*.cpp
+    SOURCES += $${_PRO_FILE_PWD_}/api/*.cpp
 }
 
 #
@@ -146,14 +157,16 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpRequest
 HEADERS += $${PUBINCLUDEDIR}/Http/HttpResponse
 HEADERS += $${PUBINCLUDEDIR}/Http/HttpHeaders
 HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
-HEADERS += http/*.h
-SOURCES += http/*.cpp
+HEADERS += $${_PRO_FILE_PWD_}/http/*.h
+SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
 
 # for SHGetFolderPath()
 win32 {
-    LIBS += -lshfolder
+    !wince {
+        LIBS += -lshfolder
+    }
 
-    PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.lib
+    PRE_TARGETDEPS  += $$OUT_PWD/../about/$$DESTDIR/about$${DBG_SUFFIX}.lib
 
     LIBS += $$PRE_TARGETDEPS
 } 
@@ -161,3 +174,4 @@ win32 {
 # installation
 target.path = $$LIBDIR
 INSTALLS += target
+

@@ -6,7 +6,9 @@ HEADERS += Auth
 HEADERS += Client
 HEADERS += Common
 HEADERS += Core
-HEADERS += Crypto
+!wince {
+    HEADERS += Crypto
+}
 HEADERS += Error
 HEADERS += Info
 HEADERS += Json

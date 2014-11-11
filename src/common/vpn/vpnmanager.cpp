@@ -184,12 +184,15 @@ void VpnManager::parseLine (QByteArray line)
         msgType = line.split(':')[0];
         rest = line.remove(0, msgType.size() + 1);
 
-        if (qstrcmp(msgType, "INFO") == 0)
+        if (qstrcmp(msgType, "INFO") == 0) {
             ;
-        else if (qstrcmp(msgType, "PASSWORD") == 0)
+        } else if (qstrcmp(msgType, "PASSWORD") == 0) {
             parseLinePass(rest);
-        else if (qstrcmp(msgType, "FATAL"))
+        } else if (qstrcmp(msgType, "LOG") == 0) {
+            LIBENCLOUD_LOG("[VPN] " << line);
+        } else if (qstrcmp(msgType, "FATAL") == 0) {
             LIBENCLOUD_EMIT_ERR(sigError((this->err = MgmtError), rest));
+        }
     }
     else
     {
@@ -397,6 +400,10 @@ void VpnManager::connected ()
     LIBENCLOUD_TRACE;
 
     this->st = StateAttached;
+
+#ifdef Q_OS_WINCE
+    enableLogging(true);
+#endif
 }
 
 void VpnManager::disconnected ()
@@ -462,4 +469,24 @@ err:
     return;
 }
 
-}  // namespace libencloud
+void VpnManager::enableLogging(bool enabled)
+{
+        if (this->socket)
+        {
+            //LIBENCLOUD_DBG("[VPNManager] state: " << QString::number(this->socket->state()))
+            if (this->socket->state() == QAbstractSocket::ConnectedState)
+            {
+                if (enabled) {
+                    this->socket->write("log on all\r\n");
+                } else {
+                    this->socket->write("log off\r\n");
+                }
+                this->socket->flush();
+            }
+        }
+}
+
+}
+
+
+// namespace libencloud

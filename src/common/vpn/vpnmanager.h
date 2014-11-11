@@ -54,6 +54,8 @@ public:
     void attach (VpnClient *client, QString host, int port);
     void detach ();
 
+    void enableLogging(bool enabled);
+
 signals:
     void authRequired (Auth::Id id);
     void ipAssigned (const QString &ip);

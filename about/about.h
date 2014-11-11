@@ -2,7 +2,7 @@
 #define _LIBENCLOUD_ABOUT_H_
 
 #ifndef LIBENCLOUDABOUT_DLLSPEC
-#  if defined(WIN32)
+#  if defined(WIN32) || defined(WINCE)
 #    if defined(_LIBENCLOUDABOUT_LIB_)
 #       define LIBENCLOUDABOUT_DLLSPEC __declspec(dllexport)
 #    else

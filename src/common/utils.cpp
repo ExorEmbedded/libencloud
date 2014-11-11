@@ -1,5 +1,7 @@
-#include <encloud/Crypto>
 #include <encloud/Utils>
+#ifndef Q_OS_WINCE
+#include <encloud/Crypto>
+#endif
 #include "helpers.h"
 #include "config.h"
 
@@ -21,12 +23,22 @@ LIBENCLOUD_DLLSPEC QString getHwInfo (void)
             QSettings(QLatin1String("HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat).\
                 value(QLatin1String("ProcessorNameString")).toString();
 #endif
+#ifdef Q_OS_WINCE
+    QString hwInfo = QSettings(QLatin1String("HKLM\\Software\\Microsoft\\Cryptography"), QSettings::NativeFormat).\
+                value(QLatin1String("MachineGuid")).toString() + " " + \
+            QSettings(QLatin1String("HKLM\\HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0"), QSettings::NativeFormat).\
+                value(QLatin1String("ProcessorNameString")).toString();
+#endif
     LIBENCLOUD_ERR_IF (hwInfo.isEmpty());
 
     LIBENCLOUD_DBG("[Utils] hwInfo: " << hwInfo);
 
+#ifndef Q_OS_WINCE
     LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
+#else
+    res = QString::fromLatin1(QCryptographicHash::hash(hwInfo.toUtf8(), QCryptographicHash::Md5));
+#endif
 
     free(s);
     return res;
@@ -110,7 +122,7 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 {
     return (s == NULL ? NULL :
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
                         // avoid ISO C++ warning
                         _strdup(s)
 #else

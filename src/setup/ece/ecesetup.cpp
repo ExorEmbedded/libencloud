@@ -127,7 +127,7 @@ void EceSetup::_onErrorState ()
 
 void EceSetup::_onError (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG(err);
+    LIBENCLOUD_DBG(err.toString());
 
     emit error((_error = err));
 }

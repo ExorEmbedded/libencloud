@@ -13,7 +13,7 @@
 
 namespace libencloud {
 
-class EceSetup : public QObject, public SetupInterface
+class EceSetup : public SetupInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::SetupInterface)

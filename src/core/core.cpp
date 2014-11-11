@@ -1,7 +1,9 @@
-#include <openssl/x509v3.h>
 #include <QUuid>
 #include <encloud/Core>
+#ifndef Q_OS_WINCE
+#include <openssl/x509v3.h>
 #include <encloud/Crypto>
+#endif
 #include <encloud/Info>
 #include <encloud/Logger>
 #include <encloud/Progress>
@@ -9,12 +11,22 @@
 #include <encloud/Utils>
 #include <encloud/Api/CommonApi>
 #include <common/config.h>
+#ifdef LIBENCLOUD_MODE_QCC
 #include <setup/qcc/qccsetup.h>
+#endif
+#ifdef LIBENCLOUD_MODE_ECE
 #include <setup/ece/ecesetup.h>
+#endif
+#ifdef LIBENCLOUD_MODE_VPN
+#include <setup/vpn/vpnsetup.h>
+#endif
 #include <cloud/cloud.h>
 
+
+#ifndef Q_OS_WINCE
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
+#endif
 
 namespace libencloud {
 
@@ -138,7 +150,7 @@ int Core::attachServer (Server *server)
     // server connections
     // 
 
-    obj = dynamic_cast<QObject *> (server);
+    obj = server;
 
 #ifndef LIBENCLOUD_DISABLE_CLOUD
     // ip assignments from cloud module to server
@@ -146,7 +158,11 @@ int Core::attachServer (Server *server)
             obj, SLOT(vpnIpAssigned(QString)));
 #endif
 
+#ifndef Q_OS_WINCE
     handler = dynamic_cast<HttpHandler *> (server->getHandler());
+#else
+    handler = (HttpHandler *) (server->getHandler());
+#endif
     LIBENCLOUD_ERR_IF (handler == NULL);
 
     //
@@ -161,7 +177,7 @@ int Core::attachServer (Server *server)
     // handler connections
     // 
 
-    obj = dynamic_cast<QObject *> (handler);
+    obj = handler;
 
     connect(this, SIGNAL(error(libencloud::Error)), 
             obj, SLOT(_coreErrorReceived(libencloud::Error)));
@@ -266,18 +282,22 @@ void Core::_setupCompleted ()
     const VpnConfig *vpnConfig = _setup->getVpnConfig();
     const VpnConfig *fallbackVpnConfig = _setup->getFallbackVpnConfig();
 
-    LIBENCLOUD_EMIT_ERR_IF (vpnConfig == NULL, 
+    LIBENCLOUD_EMIT_ERR_IF (vpnConfig == NULL,
             error(Error(tr("No Cloud configuration from Setup Module"))));
-    LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(
-                _cfg->config.vpnConfPath.absoluteFilePath()),
-            error(Error(tr("Failed writing configuration to file"))));
+    if (!vpnConfig->isFile()) {
+        LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(
+                                    _cfg->config.vpnConfPath.absoluteFilePath()),
+                                error(Error(tr("Failed writing configuration to file"))));
+    }
 
     if (fallbackVpnConfig && fallbackVpnConfig->isValid())
     {
         LIBENCLOUD_DBG("[Core] Fallback configuration found");
-        LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
-                    _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
-                error(Error(tr("Failed writing fallback configuration to file"))));
+        if (!fallbackVpnConfig->isFile()) {
+            LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
+                                        _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
+                                    error(Error(tr("Failed writing fallback configuration to file"))));
+        }
     }
 err:
     return;
@@ -521,8 +541,10 @@ err:
 
 int Core::_initCrypto ()
 {
+#ifndef Q_OS_WINCE
     libencloud_crypto_init(&_cfg->crypto);
     libencloud_crypto_set_name_cb(&_cfg->crypto, &_libencloud_context_name_cb, this);
+#endif
 
     return 0;
 }
@@ -535,10 +557,12 @@ int Core::_initSetup ()
     _setup = new QccSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
     _setup = new EceSetup(_cfg);
+#elif defined(LIBENCLOUD_MODE_VPN)
+    _setup = new VpnSetup(_cfg);
 #endif
     LIBENCLOUD_ERR_IF (_setup == NULL);
 
-    _setupObj = dynamic_cast<QObject *>(_setup);
+    _setupObj = _setup;
     LIBENCLOUD_ERR_IF (_setupObj == NULL);
 
     // error signal handling
@@ -576,7 +600,7 @@ int Core::_initCloud ()
     LIBENCLOUD_ERR_IF (_cloud == NULL);
     _cloud->setSetup(_setup);
 
-    _cloudObj = dynamic_cast<QObject *>(_cloud);
+    _cloudObj = _cloud;
     LIBENCLOUD_ERR_IF (_cloudObj == NULL);
 
     // error signal handling
@@ -688,6 +712,7 @@ QString Core::_stateStr (QState *state)
 // static methods
 // 
 
+#ifndef Q_OS_WINCE
 /* Subject name settings from JSON CSR template */
 static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
 {
@@ -727,7 +752,7 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
         // SECE: CN based on hw_info
         LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8,
                 (const unsigned char *)
-                libencloud::utils::getHwInfo().toUtf8().data(), 
+                libencloud::utils::getHwInfo().toUtf8().data(),
                 -1, -1, 0));
 #else
         // now CN for ECE should be part of template and will use (unique)
@@ -745,3 +770,4 @@ static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
 err:
     return ~0;
 }
+#endif

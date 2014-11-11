@@ -16,6 +16,8 @@ namespace libencloud {
 class MessageInterface
 {
 public:
+    MessageInterface();
+
     int clear ();
     int setConfig (Config *cfg);
     int setClient (Client *client);

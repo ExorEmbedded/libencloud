@@ -18,6 +18,8 @@ public:
 
     int clear ();
     bool isValid () const;
+    // Returns true if the configuration is file based
+    bool isFile() const;
     int fromMap (const QVariantMap &vm);
     int fromString (const QString &s);
     int fromCfg (Config *cfg);
@@ -30,6 +32,7 @@ public:
 
 private:
     bool _valid;
+    bool _file;
     QString _string;
 
     QHash<QString, QStringList> _data;

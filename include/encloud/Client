@@ -12,6 +12,10 @@
 #include <encloud/Common>
 #include <encloud/Error>
 
+#ifdef Q_OS_WINCE
+#define QSslConfiguration int
+#endif
+
 namespace libencloud {
 
 class LIBENCLOUD_DLLSPEC Client : public QObject

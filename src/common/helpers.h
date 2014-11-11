@@ -46,6 +46,23 @@
         } \
     } while (0);
 
+#define __LIBENCLOUD_SIMPLE_MSG(lev, levstr, msg) \
+    do { \
+        if (lev <= g_libencloudLogLev) { \
+            if (libencloud::Logger::connected()) \
+            { \
+                QString __s; \
+                QTextStream __ts(&__s); \
+                __ts << qPrintable(QDateTime::currentDateTime().toString()) \
+                        << " [" << levstr << "] [" << LIBENCLOUD_APP  "] " << msg; \
+                libencloud::Logger::send(__s + "\n"); \
+            } \
+            else \
+                qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
+                        << " [" << levstr << "] [" << LIBENCLOUD_APP << "] " << msg; \
+        } \
+    } while (0);
+
 // Used to redefine __LIBENCLOUD_MSG, so interface must match
 #define __LIBENCLOUD_PRINT(lev, levstr, msg) fprintf(stderr, "[%s] libencloud:%s:%s:%d] %s\n", levstr, __FILE__, __FUNCTION__, __LINE__, msg)
 

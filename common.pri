@@ -5,6 +5,7 @@
 #   endian      Endian build
 #   exor        Exor build
 #   debug       compile libraries with debugging symbols
+#   nodll       build a static library
 #
 # [ Modes ]
 # 
@@ -13,6 +14,7 @@
 #   modeqcc     Endian Connect App / Exor JMConnect mode
 #   modeece     Endian Cloud Enabler mode
 #   modesece    Software Endian Cloud Enabler mode
+#   modevpn     Only vpn manager with static ovpn file configuration
 #
 # [ Feature Disabling ]
 #
@@ -24,6 +26,10 @@
 #
 # [ About definitions ]
 #   about       use brand info from about dll, instead of using default for major brand (exor/endian)
+
+contains(DEFINES, WINCE) {
+    CONFIG += wince
+}
 
 # Local configuration overrides. Sample content:
 #     CONFIG += endian
@@ -37,6 +43,12 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 # global defs
 #
 PKGNAME = libencloud
+
+#PRODUCT_ECC="ConnectClient"
+#PRODUCT_JMC="HMIConnect"
+#PRODUCT_ENCLOUD="Encloud"
+#PRODUCT_SECE="SECE"  # FIXME
+#PRODUCT_VPN="OVPN"  # FIXME
 
 # [ client/package version ]
 # *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
@@ -120,8 +132,12 @@ modeqcc {
     PRODUCT_DIR="SECE"
     DEFINES += LIBENCLOUD_MODE_SECE
     DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
+} else:modevpn {
+    PRODUCT_DIR="OVPN"
+    DEFINES += LIBENCLOUD_MODE_VPN
+    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_VPN}\\\"
 } else {
-    error("a mode must be defined (CONFIG += modeqcc|modeece|modesece)!")
+    error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
 }
 
 PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}

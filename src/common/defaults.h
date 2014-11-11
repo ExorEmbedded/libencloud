@@ -79,7 +79,14 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
 #  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
 #  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#else  // unix - absolute paths
+#elif defined Q_OS_WINCE  // wince , local paths
+#  define LIBENCLOUD_EXE                ".exe"
+#  define LIBENCLOUD_ETC_PREFIX         ""   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
+#  define LIBENCLOUD_BIN_PREFIX         ""   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
+#  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
+#  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#else
 #  define LIBENCLOUD_EXE                ""
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
@@ -113,7 +120,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_VPN_MGMT_HOST        LIBENCLOUD_LOCALHOST
 #define LIBENCLOUD_VPN_MGMT_PORT        1195
 #define LIBENCLOUD_VPN_VERBOSITY        2
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 #  define LIBENCLOUD_VPN_LOG_FILE         "openvpn-log.txt"
 #else
 #  define LIBENCLOUD_VPN_LOG_FILE         "openvpn.log"

@@ -3,9 +3,13 @@ include(../common.pri)
 TEMPLATE = lib
 
 win32 {
-    CONFIG += dll
-    # disable number in mingw output (libencloud0.dll vs libencloud.dll)
-    TARGET_EXT = .dll
+    !nodll {
+        CONFIG += dll
+        # disable number in mingw output (libencloud0.dll vs libencloud.dll)
+        TARGET_EXT = .dll
+    } else {
+        CONFIG += staticlib
+    }
 } else {
     CONFIG += shared
 }

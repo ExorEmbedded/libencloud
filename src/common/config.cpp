@@ -16,6 +16,11 @@ Config::Config ()
     QString sep = "/";
 
 #ifdef Q_OS_WIN32  // relative paths
+#ifdef LIBENCLOUD_EXOR
+    QString progFiles = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/../";
+    sbinPrefix = progFiles + "/bin/";
+    confPrefix = progFiles + sep + QString(LIBENCLOUD_APP) + sep + LIBENCLOUD_ETC_PREFIX;
+#else
     QString progFiles = QString(qgetenv("ProgramFiles"));
 
     // main prefix and binaries are product-specific (e.g. ConnectApp)
@@ -25,7 +30,11 @@ Config::Config ()
     // configuration is package-specific (e.g. ConnectApp\libencloud) under %ProgramFiles%
     confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
             sep + LIBENCLOUD_ETC_PREFIX;
-
+#endif
+#elif defined Q_OS_WINCE
+    QString progFiles = (qApp ? qApp->applicationDirPath() : QDir::currentPath());
+    sbinPrefix = progFiles;
+    confPrefix = progFiles;
 #else  // Linux - absolute paths
     prefix = LIBENCLOUD_PREFIX_PATH;
     confPrefix = LIBENCLOUD_ETC_PREFIX;
