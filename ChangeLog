@@ -2,6 +2,9 @@ ChangeLog file for Endian libencloud
 
 next:
 
+libencloud 0.7.5:
+	- [CONNECT-188] Problems with fallback configuration
+
 libencloud 0.7.4:
 	- [CONNECT-178] Updates always available even if client is updated
 	- [CONNECT-176] Error message gets stuck between states of the application
