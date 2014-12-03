@@ -4,6 +4,8 @@ next:
 
 libencloud 0.7.6:
 	- ECE: fix compilation error in http/handler1.ccp
+	- build: when building from sratch remove only files ignored by git
+	  (so local files such as .qmake.pri are kept)
 
 libencloud 0.7.5 (01/12/2014):
 	- [CONNECT-188] Problems with fallback configuration

@@ -15,7 +15,6 @@ moc_*.cpp
 
 # build-generated files
 .revision
-.qmake.pri
 Makefile
 Makefile.Debug
 Makefile.Release
