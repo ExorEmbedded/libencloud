@@ -2,6 +2,9 @@ ChangeLog file for Endian libencloud
 
 next:
 
+libencloud 0.7.6:
+	- ECE: fix compilation error in http/handler1.ccp
+
 libencloud 0.7.5 (01/12/2014):
 	- [CONNECT-188] Problems with fallback configuration
 

@@ -241,7 +241,9 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLogPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
-#elif defined(LIBENCLOUD_MODE_VPN)
+#else
+//defined(LIBENCLOUD_MODE_VPN) ||
+//defined(LIBENCLOUD_MODE_ECE)
             if (0) {}
 #endif
             else
