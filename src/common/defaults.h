@@ -91,7 +91,11 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
-#  define LIBENCLOUD_DATA_PREFIX        "/var/efw/encloud/"
+#  ifdef LIBENCLOUD_ENDIAN
+#    define LIBENCLOUD_DATA_PREFIX      "/var/efw/encloud/"
+#  else
+#    define LIBENCLOUD_DATA_PREFIX      "/var/lib/encloud/"
+#  endif
 #  define LIBENCLOUD_LOG_PREFIX         "/var/log/encloud/"
 #endif
 #define LIBENCLOUD_CONF_FILE            LIBENCLOUD_APP ".json"
