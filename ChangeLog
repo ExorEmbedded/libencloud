@@ -4,6 +4,7 @@ next:
 	- vpn: allow timeout=0 (no timer)
 	- etc: default verbosity=7 for ECE/SECE
 	- ECE: fix compilation error in http/handler1.ccp
+	- SECE: fix compilation error in core (header not included)
 	- defaults: LIBENCLOUD_DATA_PREFIX is /var/lib/encloud if !LIBENCLOUD_ENDIAN
 	- client: avoid errors when certificate verification is off
 	- build: when building from sratch remove only files ignored by git

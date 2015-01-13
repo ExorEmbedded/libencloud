@@ -14,7 +14,7 @@
 #ifdef LIBENCLOUD_MODE_QCC
 #include <setup/qcc/qccsetup.h>
 #endif
-#ifdef LIBENCLOUD_MODE_ECE
+#if defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
 #include <setup/ece/ecesetup.h>
 #endif
 #ifdef LIBENCLOUD_MODE_VPN
