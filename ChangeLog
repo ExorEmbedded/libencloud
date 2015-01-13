@@ -4,6 +4,7 @@ next:
 	- vpn: allow timeout=0 (no timer)
 	- ECE: fix compilation error in http/handler1.ccp
 	- defaults: LIBENCLOUD_DATA_PREFIX is /var/lib/encloud if !LIBENCLOUD_ENDIAN
+	- client: avoid errors when certificate verification is off
 	- build: when building from sratch remove only files ignored by git
 	  (so local files such as .qmake.pri are kept)
 
