@@ -1,13 +1,24 @@
 ChangeLog file for Endian libencloud
 
 next:
+	- vpn: allow timeout=0 (no timer)
+	- etc: default verbosity=7 for ECE/SECE
+	- ECE: fix compilation error in http/handler1.ccp
+	- SECE: fix compilation error in core (header not included)
+	- defaults: LIBENCLOUD_DATA_PREFIX is /var/lib/encloud if !LIBENCLOUD_ENDIAN
+	- client: avoid errors when certificate verification is off
+	- build: when building from sratch remove only files ignored by git
+	  (so local files such as .qmake.pri are kept)
 
-libencloud 0.7.4:
+libencloud 0.7.5 (01/12/2014):
+	- [CONNECT-188] Problems with fallback configuration
+
+libencloud 0.7.4 (11/11/2014):
 	- [CONNECT-178] Updates always available even if client is updated
 	- [CONNECT-176] Error message gets stuck between states of the application
 	- core: fix watchdog not being restarted upon reconnect
 
-libencloud 0.7.3:
+libencloud 0.7.3 (29/10/2014):
 	- [CONNECT-169] Rename to Endian Connect App and Endian Connect Service
 	- [CONNECT-149] Connect App sets up routes belonging to previous connection
 

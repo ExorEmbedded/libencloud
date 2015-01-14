@@ -2,7 +2,7 @@
 #
 # WARNING: cleans untracked files!!!
 
-git clean -fdx . && \
+git clean -fdX . && \
 qmake && \
 make check
 

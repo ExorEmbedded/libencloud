@@ -119,15 +119,26 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
 
 void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
 {
-    QString msg;
+    // If a valid fallback configuration has been received from
+    // Switchboard and we haven't tried it yet, use it
+    if (!_isFallback && _setup && _setup->getFallbackVpnConfig() &&
+            _setup->getFallbackVpnConfig()->isValid())
+    {
+        LIBENCLOUD_DBG("[Cloud] Retrying with fallback configuration");
+        _restart(true, true);
+    }
+    else 
+    {
+        QString msg;
 
-    msg = VpnClient::errorString(err);
-    if (errMsg != "")
-        msg += "\n\n" + errMsg;
+        msg = VpnClient::errorString(err);
+        if (errMsg != "")
+            msg += "\n\n" + errMsg;
 
-    emit error(Error(Error::CodeClientFailure, msg));
+        emit error(Error(Error::CodeClientFailure, msg));
 
-    _restart(_isFallback);
+        _restart(_isFallback);
+    }
 }
 
 // manager socket failures are handled internally and timeout handled here -
