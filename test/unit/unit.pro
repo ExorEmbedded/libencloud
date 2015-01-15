@@ -48,7 +48,7 @@ check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$LIBDIR $$(LIBENCLOUD_WRAP) 
 target.path = $${BINDIR}
 INSTALLS += target
 
-unix {
+unix:!macx {
     post.path = $${BINDIR}
     post.extra = $${QMAKE_MOVE} "\"${INSTALL_ROOT}/$${BINDIR}/$${TARGET}\"" "\"${INSTALL_ROOT}/$${BINDIR}/libencloud-test\""
     INSTALLS += post
