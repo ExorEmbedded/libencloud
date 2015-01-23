@@ -1,3 +1,5 @@
+#include <QFileInfo>
+#include <QSslCertificate>
 #include <QUuid>
 #include <encloud/Core>
 #ifndef Q_OS_WINCE
@@ -170,7 +172,31 @@ int Core::attachServer (Server *server)
     // 
 
 #ifdef LIBENCLOUD_MODE_ECE
-    LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
+    if (_cfg->config.poiPath.exists())
+    {
+        LIBENCLOUD_DBG("Reading PoI from file: " <<
+                _cfg->config.poiPath.absoluteFilePath());
+
+        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
+    }
+    else
+    {
+        LIBENCLOUD_DBG("Reading PoI from cert: " <<
+                _cfg->config.sslInit.certPath.absoluteFilePath());
+
+        QList<QSslCertificate> initCerts(QSslCertificate::fromPath(
+                    _cfg->config.sslInit.certPath.absoluteFilePath()));
+        QSslCertificate initCert = initCerts.first();
+        QString poiStr;
+
+        LIBENCLOUD_ERR_IF (initCerts.isEmpty());
+        LIBENCLOUD_ERR_IF (initCert.isNull());
+
+        poiStr = initCert.subjectInfo(QSslCertificate::CommonName);
+
+        LIBENCLOUD_DBG("PoI: " << poiStr);
+        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(poiStr)));
+    }
 #endif
 
     //
