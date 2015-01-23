@@ -99,12 +99,28 @@ int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
+    // Connect Client starts immediately
+#ifdef LIBENCOUD_MODE_QCC
+    _start();
+#else
+    // for ECE and SECE startup is automated so we introduce a random pause of
+    // 0-5 secs to avoid server congestion due to excessive simultaneous connections
+    int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
+
+    LIBENCLOUD_DBG("Congestion avoidance - waiting: " << QString::number(msecs));
+
+    QTimer::singleShot(msecs, this, SLOT(_start()));
+#endif
+
+    return 0;
+}
+
+void Core::_start ()
+{
     _fsm.start();
 
     if (_clientPort != -1)
         _clientWatchdog.start();
-
-    return 0;
 }
 
 int Core::stop ()
@@ -567,6 +583,9 @@ err:
 
 int Core::_initCrypto ()
 {
+    // initialize Qt's PRNG
+    qsrand((uint) QTime::currentTime().msec());
+
 #ifndef Q_OS_WINCE
     libencloud_crypto_init(&_cfg->crypto);
     libencloud_crypto_set_name_cb(&_cfg->crypto, &_libencloud_context_name_cb, this);

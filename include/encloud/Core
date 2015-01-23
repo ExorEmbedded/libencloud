@@ -55,6 +55,7 @@ signals:
     void actionRequest (const QString &action, const libencloud::Params &params);
 
 private slots:
+    void _start ();
     void _stateChanged (State state);
     void _stateEntered ();
     void _stateExited ();

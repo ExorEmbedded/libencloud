@@ -3,9 +3,10 @@ ChangeLog file for Endian libencloud
 next:
 	- vpn: allow timeout=0 (no timer)
 	- etc: default verbosity=7 for ECE/SECE
-	- ECE: fix compilation error in http/handler1.ccp;
+	- ece: fix compilation error in http/handler1.ccp;
 	  handle PoI from cert CN (no longer required as separate file)
-	- SECE: fix compilation error in core (header not included)
+	- sece: fix compilation error in core (header not included)
+	- *ece: congestion avoidance via random wait before startup
 	- defaults: LIBENCLOUD_DATA_PREFIX is /var/lib/encloud if !LIBENCLOUD_ENDIAN
 	- client: avoid errors when certificate verification is off
 	- build: when building from sratch remove only files ignored by git
