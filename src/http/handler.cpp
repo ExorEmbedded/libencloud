@@ -256,8 +256,10 @@ void HttpHandler::_clear()
     _coreProgress = Progress();
     _isFallback = false;
     _needs.clear();
-    _poi = QUuid();
     _serverConfig.clear();
+
+    // keep persistent data
+    //_poi = QUuid();
 }
 
 // return new instance of specific api handler given version 
