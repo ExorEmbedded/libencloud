@@ -1,6 +1,8 @@
 ChangeLog file for Endian libencloud
 
 next:
+
+libencloud 0.7.6 (28/01/2015)
 	- setup: fix possible crashes upon error due to double delete;
 	  also valid=false triggers license error
 	- vpn: allow timeout=0 (no timer)
