@@ -1,7 +1,8 @@
 ChangeLog file for Endian libencloud
 
 next:
-	- setup: fix possible crashes upon error due to double delete
+	- setup: fix possible crashes upon error due to double delete;
+	  also valid=false triggers license error
 	- vpn: allow timeout=0 (no timer)
 	- etc: default verbosity=7 for ECE/SECE
 	- ece: fix compilation error in http/handler1.ccp;

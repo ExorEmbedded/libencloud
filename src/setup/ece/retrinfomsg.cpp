@@ -150,7 +150,12 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     EMIT_ERROR_ERR_IF (!_time.isValid());
 
     _valid = jo["valid"].toBool();
-    EMIT_ERROR_ERR_IF (!_valid);
+    if (!_valid)
+    {
+        LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
+        emit need("license");
+        goto err;
+    }
 
     _expiry = utils::pytime2DateTime(jo["expiry"].toString());
     EMIT_ERROR_ERR_IF (!_expiry.isValid());
