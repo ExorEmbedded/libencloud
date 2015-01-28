@@ -24,6 +24,7 @@ class LIBENCLOUD_DLLSPEC Client : public QObject
 
 public:
     Client ();
+    ~Client ();
 
 	typedef enum {
 		MSG_TYPE_NONE,

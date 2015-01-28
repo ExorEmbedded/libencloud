@@ -35,7 +35,8 @@ int LoginMsg::process ()
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
 
-    LIBENCLOUD_DELETE (_client);
+    // client already destroyed via deleteLater()
+    //LIBENCLOUD_DELETE (_client);
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
 
     // Switchboard is strict on this
@@ -99,7 +100,7 @@ void LoginMsg::_clientComplete (const QString &response)
     emit processed();
 
 err:
-    _client->deleteLater();
+    sender()->deleteLater();
     return;
 }
 

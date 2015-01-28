@@ -28,6 +28,11 @@ Client::Client ()
             SLOT(_finished(QNetworkReply *)));
 }
 
+Client::~Client ()
+{
+    LIBENCLOUD_TRACE;
+}
+
 void Client::setVerifyCA (bool b) 
 {
     LIBENCLOUD_DBG("[Client] verify CA: " << b);

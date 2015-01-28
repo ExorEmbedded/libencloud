@@ -72,7 +72,8 @@ int SetupMsg::process ()
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
 
-    LIBENCLOUD_DELETE (_client);
+    // client already destroyed via deleteLater()
+    //LIBENCLOUD_DELETE (_client);
 
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
