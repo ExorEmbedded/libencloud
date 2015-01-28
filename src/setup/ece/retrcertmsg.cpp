@@ -21,34 +21,27 @@ int RetrCertMsg::process ()
     QUrl url;
     QUrl params;
     QSslConfiguration config;
-    const char *certData;
+    QList<QSslCertificate> certs;
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
+
+    // don't getCertificate if we already have a valid one
+    certs = QSslCertificate::fromPath(_cfg->config.sslOp.certPath.absoluteFilePath());
+    if (!certs.isEmpty() && certs.first().isValid())
+    {
+        LIBENCLOUD_DBG("Valid Operation Certificate found - skipping getCertificate");
+        emit processed();
+        goto skip;
+    }
+
+    EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
+
+    EMIT_ERROR_ERR_IF (_packRequest());
+    EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
     // client already destroyed via deleteLater()
     //LIBENCLOUD_DELETE (_client);
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
-
-    EMIT_ERROR_ERR_IF (setupece::loadSslConfig(setupece::ProtocolTypeInit, _cfg, url, config));
-
-    // don't getCertificate if we already have a valid one
-    certData = utils::file2Data(_cfg->config.sslOp.certPath);
-    if (certData == NULL)
-    {
-        LIBENCLOUD_DBG("No existing Operation Certificate");
-    }
-    else
-    {
-        if (QSslCertificate(certData).isValid())
-        {
-            LIBENCLOUD_DBG("Valid Operation Certificate found - skipping getCertificate");
-            emit processed();
-            return 0;
-        }
-    }
-
-    EMIT_ERROR_ERR_IF (_packRequest());
-    EMIT_ERROR_ERR_IF (_encodeRequest(url, params));
 
     // listen to signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
@@ -56,6 +49,7 @@ int RetrCertMsg::process ()
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 
+skip:
     return 0;
 err:
     LIBENCLOUD_DELETE(_client);
