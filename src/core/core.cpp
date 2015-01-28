@@ -107,7 +107,8 @@ int Core::start ()
     // 0-5 secs to avoid server congestion due to excessive simultaneous connections
     int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
 
-    LIBENCLOUD_DBG("Congestion avoidance - waiting: " << QString::number(msecs));
+    LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
+            .arg(QString::number(msecs)));
 
     QTimer::singleShot(msecs, this, SLOT(_start()));
 #endif
