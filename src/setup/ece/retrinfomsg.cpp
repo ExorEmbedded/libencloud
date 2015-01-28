@@ -139,7 +139,11 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
         if (errString == "Invalid license")
         {
             LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
+
+#ifdef LIBENCLOUD_MODE_SECE
+            // user intervention required for license entry (see setup API)
             emit need("license");
+#endif
         }
         else
             LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
@@ -153,7 +157,11 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
     if (!_valid)
     {
         LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
+
+#ifdef LIBENCLOUD_MODE_SECE
+        // user intervention required for license entry (see setup API)
         emit need("license");
+#endif
         goto err;
     }
 

@@ -52,7 +52,7 @@
                 "fallback" : true,              # OPTIONAL (default=false) true if fallback VPN server is being used
                 "need" : "license sb_auth"      # OPTIONAL list of space-separated "need" strings
             }'                                  # to be fulfilled via API. Possible values:
-                                                # "license", "sb_auth", "proxy_auth"
+                                                # "license" (SECE), "sb_auth", "proxy_auth"
 
 
 [ Authentication/Login API ]

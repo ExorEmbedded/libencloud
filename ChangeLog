@@ -7,6 +7,7 @@ next:
 	- etc: default verbosity=7 for ECE/SECE
 	- ece: fix compilation error in http/handler1.ccp;
 	  handle PoI from cert CN (no longer required as separate file)
+	  failures due to licensing yield automatic retries (unlike sece)
 	- sece: fix compilation error in core (header not included)
 	- *ece: congestion avoidance via random wait before startup
 	- defaults: LIBENCLOUD_DATA_PREFIX is /var/lib/encloud if !LIBENCLOUD_ENDIAN

@@ -113,9 +113,11 @@ void EceSetup::_onErrorState ()
 
     switch (_error.getCode())
     {
-        // user intervention required 
+#ifdef LIBENCLOUD_MODE_SECE
+        // user intervention required for license entry (see setup API)
         case Error::CodeServerLicenseInvalid:
             break;
+#endif
 
         // keep on retrying
         default:
