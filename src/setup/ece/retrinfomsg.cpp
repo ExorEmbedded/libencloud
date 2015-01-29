@@ -134,28 +134,13 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
 #endif
 
     errString = jo["error"].toString();
-    if (!errString.isEmpty())
-    {
-        if (errString == "Invalid license")
-        {
-            LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
-
-#ifdef LIBENCLOUD_MODE_SECE
-            // user intervention required for license entry (see setup API)
-            emit need("license");
-#endif
-        }
-        else
-            LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
-        goto err;
-    }
-
-    _time = utils::pytime2DateTime(jo["time"].toString());
-    EMIT_ERROR_ERR_IF (!_time.isValid());
 
     _valid = jo["valid"].toBool();
     if (!_valid)
     {
+        if (!errString.isEmpty())
+            LIBENCLOUD_ERR("SB error: " + errString);
+
         LIBENCLOUD_EMIT (error(Error::CodeServerLicenseInvalid));
 
 #ifdef LIBENCLOUD_MODE_SECE
@@ -164,6 +149,16 @@ int RetrInfoMsg::_decodeResponse (const QString &response)
 #endif
         goto err;
     }
+
+    // generic Switchboard Error
+    if (!errString.isEmpty())
+    {
+        LIBENCLOUD_EMIT (error(Error("SB error: " + errString)));
+        goto err;
+    }
+
+    _time = utils::pytime2DateTime(jo["time"].toString());
+    EMIT_ERROR_ERR_IF (!_time.isValid());
 
     _expiry = utils::pytime2DateTime(jo["expiry"].toString());
     EMIT_ERROR_ERR_IF (!_expiry.isValid());
