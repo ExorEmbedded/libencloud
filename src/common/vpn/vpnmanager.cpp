@@ -191,7 +191,7 @@ void VpnManager::parseLine (QByteArray line)
         } else if (qstrcmp(msgType, "PASSWORD") == 0) {
             parseLinePass(rest);
         } else if (qstrcmp(msgType, "LOG") == 0) {
-            LIBENCLOUD_LOG("[VPN] " << line);
+            __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
         } else if (qstrcmp(msgType, "FATAL") == 0) {
             LIBENCLOUD_EMIT_ERR(sigError((this->err = MgmtError), rest));
         }
