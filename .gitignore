@@ -1,11 +1,13 @@
 # globally ignored extensions
 *~
 *.a
+*.app
 *.la
 *.o
 *.lo
 *.so
 *.so.*
+*.dylib
 *.pyc
 *.tar.gz
 moc_*.cpp
