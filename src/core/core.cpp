@@ -100,7 +100,7 @@ int Core::start ()
     LIBENCLOUD_TRACE;
 
     // Connect Client starts immediately
-#ifdef LIBENCOUD_MODE_QCC
+#ifdef LIBENCLOUD_MODE_QCC
     _start();
 #else
     // for ECE and SECE startup is automated so we introduce a random pause of
