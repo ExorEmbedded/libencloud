@@ -6,6 +6,7 @@
 #define _LIBENCLOUD_CRYPTO_H_
 
 #include <QByteArray>
+#include <QNetworkRequest>
 #include <QSslCertificate>
 #include <QSslConfiguration>
 #include <QSslKey>
@@ -22,6 +23,8 @@ namespace crypto {
 // Generic helpers
 //
 
+LIBENCLOUD_DLLSPEC int requestFromAuth (const Auth &auth,
+        QMap<QByteArray, QByteArray> &headers, QNetworkRequest &request);
 LIBENCLOUD_DLLSPEC int configFromAuth (const Auth &auth, QUrl &url,
         QMap<QByteArray, QByteArray> &headers, QSslConfiguration
         &sslconf);

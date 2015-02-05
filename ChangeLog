@@ -3,6 +3,7 @@ ChangeLog file for Endian libencloud
 next:
 	- sece: make sure valid=false is always caught as CodeServerLicenseInvalid
 	- *ece: fix typo which caused congestion avoidance to be applied also to QCC
+	- crypto: new requestFromAuth to set QNetworkRequest from libencloud::Auth
 
 libencloud 0.7.6 (28/01/2015)
 	- setup: fix possible crashes upon error due to double delete;

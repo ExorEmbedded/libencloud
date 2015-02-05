@@ -22,6 +22,25 @@
 namespace libencloud {
 namespace crypto {
 
+// Set request based on auth
+int requestFromAuth (const Auth &auth, QMap<QByteArray,
+        QByteArray> &headers, QNetworkRequest &request)
+{
+    QUrl url;
+
+    QSslConfiguration sslconf = request.sslConfiguration();
+    LIBENCLOUD_ERR_IF (libencloud::crypto::configFromAuth(auth, url, headers, sslconf));
+    request.setSslConfiguration(sslconf);
+
+    for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
+        request.setRawHeader(mi.key(), mi.value());
+
+    return 0;
+err:
+    return ~0;
+}
+
+// Set url, headers and sslconf based on auth
 int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
         QByteArray> &headers, QSslConfiguration &sslconf)
 {
