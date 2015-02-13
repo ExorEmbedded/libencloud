@@ -196,7 +196,7 @@ int Core::attachServer (Server *server)
 
         LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
     }
-    else
+    else if (_cfg->config.sslInit.certPath.exists())
     {
         LIBENCLOUD_DBG("Reading PoI from cert: " <<
                 _cfg->config.sslInit.certPath.absoluteFilePath());
