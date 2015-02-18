@@ -115,6 +115,12 @@ win32{
     DBG_SUFFIX =
 }
 
+win32 {
+    LIBEXT = lib
+} else {
+    LIBEXT = a
+}
+
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
     endian {

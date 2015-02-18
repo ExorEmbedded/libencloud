@@ -165,11 +165,16 @@ win32 {
     !wince {
         LIBS += -lshfolder
     }
+}
 
-    PRE_TARGETDEPS  += $$OUT_PWD/../about/$$DESTDIR/about$${DBG_SUFFIX}.lib
-
-    LIBS += $$PRE_TARGETDEPS
-} 
+about {
+    win32 {
+        PRE_TARGETDEPS  += $$OUT_PWD/../about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
+        LIBS += $$PRE_TARGETDEPS
+    } unix {
+        LIBS += -L$$OUT_PWD/../about/$$DESTDIR/ -labout
+    }
+}
 
 # installation
 target.path = $$LIBDIR

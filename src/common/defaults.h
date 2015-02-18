@@ -86,14 +86,18 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
 #  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
 #  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#elif defined Q_OS_MAC 
+#elif defined LIBENCLOUD_MODE_QCC  // client / self-contained mode
 #  define LIBENCLOUD_EXE                ""
 #  define LIBENCLOUD_ETC_PREFIX         "/etc"
 #  define LIBENCLOUD_BIN_PREFIX         ""
 #  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
-#  define LIBENCLOUD_DATA_PREFIX        ""
-#  define LIBENCLOUD_LOG_PREFIX         ""
-#else
+#  ifdef Q_OS_MAC
+#       define LIBENCLOUD_DATA_PREFIX   "/Library/Application Support/"
+#  else 
+#       define LIBENCLOUD_DATA_PREFIX   "/var/lib/"
+#  endif
+#  define LIBENCLOUD_LOG_PREFIX         LIBENCLOUD_DATA_PREFIX
+#else // independent package
 #  define LIBENCLOUD_EXE                ""
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"

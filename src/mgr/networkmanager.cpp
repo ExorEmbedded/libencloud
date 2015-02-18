@@ -46,6 +46,9 @@ void NetworkManager::stop ()
 {
     LIBENCLOUD_TRACE;
 
+    if (_gateway == "")
+        return;
+
     // remove all routes associated with current gateway (synchronous)
     readRoutes(RemoveRoutesOperation, true);
 }
@@ -226,7 +229,7 @@ void NetworkManager::readRoutes (Operation op, bool sync)
 #ifdef Q_OS_WIN
     _process = _processManager->start("route", "PRINT");
 #else
-    _process = _processManager->start("route", "-n");
+    _process = _processManager->start("netstat", "-rn");
 #endif
 
     if (sync)

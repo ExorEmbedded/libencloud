@@ -15,13 +15,13 @@ Config::Config ()
 {
     QString sep = "/";
 
-#if defined Q_OS_WINCE
     QString progFiles = getBinDir();
+#if defined Q_OS_WINCE
     sbinPrefix = progFiles;
     confPrefix = progFiles;
 #elif defined LIBENCLOUD_MODE_QCC  // self-contained (e.g. Connect@Win,Mac,Linux)
-    QString baseFiles = getBinDir() + "/../";
-    sbinPrefix = baseFiles + "/bin/";
+    QString baseFiles = progFiles + "/../";
+    sbinPrefix = progFiles;
     confPrefix = baseFiles + sep;
 #ifdef Q_OS_MAC
     confPrefix += "Resources" + sep;
@@ -257,16 +257,32 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
         sc.verifyCA = jot["verify_ca"].toBool();
 
     if (jot["ca"].isValid())
-        sc.caPath = _joinPaths(dataPrefix, jot["ca"].toString());
+    {
+        QString caPath = jot["ca"].toString();
+        if (!caPath.isEmpty())
+            sc.caPath = _joinPaths(dataPrefix, caPath);
+    }
 
     if (jot["cert"].isValid())
-        sc.certPath = _joinPaths(dataPrefix, jot["cert"].toString());
+    {
+        QString certPath = jot["cert"].toString();
+        if (!certPath.isEmpty())
+            sc.certPath = _joinPaths(dataPrefix, certPath);
+    }
 
     if (jot["key"].isValid())
-        sc.keyPath = _joinPaths(dataPrefix, jot["key"].toString());
+    {
+        QString keyPath = jot["key"].toString();
+        if (!keyPath.isEmpty())
+            sc.keyPath = _joinPaths(dataPrefix, keyPath);
+    }
 
     if (jot["p12"].isValid())
-        sc.p12Path = _joinPaths(dataPrefix, jot["p12"].toString());
+    {
+        QString p12Path = jot["p12"].toString();
+        if (!p12Path.isEmpty())
+            sc.p12Path = _joinPaths(dataPrefix, p12Path);
+    }
 
     sc.sbUrl = jot["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
