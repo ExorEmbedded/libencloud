@@ -305,6 +305,14 @@ void VpnClient::stop (void)
 
     //LIBENCLOUD_DBG("[VPNClient] state: " << QString::number(this->process->state()));
 
+#if defined Q_OS_UNIX && defined LIBENCLOUD_MODE_QCC
+    // On MAC & Linux in Connect mode, OpenVPN runs from wrapper script...
+    // avoid having to kill all children manually
+    QString killWrapper = QString("pkill -P %1").arg(QString::number(this->process->pid()));
+    LIBENCLOUD_DBG("[VPNClient] executing: " << killWrapper);
+    QProcess::execute(killWrapper);
+#endif
+
     if (this->process->state() != QProcess::NotRunning)
     {
         this->process->blockSignals(true);
