@@ -196,6 +196,15 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--dev-node" << LIBENCLOUD_TAPNAME;
 #endif
 
+    // fix routes not being applied properly on OSX in TAP mode
+#ifdef Q_OS_MAC
+    args << "--route-noexec";
+    args << "--script-security" << "2";
+    args << "--route-up" << getBinDir() + "/route-up.sh";
+    // avoid bad routes if brought up too early (enpoints unreachable)
+    args << "--route-delay" << "2";
+#endif
+
     // Note: '--remote' overrides breaks proxy (Assertion failed at proxy.c:217)
     // => handle them by substituting in configuration
 

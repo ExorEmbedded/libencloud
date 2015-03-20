@@ -5,6 +5,7 @@ TEMPLATE = subdirs
 SUBDIRS += include
 SUBDIRS += about
 SUBDIRS += src
+SUBDIRS += scripts
 SUBDIRS += etc
 
 !notest:SUBDIRS += test
