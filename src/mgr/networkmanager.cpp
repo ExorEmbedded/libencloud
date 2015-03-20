@@ -255,16 +255,28 @@ void NetworkManager::addRoute (const QString &endpoint)
 
     LIBENCLOUD_ERR_IF ((ipmask == QPair<QString,QString>()));
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WIN  // single syntax for IP and network
     _processManager->start("route", "ADD " + ipmask.first +
             " MASK " + ipmask.second + " " +  _gw);
 #else
+    // single IP
     if (ipmask.second == "255.255.255.255")
         _processManager->start("route", "add " + ipmask.first +
-                " gw " + _gw);
-    else
+# ifdef Q_OS_MAC
+                " " +
+# else
+                " gw " +
+# endif
+                _gw);
+    else // network
         _processManager->start("route", "add -net " + ipmask.first +
-                " netmask " + ipmask.second + " gw " + _gw);
+                " netmask " + ipmask.second +
+# ifdef Q_OS_MAC
+                " " +
+# else
+                " gw " +
+# endif
+                _gw);
 #endif
 
 err:
@@ -285,9 +297,9 @@ void NetworkManager::delRoute (const QString &endpoint)
                 " MASK " + ipmask.second);
 #else
     if (ipmask.second == "255.255.255.255")
-        _processManager->start("route", "del " + ipmask.first);
+        _processManager->start("route", "delete " + ipmask.first);
     else
-        _processManager->start("route", "del -net " + ipmask.first +
+        _processManager->start("route", "delete -net " + ipmask.first +
                 " netmask " + ipmask.second);
 #endif
 
