@@ -196,6 +196,15 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--dev-node" << LIBENCLOUD_TAPNAME;
 #endif
 
+    // fix routes not being applied properly on OSX in TAP mode
+#ifdef Q_OS_MAC
+    args << "--route-noexec";
+    args << "--script-security" << "2";
+    args << "--route-up" << getBinDir() + "/route-up.sh";
+    // avoid bad routes if brought up too early (enpoints unreachable)
+    args << "--route-delay" << "2";
+#endif
+
     // Note: '--remote' overrides breaks proxy (Assertion failed at proxy.c:217)
     // => handle them by substituting in configuration
 
@@ -305,6 +314,14 @@ void VpnClient::stop (void)
 
     //LIBENCLOUD_DBG("[VPNClient] state: " << QString::number(this->process->state()));
 
+#if defined Q_OS_UNIX && defined LIBENCLOUD_MODE_QCC
+    // On MAC & Linux in Connect mode, OpenVPN runs from wrapper script...
+    // avoid having to kill all children manually
+    QString killWrapper = QString("pkill -P %1").arg(QString::number(this->process->pid()));
+    LIBENCLOUD_DBG("[VPNClient] executing: " << killWrapper);
+    QProcess::execute(killWrapper);
+#endif
+
     if (this->process->state() != QProcess::NotRunning)
     {
         this->process->blockSignals(true);
@@ -410,12 +427,7 @@ void VpnClient::enableTap()
 {
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
-#ifdef LIBENCLOUD_MODE_QCC
-#ifdef LIBENCLOUD_EXOR
     QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
-#else
-    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
-#endif
     QStringList args;
     QString out;
 
@@ -423,7 +435,6 @@ void VpnClient::enableTap()
 
     LIBENCLOUD_ERR_IF (utils::execute(path, args, out));
 err:
-#endif  // LIBENCLOUD_MODE_QCC
 #endif  // Q_OS_WIN
     return;
 }
@@ -432,12 +443,7 @@ void VpnClient::disableTap()
 {
     // tap device enabled by default on unix and embedded platforms
 #ifdef Q_OS_WIN
-#ifdef LIBENCLOUD_MODE_QCC  
-#ifdef LIBENCLOUD_EXOR
     QString path = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/TapSetup.exe";
-#else
-    QString path = qgetenv("ProgramFiles") + "/" + LIBENCLOUD_PRODUCTDIR + "/bin/TapSetup.exe";
-#endif
     QStringList args;
     QString out;
 
@@ -446,7 +452,6 @@ void VpnClient::disableTap()
     // wait = false to speed up disconnect [CONNECT-115]
     LIBENCLOUD_ERR_IF (utils::execute(path, args, out, false));
 err:
-#endif  // LIBENCLOUD_MODE_QCC
 #endif  // Q_OS_WIN
     return;
 }

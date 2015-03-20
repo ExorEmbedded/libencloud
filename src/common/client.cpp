@@ -134,6 +134,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
     {
         switch (err.error())
         {
+            case QSslError::SelfSignedCertificate:
             case QSslError::SelfSignedCertificateInChain:
             case QSslError::UnableToGetLocalIssuerCertificate:
             case QSslError::UnableToVerifyFirstCertificate:

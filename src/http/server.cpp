@@ -1,3 +1,4 @@
+#define LIBENCLOUD_DISABLE_TRACE
 #include <QTcpSocket>
 #include <QStringList>
 #include <QRegExp>
@@ -6,10 +7,6 @@
 #include <encloud/Http/HttpResponse>
 #include <common/common.h>
 #include <common/config.h>
-
-// disable heavy tracing
-#undef LIBENCLOUD_TRACE 
-#define LIBENCLOUD_TRACE do {} while(0)
 
 namespace libencloud {
 

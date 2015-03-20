@@ -15,27 +15,19 @@ Config::Config ()
 {
     QString sep = "/";
 
-#ifdef Q_OS_WIN32  // relative paths
-#ifdef LIBENCLOUD_EXOR
-    QString progFiles = (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + "/../";
-    sbinPrefix = progFiles + "/bin/";
-    confPrefix = progFiles + sep + QString(LIBENCLOUD_APP) + sep + LIBENCLOUD_ETC_PREFIX;
-#else
-    QString progFiles = QString(qgetenv("ProgramFiles"));
-
-    // main prefix and binaries are product-specific (e.g. ConnectApp)
-    prefix = progFiles + sep + QString(LIBENCLOUD_PRODUCTDIR);
-    sbinPrefix = prefix + sep + LIBENCLOUD_SBIN_PREFIX;
-
-    // configuration is package-specific (e.g. ConnectApp\libencloud) under %ProgramFiles%
-    confPrefix = progFiles + sep + QString(LIBENCLOUD_INSTALLDIR) +
-            sep + LIBENCLOUD_ETC_PREFIX;
-#endif
-#elif defined Q_OS_WINCE
-    QString progFiles = (qApp ? qApp->applicationDirPath() : QDir::currentPath());
+    QString progFiles = getBinDir();
+#if defined Q_OS_WINCE
     sbinPrefix = progFiles;
     confPrefix = progFiles;
-#else  // Linux - absolute paths
+#elif defined LIBENCLOUD_MODE_QCC  // self-contained (e.g. Connect@Win,Mac,Linux)
+    QString baseFiles = progFiles + "/../";
+    sbinPrefix = progFiles;
+    confPrefix = baseFiles + sep;
+#ifdef Q_OS_MAC
+    confPrefix += "Resources" + sep;
+#endif
+    confPrefix += QString(LIBENCLOUD_APP) + sep + LIBENCLOUD_ETC_PREFIX;
+#else  // !defined LIBENCLOUD_MODE_QCC: independent package (e.g. Yocto) - absolute paths
     prefix = LIBENCLOUD_PREFIX_PATH;
     confPrefix = LIBENCLOUD_ETC_PREFIX;
     sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
@@ -265,16 +257,32 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
         sc.verifyCA = jot["verify_ca"].toBool();
 
     if (jot["ca"].isValid())
-        sc.caPath = _joinPaths(dataPrefix, jot["ca"].toString());
+    {
+        QString caPath = jot["ca"].toString();
+        if (!caPath.isEmpty())
+            sc.caPath = _joinPaths(dataPrefix, caPath);
+    }
 
     if (jot["cert"].isValid())
-        sc.certPath = _joinPaths(dataPrefix, jot["cert"].toString());
+    {
+        QString certPath = jot["cert"].toString();
+        if (!certPath.isEmpty())
+            sc.certPath = _joinPaths(dataPrefix, certPath);
+    }
 
     if (jot["key"].isValid())
-        sc.keyPath = _joinPaths(dataPrefix, jot["key"].toString());
+    {
+        QString keyPath = jot["key"].toString();
+        if (!keyPath.isEmpty())
+            sc.keyPath = _joinPaths(dataPrefix, keyPath);
+    }
 
     if (jot["p12"].isValid())
-        sc.p12Path = _joinPaths(dataPrefix, jot["p12"].toString());
+    {
+        QString p12Path = jot["p12"].toString();
+        if (!p12Path.isEmpty())
+            sc.p12Path = _joinPaths(dataPrefix, p12Path);
+    }
 
     sc.sbUrl = jot["sb"].toMap()["url"].toString();
     if (sc.sbUrl.isEmpty())
