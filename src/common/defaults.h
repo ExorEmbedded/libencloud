@@ -49,10 +49,18 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_VERSION_TAG        ""
 #endif
 
-#define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING
+#if defined Q_OS_WIN32
+#  define LIBENCLOUD_OS_STR             "Windows"
+#elif defined Q_OS_LINUX
+#  define LIBENCLOUD_OS_STR             "Linux"
+#elif defined Q_OS_MAC
+#  define LIBENCLOUD_OS_STR             "Macintosh"
+#endif
+
+#define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING " (" LIBENCLOUD_OS_STR ")"
 
 // do NOT change this - Switchboard relies on it!
-#define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION
+#define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION " (" LIBENCLOUD_OS_STR ")"
 
 #define LIBENCLOUD_SB_URL               "https://switchboard-host/"
 
