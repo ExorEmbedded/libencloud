@@ -55,6 +55,10 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_OS_STR             "Linux"
 #elif defined Q_OS_MAC
 #  define LIBENCLOUD_OS_STR             "Macintosh"
+#elif defined Q_OS_WINCE
+#  define LIBENCLOUD_OS_STR             "WinCE"
+#else
+#  define LIBENCLOUD_OS_STR             "Unknown OS"
 #endif
 
 #define LIBENCLOUD_USERAGENT            LIBENCLOUD_STRING " (" LIBENCLOUD_OS_STR ")"
