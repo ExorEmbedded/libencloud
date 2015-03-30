@@ -16,19 +16,15 @@ Config::Config ()
     QString sep = "/";
 
     QString progFiles = getBinDir();
-#if defined Q_OS_WINCE
+
+#ifndef LIBENCLOUD_SPLITDEPS  // absolute paths
     sbinPrefix = progFiles;
+#  if defined Q_OS_WINCE
     confPrefix = progFiles;
-#elif defined LIBENCLOUD_MODE_QCC  // self-contained (e.g. Connect@Win,Mac,Linux)
-    QString baseFiles = progFiles + "/../";
-    sbinPrefix = progFiles;
-    confPrefix = baseFiles + sep;
-#ifdef Q_OS_MAC
-    confPrefix += "Resources" + sep;
-#endif
-    confPrefix += QString(LIBENCLOUD_APP) + sep + LIBENCLOUD_ETC_PREFIX;
-#else  // !defined LIBENCLOUD_MODE_QCC: independent package (e.g. Yocto) - absolute paths
-    prefix = LIBENCLOUD_PREFIX_PATH;
+#  else 
+    confPrefix = progFiles + "/../" + LIBENCLOUD_ETC_PREFIX;
+#  endif
+#else  // LIBENCLOUD_SPLITDEPS - absolute paths
     confPrefix = LIBENCLOUD_ETC_PREFIX;
     sbinPrefix = LIBENCLOUD_SBIN_PREFIX;
 #endif
@@ -77,7 +73,6 @@ QString Config::dump ()
 #elif defined(LIBENCLOUD_MODE_SECE)
     ts << "mode=SECE" << endl;
 #endif
-    ts << "prefix=" << prefix << endl;
     ts << "confPrefix=" << confPrefix << endl;
     ts << "sbinPrefix=" << sbinPrefix << endl;
     ts << "dataPrefix=" << dataPrefix << endl;

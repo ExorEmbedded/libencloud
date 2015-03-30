@@ -84,33 +84,42 @@ static char libEncloudTapNameBuffer [256];
 #ifndef LIBENCLOUD_PREFIX_PATH                             /* [overridable] */
 #define LIBENCLOUD_PREFIX_PATH          "/"
 #endif
-#ifdef Q_OS_WIN32  // relative paths - refer to src/common/config.cpp
+
+#ifdef Q_OS_WIN
 #  define LIBENCLOUD_EXE                ".exe"
-#  define LIBENCLOUD_ETC_PREFIX         "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
-#  define LIBENCLOUD_BIN_PREFIX         "\\bin\\"   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
-#  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
-#  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#elif defined Q_OS_WINCE  // wince , local paths
-#  define LIBENCLOUD_EXE                ".exe"
-#  define LIBENCLOUD_ETC_PREFIX         ""   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
-#  define LIBENCLOUD_BIN_PREFIX         ""   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
-#  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
-#  define LIBENCLOUD_DATA_PREFIX        ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#  define LIBENCLOUD_LOG_PREFIX         ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
-#elif defined LIBENCLOUD_MODE_QCC  // client / self-contained mode
+#else
 #  define LIBENCLOUD_EXE                ""
-#  define LIBENCLOUD_ETC_PREFIX         "/etc"
-#  define LIBENCLOUD_BIN_PREFIX         ""
-#  define LIBENCLOUD_SBIN_PREFIX        LIBENCLOUD_BIN_PREFIX
-#  ifdef Q_OS_MAC
-#       define LIBENCLOUD_DATA_PREFIX   "/Library/Application Support/"
-#  else 
-#       define LIBENCLOUD_DATA_PREFIX   "/var/lib/"
+#endif
+
+#ifndef LIBENCLOUD_SPLITDEPS // relative paths - refer to src/common/config.cpp
+#  ifdef Q_OS_WIN32
+#    define LIBENCLOUD_ETC_PREFIX       LIBENCLOUD_APP "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
+#    define LIBENCLOUD_BIN_PREFIX       "\\bin\\"   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
+#    define LIBENCLOUD_SBIN_PREFIX      LIBENCLOUD_BIN_PREFIX
+#    define LIBENCLOUD_DATA_PREFIX      ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#    define LIBENCLOUD_LOG_PREFIX       ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#  elif defined Q_OS_WINCE  // wince , local paths
+#    define LIBENCLOUD_ETC_PREFIX       ""   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
+#    define LIBENCLOUD_BIN_PREFIX       ""   // => %ProgramFiles% \ LIBENCLOUD_PRODUCTDIR \ bin
+#    define LIBENCLOUD_SBIN_PREFIX      LIBENCLOUD_BIN_PREFIX
+#    define LIBENCLOUD_DATA_PREFIX      ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#    define LIBENCLOUD_LOG_PREFIX       ""          // => %AppData% \ LIBENCLOUD_INSTALLDIR
+#  else  // linux/mac
+#    ifdef Q_OS_MAC
+#      define LIBENCLOUD_ETC_PREFIX     "/Resources/" LIBENCLOUD_APP "/etc"
+#    else
+#      define LIBENCLOUD_ETC_PREFIX     LIBENCLOUD_APP "/etc"
+#    endif
+#    define LIBENCLOUD_BIN_PREFIX       ""
+#    define LIBENCLOUD_SBIN_PREFIX      LIBENCLOUD_BIN_PREFIX
+#    ifdef Q_OS_MAC
+#      define LIBENCLOUD_DATA_PREFIX    "/Library/Application Support/"
+#    else
+#      define LIBENCLOUD_DATA_PREFIX    "/var/lib/"
+#    endif
+#    define LIBENCLOUD_LOG_PREFIX       LIBENCLOUD_DATA_PREFIX
 #  endif
-#  define LIBENCLOUD_LOG_PREFIX         LIBENCLOUD_DATA_PREFIX
-#else // independent package
-#  define LIBENCLOUD_EXE                ""
+#else // LIBENCLOUD_SPLITDEPS - absolute paths - only used on Linux/Yocto for now
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"

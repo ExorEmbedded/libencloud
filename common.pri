@@ -6,6 +6,9 @@
 #   exor        Exor build
 #   debug       compile libraries with debugging symbols
 #   nodll       build a static library
+#   splitdeps   Dependencies are split into different parts of the system
+#               (Default behaviour is to package all dependencies together into a self-contained package/bundle
+#               Split mode is used when dependencies are handled as separate packages - e.g. Yocto Encloud services)
 #
 # [ Modes ]
 # 
@@ -44,17 +47,11 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 #
 PKGNAME = libencloud
 
-#PRODUCT_ECC="ConnectClient"
-#PRODUCT_JMC="HMIConnect"
-#PRODUCT_ENCLOUD="Encloud"
-#PRODUCT_SECE="SECE"  # FIXME
-#PRODUCT_VPN="OVPN"  # FIXME
-
 # [ client/package version ]
 # *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # used for version in User Agent - particularly important in modeqcc for
 # Switchboard update checks
-modeqcc {
+modeqcc:!splitdeps {
     endian {
         PRODUCT_SRC = ../4iconnect
     } else {
@@ -63,7 +60,7 @@ modeqcc {
     include($${PRODUCT_SRC}/version.pri)
 } else {
     # TODO grab version from other products or make configurable via json
-    VERSION = x.y.z
+    VERSION = 0.0.1 # dummy version to make Encloud Server happy with User-Agent
 }
 
 DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
@@ -107,7 +104,7 @@ debug:unix {
 }
 
 # Suffix for libraries compiled with debug symbols
-win32{
+win32 {
     CONFIG(debug,debug|release) {
         DBG_SUFFIX = d
     }
@@ -123,30 +120,36 @@ win32 {
 
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
-    endian {
-        PRODUCT_DIR="ConnectApp"
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
+
+    # special case for Yocto - currently we use QCC mode also on devices
+    splitdeps {
+        PRODUCT="Encloud"
     } else {
-        PRODUCT_DIR="HMIConnect"
-        DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
+        endian {
+            PRODUCT="ConnectApp"
+        } else {
+            PRODUCT="HMIConnect"
+        }
     }
 } else:modeece {
-    PRODUCT_DIR="Encloud"
+    PRODUCT="Encloud"
     DEFINES += LIBENCLOUD_MODE_ECE
-    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 } else:modesece {
-    PRODUCT_DIR="SECE"
+    PRODUCT="SECE"
     DEFINES += LIBENCLOUD_MODE_SECE
-    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 } else:modevpn {
-    PRODUCT_DIR="OVPN"
+    PRODUCT="OVPN"
     DEFINES += LIBENCLOUD_MODE_VPN
-    DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_VPN}\\\"
 } else {
     error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
 }
+DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT}\\\"
 
-PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
+splitdeps {
+    DEFINES += LIBENCLOUD_SPLITDEPS
+}
+
+PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }

@@ -1,6 +1,7 @@
 ChangeLog file for Endian libencloud
 
 next:
+	- CONFIG += splitdeps for case when package is not self-contained (e.g. Yocto)
 	- sece: make sure valid=false is always caught as CodeServerLicenseInvalid
 	- *ece: fix typo which caused congestion avoidance to be applied also to QCC
 	- crypto: new requestFromAuth to set QNetworkRequest from libencloud::Auth

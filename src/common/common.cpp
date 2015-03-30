@@ -20,12 +20,12 @@ LIBENCLOUD_DLLSPEC QString paramsFind (const Params &params, const QString &key)
     return "";
 }
 
-/* \brief Where to look for application binaries (based on product) */
+/* \brief Where to look for application binaries */
 LIBENCLOUD_DLLSPEC QString getBinDir ()
 {
-#if defined LIBENCLOUD_MODE_QCC || defined LIBENCLOUD_MODE_SECE  // client / self-contained mode
+#ifndef LIBENCLOUD_SPLITDEPS
     return (qApp ? qApp->applicationDirPath() : QDir::currentPath()) + sep;
-#else  // independent package
+#else
     return QString(LIBENCLOUD_BIN_PREFIX);
 #endif
 }
@@ -34,7 +34,7 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 {
     QString s;
 
-#if defined LIBENCLOUD_MODE_QCC || defined LIBENCLOUD_MODE_SECE  // client / self-contained mode
+#ifndef LIBENCLOUD_SPLITDEPS
 
 #if defined Q_OS_WIN32
     char szPath[MAX_PATH];
@@ -55,7 +55,7 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 
     return s;
 
-#else  // independent package
+#else
     LIBENCLOUD_UNUSED(package);
     LIBENCLOUD_UNUSED(s);
 
@@ -65,9 +65,9 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package)
 
 LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package)
 {
-#if defined LIBENCLOUD_MODE_QCC || defined LIBENCLOUD_MODE_SECE  // client / self-contained mode
+#ifndef LIBENCLOUD_SPLITDEPS
     return getCommonAppDataDir(package);
-#else  // independent package
+#else
     LIBENCLOUD_UNUSED(package);
     return QString(LIBENCLOUD_LOG_PREFIX);
 #endif

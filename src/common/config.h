@@ -86,7 +86,6 @@ public:
     /* Path to configuration file */
     QFileInfo filePath;
 
-    QString prefix;
     QString confPrefix;
     QString sbinPrefix;
     QString dataPrefix;
