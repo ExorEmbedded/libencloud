@@ -155,6 +155,24 @@ int Config::_parse (const QVariantMap &jo)
     else
         config.timeout = jo["timeout"].toInt();
 
+    if (jo["autoretry"].isNull())
+#if defined(LIBENCLOUD_MODE_QCC)
+        config.autoretry = false;
+#else
+        config.autoretry = true;
+#endif
+    else
+        config.autoretry = jo["autoretry"].toBool();
+
+    if (jo["decongest"].isNull())
+#if defined(LIBENCLOUD_MODE_QCC)
+        config.decongest = false;
+#else
+        config.decongest = true;
+#endif
+    else
+        config.decongest = jo["decongest"].toBool();
+
     if (jo["csr"].toMap()["tmpl"].isNull())
         config.csrTmplPath = _joinPaths(dataPrefix, LIBENCLOUD_CSRTMPL_FILE);
     else

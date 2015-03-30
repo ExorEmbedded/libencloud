@@ -4,43 +4,22 @@
 #include <common/config.h>
 #include <setup/qcc/qccsetup.h>
 
-// Login/Logout are unnecessary when using Basic Auth, and logout doesn't kick
-// out of VPN connection which is what we really would need
-//#define LIBENCLOUD_SETUP_QCC_WITH_LOGIN
-
 namespace libencloud {
-
-/**
- * Unlike ECE/SECE Setup, the QCC Setup Module makes no automatic retries =>
- * errors are forwarded to user.
- */
 
 QccSetup::QccSetup (Config *cfg)
     : SetupInterface(cfg)
+    , _initialState(&_setupMsgSt)
+    , _previousState(_initialState)
+    , _errorState(&_errorSt)
+    , _setupMsgState(&_setupMsgSt)
+    , _finalState(&_finalSt)
+    , _isError(false)
 {
     LIBENCLOUD_TRACE;
 
-    _initMsg(_setupMsg);
-    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
-            this, SIGNAL(error(libencloud::Error)));
-    connect(&_setupMsg, SIGNAL(need(QString)),
-            this, SIGNAL(need(QString)));
-    connect(&_setupMsg, SIGNAL(processed()),
-            this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
-            this, SIGNAL(authRequired(Auth::Id)));
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_setupMsg, SLOT(authSupplied(Auth)));
-    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
-            this, SIGNAL(serverConfigSupply(QVariant)));
+    _initFsm();
 
-#ifdef LIBENCLOUD_SETUP_QCC_WITH_LOGIN
-    _initMsg(_loginMsg);
-    connect(&_loginMsg, SIGNAL(error(libencloud::Error)),
-            this, SIGNAL(error(libencloud::Error)));
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_loginMsg, SLOT(authSupplied(Auth)));
-#endif
+    connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
 }
 
 int QccSetup::start ()
@@ -49,19 +28,7 @@ int QccSetup::start ()
 
     _clear();
 
-    QVariantMap data;
-    data["in"] = true;
-
-#ifdef LIBENCLOUD_SETUP_QCC_WITH_LOGIN
-    _loginMsg.setData(data);
-    _loginMsg.process();
-#endif
-
-    if (_setupMsg.process())
-        return ~0;
-
-    emit progress(Progress(tr("Retrieving Configuration from Switchboard"),
-                StateSetupMsg, getTotalSteps()));
+    _fsm.start();
 
     return 0;
 }
@@ -70,17 +37,12 @@ int QccSetup::stop ()
 {
     LIBENCLOUD_TRACE;
 
+    _retry.stop();
+    _fsm.stop();
+
     _clear();
     _setupMsg.clear();
     _initMsg(_setupMsg);
-
-    QVariantMap data;
-    data["in"] = false;
-
-#ifdef LIBENCLOUD_SETUP_QCC_WITH_LOGIN
-    _loginMsg.setData(data);
-    _loginMsg.process();
-#endif
 
     return 0;
 }
@@ -104,25 +66,147 @@ int QccSetup::getTotalSteps() const
 // private slots
 //
 
+void QccSetup::_stateEntered ()
+{
+    QState *state = qobject_cast<QState *>(sender());
+    Progress p = _stateToProgress(state);
+
+    LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ") " <<
+            " previousState: " << _previousState);
+
+    if (!_isError)
+        _retry.stop();
+
+    _previousState = state;
+
+    emit progress(p);
+
+    if (state == _finalState)
+        emit completed();
+}
+
+void QccSetup::_stateExited ()
+{
+    QState *state = qobject_cast<QState *>(sender());
+    Progress p = _stateToProgress(state);
+
+    LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ")");
+
+    _isError = false;
+}
+
 void QccSetup::_onProcessed ()
 {
     LIBENCLOUD_TRACE;
 
-    emit progress(Progress(tr("Received Configuration from Switchboard"),
-                StateReceived, getTotalSteps()));
-
     emit completed();
+}
+
+void QccSetup::_onErrorState ()
+{
+    QState *state = qobject_cast<QState *>(sender());
+
+    LIBENCLOUD_DBG("state: " << state);
+
+    _isError = true;
+
+    switch (_error.getCode())
+    {
+        // keep on retrying
+        default:
+            _errorState->addTransition(this, SIGNAL(retry()), _previousState);
+            if (_cfg->config.autoretry)
+                _retry.start();
+            break;
+    }
+}
+
+void QccSetup::_onError (const libencloud::Error &err)
+{
+    LIBENCLOUD_DBG(err.toString());
+
+    emit error((_error = err));
+}
+
+void QccSetup::_onRetryTimeout ()
+{
+    LIBENCLOUD_TRACE;
+
+    if (_cfg->config.autoretry)
+        emit retry();
 }
 
 //
 // private methods
 //
+int QccSetup::_initFsm ()
+{
+    // failures result in retry of previous state (with backoff)
+    connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
+    
+    _initMsg(_setupMsg);
+    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
+            this, SLOT(_onError(libencloud::Error)));
+    connect(&_setupMsg, SIGNAL(need(QString)),
+            this, SIGNAL(need(QString)));
+    connect(&_setupMsg, SIGNAL(processed()),
+            this, SLOT(_onProcessed()));
+    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
+            this, SIGNAL(authRequired(Auth::Id)));
+    connect(this, SIGNAL(authSupplied(Auth)),
+            &_setupMsg, SLOT(authSupplied(Auth)));
+    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
+            this, SIGNAL(serverConfigSupply(QVariant)));
+    connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
+    connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
+    connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
+
+    _setupMsgState->addTransition(&_setupMsg, SIGNAL(error(libencloud::Error)), _errorState);
+    _setupMsgState->addTransition(&_setupMsg, SIGNAL(processed()), _finalState);
+
+    _fsm.addState(_errorState);
+    _fsm.addState(_setupMsgState);
+    _fsm.addState(_finalState);
+
+    _fsm.setInitialState(_initialState);
+
+    return 0;
+}
 
 int QccSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
 
     return 0;
+}
+
+Progress QccSetup::_stateToProgress (QState *state)
+{
+    Progress p;
+
+    p.setTotal(getTotalSteps());
+
+    if (state == _errorState)
+    {
+        p.setStep(-1);
+        p.setDesc("Setup Error State");
+    } 
+    else if (state == _setupMsgState)
+    {
+        p.setStep(StateSetupMsg);
+        p.setDesc(tr("Retrieving Configuration from Switchboard"));
+    }
+    else if (state == _finalState)
+    {
+        p.setStep(StateReceived);
+        p.setDesc(tr("Received Configuration from Switchboard"));
+    }
+    else
+    {
+        p.setStep(StateInvalid);
+    }
+
+    return p;
 }
 
 // Clear all generated data

@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_QCC_H_
 #define _LIBENCLOUD_PRIV_SETUP_QCC_H_
 
+#include <QStateMachine>
 #include <QtPlugin>
 #include <encloud/Client>
 #include <common/message.h>
@@ -31,6 +32,7 @@ public:
 
     QccSetup (Config *cfg);
 
+    int _initFsm ();
     int start ();
     int stop ();
 
@@ -59,15 +61,40 @@ signals:
     //
     void authSupplied (const Auth &auth);  
 
+    //
+    // internals
+    // 
+    void retry ();
+
 private slots:
+    void _stateEntered ();
+    void _stateExited ();
     void _onProcessed ();
+    void _onErrorState ();
+    void _onError (const libencloud::Error &error);
+    void _onRetryTimeout ();
 
 private:
     int _initMsg (MessageInterface &msg);
     void _clear ();
+    Progress _stateToProgress (QState *state);
+
+    QStateMachine _fsm;
+
+    QState *_initialState;
+    QState *_previousState;
+
+    QState _errorSt, *_errorState;
 
     SetupMsg _setupMsg;
+    QState _setupMsgSt, *_setupMsgState;
+    QState _finalSt, *_finalState;
+
     LoginMsg _loginMsg;
+
+    bool _isError;
+    Error _error;
+    Retry _retry;
 };
 
 } // namespace libencloud

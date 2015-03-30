@@ -100,9 +100,12 @@ int Core::start ()
     LIBENCLOUD_TRACE;
 
     // Connect Client starts immediately
-#ifdef LIBENCLOUD_MODE_QCC
-    _start();
-#else
+    if (!_cfg->config.decongest)
+    {
+        _start();
+        return 0;
+    }
+
     // for ECE and SECE startup is automated so we introduce a random pause of
     // 0-5 secs to avoid server congestion due to excessive simultaneous connections
     int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
@@ -111,7 +114,6 @@ int Core::start ()
             .arg(QString::number(msecs)));
 
     QTimer::singleShot(msecs, this, SLOT(_start()));
-#endif
 
     return 0;
 }
@@ -362,9 +364,8 @@ void Core::_errorReceived (const libencloud::Error &err)
 
    // QCC stops progress upon critical errors for user intervention
    // while ECE and SECE keep on retrying automatically (in internal modules)
-#if defined(LIBENCLOUD_MODE_QCC)
-    stop();
-#endif
+    if (!_cfg->config.autoretry)
+        stop();
 
     emit stateChanged(StateError);
     emit error(err);
@@ -375,7 +376,7 @@ void Core::_progressReceived (const Progress &p)
 {
     Progress pt(p);
 
-    // only need remapping for if both setup and cloud are enabled
+    // only need remapping if both setup and cloud are enabled
 #if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_SETUP)
     if (sender() == _cloud)
         pt.setStep(p.getStep() + _setup->getTotalSteps());

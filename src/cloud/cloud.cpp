@@ -192,9 +192,8 @@ void Cloud::_restart (bool fallback, bool force)
 
     _isFallback = fallback;
 
-#if !defined(LIBENCLOUD_MODE_QCC)
-    force = true;
-#endif
+    if (_cfg->config.autoretry)
+        force = true;
 
     if (force)
     {

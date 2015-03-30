@@ -122,7 +122,8 @@ void EceSetup::_onErrorState ()
         // keep on retrying
         default:
             _errorState->addTransition(this, SIGNAL(retry()), _previousState);
-            _retry.start();
+            if (_cfg->config.autoretry)
+                _retry.start();
             break;
     }
 }
@@ -138,10 +139,8 @@ void EceSetup::_onRetryTimeout ()
 {
     LIBENCLOUD_TRACE;
 
-    // <TEST> disable retry
-#if 1
-    emit retry();
-#endif
+    if (_cfg->config.autoretry)
+        emit retry();
 }
 
 //

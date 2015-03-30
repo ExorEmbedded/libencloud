@@ -42,6 +42,8 @@ typedef struct
     
     QUrl sbUrl;
     int timeout;
+    bool autoretry;
+    bool decongest;
     QFileInfo csrTmplPath;
 
     libencloud_config_ssl_t ssl;
