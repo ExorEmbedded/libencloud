@@ -63,8 +63,8 @@
     e.g. 2              id=sb&type=user-pass&url=<url>&user=myuser&pass=mypass
     e.g. 3              id=sb&type=x509&url=<url>&pass=mypass&path=c:\key.p12
 
-    Def "id"            authentication identifier: "sb", "proxy"
-    Def "type"          OPTIONAL type of authentication (for proxy)
+    Def "id"            OPTIONAL authentication identifier: "sb" (default), "proxy"
+    Def "type"          OPTIONAL type of authentication: "user-pass" (default), "x509"
     Def "url"           destination url (for Switchboard login or proxy)
     Def "user"          user for authentication
     Def "pass"          password for authentication

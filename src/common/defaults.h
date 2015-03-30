@@ -125,6 +125,8 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_SERIAL_FILE          "serial"
 #define LIBENCLOUD_POI_FILE             "poi"
 #define LIBENCLOUD_CSRTMPL_FILE         "csr-tmpl.json"
+#define LIBENCLOUD_AUTH_SB              "sb"
+#define LIBENCLOUD_AUTH_PROXY           "proxy"
 #define LIBENCLOUD_AUTH_USERPASS        "user-pass"
 #define LIBENCLOUD_AUTH_X509            "x509"
 #define LIBENCLOUD_AUTH_CERTKEY         "cert-key"

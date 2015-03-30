@@ -143,10 +143,6 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
-            LIBENCLOUD_HANDLER_ERR_IF (
-                    ((id = url.queryItemValue("id")) == ""),
-                LIBENCLOUD_HTTP_STATUS_BADREQUEST);
-
             /* allow empty credentials for reset
             LIBENCLOUD_HANDLER_ERR_IF (
                     ((id = url.queryItemValue("id")) == "") ||
@@ -156,7 +152,14 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
                 */
 
+            id = url.queryItemValue("id");
+            if (id.isEmpty())
+                id = LIBENCLOUD_AUTH_SB;
+
             type = url.queryItemValue("type");
+            if (type.isEmpty())
+                type = LIBENCLOUD_AUTH_USERPASS;
+
             aurl = url.queryItemValue("url");
             user = url.queryItemValue("user");
             pass = url.queryItemValue("pass");
