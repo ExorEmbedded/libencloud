@@ -115,7 +115,7 @@ void VpnManager::attach (VpnClient *client, QString host, int port)
     this->socket->connectToHost(this->host, this->port);
     LIBENCLOUD_ERR_IF (!this->socket->isValid());
 
-    this->stateTimer.start(LIBENCLOUD_VPNMANAGER_STATE_PERIOD);
+    this->stateTimer.start(cfg->config.vpnMgmtPeriod);
 
     if (cfg->config.timeout)  // 0 = no timeout
         this->connTimer.start(cfg->config.timeout * 1000);

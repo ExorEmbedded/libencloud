@@ -56,6 +56,7 @@ typedef struct
     QFileInfo vpnConfPath;
     QFileInfo fallbackVpnConfPath;
     int vpnMgmtPort;
+    int vpnMgmtPeriod;
     int vpnVerbosity;
     QString vpnArgs;
 

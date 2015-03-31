@@ -157,6 +157,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_VPN_FALLBACK_CONF_FILE       "openvpn-fallback.conf"
 #define LIBENCLOUD_VPN_MGMT_HOST        LIBENCLOUD_LOCALHOST
 #define LIBENCLOUD_VPN_MGMT_PORT        1195
+#define LIBENCLOUD_VPN_MGMT_PERIOD      2000  // (ms)
 #define LIBENCLOUD_VPN_VERBOSITY        2
 #ifdef Q_OS_WIN
 #  define LIBENCLOUD_VPN_LOG_FILE         "openvpn-log.txt"

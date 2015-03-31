@@ -320,6 +320,7 @@ int Config::_parseVpn (const QVariantMap &jo)
     config.vpnConfPath = _joinPaths(dataPrefix, LIBENCLOUD_VPN_CONF_FILE);
     config.fallbackVpnConfPath = _joinPaths(dataPrefix, LIBENCLOUD_VPN_FALLBACK_CONF_FILE);
     config.vpnMgmtPort = LIBENCLOUD_VPN_MGMT_PORT;
+    config.vpnMgmtPeriod = LIBENCLOUD_VPN_MGMT_PERIOD;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
     config.vpnArgs = "";
 
@@ -339,6 +340,9 @@ int Config::_parseVpn (const QVariantMap &jo)
 
     if (jot["mgmt"].toMap()["port"].isValid())
         config.vpnMgmtPort = jot["mgmt"].toMap()["port"].toInt();
+
+    if (jot["mgmt"].toMap()["period"].isValid())
+        config.vpnMgmtPeriod = jot["mgmt"].toMap()["period"].toInt();
 
     if (jot["verb"].isValid())
         config.vpnVerbosity = jot["verb"].toInt();

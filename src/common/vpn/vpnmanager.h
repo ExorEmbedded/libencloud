@@ -9,7 +9,6 @@
 #include <common/vpn/vpnconfig.h>
 #include <common/vpn/vpnclient.h>
 
-#define LIBENCLOUD_VPNMANAGER_STATE_PERIOD    1000  // (ms)
 #define LIBENCLOUD_VPNMANAGER_ATTACH_RETRIES  5
 
 namespace libencloud {
