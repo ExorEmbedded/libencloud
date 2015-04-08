@@ -205,7 +205,8 @@ const QString &Auth::getUrl () const
 
 int Auth::setUrl (const QString &url)
 {
-    if (!QUrl(url).isValid())
+    if (!url.isEmpty() && // empty URL allowed (for plain VPN case)
+            !QUrl(url).isValid())
         return ~0;
 
     _url = url;

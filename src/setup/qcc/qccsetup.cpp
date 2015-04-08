@@ -8,29 +8,57 @@ namespace libencloud {
 
 QccSetup::QccSetup (Config *cfg)
     : SetupInterface(cfg)
-    , _initialState(&_setupMsgSt)
-    , _previousState(_initialState)
-    , _errorState(&_errorSt)
-    , _setupMsgState(&_setupMsgSt)
-    , _finalState(&_finalSt)
-    , _isError(false)
 {
     LIBENCLOUD_TRACE;
 
     _initFsm();
+    _initMsg(_setupMsg);
 
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
+    connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
+
+    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
+            this, SLOT(_onError(libencloud::Error)));
+    connect(&_setupMsg, SIGNAL(need(QString)),
+            this, SIGNAL(need(QString)));
+    connect(&_setupMsg, SIGNAL(processed()),
+            this, SLOT(_onProcessed()));
+    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
+            this, SIGNAL(authRequired(Auth::Id)));
+    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
+            this, SIGNAL(serverConfigSupply(QVariant)));
+    connect(this, SIGNAL(authSupplied(Auth)),
+            &_setupMsg, SLOT(authSupplied(Auth)));
+
+    connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
+    connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
+    connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
 }
 
 int QccSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
-    _clear();
+    _initFsm();
+
+    if (!m_setupEnabled)
+    {
+        if (_vpnConfig.fromFile(_cfg->config.vpnConfPath.absoluteFilePath()))
+            LIBENCLOUD_EMIT_ERR (error(Error(tr("No valid VPN configuration found!"))));
+
+        if (_vpnFallbackConfig.fromFile(_cfg->config.fallbackVpnConfPath.absoluteFilePath()))
+            LIBENCLOUD_DBG("No valid VPN fallback configuration found");
+    }
 
     _fsm.start();
 
+    if (_fsm.initialState() == _finalState)
+        emit completed();
+
     return 0;
+
+err:
+    return ~0;
 }
 
 int QccSetup::stop ()
@@ -39,22 +67,25 @@ int QccSetup::stop ()
 
     _retry.stop();
     _fsm.stop();
-
-    _clear();
-    _setupMsg.clear();
-    _initMsg(_setupMsg);
+    _deinitFsm();
 
     return 0;
 }
 
 const VpnConfig *QccSetup::getVpnConfig () const
 {
-    return _setupMsg.getVpnConfig();
+    if (m_setupEnabled)
+        return _setupMsg.getVpnConfig();
+    else
+        return &_vpnConfig;
 }
 
 const VpnConfig *QccSetup::getFallbackVpnConfig () const
 {
-    return _setupMsg.getFallbackVpnConfig();
+    if (m_setupEnabled)
+        return _setupMsg.getFallbackVpnConfig();
+    else
+        return &_vpnFallbackConfig;
 }
 
 int QccSetup::getTotalSteps() const
@@ -141,34 +172,53 @@ void QccSetup::_onRetryTimeout ()
 //
 int QccSetup::_initFsm ()
 {
-    // failures result in retry of previous state (with backoff)
-    connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
-    
-    _initMsg(_setupMsg);
-    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
-            this, SLOT(_onError(libencloud::Error)));
-    connect(&_setupMsg, SIGNAL(need(QString)),
-            this, SIGNAL(need(QString)));
-    connect(&_setupMsg, SIGNAL(processed()),
-            this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
-            this, SIGNAL(authRequired(Auth::Id)));
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_setupMsg, SLOT(authSupplied(Auth)));
-    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
-            this, SIGNAL(serverConfigSupply(QVariant)));
-    connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
-    connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
-    connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    m_setupEnabled = _cfg->config.setupEnabled;
 
-    _setupMsgState->addTransition(&_setupMsg, SIGNAL(error(libencloud::Error)), _errorState);
-    _setupMsgState->addTransition(&_setupMsg, SIGNAL(processed()), _finalState);
+    LIBENCLOUD_DBG("setupEnabled: " << m_setupEnabled);
+
+    _isError = false;
+    _errorState = &_errorSt;
+    if (m_setupEnabled)
+        _setupMsgState = &_setupMsgSt;
+    else
+        _setupMsgState = NULL;
+    _finalState = &_finalSt;
+
+    if (m_setupEnabled)
+    {
+        _initMsg(_setupMsg);
+        _setupMsgState->addTransition(&_setupMsg, SIGNAL(error(libencloud::Error)), _errorState);
+        _setupMsgState->addTransition(&_setupMsg, SIGNAL(processed()), _finalState);
+    }
 
     _fsm.addState(_errorState);
-    _fsm.addState(_setupMsgState);
+    if (m_setupEnabled)
+        _fsm.addState(_setupMsgState);
     _fsm.addState(_finalState);
 
-    _fsm.setInitialState(_initialState);
+    if (m_setupEnabled)
+        _fsm.setInitialState(_setupMsgState);
+    else
+        _fsm.setInitialState(_finalState);
+
+    _previousState = qobject_cast<QState*> (_fsm.initialState());
+
+    return 0;
+}
+
+int QccSetup::_deinitFsm ()
+{
+    _fsm.removeState(_finalState);
+    if (m_setupEnabled)
+        _fsm.removeState(_setupMsgState);
+    _fsm.removeState(_errorState);
+
+    if (m_setupEnabled)
+        Q_FOREACH(QAbstractTransition *transition, _setupMsgState->transitions())
+            _setupMsgState->removeTransition(transition);
+
+    _setupMsg.clear();
+    _clear();
 
     return 0;
 }
@@ -209,9 +259,16 @@ Progress QccSetup::_stateToProgress (QState *state)
     return p;
 }
 
-// Clear all generated data
+// Clear all generated/temporary data (e.g. configuration downloaded form Switchboard),
+// without clearing user-configured profile data
 void QccSetup::_clear ()
 {
+    _vpnConfig.clear();
+    _vpnFallbackConfig.clear();
+
+    if (!m_setupEnabled)
+        return;
+
     if (QFile::exists(_cfg->config.sslOp.caPath.absoluteFilePath()))
         LIBENCLOUD_ERR_IF (!QFile::remove(_cfg->config.sslOp.caPath.absoluteFilePath()));
     if (QFile::exists(_cfg->config.vpnConfPath.absoluteFilePath()))

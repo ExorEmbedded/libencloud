@@ -143,9 +143,17 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--management-forget-disconnect";
     args << "--management-query-passwords";
 
+    // in VPN mode, we jump to profile directory to make relative paths work
+    if (!_cfg->config.setupEnabled)
+        args << "--cd" << _cfg->config.vpnConfPath.absolutePath();
+
 #ifndef LIBENCLOUD_MODE_VPN
-    caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
-    args << "--ca" << caCertPath;
+    if (_cfg->config.setupEnabled)  // automatic setup via Switchboard -> CA is download
+    {
+        caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
+        args << "--ca" << caCertPath;
+    }  
+    // else CA is user-specified
 #endif
 
 #ifdef Q_OS_WINCE // redirect output to log

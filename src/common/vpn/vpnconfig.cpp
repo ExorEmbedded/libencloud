@@ -136,8 +136,9 @@ int VpnConfig::fromFile (const QString &path)
     QByteArray ba;
     QFile f(path);
 
-    LIBENCLOUD_ERR_IF (!f.open(QIODevice::ReadOnly));
-    LIBENCLOUD_ERR_IF ((ba = f.readAll()).isEmpty());
+    if (!f.open(QIODevice::ReadOnly) ||
+            (ba = f.readAll()).isEmpty())
+        goto err;
 
     foreach (QString line, ba.split('\n')) 
     {

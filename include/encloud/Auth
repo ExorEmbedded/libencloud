@@ -21,7 +21,7 @@ public:
     typedef enum
     {
         NoneId = -1,
-        SwitchboardId,
+        SwitchboardId,  // used also for VPN server authentication
         ProxyId,
         FirstId = SwitchboardId,
         LastId = ProxyId

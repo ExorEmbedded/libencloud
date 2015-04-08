@@ -18,6 +18,8 @@
 #   modeece     Endian Cloud Enabler mode
 #   modesece    Software Endian Cloud Enabler mode
 #   modevpn     Only vpn manager with static ovpn file configuration
+#               Note: use this mode only if no setup is ever required
+#               (other modes now also support vpn-only mode via Config API)
 #
 # [ Feature Disabling ]
 #

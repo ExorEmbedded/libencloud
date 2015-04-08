@@ -61,8 +61,6 @@ int VpnSetup::getTotalSteps() const
     return StateLast - StateFirst + 1;
 }
 
-
-
 // Clear all generated data
 void VpnSetup::_clear ()
 {
