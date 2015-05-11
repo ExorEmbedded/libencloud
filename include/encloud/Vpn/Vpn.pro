@@ -2,13 +2,13 @@ include(../../../common.pri)
 
 TEMPLATE = subdirs
 
-HEADERS += NetworkManager
-HEADERS += Process
-HEADERS += ProcessManager
+HEADERS += VpnClient
+HEADERS += VpnConfig
+HEADERS += VpnManager
 
 # header installation
 unix {
-    headers.path = $${INCDIR}/encloud/Manager
+    headers.path = $${INCDIR}/encloud/Vpn
     headers.files = $${HEADERS}
     INSTALLS += headers
 

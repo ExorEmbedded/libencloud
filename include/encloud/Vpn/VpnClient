@@ -10,7 +10,7 @@
 namespace libencloud 
 {
 
-class VpnClient : public QObject
+class LIBENCLOUD_DLLSPEC VpnClient : public QObject
 {
     Q_OBJECT
 

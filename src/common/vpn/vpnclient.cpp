@@ -2,8 +2,8 @@
 #include <QSslCertificate>
 #include <encloud/Logger>
 #include <encloud/Utils>
-#include <common/vpn/vpnconfig.h>
-#include <common/vpn/vpnclient.h>
+#include <encloud/Vpn/VpnClient>
+#include <encloud/Vpn/VpnConfig>
 #include <common/common.h>
 #include <common/config.h>
 

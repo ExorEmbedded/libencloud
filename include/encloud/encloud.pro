@@ -23,6 +23,7 @@ HEADERS += Watchdog
 SUBDIRS += Api
 SUBDIRS += Http
 SUBDIRS += Manager
+SUBDIRS += Vpn
 
 # header installation
 unix {

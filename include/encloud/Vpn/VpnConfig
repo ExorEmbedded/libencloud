@@ -2,11 +2,12 @@
 #define _LIBENCLOUD_PRIV_CLOUD_VPNCONFIG_H_
 
 #include <encloud/Utils>
-#include <common/config.h>
 
 namespace libencloud {
 
-class VpnConfig
+class Config;
+
+class LIBENCLOUD_DLLSPEC VpnConfig
 {
 public:
     VpnConfig ();

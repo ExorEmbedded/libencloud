@@ -1,6 +1,7 @@
 ChangeLog file for Endian libencloud
 
 next:
+	- vpn: headers are now public
 	- modeqcc now also supports plain vpn (based on config: setup.enabled)
 	- CONFIG += splitdeps for case when package is not self-contained (e.g. Yocto)
 	- sece: make sure valid=false is always caught as CodeServerLicenseInvalid
