@@ -3,6 +3,7 @@
 
 #include <QNetworkProxy>
 #include <QString>
+#include <QUrl>
 #include <encloud/Common>
 
 namespace libencloud 
@@ -55,6 +56,7 @@ public:
             QString user = "", QString pass = "", QString path = "");
 
     bool isValid () const;
+    int validate ();
     QString toString () const;
     friend LIBENCLOUD_DLLSPEC QDebug operator << (QDebug d, const Auth &auth);
 
@@ -62,6 +64,7 @@ public:
     int setId (Id id);
     const QString getStrId () const;
     int setStrId (const QString &id);
+    inline bool isIdValid (Id id) { return (id >= FirstId && id <= LastId); };
 
     Type getType () const;
     int setType (Type type);
@@ -69,18 +72,24 @@ public:
     int setStrType (const QString &type);
     static Type typeFromQt (QNetworkProxy::ProxyType type);
     static QNetworkProxy::ProxyType typeToQt (Type type);
+    inline bool isTypeValid (Type t) { return (t >= FirstType && t <= LastType); };
 
     const QString &getUrl () const;
     int setUrl (const QString &url);
+    // empty URL allowed (for plain VPN case where external configuration file is used)
+    inline bool isUrlValid (const QString &url) { return (url.isEmpty() || QUrl(url).isValid()); };
 
     const QString &getUser () const;
     int setUser (const QString &user);
+    inline bool isUserValid (const QString &user) { return !(_type == UserpassType && user == ""); };
 
     const QString &getPass () const;
     int setPass (const QString &pass);
+    inline bool isPassValid (const QString &pass) { return (pass != ""); };
 
     const QString &getPath () const;
     int setPath (const QString &path);
+    inline bool isPathValid (const QString &path) { return !(_type == CertificateType && path == ""); };
 
 protected:
     bool _valid;
