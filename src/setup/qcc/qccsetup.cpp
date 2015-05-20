@@ -44,11 +44,11 @@ int QccSetup::start ()
     if (!m_setupEnabled)
     {
         // critical
-        if (_vpnConfig.fromFile(_cfg->config.vpnConfPath.absoluteFilePath()))
+        if (_vpnConfig.fromFile(_cfg->config.vpnConfPath.absoluteFilePath(), false))
             LIBENCLOUD_EMIT_ERR (error(Error(tr("No valid VPN configuration found!"))));
 
         // non-critical
-        if (_vpnFallbackConfig.fromFile(_cfg->config.fallbackVpnConfPath.absoluteFilePath()))
+        if (_vpnFallbackConfig.fromFile(_cfg->config.fallbackVpnConfPath.absoluteFilePath(), false))
             LIBENCLOUD_DBG("No valid VPN fallback configuration found");
     }
 

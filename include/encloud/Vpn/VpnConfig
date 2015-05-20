@@ -7,36 +7,128 @@ namespace libencloud {
 
 class Config;
 
+/**
+ * \brief Manipulates client-side OpenVPN configuration files
+ *
+ * Currently supports basic config and a single possible fallback remote.
+ */
 class LIBENCLOUD_DLLSPEC VpnConfig
 {
 public:
+
+    typedef enum {
+        PortDefault = 1194
+    } Default;
+
+    typedef enum {
+        NoneProto = -1,
+        UdpProto,
+        TcpProto,
+        FirstProto = UdpProto,
+        LastProto = TcpProto
+    } Proto;
+
+    typedef enum {
+        NoneDev = 0,
+        TapDev,
+        TunDev,
+        FirstDev = TapDev,
+        LastDev = TunDev
+    } Dev;
+
     VpnConfig ();
-    VpnConfig (const QVariantMap &vm, Config *cfg = NULL);
-    VpnConfig (const QString &s, Config *cfg = NULL);
+    VpnConfig (const QVariantMap &vm);
+    VpnConfig (const QString &s);
 
     // use compiler-default
     //VpnConfig &operator=(const VpnConfig vc);
 
     int clear ();
     bool isValid () const;
-    // Returns true if the configuration is file based
-    bool isFile() const;
+    bool isFile () const;
     int fromMap (const QVariantMap &vm);
-    int fromString (const QString &s);
-    int fromCfg (Config *cfg);
+    int fromString (const QString &s, bool parse = true);
 
     QString toString () const;
-    int fromFile (const QString &path);
+    int fromFile (const QString &path, bool parse = true);
     int toFile (const QString &path) const;
 
-    QStringList get (const QString &key) const;
+    // Helper access functions - use these methods only if object was created
+    // manually or via fromMap() - content is not parsed if creating via
+    // fromFile() or fromString()
+
+    Dev getDev () const;
+    int setDev (Dev dev);
+    static bool validDev (Dev dev);
+    static Dev devFromStr (const QString &s);
+    static QString devToStr (Dev dev);
+
+    static bool validProto (Proto proto);
+    static Proto protoFromStr (const QString &s);
+    static QString protoToStr (Proto proto);
+
+    const QString &getRemote () const;
+    int setRemote (const QString &remote);
+    static bool validRemote (const QString &remote);
+
+    int getRemotePort () const;
+    int setRemotePort (int port);
+
+    Proto getRemoteProto () const;
+    int setRemoteProto (Proto proto);
+
+    bool isFallbackEnabled () const;
+    int setFallbackEnabled (bool enabled);
+
+    const QString &getFallbackRemote () const;
+    int setFallbackRemote (const QString &remote);
+
+    int getFallbackRemotePort () const;
+    int setFallbackRemotePort (int port);
+
+    Proto getFallbackRemoteProto () const;
+    int setFallbackRemoteProto (Proto proto);
+
+    const QString &getCaPath () const;
+    int setCaPath (const QString &caPath);
+
+    const QString &getCertPath () const;
+    int setCertPath (const QString &certPath);
+
+    const QString &getKeyPath () const;
+    int setKeyPath (const QString &keyPath);
+
+    const QString &getP12Path () const;
+    int setP12Path (const QString &p12Path);
 
 private:
+
+    //
+    // internals
+    //
     bool _valid;
-    bool _file;
+    bool _isFile;
     QString _string;
 
-    QHash<QString, QStringList> _data;
+    //
+    // configuration
+    //
+    bool _client;
+    Dev _dev;
+
+    QString _remote;
+    int _remotePort;
+    Proto _remoteProto;
+
+    bool _fallbackEnabled;
+    QString _fallbackRemote;
+    int _fallbackRemotePort;
+    Proto _fallbackRemoteProto;
+
+    QString _caPath;
+    QString _certPath;
+    QString _keyPath;
+    QString _p12Path;
 };
 
 } // namespace libencloud

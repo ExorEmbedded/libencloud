@@ -224,10 +224,11 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     //
     // consistency checks
     //
-    LIBENCLOUD_ERR_IF (config.fromFile(configPath));
+    LIBENCLOUD_EMIT_ERR_IF (config.fromFile(configPath, false),
+            sigError(this->err = ConfigError));
 #ifndef LIBENCLOUD_MODE_VPN
     LIBENCLOUD_EMIT_ERR_IF (
-            config.get("proto")[0] == "udp" &&
+            config.getRemoteProto() == VpnConfig::UdpProto &&
             proxyAuth.getType() != Auth::NoneType,
             sigError(this->err = ProxyNotAllowed, "Server must be configured to use TCP"));
 #endif
@@ -354,6 +355,8 @@ void VpnClient::stop (void)
 //
 void VpnClient::authSupplied (const Auth &auth)
 {
+    LIBENCLOUD_ERR_IF (!auth.isValid());
+
     switch (auth.getId())
     {
         case Auth::ProxyId:
@@ -362,6 +365,8 @@ void VpnClient::authSupplied (const Auth &auth)
         default:
             break;
     }
+err:
+    return;
 }
 
 //
