@@ -123,13 +123,29 @@ int VpnConfig::fromString (const QString &s, bool parse)
 
             QString key = params[0];
             params.removeFirst();
+            nParams--;
 
             if (key == "client")
                 ;  // already default behaviour
             else if (key == "dev")
             {
-                LIBENCLOUD_ERR_IF (nParams != 2);
+                LIBENCLOUD_ERR_IF (nParams != 1);
                 LIBENCLOUD_ERR_IF (setDev(devFromStr(params[0])));
+            }
+            else if (key == "proto")
+            {
+                LIBENCLOUD_ERR_IF (nParams != 1);
+                LIBENCLOUD_ERR_IF (setRemoteProto(VpnConfig::protoFromStr(params[0])));
+                LIBENCLOUD_ERR_IF (setFallbackRemoteProto(VpnConfig::protoFromStr(params[0])));
+            }
+            else if (key == "remote")
+            {
+                LIBENCLOUD_ERR_IF (nParams < 1);
+                LIBENCLOUD_ERR_IF (setRemote(params[0]));
+                if (nParams >= 2)
+                    LIBENCLOUD_ERR_IF (setRemotePort(params[1].toInt()));
+                if (nParams >= 3)
+                    LIBENCLOUD_ERR_IF (setRemoteProto(VpnConfig::protoFromStr(params[2])));
             }
             else if (key == "<connection>")
             {
@@ -168,25 +184,27 @@ int VpnConfig::fromString (const QString &s, bool parse)
             }
             else if (key == "ca")
             {
-                LIBENCLOUD_ERR_IF (nParams != 2);
+                LIBENCLOUD_ERR_IF (nParams != 1);
                 LIBENCLOUD_ERR_IF (setCaPath(params[0].remove('"')));
             }
             else if (key == "cert")
             {
-                LIBENCLOUD_ERR_IF (nParams != 2);
+                LIBENCLOUD_ERR_IF (nParams != 1);
                 LIBENCLOUD_ERR_IF (setCertPath(params[0].remove('"')));
             }
             else if (key == "key")
             {
-                LIBENCLOUD_ERR_IF (nParams != 2);
+                LIBENCLOUD_ERR_IF (nParams != 1);
                 LIBENCLOUD_ERR_IF (setKeyPath(params[0].remove('"')));
             }
             else if (key == "pkcs12")
             {
-                LIBENCLOUD_ERR_IF (nParams != 2);
+                LIBENCLOUD_ERR_IF (nParams != 1);
                 LIBENCLOUD_ERR_IF (setP12Path(params[0].remove('"')));
             }
         }
+
+        LIBENCLOUD_ERR_IF (!_isValid(false));
     }
     else
     {
@@ -553,5 +571,21 @@ err:
 //
 // private methods
 //
+
+// Basic consistency check
+// Note: to be used only for parsed configuration (parse=true)
+bool VpnConfig::_isValid (bool strict)
+{
+    LIBENCLOUD_ERR_IF (!VpnConfig::validDev(getDev()));
+    LIBENCLOUD_ERR_IF (!VpnConfig::validProto(getRemoteProto()));
+    LIBENCLOUD_ERR_IF (getRemote().isEmpty());
+
+    if (strict)
+        LIBENCLOUD_ERR_IF (getCaPath().isEmpty());
+
+    return true;
+err:
+    return false;
+}
 
 } // namespace libencloud

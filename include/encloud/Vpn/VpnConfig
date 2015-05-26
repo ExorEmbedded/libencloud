@@ -103,6 +103,8 @@ public:
 
 private:
 
+    bool _isValid (bool strict = true);
+
     //
     // internals
     //
