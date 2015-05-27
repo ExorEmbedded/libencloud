@@ -29,7 +29,7 @@ public:
     } Proto;
 
     typedef enum {
-        NoneDev = 0,
+        NoneDev = -1,
         TapDev,
         TunDev,
         FirstDev = TapDev,

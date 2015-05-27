@@ -108,12 +108,12 @@ int VpnConfig::fromString (const QString &s, bool parse)
     if (parse)
     {
         QStringList tokens = s.split('\n');
+        int connectionCount = 0;
 
         while (!tokens.isEmpty())
         {
             QString line = tokens.takeFirst();
-            int connectionCount = 0;
-            
+
             // parameters are separated by spaces (except if enclosed by quotes)
             QStringList params = line.split(QRegExp(" +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"));
             int nParams = params.count();
@@ -234,7 +234,7 @@ QString VpnConfig::toString () const
     {
         out << "fb_remote: " << getFallbackRemote() << ", ";
         out << "fb_port: " << getFallbackRemotePort() << ", ";
-        out << "fb_roto: " << getFallbackRemoteProto() << ", ";
+        out << "fb_proto: " << getFallbackRemoteProto() << ", ";
     }
 
     out << "ca_path: " << getCaPath() << ", ";
