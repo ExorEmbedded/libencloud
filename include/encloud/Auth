@@ -44,7 +44,7 @@ public:
         //
         HttpProxyType = 10,
         SocksProxyType,
-        FirstType = NoneType,
+        FirstType = UserpassType,
         LastType = SocksProxyType
     }
     Type;
