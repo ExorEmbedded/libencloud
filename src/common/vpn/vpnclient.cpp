@@ -208,7 +208,9 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 #ifdef Q_OS_MAC
     args << "--route-noexec";
     args << "--script-security" << "2";
-    args << "--route-up" << getBinDir() + "/route-up.sh";
+    args << "--up" << getBinDir() + "/openvpn-up.sh";
+    args << "--down" << getBinDir() + "/openvpn-down.sh";
+    args << "--route-up" << getBinDir() + "/openvpn-route-up.sh";
     // avoid bad routes if brought up too early (enpoints unreachable)
     args << "--route-delay" << "2";
 #endif
