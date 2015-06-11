@@ -160,44 +160,50 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--log" << "openvpnlog.log";
 #endif
 
-    if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
+    if (sbAuth.isValid())
     {
-        args << "--auth-user-pass";
-        args << "--auth-nocache";
-    }
-    else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
-    {
-        if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
+        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
         {
-            args << "--cert" << _cfg->config.sslOp.certPath.absoluteFilePath();
-            args << "--key" << _cfg->config.sslOp.keyPath.absoluteFilePath();
+            args << "--auth-user-pass";
+            args << "--auth-nocache";
         }
-        else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
+        else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
         {
-            args << "--pkcs12" << _cfg->config.sslOp.p12Path.absoluteFilePath();
+            if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
+            {
+                args << "--cert" << _cfg->config.sslOp.certPath.absoluteFilePath();
+                args << "--key" << _cfg->config.sslOp.keyPath.absoluteFilePath();
+            }
+            else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
+            {
+                args << "--pkcs12" << _cfg->config.sslOp.p12Path.absoluteFilePath();
+            }
         }
-    }
+    } // otherwise we assume that authentication is file-based
 
-    QUrl proxyUrl = proxyAuth.getUrl();
-
-    switch (proxyAuth.getType())
+    if (proxyAuth.isValid())
     {
-        case (Auth::SocksProxyType):
-            args << "--socks-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
-            break;
-        case (Auth::HttpProxyType):
-            args << "--http-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
-            args << "auto";
+        QUrl proxyUrl = proxyAuth.getUrl();
 
-            // mimic HTTP Proxy Type detection in 4iConnect 1X,2X
-            if (proxyAuth.getUser().contains('\\'))
-                args << "ntlm";
-            else
-                args << "basic";
-            break;
-        case (Auth::NoneType):
-        default:
-            break;
+        switch (proxyAuth.getType())
+        {
+            case (Auth::SocksProxyType):
+                args << "--socks-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
+                break;
+            case (Auth::HttpProxyType):
+                args << "--http-proxy" << proxyUrl.host() << QString::number(proxyUrl.port());
+                args << "auto";
+
+                // mimic HTTP Proxy Type detection in 4iConnect 1X,2X
+                if (proxyAuth.getUser().contains('\\'))
+                    args << "ntlm";
+                else
+                    args << "basic";
+                break;
+            case (Auth::NoneType):
+            default:
+                break;
+        }
     }
 
 #ifdef Q_OS_WIN32
@@ -229,10 +235,13 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     LIBENCLOUD_EMIT_ERR_IF (config.fromFile(configPath, false),
             sigError(this->err = ConfigError));
 #ifndef LIBENCLOUD_MODE_VPN
-    LIBENCLOUD_EMIT_ERR_IF (
-            config.getRemoteProto() == VpnConfig::UdpProto &&
-            proxyAuth.getType() != Auth::NoneType,
-            sigError(this->err = ProxyNotAllowed, "Server must be configured to use TCP"));
+    if (proxyAuth.isValid())
+    {
+        LIBENCLOUD_EMIT_ERR_IF (
+                config.getRemoteProto() == VpnConfig::UdpProto &&
+                proxyAuth.getType() != Auth::NoneType,
+                sigError(this->err = ProxyNotAllowed, "Server must be configured to use TCP"));
+    }
 #endif
 
     return args;
@@ -357,18 +366,19 @@ void VpnClient::stop (void)
 //
 void VpnClient::authSupplied (const Auth &auth)
 {
-    LIBENCLOUD_ERR_IF (!auth.isValid());
+    //LIBENCLOUD_ERR_IF (!auth.isValid());  // invalid objects used to perform reset
 
     switch (auth.getId())
     {
+        case Auth::SwitchboardId:
+            sbAuth = auth;
+            break;
         case Auth::ProxyId:
             proxyAuth = auth;
             break;
         default:
             break;
     }
-err:
-    return;
 }
 
 //

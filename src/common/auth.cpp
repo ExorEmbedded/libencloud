@@ -66,16 +66,20 @@ bool Auth::isValid () const
 // user (not for CertificateType) and password.
 int Auth::validate ()
 {
-    if (!isIdValid(_id) ||
-       !isTypeValid(_type) ||
-       !isUrlValid(_url) ||
-       !isUserValid(_user) ||
-       !isPassValid(_pass))
-        return ~0;
+    LIBENCLOUD_ERR_IF (!isIdValid(_id));
+    LIBENCLOUD_ERR_IF (!isTypeValid(_type));
+    LIBENCLOUD_ERR_IF (!isUrlValid(_url));
+    LIBENCLOUD_ERR_IF (_type == Auth::UserpassType &&
+            (!isUserValid(_user) ||
+            !isPassValid(_pass)));
+    LIBENCLOUD_ERR_IF (_type == Auth::CertificateType &&
+            !isPathValid(_path));
 
     _valid = true;
 
     return 0;
+err:
+    return ~0;
 }
 
 QString Auth::toString () const

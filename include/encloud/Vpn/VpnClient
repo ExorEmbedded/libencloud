@@ -94,6 +94,8 @@ private:
     QTemporaryFile configFile;
     QTemporaryFile caCertFile;
     QProcess *process;
+
+    Auth sbAuth;
     Auth proxyAuth;
 };
 
