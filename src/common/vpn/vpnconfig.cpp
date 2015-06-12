@@ -127,6 +127,13 @@ int VpnConfig::fromString (const QString &s, bool parse)
 
             if (key == "client")
                 ;  // already default behaviour
+            if (key == "comp-lzo")
+            {
+                if (nParams == 0)
+                    LIBENCLOUD_ERR_IF (setCompEnabled(true));
+                else if (nParams == 1)
+                    LIBENCLOUD_ERR_IF (setCompEnabled(params[0] == "yes" ? true : false));
+            }
             else if (key == "dev")
             {
                 LIBENCLOUD_ERR_IF (nParams != 1);
@@ -224,6 +231,7 @@ QString VpnConfig::toString () const
     QTextStream out(&s);
 
     out << "client: " << _client << ", ";
+    out << "comp-lzo: " << isCompEnabled() << ", ";
     out << "dev: " << getDev() << ", ";
 
     out << "remote: " << getRemote() << ", ";
@@ -284,6 +292,11 @@ int VpnConfig::toFile (const QString &path) const
         if (_client)
             out << "client" << endl;
 
+        if (isCompEnabled())
+            out << "comp-lzo" << endl;
+        else
+            out << "comp-lzo" << ' ' << "no" << endl;
+
         out << "dev" << ' ' << VpnConfig::devToStr(getDev()) << endl;
 
         out << "<connection>" << endl;
@@ -317,6 +330,18 @@ int VpnConfig::toFile (const QString &path) const
 err:
     configFile.close();
     return ~0;
+}
+
+bool VpnConfig::isCompEnabled () const
+{
+    return _compEnabled;
+}
+
+int VpnConfig::setCompEnabled (bool enabled)
+{
+    _compEnabled = enabled;
+
+    return 0;
 }
 
 bool VpnConfig::validProto (Proto proto)

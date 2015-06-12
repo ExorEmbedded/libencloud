@@ -56,6 +56,8 @@ public:
     // Helper access functions - use these methods only if object was created
     // manually or via fromMap() - content is not parsed if creating via
     // fromFile() or fromString()
+    bool isCompEnabled () const;
+    int setCompEnabled (bool enabled);
 
     Dev getDev () const;
     int setDev (Dev dev);
@@ -116,6 +118,7 @@ private:
     // configuration
     //
     bool _client;
+    bool _compEnabled;
     Dev _dev;
 
     QString _remote;
