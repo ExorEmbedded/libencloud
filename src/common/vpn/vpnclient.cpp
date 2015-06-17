@@ -150,7 +150,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 #ifndef LIBENCLOUD_MODE_VPN
     if (_cfg->config.setupEnabled)  // automatic setup via Switchboard -> CA is download
     {
-        caCertPath = _cfg->config.sslOp.caPath.absoluteFilePath();
+        caCertPath = _cfg->config.sslOp.caPath.filePath();
         args << "--ca" << caCertPath;
     }  
     // else CA is user-specified
@@ -171,12 +171,12 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
         {
             if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
             {
-                args << "--cert" << _cfg->config.sslOp.certPath.absoluteFilePath();
-                args << "--key" << _cfg->config.sslOp.keyPath.absoluteFilePath();
+                args << "--cert" << _cfg->config.sslOp.certPath.filePath();
+                args << "--key" << _cfg->config.sslOp.keyPath.filePath();
             }
             else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
             {
-                args << "--pkcs12" << _cfg->config.sslOp.p12Path.absoluteFilePath();
+                args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
             }
         }
     } // otherwise we assume that authentication is file-based
@@ -285,7 +285,7 @@ void VpnClient::start (bool fallback)
         return;
     }
 
-    path = _cfg->config.vpnExePath.absoluteFilePath();
+    path = _cfg->config.vpnExePath.filePath();
 
     LIBENCLOUD_DBG("[VPNClient] fallback: " << fallback << ", path: " << path);
 

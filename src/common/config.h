@@ -34,6 +34,9 @@ libencloud_config_ssl_t;
 
 typedef struct
 {
+    bool isProfile;     // is this a Connection Profile?
+                        // true: paths relative to OpenVPN config path are used
+                        // false: we use absolute paths constructed from data prefix
     QString bind;
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -108,7 +111,7 @@ protected:
     int _parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc);
     int _parseVpn (const QVariantMap &jo);
     int _parseLog (const QVariantMap &jo);
-    QString _joinPaths (const QString &prefix, const QString &path);
+    QString _joinPaths (const QString &prefix, const QString &path, bool keepRelative = false);
 
     QVariant _json;
     QVariant _jsonOrig;

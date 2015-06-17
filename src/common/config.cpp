@@ -137,6 +137,11 @@ err:
 
 int Config::_parse (const QVariantMap &jo)
 {
+    if (jo["is_profile"].isNull())
+        config.isProfile = false;
+    else
+        config.isProfile = jo["is_profile"].toBool();
+
     if (jo["bind"].isNull())
         config.bind = "";  // binds only to localhost and tap
     else
@@ -223,6 +228,7 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 {
     QVariantMap jot;
 
+    // defaults for ssl blocks
     if (&sc == &config.ssl)
     {
         sc.sbUrl = QUrl(LIBENCLOUD_SB_URL);
@@ -236,6 +242,7 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 
         jot = jo["ssl"].toMap();
     }
+    // defaults for ssl (initialization) blocks
     else if (&sc == &config.sslInit)
     {
         sc = config.ssl;
@@ -246,6 +253,7 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
 
         jot = jo["init"].toMap();
     }
+    // defaults for ssl (operation) blocks
     else if (&sc == &config.sslOp)
     {
         sc = config.ssl;
@@ -278,28 +286,28 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
     {
         QString caPath = jot["ca"].toString();
         if (!caPath.isEmpty())
-            sc.caPath = _joinPaths(dataPrefix, caPath);
+            sc.caPath = _joinPaths(dataPrefix, caPath, config.isProfile);
     }
 
     if (jot["cert"].isValid())
     {
         QString certPath = jot["cert"].toString();
         if (!certPath.isEmpty())
-            sc.certPath = _joinPaths(dataPrefix, certPath);
+            sc.certPath = _joinPaths(dataPrefix, certPath, config.isProfile);
     }
 
     if (jot["key"].isValid())
     {
         QString keyPath = jot["key"].toString();
         if (!keyPath.isEmpty())
-            sc.keyPath = _joinPaths(dataPrefix, keyPath);
+            sc.keyPath = _joinPaths(dataPrefix, keyPath, config.isProfile);
     }
 
     if (jot["p12"].isValid())
     {
         QString p12Path = jot["p12"].toString();
         if (!p12Path.isEmpty())
-            sc.p12Path = _joinPaths(dataPrefix, p12Path);
+            sc.p12Path = _joinPaths(dataPrefix, p12Path, config.isProfile);
     }
 
     sc.sbUrl = jot["sb"].toMap()["url"].toString();
@@ -338,10 +346,10 @@ int Config::_parseVpn (const QVariantMap &jo)
         config.vpnExePath = _joinPaths(sbinPrefix, jot["path"].toString());
 
     if (jot["conf"].isValid())
-        config.vpnConfPath = _joinPaths(dataPrefix, jot["conf"].toString());
+        config.vpnConfPath = _joinPaths(dataPrefix, jot["conf"].toString(), config.isProfile);
 
     if (jot["fallback_conf"].isValid())
-        config.fallbackVpnConfPath = _joinPaths(dataPrefix, jot["fallback_conf"].toString());
+        config.fallbackVpnConfPath = _joinPaths(dataPrefix, jot["fallback_conf"].toString(), config.isProfile);
 
     if (jot["mgmt"].toMap()["port"].isValid())
         config.vpnMgmtPort = jot["mgmt"].toMap()["port"].toInt();
@@ -383,9 +391,9 @@ err:
 }
 
 // Add prefix to path only if path is relative.
-QString Config::_joinPaths (const QString &prefix, const QString &path)
+QString Config::_joinPaths (const QString &prefix, const QString &path, bool keepRelative)
 {
-    if (QDir(path).isAbsolute())
+    if (QDir(path).isAbsolute() || keepRelative)
         return path;
     
     return QDir::cleanPath(prefix + QDir::separator() + path);
