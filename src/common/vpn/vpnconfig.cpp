@@ -115,7 +115,7 @@ int VpnConfig::fromString (const QString &s, bool parse)
             QString line = tokens.takeFirst();
 
             // parameters are separated by spaces (except if enclosed by quotes)
-            QStringList params = line.split(QRegExp(" +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"));
+            QStringList params = line.trimmed().split(QRegExp(" +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)"));
             int nParams = params.count();
 
             if (nParams < 1)
