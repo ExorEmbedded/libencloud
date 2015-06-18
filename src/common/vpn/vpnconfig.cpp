@@ -55,6 +55,7 @@ int VpnConfig::clear ()
     _string = "";
 
     _client = true;
+    _compEnabled = true;
     _dev = TapDev;
 
     _remotePort = PortDefault;
