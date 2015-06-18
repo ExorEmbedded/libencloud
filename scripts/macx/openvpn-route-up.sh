@@ -17,6 +17,7 @@ for ((i = 1; i <= ${n_nets}; i++)); do
     # Avoids problems with split networks using tap device on OSX
     # (possibly related: https://discussions.apple.com/message/8546386)
     [ "${netmask}" = "255.255.255.128" ] && ARGS="${ARGS} -iface"
+    [ "${netmask}" = "255.255.128.0" ] && ARGS="${ARGS} -iface"
 
     /sbin/route ${ARGS}
 done
