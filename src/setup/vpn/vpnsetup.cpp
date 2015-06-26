@@ -27,8 +27,8 @@ int VpnSetup::start ()
 
     _clear();
 
-    _vpnConfig.fromFile(_cfg->config.vpnConfPath.absoluteFilePath());
-    _vpnFallbackConfig.fromFile(_cfg->config.fallbackVpnConfPath.absoluteFilePath());
+    _vpnConfig.fromFile(_cfg->config.vpnConfPath.absoluteFilePath(), false);
+    _vpnFallbackConfig.fromFile(_cfg->config.fallbackVpnConfPath.absoluteFilePath(), false);
 
     emit progress(Progress(tr("Using static Switchboard configuration"),
                            StateLast, getTotalSteps()));
@@ -60,8 +60,6 @@ int VpnSetup::getTotalSteps() const
 {
     return StateLast - StateFirst + 1;
 }
-
-
 
 // Clear all generated data
 void VpnSetup::_clear ()

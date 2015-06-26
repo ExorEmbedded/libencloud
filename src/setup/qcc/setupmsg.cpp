@@ -194,13 +194,13 @@ int SetupMsg::_decodeResponse (const QString &response)
 
     // most fields not used locally (retrieved by QCC via API)
     // for now we're only interested in VPN configuration,
-    _vpnConfig = VpnConfig(json["openvpn_conf"].toString(), _cfg);
+    _vpnConfig = VpnConfig(json["openvpn_conf"].toString());
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
             error(Error(tr("VPN Configuration from Switchboard not valid"))));
 
     if (!json["fallback_openvpn_conf"].isNull())
     {
-        _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString(), _cfg);
+        _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString());
         LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
                 error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
     }

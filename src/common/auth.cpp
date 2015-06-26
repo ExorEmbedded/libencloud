@@ -61,6 +61,27 @@ bool Auth::isValid () const
     return _valid;
 }
 
+// Use this to mark an initially invalid (e.g. default constructor) Auth object
+// as valid. Minimum requirements are: valid id, type, url (may be empty)
+// user (not for CertificateType) and password.
+int Auth::validate ()
+{
+    LIBENCLOUD_ERR_IF (!isIdValid(_id));
+    LIBENCLOUD_ERR_IF (!isTypeValid(_type));
+    LIBENCLOUD_ERR_IF (!isUrlValid(_url));
+    LIBENCLOUD_ERR_IF (_type == Auth::UserpassType &&
+            (!isUserValid(_user) ||
+            !isPassValid(_pass)));
+    LIBENCLOUD_ERR_IF (_type == Auth::CertificateType &&
+            !isPathValid(_path));
+
+    _valid = true;
+
+    return 0;
+err:
+    return ~0;
+}
+
 QString Auth::toString () const
 {
     QString s;
@@ -89,7 +110,7 @@ Auth::Id Auth::getId () const
 
 int Auth::setId (Auth::Id id)
 {
-    if (id < FirstId || id > LastId)
+    if (!isIdValid(id))
         return ~0;
 
     _id = id;
@@ -129,7 +150,7 @@ Auth::Type Auth::getType () const
 
 int Auth::setType (Type type)
 {
-    if (type < FirstType || type > LastType)
+    if (!isTypeValid(type))
         return ~0;
     
     _type = type;
@@ -205,7 +226,7 @@ const QString &Auth::getUrl () const
 
 int Auth::setUrl (const QString &url)
 {
-    if (!QUrl(url).isValid())
+    if (!isUrlValid(url))
         return ~0;
 
     _url = url;
@@ -220,7 +241,7 @@ const QString &Auth::getUser () const
 
 int Auth::setUser (const QString &user)
 {
-    if (_type != CertificateType && user == "")
+    if (!isUserValid(user))
         return ~0;
 
     _user = user;
@@ -236,7 +257,7 @@ const QString &Auth::getPass () const
 /* Password-based auth or password to decrypt PKCS12 */
 int Auth::setPass (const QString &pass)
 {
-    if (pass == "")
+    if (!isPassValid(pass))
         return ~0;
 
     _pass = pass;
@@ -252,7 +273,7 @@ const QString &Auth::getPath () const
 /* Password-based auth or password to decrypt PKCS12 */
 int Auth::setPath (const QString &path)
 {
-    if (_type == CertificateType && path == "")
+    if (!isPathValid(path))
         return ~0;
 
     _path = path;

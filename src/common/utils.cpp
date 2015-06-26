@@ -97,6 +97,32 @@ err:
     return NULL;
 }
 
+LIBENCLOUD_DLLSPEC int rmRec (const QString &dir)
+{
+    QDir d(dir);
+
+    if (!d.exists())
+        return ~0;
+
+    Q_FOREACH (QFileInfo info, d.entryInfoList(QDir::NoDotAndDotDot | QDir::System |
+                QDir::Hidden | QDir::AllDirs | QDir::Files, QDir::DirsFirst))
+    {
+        QString path = info.absoluteFilePath();
+        LIBENCLOUD_DBG("path: " << path);
+
+        if (info.isDir())
+            LIBENCLOUD_ERR_IF (rmRec(path));
+        else
+            LIBENCLOUD_ERR_IF (!QFile::remove(path));
+    }
+
+    d.rmdir(dir);
+
+    return 0;
+err:
+    return ~0;
+}
+
 LIBENCLOUD_DLLSPEC QString bool2String (bool b)
 {
     return (b ? "true" : "false");
@@ -241,6 +267,21 @@ LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
     }
 
     to = mTo;
+}
+
+LIBENCLOUD_DLLSPEC bool validIp (const QString &s)
+{
+    return (QRegExp(QString("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}") +
+                "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$")
+        .indexIn(s) == 0);
+}
+
+// RFC 1123
+LIBENCLOUD_DLLSPEC bool validHost (const QString &s)
+{
+    return (QRegExp(QString("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*") +
+                "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$")
+        .indexIn(s) == 0);
 }
 
 } // namespace utils

@@ -32,7 +32,6 @@ public:
 
     QccSetup (Config *cfg);
 
-    int _initFsm ();
     int start ();
     int stop ();
 
@@ -75,11 +74,14 @@ private slots:
     void _onRetryTimeout ();
 
 private:
+    int _initFsm ();
+    int _deinitFsm ();
     int _initMsg (MessageInterface &msg);
     void _clear ();
     Progress _stateToProgress (QState *state);
 
     QStateMachine _fsm;
+    bool m_setupEnabled;
 
     QState *_initialState;
     QState *_previousState;
@@ -95,6 +97,9 @@ private:
     bool _isError;
     Error _error;
     Retry _retry;
+
+    VpnConfig _vpnConfig;
+    VpnConfig _vpnFallbackConfig;
 };
 
 } // namespace libencloud

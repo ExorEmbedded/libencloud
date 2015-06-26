@@ -140,6 +140,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
             case QSslError::UnableToVerifyFirstCertificate:
                 if (_verifyCA)
                 {
+                    CLIENT_DBG("[Client] CRITICAL QSslError (" << (int) err.error() << "): " << err.errorString());
                     LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed)));
                     _sslError = true;
                     break;

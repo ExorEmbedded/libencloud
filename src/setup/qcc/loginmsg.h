@@ -6,7 +6,6 @@
 #include <encloud/Auth>
 #include <encloud/Client>
 #include <common/message.h>
-#include <common/vpn/vpnconfig.h>
 
 #define LIBENCLOUD_SETUP_QCC_LOGIN_URL        "/manage/access/login/"
 #define LIBENCLOUD_SETUP_QCC_LOGOUT_URL        "/manage/access/logout/"

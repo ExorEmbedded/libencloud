@@ -147,6 +147,7 @@ int Core::stop ()
     _cloud->stop();
 #endif
 
+    emit authSupplied(Auth());
     emit stateChanged(StateIdle);
     emit progress(Progress());
 

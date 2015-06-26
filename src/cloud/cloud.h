@@ -7,9 +7,9 @@
 #include <encloud/Error>
 #include <encloud/State>
 #include <encloud/Progress>
+#include <encloud/Vpn/VpnClient>
+#include <encloud/Vpn/VpnManager>
 #include <common/config.h>
-#include <common/vpn/vpnclient.h>
-#include <common/vpn/vpnmanager.h>
 #include <setup/setup.h>
 
 namespace libencloud {

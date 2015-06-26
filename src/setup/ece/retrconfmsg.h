@@ -3,8 +3,8 @@
 
 #include <QDateTime>
 #include <QString>
+#include <encloud/Vpn/VpnConfig>
 #include <common/message.h>
-#include <common/vpn/vpnconfig.h>
 
 namespace libencloud {
 

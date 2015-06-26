@@ -1,0 +1,1018 @@
+#
+# NUTS      Swiss army knife for network addresses based only on Bash and basic *nix utilities
+# ^^^^
+#
+# Usage     Source this file from your main script and use the nuts_* API
+#
+# Features 
+#  * Generic utilities
+#     - nuts_info
+#     - nuts_die
+#     - nuts_chk
+#     - nuts_chkko
+#     - nuts_arrayjoin
+#  * Conversions and arithmetic to/from binary, decimal and hex formats
+#     - nuts_isint
+#     - nuts_isbin
+#     - nuts_binsum
+#     - nuts_bin2dec
+#     - nuts_dec2bin
+#     - nuts_bin2hex
+#     - nuts_hex2bin
+#  * Network address utilities and conversion to and from CIDR notation
+#     - nuts_addrisvalid
+#     - nuts_addr2net
+#     - nuts_netgetaddr
+#     - nuts_netgetcidr
+#     - nuts_cidrisvalid
+#     - nuts_netiscidr
+#     - nuts_addr2quad
+#     - nuts_mask2cidr
+#     - nuts_cidr2mask
+#     - nuts_cidr2range
+#     - nuts_net2bcast
+#  * Conversion of network addresses to and from binary, decimal and hex formats
+#     - nuts_addr2bin
+#     - nuts_bin2addr
+#     - nuts_addr2dec
+#     - nuts_dec2addr
+#     - nuts_addr2hex
+#     - nuts_hex2addr
+#  * Basic arithmetic with network addresses (addition and comparison)
+#     - nuts_addrsum
+#     - nuts_addrcmp
+#  * Network sorting
+#     - nuts_sort
+#  * Check for network adjacency
+#     - nuts_adjacent
+#  * Check if sum of given networks yields a supernet
+#     - nuts_super
+#  * Unit/regression testing
+#     - nuts_runtests
+#
+# Assumptions
+#  * IPv4-only
+#  * Prerequisites: bash, awk, bc, printf
+#  * Input addresses and netmasks must be valid
+#
+# Tested on
+#  * Ubuntu 14
+#  * OSX Mavericks
+
+#
+# [ Generic utilities ]
+#
+
+## Print some info
+nuts_info ()
+{
+    echo "[info] $@"
+}
+
+## Print critical message and exit
+nuts_die ()
+{
+    nuts_info "[CRITICAL] $@" 
+
+    exit 1
+}
+
+## Make sure the specified command succeeds
+nuts_chk ()
+{
+    "$@"
+    [ $? -eq 0 ] || nuts_die "Failed chk: $@"
+}
+
+## Make sure the specified command fails
+nuts_chkko ()
+{
+    "$@"
+    [ $? -eq 0 ] && nuts_die "Failed chkko: $@"
+}
+
+## Join elements of an array into a $1-delimited string
+nuts_arrayjoin()
+{ 
+    local IFS="$1"; shift; echo "$*"
+}
+    
+## Whether given string is an integer
+nuts_isint ()
+{
+    [ $# -eq 1 ] || return 1
+
+    [ "$1" -eq "$1" ] 2>/dev/null || return 1
+
+    return 0
+}
+nuts_isint_test ()
+{
+    nuts_chk nuts_isint 123
+    nuts_chk nuts_isint -111
+
+    nuts_chkko nuts_isint abc
+}
+
+#
+# [ Basic arithmetic ]
+#
+
+## Check for valid binary numbers - negative sign allowed
+# e.g. nuts_isbin 01010 => 0 (success)
+# e.g. nuts_isbin -011 => 0 (success)
+# e.g. nuts_isbin foo => 1 (failure)
+nuts_isbin ()
+{
+    echo $1 | grep -q "^-\?[01]\+$"
+}
+nuts_isbin_test ()
+{
+    nuts_chk nuts_isbin 000011
+
+    nuts_chkko nuts_isbin foo
+}
+
+## Check for valid hexadecimal values
+nuts_ishex ()
+{
+    echo "$1" | grep -q "^0x[0-9a-fA-F]\+$"
+}
+nuts_ishex_test ()
+{
+    nuts_chk nuts_ishex 0x123
+    nuts_chk nuts_ishex 0xDEADBEEF
+
+    nuts_chkko nuts_ishex 123
+    nuts_chkko nuts_ishex 0xKO
+}
+
+## Sum two binary numbers with optional padding
+# e.g. nuts_binsum 111 1 8 => 00001000
+nuts_binsum ()
+{
+    [ $# -lt 2 ] && return 1
+
+    local b1=$1
+    local b2=$2
+    local npad=$3
+
+    nuts_isbin $b1 || return 1
+    nuts_isbin $b2 || return 1
+
+    out=$(echo "obase=2;ibase=2;${b1}+${b2}" | bc)
+    if [ "$npad" == "" ]; then
+        echo $out
+    else
+        nuts_isint $npad || return 1
+        printf "%0${npad}s" $out | tr ' ' '0'
+    fi
+}
+nuts_binsum_test ()
+{
+    nuts_chk [ "$(nuts_binsum 1 1)" = "10" ]
+    nuts_chk [ "$(nuts_binsum 111 1)" = "1000" ]
+    nuts_chk [ "$(nuts_binsum 111 1 8)" = "00001000" ]  # pad to 8 chars
+
+    nuts_chkko nuts_binsum "foo" 1
+    nuts_chkko nuts_binsum 123 456
+}
+
+## Convert a binary number to decimal
+nuts_bin2dec ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local bin=$1
+
+    nuts_isbin $bin || return 1
+
+    local x=$(echo "obase=10;ibase=2;$bin" | bc)
+
+    nuts_isint $x || return 1
+
+    echo $x
+
+    return 0
+}
+nuts_bin2dec_test ()
+{
+    nuts_chk [ "$(nuts_bin2dec 10)" = "2" ]
+    nuts_chk [ "$(nuts_bin2dec 111)" = "7" ]
+
+    nuts_chkko nuts_bin2dec foo
+    nuts_chkko nuts_bin2dec 123
+}
+
+## Convert decimal to binary with optional padding
+# e.g. nuts_dec2bin 7 5 => 00111
+nuts_dec2bin ()
+{
+    [ $# -lt 1 ] && return 1
+
+    local dec=$1
+    local npad=$2
+
+    nuts_isint $dec || return 1
+
+    out=$(echo "obase=2;ibase=10;$dec" | bc)
+    if [ "$npad" == "" ]; then
+        echo $out
+    else
+        nuts_isint $npad || return 1
+        printf "%0${npad}s" $out | tr ' ' '0'
+    fi
+
+    return 0
+}
+nuts_dec2bin_test ()
+{
+    nuts_chk [ "$(nuts_dec2bin 2)" = "10" ]
+    nuts_chk [ "$(nuts_dec2bin 7)" = "111" ]
+    nuts_chk [ "$(nuts_dec2bin 7 5)" = "00111" ]  # pad to 5 chars
+
+    nuts_chkko nuts_dec2bin "foo"
+}
+
+## Convert a binary number to hexadecimal
+nuts_bin2hex ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local bin=$1
+
+    nuts_isbin $bin || return 1
+
+    local h=$(echo "obase=16;ibase=2;$bin" | bc)
+    local hex="0x$h"
+
+    nuts_ishex "$hex" || return 1
+
+    echo $hex
+}
+nuts_bin2hex_test ()
+{
+    nuts_chk [ "$(nuts_bin2hex 10)" = "0x2" ]
+    nuts_chk [ "$(nuts_bin2hex 11111111)" = "0xFF" ]
+
+    nuts_chkko nuts_bin2hex foo
+    nuts_chkko nuts_bin2hex 123
+}
+
+## Convert hexadecimal to binary with optional padding
+nuts_hex2bin ()
+{
+    [ $# -lt 1 ] && return 1
+
+    local hex=$1
+    nuts_ishex $hex || return 1
+
+    local h=$(echo $hex | cut -d 'x' -f 2)
+    local npad=$2
+
+    out=$(echo "obase=2;ibase=16;$h" | bc)
+    if [ "$npad" == "" ]; then
+        echo $out
+    else
+        nuts_isint $npad || return 1
+        printf "%0${npad}s" $out | tr ' ' '0'
+    fi
+
+    return 0
+}
+nuts_hex2bin_test ()
+{
+    nuts_chk [ "$(nuts_hex2bin 0x2)" = "10" ]
+    nuts_chk [ "$(nuts_hex2bin 0x7)" = "111" ]
+    nuts_chk [ "$(nuts_hex2bin 0xFF 10)" = "0011111111" ]  # pad to 10 chars
+
+    nuts_chkko nuts_hex2bin foo
+}
+
+#
+# [ Address format conversions ]
+#
+
+## Whether a network address is valid
+# e.g. 192.168.0.1 => 0 (success)
+# e.g. 192.168.0.1.foo => 1 (failure)
+nuts_addrisvalid ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    local a=$(echo $addr | cut -d '.' -f 1)
+    local b=$(echo $addr | cut -d '.' -f 2)
+    local c=$(echo $addr | cut -d '.' -f 3)
+    local d=$(echo $addr | cut -d '.' -f 4)
+    local x=$(echo $addr | cut -d '.' -f 5)
+
+    nuts_isint $a && [ $a -ge 0 ] && [ $a -le 255 ] || return 1
+    nuts_isint $b && [ $a -ge 0 ] && [ $b -le 255 ] || return 1
+    nuts_isint $c && [ $a -ge 0 ] && [ $c -le 255 ] || return 1
+    nuts_isint $d && [ $a -ge 0 ] && [ $d -le 255 ] || return 1
+    [ "$x" = "" ] || return 1
+
+    return 0
+}
+nuts_addrisvalid_test ()
+{
+    nuts_chk nuts_addrisvalid 1.2.3.4
+    nuts_chk nuts_addrisvalid 192.168.0.255
+    nuts_chk nuts_addrisvalid 255.255.255.255
+
+    nuts_chkko nuts_addrisvalid
+    nuts_chkko nuts_addrisvalid 1.2.3
+    nuts_chkko nuts_addrisvalid 1.2.3.4.5
+    nuts_chkko nuts_addrisvalid 192.168.0.256
+    nuts_chkko nuts_addrisvalid foo
+    nuts_chkko nuts_addrisvalid foo.192.168.0.1.bar
+    nuts_chkko nuts_addrisvalid 192.168.foo.1
+}
+
+## Remap a CIDR-formatted host address to the network it belongs to
+# e.g. 192.168.1.1/24 => 192.168.1.0/24
+nuts_addr2net ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    nuts_netiscidr $addr || return 2
+
+    local a=$(nuts_netgetaddr $addr)
+    local c=$(nuts_netgetcidr $addr)
+
+    local adec=$(nuts_addr2dec $a)
+    local mask=$(nuts_cidr2mask $c)
+    local mdec=$(nuts_addr2dec $mask)
+
+    local ndec=$(($adec & $mdec))
+    local net=$(nuts_dec2addr $ndec)
+
+    echo $net/$c
+}
+nuts_addr2net_test ()
+{
+    nuts_chk [ "$(nuts_addr2net 192.168.1.0/24)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.1/24)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.255/24)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.3/30)" = "192.168.1.0/30" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.4/30)" = "192.168.1.4/30" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.6/30)" = "192.168.1.4/30" ]
+    nuts_chk [ "$(nuts_addr2net 192.168.1.1/25)" = "192.168.1.0/25" ]
+
+    nuts_chkko nuts_addr2net foo
+    nuts_chkko nuts_addr2net 192.168.1.0.b/24
+}
+
+## Get address part from (possibly CIDR-formatted) address
+# e.g. 192.168.1.0/24 => 192.168.1.0
+# e.g. 192.168.1.0 => 192.168.1.0
+nuts_netgetaddr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    if nuts_netiscidr $addr; then
+        echo $addr | cut -d '/' -f 1
+    else
+        nuts_addrisvalid $addr || return 1
+        echo $addr
+    fi
+
+    return 0
+}
+nuts_netgetaddr_test ()
+{
+    nuts_chk [ "$(nuts_netgetaddr 192.168.1.0/24)" = "192.168.1.0" ]
+    nuts_chk [ "$(nuts_netgetaddr 192.168.1.0)" = "192.168.1.0" ]
+
+    nuts_chkko nuts_netgetaddr
+    nuts_chkko nuts_netgetaddr foo
+    nuts_chkko nuts_netgetaddr 1.2.3
+}
+
+## Extract CIDR part from an CIDR-formatted address
+# e.g. 192.168.1.0/24 => 24 (success)
+# e.g. 192.168.1.0 => "" (failure)
+nuts_netgetcidr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    nuts_netiscidr $1 || return 1
+
+    echo $addr | cut -d '/' -f 2
+
+    return 0
+}
+nuts_netgetcidr_test ()
+{
+    nuts_chk [ "$(nuts_netgetcidr 192.168.1.0/24)" = "24" ]
+    nuts_chk [ "$(nuts_netgetcidr 10.0.0.0/8)" = "8" ]
+
+    nuts_chkko nuts_netgetcidr foo
+    nuts_chkko nuts_netgetcidr 10.0.0.0
+    nuts_chkko nuts_netgetcidr 10.0.0.0/33
+    nuts_chkko nuts_netgetcidr 10.0.0.0/foo
+}
+
+## Check whether a CIDR is valid
+# e.g. 24 => 0 (success)
+# e.g. 123 => 1 (failure)
+nuts_cidrisvalid ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local cidr=$1
+
+    nuts_isint $cidr && [ $cidr -ge 0 ] && [ $cidr -lt 32 ] || return 1
+
+    return 0
+}
+nuts_cidrisvalid_test ()
+{
+    nuts_chk nuts_cidrisvalid 8
+    nuts_chk nuts_cidrisvalid 24
+    nuts_chk nuts_cidrisvalid 25
+
+    nuts_chkko nuts_cidrisvalid 33
+    nuts_chkko nuts_cidrisvalid foo
+}
+
+## Whether an address is in CIDR format
+nuts_netiscidr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    local a=$(echo $addr | cut -d '/' -f 1)
+    local n=$(echo $addr | cut -d '/' -f 2)
+
+    nuts_addrisvalid $a || return 1
+    nuts_cidrisvalid $n || return 1
+    
+    return 0
+}
+nuts_adrriscidr_test ()
+{
+    nuts_chk nuts_netiscidr 192.168.0.1/24
+
+    nuts_chkko nuts_netiscidr 192.168.0
+    nuts_chkko nuts_netiscidr 192.168.0.1
+    nuts_chkko nuts_netiscidr a
+}
+
+## Convert an address to whitespace-separated quad
+nuts_addr2quad ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    nuts_addrisvalid $addr || return 1
+
+    echo -n $addr | sed 's/\./ /g'
+}
+nuts_addr2quad_test ()
+{
+    nuts_chk [ "$(nuts_addr2quad 1.2.3.4)" = "1 2 3 4" ]
+
+    nuts_chkko nuts_addr2quad
+    nuts_chkko nuts_addr2quad foo
+    nuts_chkko nuts_addr2quad 1.2.3
+    nuts_chkko nuts_addr2quad 1.2.3.4.5
+}
+
+## Get a CIDR from netmask
+# e.g. nuts_mask2cidr 255.255.255.128 => 25
+nuts_mask2cidr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local mask=$1
+
+    nuts_addrisvalid $mask || return 1
+
+    local bin=$(nuts_addr2bin $mask)
+    local firstzero=$(echo -n $bin | awk 'END{print index($0,"0")}')
+
+    echo -n $(($firstzero-1))
+}
+nuts_mask2cidr_test ()
+{
+    nuts_chk [ "$(nuts_mask2cidr 255.0.0.0)" = "8" ]
+    nuts_chk [ "$(nuts_mask2cidr 255.255.255.0)" = "24" ]
+    nuts_chk [ "$(nuts_mask2cidr 255.255.255.128)" = "25" ]
+
+    nuts_chkko nuts_mask2cidr foo
+    nuts_chkko nuts_mask2cidr 255.255.255
+    nuts_chkko nuts_mask2cidr 255.255.255.255/123
+}
+
+## Convert from addr + network to CIDR
+# e.g. nutmask_addr2cidr 192.168.1.0 255.255.255.0 => 192.168.1.0/24
+nuts_net2cidr ()
+{
+    [ $# -eq 2 ] || return 1
+
+    local addr=$1
+    local mask=$2
+
+    nuts_addrisvalid $addr || return 1
+    nuts_addrisvalid $mask || return 1
+
+    local cidr=$(nuts_mask2cidr $mask)
+
+    echo $addr/$cidr
+}
+nuts_net2cidr_test ()
+{
+    nuts_chk [ "$(nuts_net2cidr 192.168.1.0 255.255.255.0)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_net2cidr 192.168.1.0 255.255.255.128)" = "192.168.1.0/25" ]
+    nuts_chk [ "$(nuts_net2cidr 192.168.1.128 255.255.255.128)" = "192.168.1.128/25" ]
+
+    nuts_chkko nuts_net2cidr foo
+    nuts_chkko nuts_net2cidr 192.168.1.128
+    nuts_chkko nuts_net2cidr 192.168.1.0/24
+}
+
+## Get a netmask from CIDR
+# e.g. nuts_mask2cidr 25 => 255.255.255.128
+nuts_cidr2mask ()
+{
+    [ $# -eq 1 ] || return 1
+    
+    local cidr=$1
+
+    nuts_cidrisvalid $cidr || return 1
+
+    local remdigits=$((32-$cidr))
+    local bin=""
+
+    bin=$bin$(printf "%${cidr}s" | tr ' ' 1)
+    bin=$bin$(printf "%${remdigits}s" | tr ' ' 0)
+
+    nuts_bin2addr $bin
+}
+nuts_cidr2mask_test ()
+{
+    nuts_chk [ "$(nuts_cidr2mask 8)" = "255.0.0.0" ]
+    nuts_chk [ "$(nuts_cidr2mask 24)" = "255.255.255.0" ]
+    nuts_chk [ "$(nuts_cidr2mask 25)" = "255.255.255.128" ]
+
+    nuts_chkko nuts_cidr2mask foo
+    nuts_chkko nuts_cidr2mask 33
+    nuts_chkko nuts_cidr2mask 1.2.3.4
+}
+
+## Calculate range from CIDR
+# e.g. nuts_cidr2range 25 => 128
+nuts_cidr2range ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local cidr=$1
+
+    nuts_cidrisvalid $cidr || return 1
+
+    echo -n $(( 2** $((32-$cidr)) ))
+}
+nuts_cidr2range_test ()
+{
+    nuts_chk [ "$(nuts_cidr2range 24)" = "256" ]
+    nuts_chk [ "$(nuts_cidr2range 25)" = "128" ]
+    nuts_chk [ "$(nuts_cidr2range 30)" = "4" ]
+
+    nuts_chkko nuts_cidr2range foo
+    nuts_chkko nuts_cidr2range 33
+    nuts_chkko nuts_cidr2range 1.2.3.4
+}
+
+# Get broadcast address from network, netmask 
+# e.g. nuts_net2bcast 10.1.1.0 255.255.255.128 => 10.1.1.127
+# e.g. nuts_net2bcast 10.1.1.0/25 => 10.1.1.127
+nuts_net2bcast ()
+{
+    [ $# -lt 1 ] && return 1
+
+    local addr=$1
+    local mask=$2
+
+    if nuts_netiscidr $addr; then
+        local cidr=$(nuts_netgetcidr $addr)
+    else
+        local cidr=$(nuts_mask2cidr $mask)
+    fi
+
+    [ "$cidr" != "" ] || return 1
+
+    local range=$(nuts_cidr2range $cidr)
+
+    nuts_addrsum $addr $(($range-1))
+}
+nuts_net2bcast_test ()
+{
+    nuts_chk [ "$(nuts_net2bcast 192.168.0.0 255.255.0.0)" = "192.168.255.255" ]
+    nuts_chk [ "$(nuts_net2bcast 192.168.1.0 255.255.255.0)" = "192.168.1.255" ]
+    nuts_chk [ "$(nuts_net2bcast 192.168.1.0/24)" = "192.168.1.255" ]
+    nuts_chk [ "$(nuts_net2bcast 192.168.1.0 255.255.255.128)" = "192.168.1.127" ]
+    nuts_chk [ "$(nuts_net2bcast 192.168.1.0/25)" = "192.168.1.127" ]
+    nuts_chk [ "$(nuts_net2bcast 10.0.0.0/8)" = "10.255.255.255" ]
+    nuts_chk [ "$(nuts_net2bcast 10.0.0.0/9)" = "10.127.255.255" ]
+
+    nuts_chkko nuts_net2bcast foo
+    nuts_chkko nuts_net2bcast 10.0.0.0/foo
+    nuts_chkko nuts_net2bcast 10.0.0.0/33
+}
+
+## Convert an address to binary
+nuts_addr2bin ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    if nuts_netiscidr $addr; then
+        addr=$(nuts_netgetaddr $addr)
+    else
+        nuts_addrisvalid $addr || return 1
+    fi
+
+    for part in $(nuts_addr2quad $addr); do
+        echo -n $(nuts_dec2bin $part 8)
+    done
+}
+nuts_addr2bin_test ()
+{
+    nuts_chk [ "$(nuts_addr2bin 1.1.1.1)" = "00000001000000010000000100000001" ]
+    nuts_chk [ "$(nuts_addr2bin 1.2.3.4)" = "00000001000000100000001100000100" ]
+    nuts_chk [ "$(nuts_addr2bin 1.2.3.4/30)" = "00000001000000100000001100000100" ]
+
+    nuts_chkko nuts_addr2bin foo
+    nuts_chkko nuts_addr2bin 1.2.3
+    nuts_chkko nuts_addr2bin 1.2.3.4/
+    nuts_chkko nuts_addr2bin 1.2.3.4/33
+}
+
+## Convert binary number to address
+nuts_bin2addr ()
+{
+    [ $# -eq 1 ] || return 1
+    [ ${#1} -eq 32 ] || return 2
+
+    local bin=$1
+
+    nuts_isbin $bin || return 1
+
+    local a=${bin:0:8}
+    local b=${bin:8:8}
+    local c=${bin:16:8}
+    local d=${bin:24:8}
+
+    local addr=$(echo -n $(nuts_bin2dec $a).$(nuts_bin2dec $b).$(nuts_bin2dec $c).$(nuts_bin2dec $d))
+
+    echo $addr
+
+    return 0
+}
+nuts_bin2addr_test ()
+{
+    nuts_chk [ "$(nuts_bin2addr 00000001000000010000000100000001)" = "1.1.1.1" ]
+    nuts_chk [ "$(nuts_bin2addr 00000001000000100000001100000100)" = "1.2.3.4" ]
+
+    nuts_chkko nuts_bin2addr foo
+    nuts_chkko nuts_bin2addr 123
+}
+
+## Convert an address to decimal number
+nuts_addr2dec ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    local bin; bin=$(nuts_addr2bin $addr)
+    [ $? -eq 0 ] || return 2
+
+    local dec; dec=$(nuts_bin2dec $bin)
+    [ $? -eq 0 ] || return 2
+
+    echo $dec
+
+    return 0
+}
+nuts_addr2dec_test ()
+{
+    nuts_chk [ "$(nuts_addr2dec 192.0.2.235)" = "3221226219" ]
+
+    nuts_chkko nuts_addr2dec foo
+}
+
+## Convert a decimal number to an address
+nuts_dec2addr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local dec=$1
+
+    local bin; bin=$(nuts_dec2bin $dec 32)
+    [ $? -eq 0 ] || return 2
+
+    local addr; addr=$(nuts_bin2addr $bin)
+    [ $? -eq 0 ] || return 2
+
+    echo $addr
+
+    return 0
+}
+nuts_dec2addr_test ()
+{
+    nuts_chk [ "$(nuts_dec2addr 3221226219)" = "192.0.2.235" ]
+
+    nuts_chkko nuts_dec2addr foo
+}
+
+## Convert an address to hexadecimal value
+nuts_addr2hex ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local addr=$1
+
+    local bin; bin=$(nuts_addr2bin $addr)
+    [ $? -eq 0 ] || return 2
+
+    local hex; hex=$(nuts_bin2hex $bin)
+    [ $? -eq 0 ] || return 2
+
+    echo $hex
+
+    return 0
+}
+nuts_addr2hex_test ()
+{
+    nuts_chk [ "$(nuts_addr2hex 192.0.2.235)" = "0xC00002EB" ]
+
+    nuts_chkko nuts_addr2hex foo
+}
+
+## Convert a hexadecimal value to an address
+nuts_hex2addr ()
+{
+    [ $# -eq 1 ] || return 1
+
+    local hex=$1
+
+    local bin; bin=$(nuts_hex2bin $hex)
+    [ $? -eq 0 ] || return 2
+
+    local addr; addr=$(nuts_bin2addr $bin)
+    [ $? -eq 0 ] || return 2
+
+    echo $addr
+
+    return 0
+}
+nuts_hex2addr_test ()
+{
+    nuts_chk [ "$(nuts_hex2addr 0xC00002EB)" = "192.0.2.235" ]
+
+    nuts_chkko nuts_hex2addr foo
+}
+
+#
+# [ Address operations ]
+#
+
+# Sum a number to (or subtract from) address
+# e.g. nuts_addrsum 192.168.0.255 3 => 192.168.1.2
+nuts_addrsum ()
+{
+    [ $# -lt 2 ] && return 1
+
+    local addr=$1
+    local n=$2
+
+    if nuts_netiscidr $addr; then
+        addr=$(nuts_netgetaddr $addr)
+    fi
+
+    local addrbin=$(nuts_addr2bin $addr)
+    local nbin=$(nuts_dec2bin $n)
+    local binsum=$(nuts_binsum $addrbin $nbin 32)
+
+    nuts_bin2addr $binsum
+}
+nuts_addrsum_test ()
+{
+    nuts_chk [ "$(nuts_addrsum 192.168.0.1 20)" = "192.168.0.21" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 0)" = "192.168.0.255" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 1)" = "192.168.1.0" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 256)" = "192.168.1.255" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 65536)" = "192.169.0.255" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 65537)" = "192.169.1.0" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.255 257)" = "192.168.2.0" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.0.21 -1)" = "192.168.0.20" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.1.0 -1)" = "192.168.0.255" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.1.0 -65536)" = "192.167.1.0" ]
+    nuts_chk [ "$(nuts_addrsum 192.168.1.0 -65537)" = "192.167.0.255" ]
+
+    nuts_chkko nuts_addrsum foo bar
+    nuts_chkko nuts_addrsum 192.168.1.0 65537123123112
+    nuts_chkko nuts_addrsum 192.168.1.0 -65537123123112
+}
+
+## Compare two addresses, printing "0" if equal, "-1" if addr1 < addr2 and "1" if addr1 > addr2
+nuts_addrcmp ()
+{
+    [ $# -eq 2 ] || return 1
+
+    local addr1=$1
+    local addr2=$2
+
+    [ "$addr1" = "$addr2" ] && echo "0" && return 0
+
+    nuts_addrisvalid $addr1 || return 1
+    nuts_addrisvalid $addr2 || return 1
+
+    local dec1=$(nuts_addr2dec $addr1)
+    [ $? -eq 0 ] || return 1
+
+    local dec2=$(nuts_addr2dec $addr2)
+    [ $? -eq 0 ] || return 1
+
+    [ $dec1 -lt $dec2 ] && echo -1 && return 0
+    echo 1 && return 0
+}
+nuts_addrcmp_test ()
+{
+    nuts_chk [ "$(nuts_addrcmp 1.2.3.4 1.2.3.4)" = "0" ]
+    nuts_chk [ "$(nuts_addrcmp 1.2.3.4 1.2.3.5)" = "-1" ]
+    nuts_chk [ "$(nuts_addrcmp 1.2.3.4 1.2.3.3)" = "1" ]
+
+    nuts_chkko nuts_addrcmp foo
+    nuts_chkko nuts_addrcmp 1.2.3.4 foo
+}
+
+## Sort a list of N networks (must be in CIDR format) 
+# Based on first address - ignores network size
+nuts_sort ()
+{
+    local addr
+
+    for net in $@; do
+       addr=$(nuts_netgetaddr $net)
+       nuts_addrisvalid $addr || return 1
+    done
+
+    local sorted=$(for net in $@; do
+        echo $(nuts_addr2dec $net)/$(nuts_netgetcidr $net)
+    done | sort)
+
+    local decaddr
+    local binnet
+    local net
+    local nets=()
+
+    for binnet in $sorted; do
+        decaddr="$(echo $binnet | cut -d '/' -f 1)"
+        binnet="$(echo $binnet | cut -d '/' -f 2)"
+        net="$(nuts_dec2addr $decaddr)/$binnet"
+        nets+=($net)
+    done
+
+    nuts_arrayjoin " " "${nets[@]}"
+}
+
+nuts_sort_test ()
+{
+    nuts_chk [ "$(nuts_sort 192.168.2.0/24 192.168.0.0/16 255.255.0.0/16 10.0.0.0/8 192.168.1.0/24)" = \
+        "10.0.0.0/8 192.168.0.0/16 192.168.1.0/24 192.168.2.0/24 255.255.0.0/16" ]
+}
+
+# Check if two networks (must be in CIDR format) are adjacent 
+# (i.e. range end of one corresponds to the beginning of the other)
+# e.g. nuts_adjacent 192.168.0.1/24 192.168.0.2/24 => 0 (success)
+# e.g. nuts_adjacent 192.168.0.1/24 192.168.0.3/24 => 1 (failure)
+nuts_adjacent ()
+{
+    [ $# -eq 2 ] || return 1
+
+    local net1=$1
+    local net2=$2
+
+    nuts_netiscidr $net1 || return 1
+    nuts_netiscidr $net2 || return 1
+
+    local addr1=$(nuts_netgetaddr $net1)
+    local addr2=$(nuts_netgetaddr $net2)
+
+    local bcast1=$(nuts_net2bcast $net1)
+    local bcast2=$(nuts_net2bcast $net2)
+
+    local afterbcast1=$(nuts_addrsum $bcast1 1)
+    local afterbcast2=$(nuts_addrsum $bcast2 1)
+    
+    [ "$afterbcast1" != "$addr2" ] && [ "$afterbcast2" != "$addr1" ] && return 1
+
+    return 0
+}
+nuts_adjacent_test ()
+{
+    nuts_chk nuts_adjacent 192.168.1.0/24 192.168.2.0/24
+    nuts_chk nuts_adjacent 192.168.0.0/16 192.169.0.0/16
+    nuts_chk nuts_adjacent 10.0.0.0/8 11.0.0.0/8
+    nuts_chk nuts_adjacent 192.168.1.0/25 192.168.1.128/25
+
+    nuts_chkko nuts_adjacent 192.168.1.0/24 192.168.3.0/24
+    nuts_chkko nuts_adjacent 192.168.1.0/25 192.168.1.129/25
+}
+
+# Check if two networks (must be in CIDR format) are split and may form a supernet.
+# If so, print out the resulting network.
+# Criteria:
+# - nets must be different
+# - nets have same netmask
+# - nets are adjacent
+# - first and last elements (broadcast) of subnets match those of supernet
+nuts_super ()
+{
+    [ $# -eq 2 ] || return 1
+
+    local n1=$1
+    local n2=$2
+
+    [ "$n1" = "$n2" ] && return 2
+
+    nuts_netiscidr $n1 || return 3
+    nuts_netiscidr $n2 || return 4
+
+    # if host addresses are given, remap them to networks
+    local net1=$(nuts_addr2net $n1)
+    local net2=$(nuts_addr2net $n2)
+
+    local cidr1=$(nuts_netgetcidr $net1)
+    local cidr2=$(nuts_netgetcidr $net2)
+
+    [ "$cidr1" = "$cidr2" ] || return 4
+
+    nuts_adjacent $net1 $net2 || return 5
+
+    local addr1=$(nuts_netgetaddr $net1)
+    local addr2=$(nuts_netgetaddr $net2)
+
+    local supercidr=$(($cidr1-1))
+
+    if [ "$(nuts_addrcmp $addr1 $addr2)" = "-1" ]; then
+        local firstaddr=$addr1
+        local lastbcast=$(nuts_net2bcast $net2)
+    else
+        local firstaddr=$addr2
+        local lastbcast=$(nuts_net2bcast $net1)
+    fi
+
+    local supernet=$firstaddr/$supercidr
+    local firstsuper=$(nuts_netgetaddr $supernet)
+    local superbcast=$(nuts_net2bcast $supernet)
+
+    [ "$firstaddr" != "$firstsuper" ] && return 1
+    [ "$lastbcast" != "$superbcast" ] && return 1
+
+    echo "$supernet"
+
+    return 0
+}
+nuts_super_test ()
+{
+    nuts_chk [ "$(nuts_super 192.168.1.0/25 192.168.1.128/25)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_super 192.168.1.1/25 192.168.1.129/25)" = "192.168.1.0/24" ]
+    nuts_chk [ "$(nuts_super 11.111.0.0/17 11.111.128.0/17)" = "11.111.0.0/16" ]
+    nuts_chk [ "$(nuts_super 11.111.0.123/17 11.111.128.123/17)" = "11.111.0.0/16" ]
+
+    nuts_chkko nuts_super 192.168.1.0/24 192.168.3.0/24
+}
+
+#
+# [ Testing ]
+#
+
+# Run all defined test functions (nuts_*_test)
+nuts_runtests ()
+{
+    local tests=$(declare -F | grep nuts\.*_test$ | cut -d ' ' -f 3)
+
+    nuts_info "Running tests"
+
+    for t in $tests; do
+        nuts_info "Testing $t"
+        $t
+    done
+
+    nuts_info "All tests ok."
+}

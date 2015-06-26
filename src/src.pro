@@ -85,7 +85,7 @@ SOURCES += common/utils.cpp
 }
 
 !nocloud {
-    HEADERS += $${_PRO_FILE_PWD_}/common/vpn/*.h
+    HEADERS += $${PUBINCLUDEDIR}/Vpn/Vpn*
     SOURCES += $${_PRO_FILE_PWD_}/common/vpn/*.cpp
 }
 

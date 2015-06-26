@@ -5,8 +5,8 @@
 #include <QVariant>
 #include <encloud/Auth>
 #include <encloud/Client>
+#include <encloud/Vpn/VpnConfig>
 #include <common/message.h>
-#include <common/vpn/vpnconfig.h>
 
 #define LIBENCLOUD_SETUP_QCC_CONFIG_URL        "/manage/status/status.access.config/"
 
