@@ -1,6 +1,6 @@
 ChangeLog file for Endian libencloud
 
-next:
+libencloud 0.8.0 (26/06/2015)
 	- vpn: headers are now public; improved internal representation; added helper functions and 
 	  basic error checking
 	- modeqcc now also supports plain vpn (based on config: setup.enabled)
