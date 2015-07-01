@@ -59,6 +59,7 @@ modeqcc:!splitdeps {
     } else {
         PRODUCT_SRC = ../jmconnect
     }
+    !exists($${PRODUCT_SRC}): error(Could not find main application sources! Expected in $${PRODUCT_SRC})
     include($${PRODUCT_SRC}/version.pri)
 } else {
     # TODO grab version from other products or make configurable via json
