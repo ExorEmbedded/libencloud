@@ -41,7 +41,8 @@ public:
     VpnConfig (const QString &s);
 
     // use compiler-default
-    //VpnConfig &operator=(const VpnConfig vc);
+    //VpnConfig& operator= (const VpnConfig vc);
+    bool operator== (const VpnConfig &vc) const;
 
     int clear ();
     bool isValid () const;

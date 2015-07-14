@@ -68,6 +68,28 @@ int VpnConfig::clear ()
     return 0;
 }
 
+bool VpnConfig::operator== (const VpnConfig &vc) const
+{
+    // _valid - not considered
+
+    return (_isFile == vc._isFile &&
+            _string == vc._string &&
+            _client == vc._client &&
+            _compEnabled == vc._compEnabled &&
+            _dev == vc._dev &&
+            _remote == vc._remote &&
+            _remotePort == vc._remotePort &&
+            _remoteProto == vc._remoteProto &&
+            _fallbackEnabled == vc._fallbackEnabled &&
+            _fallbackRemote == vc._fallbackRemote &&
+            _fallbackRemotePort == vc._fallbackRemotePort &&
+            _fallbackRemoteProto == vc._fallbackRemoteProto &&
+            _caPath == vc._caPath &&
+            _certPath == vc._certPath &&
+            _keyPath == vc._keyPath &&
+            _p12Path == vc._p12Path);
+}
+
 bool VpnConfig::isValid () const
 {
     return _valid;

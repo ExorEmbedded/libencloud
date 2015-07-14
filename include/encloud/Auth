@@ -58,7 +58,11 @@ public:
     bool isValid () const;
     int validate ();
     QString toString () const;
-    friend LIBENCLOUD_DLLSPEC QDebug operator << (QDebug d, const Auth &auth);
+
+    // use compiler-default
+    //libencloud::Auth& operator= (const libencloud::Auth &auth);
+    bool operator== (const libencloud::Auth &auth) const;
+    friend LIBENCLOUD_DLLSPEC QDebug operator<< (QDebug d, const Auth &auth);
 
     Id getId () const;
     int setId (Id id);

@@ -97,7 +97,17 @@ QString Auth::toString () const
     return s;
 }
 
-QDebug operator << (QDebug d, const Auth &auth)
+bool Auth::operator== (const libencloud::Auth &auth) const
+{
+    return (_id == auth._id &&
+            _type == auth._type &&
+            _url == auth._url &&
+            _user == auth._user &&
+            _pass == auth._pass &&
+            _path == auth._path);
+}
+
+QDebug operator<< (QDebug d, const Auth &auth)
 {
     d << auth.toString();
     return d;

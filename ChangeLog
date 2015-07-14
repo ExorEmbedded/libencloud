@@ -1,5 +1,8 @@
 ChangeLog file for Endian libencloud
 
+next:
+	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
+
 libencloud 0.8.0 (26/06/2015)
 	- vpn: headers are now public; improved internal representation; added helper functions and 
 	  basic error checking
