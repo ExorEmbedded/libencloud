@@ -339,7 +339,8 @@ void VpnClient::stop (void)
     // avoid having to kill all children manually
     QString killWrapper = QString("pkill -P %1").arg(QString::number(this->process->pid()));
     LIBENCLOUD_DBG("[VPNClient] executing: " << killWrapper);
-    QProcess::execute(killWrapper);
+    int rc = QProcess::execute(killWrapper);
+    LIBENCLOUD_DBG("[VPNClient] execute returned: " << rc);
 #endif
 
     if (this->process->state() != QProcess::NotRunning)
@@ -348,7 +349,10 @@ void VpnClient::stop (void)
 #ifdef Q_OS_WIN
         this->process->kill();
 #else
+#ifndef LIBENCLOUD_MODE_QCC
+        // only if not already pkill-ed
         this->process->terminate();
+#endif
 #endif
         this->process->waitForFinished();
     }
