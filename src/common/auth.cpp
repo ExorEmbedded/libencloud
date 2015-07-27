@@ -264,12 +264,17 @@ const QString &Auth::getPass () const
     return _pass;
 }
 
-/* Password-based auth or password to decrypt PKCS12 */
+/* Password-based auth OR password to decrypt PKCS12
+
+   Note: no validity checks are performed here so that it can be reset - just
+   make sure it's set when validate is called().
+ */
 int Auth::setPass (const QString &pass)
 {
+/*
     if (!isPassValid(pass))
         return ~0;
-
+*/
     _pass = pass;
 
     return 0;
