@@ -152,6 +152,7 @@ splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
+SRCBASEDIR = $${PWD}
 PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
@@ -187,10 +188,14 @@ DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
 OPENSSLPATH = $${OPENSSL_INSTALLPATH}
 windows{
     isEmpty(OPENSSLPATH){
-        OPENSSLPATH="c:\\openssl"
+        endian {
+            OPENSSLPATH="$$SRCBASEDIR/../bins-4iconnect/openssl"
+        } else {
+            OPENSSLPATH="c:\\openssl"
+        }
     }
     !exists($$OPENSSLPATH) {
-        error("Missing openssl dependency - expected in $$OPENSSL_PATH") 
+        error("Missing openssl dependency - expected in $$OPENSSLPATH") 
     }
     INCLUDEPATH += "$$OPENSSLPATH\\include\\"
     LIBS += $$OPENSSLPATH\\lib\\libeay32.lib
@@ -202,7 +207,6 @@ windows{
 # build settings
 # 
 
-SRCBASEDIR = $${PWD}
 PUBINCLUDEDIR = $${SRCBASEDIR}/include/encloud
 
 # public API and headers are included globally
