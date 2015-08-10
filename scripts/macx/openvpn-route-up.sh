@@ -1,9 +1,14 @@
 #!/bin/bash
 #
-# Script to sanitize and apply OpenVPN routes
+# Script to sanitize and apply OpenVPN routes:
+# * Avoids problems with split networks using tap device on OSX
+#   (possibly related: https://discussions.apple.com/message/8546386)
 #
-# - Avoids problems with split networks using tap device on OSX
-# (possibly related: https://discussions.apple.com/message/8546386)
+# Implementation Notes:
+# * bad split net routes are fixed via -iface parameter
+# * --route-noexec is longer used (to unblock features such as
+#   --redirect-gateway), so bad split net routes are deleted via delroute()
+#   before being fixed with addroute()
 
 this_path="$(dirname $0)"
 . "${this_path}/nuts"
@@ -21,9 +26,22 @@ nuts_info "$0 START"
 
 # $1: cidr network
 # $2: gateway
-# $3: supernet
+delroute ()
+{
+    [ "$1" = "" ] && return 0
+    [ "$2" = "" ] && return 0
+
+    "${route_path}" delete -net $1 $2
+}
+
+# $1: cidr network
+# $2: gateway
+# $3: is_supernet
 addroute ()
 {
+    [ "$1" = "" ] && return 0
+    [ "$2" = "" ] && return 0
+
     local args="add -net $1 $2"
 
     [ "$3" = "1" ] && args="$args -iface"
@@ -92,6 +110,7 @@ for cg in ${cidrs_gw}; do
             issuper="1"
             issuper_prev="1"
         fi
+        delroute $cidr_prev $gw_prev
         addroute $cidr_prev $gw_prev $issuper_prev
     fi
 
@@ -100,7 +119,8 @@ for cg in ${cidrs_gw}; do
     issuper_prev=$issuper
 done
 
-addroute $cidr_prev $gw_prev $issuper_prev
+delroute "$cidr_prev" "$gw_prev"
+addroute "$cidr_prev" "$gw_prev" $issuper_prev
 
 nuts_info "$0 OK"
 

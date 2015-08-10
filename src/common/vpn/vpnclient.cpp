@@ -212,7 +212,6 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     // fix routes not being applied properly on OSX in TAP mode
 #ifdef Q_OS_MAC
-    args << "--route-noexec";
     args << "--script-security" << "2";
     args << "--up" << getBinDir() + "/openvpn-up.sh";
     args << "--down" << getBinDir() + "/openvpn-down.sh";
