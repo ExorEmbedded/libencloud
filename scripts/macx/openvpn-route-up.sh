@@ -10,7 +10,7 @@
 #   --redirect-gateway), so bad split net routes are deleted via delroute()
 #   before being fixed with addroute()
 
-this_path="$(dirname $0)"
+this_path=$(dirname "$0")
 . "${this_path}/nuts"
 
 route_path="/sbin/route"

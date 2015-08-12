@@ -121,6 +121,11 @@ bool VpnClient::checkState (VpnClient::State state)
     return (state >= VpnClient::StateIdle && state <= VpnClient::StateLast);
 }
 
+QString VpnClient::quote (const QString &s)
+{
+    return '\"' + s + '\"';
+}
+
 // These values override configuration received from Switchboard
 QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 {
@@ -213,9 +218,9 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     // fix routes not being applied properly on OSX in TAP mode
 #ifdef Q_OS_MAC
     args << "--script-security" << "2";
-    args << "--up" << getBinDir() + "/openvpn-up.sh";
-    args << "--down" << getBinDir() + "/openvpn-down.sh";
-    args << "--route-up" << getBinDir() + "/openvpn-route-up.sh";
+    args << "--up" << quote(getBinDir() + "/openvpn-up.sh");
+    args << "--down" << quote(getBinDir() + "/openvpn-down.sh");
+    args << "--route-up" << quote(getBinDir() + "/openvpn-route-up.sh");
     // avoid bad routes if brought up too early (enpoints unreachable)
     args << "--route-delay" << "2";
 #endif

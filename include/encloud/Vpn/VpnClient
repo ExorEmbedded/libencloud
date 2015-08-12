@@ -85,6 +85,7 @@ private:
     void disableTap ();
     int parseConfig (const QVariantMap &jo);
     int parseCaCert (const QVariantMap &jo);
+    QString quote (const QString &s);
 
     QUrl remoteUrl;
     int remotePort;
