@@ -559,13 +559,9 @@ const QString &VpnConfig::getCaPath () const
 
 int VpnConfig::setCaPath (const QString &caPath)
 {
-    LIBENCLOUD_ERR_IF (caPath == "");
-
     _caPath = caPath;
 
     return 0;
-err:
-    return ~0;
 }
 
 const QString &VpnConfig::getCertPath () const
