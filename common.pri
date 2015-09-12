@@ -55,7 +55,7 @@ PKGNAME = libencloud
 # Switchboard update checks
 modeqcc:!splitdeps {
     endian {
-        PRODUCT_SRC = ../4iconnect
+        PRODUCT_SRC = ../connectapp
     } else {
         PRODUCT_SRC = ../jmconnect
     }
@@ -189,7 +189,7 @@ OPENSSLPATH = $${OPENSSL_INSTALLPATH}
 windows{
     isEmpty(OPENSSLPATH){
         endian {
-            OPENSSLPATH="$$SRCBASEDIR/../bins-4iconnect/openssl"
+            OPENSSLPATH="$$SRCBASEDIR/../bins-connectapp/openssl"
         } else {
             OPENSSLPATH="c:\\openssl"
         }
