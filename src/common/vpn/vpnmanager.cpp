@@ -330,11 +330,17 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
     QTextStream ts(this->socket);
 
+    QString escapedUser = user;
+    escapedUser.replace("\"", "\\\"");
+
+    QString escapedPass = pass;
+    escapedPass.replace("\"", "\\\"");
+
     if (user != "")
-        ts << "username '" << type << "' " << user << "\r\n";
+        ts << "username \"" << type << "\" \"" << escapedUser << "\"\r\n";
 
     if (pass != "")
-        ts << "password '" << type << "' " << pass << "\r\n";
+        ts << "password \"" << type << "\" \"" << escapedPass << "\"\r\n";
 
     this->socket->flush();
 }

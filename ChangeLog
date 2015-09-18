@@ -6,6 +6,7 @@ next:
 	- [FIX] CONNECT-253 "Undefined fields in profile" displayed erroneously
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
+	- [FEATURE] CONNECT-257 One-Time Password support
 
 libencloud 0.8.0 (26/06/2015)
 	- vpn: headers are now public; improved internal representation; added helper functions and 
