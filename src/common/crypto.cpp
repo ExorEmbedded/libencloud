@@ -5,6 +5,7 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
+#include <openssl/err.h>
 #include <openssl/x509v3.h>
 #include <encloud/Common>
 #include <encloud/Crypto>
@@ -14,6 +15,8 @@
 
 #undef __LIBENCLOUD_MSG
 #define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
+
+//#define LIBENCLOUD_CRYPTO_DEBUG
 
 //
 // C++ API
@@ -220,8 +223,30 @@ int libencloud_crypto_init (libencloud_crypto_t *ec)
         return 0;
 
     memset(ec, 0, sizeof(libencloud_crypto_t));
+    ec->cipher = EVP_aes_256_cbc();
+    ec->zeropad = false;
 
-    OpenSSL_add_all_algorithms();
+    LIBENCLOUD_ONCE
+    {
+        OpenSSL_add_all_algorithms();
+        ERR_load_crypto_strings();
+    }
+
+    return 0;
+}
+
+int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, const EVP_CIPHER *cipher)
+{
+    ec->cipher = cipher;
+
+    return 0;
+}
+
+/** \brief Do manual zero-padding - e.g. for pycryto compatibility
+    Otherwise default PCKS#7 implementation is used) */
+int libencloud_crypto_set_zeropad (libencloud_crypto_t *ec, bool enabled)
+{
+    ec->zeropad = enabled;
 
     return 0;
 }
@@ -232,6 +257,11 @@ int libencloud_crypto_term (libencloud_crypto_t *ec)
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_UNUSED(ec);
+
+    LIBENCLOUD_ONCE
+    {
+        ERR_free_strings();
+    }
 
     return 0;
 }
@@ -421,7 +451,7 @@ err:
  * 
  * Result string must be free()d by caller.
  */
-char *libencloud_crypto_md5 (libencloud_crypto_t *ec, char *buf, long buf_sz)
+char *libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_sz)
 {
     unsigned char md5[MD5_DIGEST_LENGTH];
     char *s = NULL;
@@ -446,4 +476,104 @@ err:
         free(s);
 
     return NULL;
+}
+
+int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long ptext_sz,
+    unsigned char *key, unsigned char *iv, unsigned char *ctext, long *ctext_sz)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = (ec && ec->cipher ? ec->cipher : EVP_aes_256_cbc());
+    int len;
+    unsigned char *ptextpad = NULL;
+    int ptextpad_sz;
+    long ptextrem;
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, "<Plaintext: \n");
+    BIO_dump_fp(stderr, (const char *)ptext, ptext_sz);
+#endif
+
+    ctx = EVP_CIPHER_CTX_new();
+    LIBENCLOUD_ERR_IF (ctx == NULL);
+
+    LIBENCLOUD_ERR_IF (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv));
+
+    if (ec && ec->zeropad)
+        EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    if (ec && ec->zeropad && (ptextrem = ptext_sz % EVP_CIPHER_CTX_block_size(ctx)))
+    {
+        ptextpad_sz = ptext_sz + EVP_CIPHER_CTX_block_size(ctx) - ptextrem;
+        ptextpad = (unsigned char *) calloc(1, sizeof(unsigned char) * ptextpad_sz);
+        LIBENCLOUD_ERR_IF (ptextpad == NULL);
+        memmove(ptextpad, ptext, ptext_sz);
+
+        LIBENCLOUD_ERR_IF (!EVP_EncryptUpdate(ctx, ctext, &len, ptextpad, ptextpad_sz));
+    }
+    else 
+    {
+        LIBENCLOUD_ERR_IF (!EVP_EncryptUpdate(ctx, ctext, &len, ptext, ptext_sz));
+    }
+    *ctext_sz = len;
+
+    LIBENCLOUD_ERR_IF (!EVP_EncryptFinal_ex(ctx, ctext + len, &len));
+    *ctext_sz += len;
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, ">Ciphertext: \n");
+    BIO_dump_fp(stderr, (const char *)ctext, *ctext_sz);
+#endif
+   
+    LIBENCLOUD_FREE(ptextpad);
+    EVP_CIPHER_CTX_free(ctx);
+    return 0;
+err:
+    LIBENCLOUD_FREE(ptextpad);
+    unsigned long rc = ERR_peek_last_error();
+    if (rc)
+        LIBENCLOUD_ERR(ERR_error_string(rc, NULL));
+    if (ctx)
+        EVP_CIPHER_CTX_free(ctx);
+    return ~0;
+}
+
+int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long ctext_sz,
+    unsigned char *key, unsigned char *iv, unsigned char *ptext, long *ptext_sz)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    const EVP_CIPHER *cipher = (ec && ec->cipher ? ec->cipher : EVP_aes_256_cbc());
+    int len;
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, "<Ciphertext: \n");
+    BIO_dump_fp(stderr, (const char *)ctext, ctext_sz);
+#endif
+
+    ctx = EVP_CIPHER_CTX_new();
+    LIBENCLOUD_ERR_IF (ctx == NULL);
+
+    LIBENCLOUD_ERR_IF (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv));
+
+    if (ec && ec->zeropad)
+        EVP_CIPHER_CTX_set_padding(ctx, 0);
+
+    LIBENCLOUD_ERR_IF (!EVP_DecryptUpdate(ctx, ptext, &len, ctext, ctext_sz));
+    *ptext_sz = len;
+    LIBENCLOUD_ERR_IF (!EVP_DecryptFinal_ex(ctx, ptext + len, &len));
+    *ptext_sz += len;
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, ">Plaintext: \n");
+    BIO_dump_fp(stderr, (const char *)ptext, *ptext_sz);
+#endif
+
+    EVP_CIPHER_CTX_free(ctx);
+    return 0;
+err:
+    unsigned long rc = ERR_peek_last_error();
+    if (rc)
+        LIBENCLOUD_ERR(ERR_error_string(rc, NULL));
+    if (ctx)
+        EVP_CIPHER_CTX_free(ctx);
+    return ~0;
 }

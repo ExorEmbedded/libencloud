@@ -22,6 +22,8 @@
 #define LIBENCLOUD_FREE(ptr) do { if (ptr) { free(ptr); ptr = NULL; } } while(0)
 #define LIBENCLOUD_DELETE(ptr) do { if (ptr) { delete ptr; ptr = NULL; } } while(0)
 
+#define LIBENCLOUD_ONCE for (static bool once = true; once; once = false)
+
 #define LIBENCLOUD_NOP do {} while (0)
 
 // Messages are sent to remote listener if connected, otherwise passed to local Qt logger
@@ -62,6 +64,8 @@
                         << " [" << levstr << "] [" << LIBENCLOUD_APP << "] " << msg; \
         } \
     } while (0);
+
+#define LIBENCLOUD_GOTOERR_IF(cond) do { if (cond) { goto err; } } while (0)
 
 // Used to redefine __LIBENCLOUD_MSG, so interface must match
 #define __LIBENCLOUD_PRINT(lev, levstr, msg) fprintf(stderr, "[%s] libencloud:%s:%s:%d] %s\n", levstr, __FILE__, __FUNCTION__, __LINE__, msg)
