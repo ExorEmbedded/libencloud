@@ -232,8 +232,8 @@ int Config::_parseSsl (const QVariantMap &jo, libencloud_config_ssl_t &sc)
     if (&sc == &config.ssl)
     {
         sc.sbUrl = QUrl(LIBENCLOUD_SB_URL);
-        sc.auth = LIBENCLOUD_AUTH_USERPASS;
-        sc.authFormat = LIBENCLOUD_AUTH_CERTKEY;
+        sc.auth = LIBENCLOUD_AUTH_NONE;
+        sc.authFormat = LIBENCLOUD_AUTH_NONE;
         sc.verifyCA = true;
         sc.caPath = _joinPaths(dataPrefix, LIBENCLOUD_CA_FILE);
         sc.certPath = _joinPaths(dataPrefix, LIBENCLOUD_CERT_FILE);

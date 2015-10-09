@@ -208,12 +208,10 @@ void VpnManager::parseLinePass (QByteArray rest)
 {
 //    LIBENCLOUD_DBG("[VPNManager] rest: " << rest);
 
-    if (qstrcmp(rest, "Verification Failed: 'Auth'") == 0)
+    if (qstrcmp(rest, "Verification Failed: 'Auth'") == 0 ||
+           qstrcmp(rest, "Verification Failed: 'Private Key'") == 0)
     {
-        if (cfg->config.sslOp.auth == "user-pass")  // plain signal for user
-            emit authRequired(Auth::SwitchboardId);
-        else if (cfg->config.sslOp.auth == "x509")  // hard error signal
-            LIBENCLOUD_EMIT_ERR(sigError((this->err = AuthFailedError), rest));
+        LIBENCLOUD_EMIT_ERR(sigError((this->err = AuthFailedError), rest));
     }
     else if (qstrcmp(rest, "Verification Failed: 'HTTP Proxy'") == 0 ||
             qstrcmp(rest, "Verification Failed: 'SOCKS Proxy'") == 0)
