@@ -235,9 +235,18 @@ int libencloud_crypto_init (libencloud_crypto_t *ec)
     return 0;
 }
 
-int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, const EVP_CIPHER *cipher)
+int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::Cipher cipher)
 {
-    ec->cipher = cipher;
+    switch (cipher)
+    {
+        case libencloud::crypto::Aes256CbcCipher:
+            ec->cipher = EVP_aes_256_cbc();
+            break;
+
+        case libencloud::crypto::Aes256EcbCipher:
+            ec->cipher = EVP_aes_256_ecb();
+            break;
+    }
 
     return 0;
 }
@@ -488,15 +497,19 @@ int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long p
     int ptextpad_sz;
     long ptextrem;
 
-#ifdef LIBENCLOUD_CRYPTO_DEBUG
-    fprintf(stderr, "<Plaintext: \n");
-    BIO_dump_fp(stderr, (const char *)ptext, ptext_sz);
-#endif
-
     ctx = EVP_CIPHER_CTX_new();
     LIBENCLOUD_ERR_IF (ctx == NULL);
 
     LIBENCLOUD_ERR_IF (!EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv));
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, "<Key: \n");
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    fprintf(stderr, "<iv: \n");
+    BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
+    fprintf(stderr, "<Plaintext: \n");
+    BIO_dump_fp(stderr, (const char *)ptext, ptext_sz);
+#endif
 
     if (ec && ec->zeropad)
         EVP_CIPHER_CTX_set_padding(ctx, 0);
@@ -544,15 +557,19 @@ int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long c
     const EVP_CIPHER *cipher = (ec && ec->cipher ? ec->cipher : EVP_aes_256_cbc());
     int len;
 
-#ifdef LIBENCLOUD_CRYPTO_DEBUG
-    fprintf(stderr, "<Ciphertext: \n");
-    BIO_dump_fp(stderr, (const char *)ctext, ctext_sz);
-#endif
-
     ctx = EVP_CIPHER_CTX_new();
     LIBENCLOUD_ERR_IF (ctx == NULL);
 
     LIBENCLOUD_ERR_IF (!EVP_DecryptInit_ex(ctx, cipher, NULL, key, iv));
+
+#ifdef LIBENCLOUD_CRYPTO_DEBUG
+    fprintf(stderr, "<Key: \n");
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    fprintf(stderr, "<iv: \n");
+    BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
+    fprintf(stderr, "<Ciphertext: \n");
+    BIO_dump_fp(stderr, (const char *)ctext, ctext_sz);
+#endif
 
     if (ec && ec->zeropad)
         EVP_CIPHER_CTX_set_padding(ctx, 0);

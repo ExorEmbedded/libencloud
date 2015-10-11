@@ -19,6 +19,12 @@
 namespace libencloud {
 namespace crypto {
 
+typedef enum {
+    Aes256CbcCipher,
+    Aes256EcbCipher
+} Cipher;
+
+
 //
 // Generic helpers
 //
@@ -76,7 +82,7 @@ LIBENCLOUD_DLLSPEC int libencloud_crypto_init (libencloud_crypto_t *ec);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_term (libencloud_crypto_t *ec);
 
 /* Settings */
-LIBENCLOUD_DLLSPEC int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, const EVP_CIPHER *cipher);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::Cipher cipher);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_zeropad (libencloud_crypto_t *ec, bool enabled);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_name_cb (libencloud_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
 
