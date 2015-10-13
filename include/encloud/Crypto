@@ -19,6 +19,12 @@
 namespace libencloud {
 namespace crypto {
 
+typedef enum {
+    Aes256CbcCipher,
+    Aes256EcbCipher
+} Cipher;
+
+
 //
 // Generic helpers
 //
@@ -66,6 +72,8 @@ struct libencloud_crypto_s
 {
     libencloud_crypto_name_cb name_cb;
     void *name_cb_ctx;
+    const EVP_CIPHER *cipher;
+    bool zeropad;
 };
 typedef struct libencloud_crypto_s libencloud_crypto_t;
 
@@ -73,13 +81,19 @@ typedef struct libencloud_crypto_s libencloud_crypto_t;
 LIBENCLOUD_DLLSPEC int libencloud_crypto_init (libencloud_crypto_t *ec);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_term (libencloud_crypto_t *ec);
 
-/* Callbacks */
+/* Settings */
+LIBENCLOUD_DLLSPEC int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::Cipher cipher);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_set_zeropad (libencloud_crypto_t *ec, bool enabled);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_name_cb (libencloud_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
 
 /* Crypto methods */
 LIBENCLOUD_DLLSPEC int libencloud_crypto_genkey (libencloud_crypto_t *ec, size_t nbits, const char *outfile);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_gencsr (libencloud_crypto_t *ec, const char *keyfile, char **buf, long *buf_sz);
-LIBENCLOUD_DLLSPEC char * libencloud_crypto_md5 (libencloud_crypto_t *ec, char *buf, long buf_sz);
+LIBENCLOUD_DLLSPEC char * libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_sz);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long ptext_sz,
+    unsigned char *key, unsigned char *iv, unsigned char *ctext, long *ctext_sz);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long ctext_sz,
+    unsigned char *key, unsigned char *iv, unsigned char *ptext, long *ptext_sz);
 
 #ifdef __cplusplus
 }

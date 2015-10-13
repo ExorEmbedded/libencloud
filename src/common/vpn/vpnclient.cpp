@@ -167,6 +167,11 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     if (sbAuth.isValid())
     {
+        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_NONE)
+        {
+            // we assume that authentication is file-based
+            // e.g. PKCS12 specified directly in OpenVPN configuration
+        }
         if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
         {
             args << "--auth-user-pass";
@@ -184,7 +189,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
                 args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
             }
         }
-    } // otherwise we assume that authentication is file-based
+    } 
 
     if (proxyAuth.isValid())
     {

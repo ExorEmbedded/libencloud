@@ -10,6 +10,7 @@ TARGET = unit
 CONFIG += gui
 CONFIG += console
 CONFIG += qtestlib
+CONFIG -= app_bundle
 
 SOURCES += main.cpp
 
@@ -43,7 +44,11 @@ contains(CONFIG, qjson) {
 
 # command to run upon 'make check'
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
-check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+macx {
+    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+} else {
+    check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+}
 
 target.path = $${BINDIR}
 INSTALLS += target

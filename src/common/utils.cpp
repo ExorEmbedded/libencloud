@@ -79,6 +79,22 @@ LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode)
     return file.open(mode);
 }
 
+LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path)
+{
+    QFile file(path);
+
+    LIBENCLOUD_ERR_IF (!file.open(QIODevice::WriteOnly | QIODevice::Text));
+    LIBENCLOUD_ERR_IF (file.write(ba) == -1);
+    file.close();
+
+    return 0;
+err:
+    if (file.error())
+        LIBENCLOUD_ERR("file error: " << file.errorString());
+    file.close();
+    return ~0;
+}
+
 LIBENCLOUD_DLLSPEC const char *file2Data (QFileInfo fi)
 {
     if (!fi.isFile())

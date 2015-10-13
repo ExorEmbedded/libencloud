@@ -55,6 +55,7 @@ int VpnConfig::clear ()
     _string = "";
 
     _client = true;
+    _nobind = true;
     _compEnabled = true;
     _dev = TapDev;
 
@@ -75,6 +76,7 @@ bool VpnConfig::operator== (const VpnConfig &vc) const
     return (_isFile == vc._isFile &&
             _string == vc._string &&
             _client == vc._client &&
+            _nobind == vc._nobind &&
             _compEnabled == vc._compEnabled &&
             _dev == vc._dev &&
             _remote == vc._remote &&
@@ -254,6 +256,7 @@ QString VpnConfig::toString () const
     QTextStream out(&s);
 
     out << "client: " << _client << ", ";
+    out << "nobind: " << _nobind << ", ";
     out << "comp-lzo: " << isCompEnabled() << ", ";
     out << "dev: " << getDev() << ", ";
 
@@ -269,7 +272,6 @@ QString VpnConfig::toString () const
     }
 
     out << "ca_path: " << getCaPath() << ", ";
-
     out << "cert_path: " << getCertPath() << ", ";
     out << "key_path: " << getKeyPath() << ", ";
     out << "p12_path: " << getP12Path();
@@ -315,6 +317,9 @@ int VpnConfig::toFile (const QString &path) const
         if (_client)
             out << "client" << endl;
 
+        if (_nobind)
+            out << "nobind" << endl;
+
         if (isCompEnabled())
             out << "comp-lzo" << endl;
         else
@@ -335,8 +340,8 @@ int VpnConfig::toFile (const QString &path) const
             out << "</connection>" << endl;
         }
 
-        out << "ca" << ' ' << '"' << getCaPath() << '"' << endl;
-
+        if (getCaPath() != "")
+            out << "ca" << ' ' << '"' << getCaPath() << '"' << endl;
         if (getCertPath() != "")
             out << "cert" << ' ' << '"' << getCertPath() << '"' << endl;
         if (getKeyPath() != "")
@@ -625,7 +630,10 @@ bool VpnConfig::_isValid (bool strict)
     LIBENCLOUD_ERR_IF (getRemote().isEmpty());
 
     if (strict)
-        LIBENCLOUD_ERR_IF (getCaPath().isEmpty());
+    {
+        LIBENCLOUD_ERR_IF (getCaPath().isEmpty() &&
+                getP12Path().isEmpty());
+    }
 
     return true;
 err:

@@ -46,8 +46,8 @@ int main (int argc, char *argv[])
     TestApi apiTest;
     QTest::qExec(&apiTest, argc, argv);
 
-    //TestJson jsonTest;
-    //QTest::qExec(&jsonTest, argc, argv);
+    TestJson jsonTest;
+    QTest::qExec(&jsonTest, argc, argv);
 
     TEST_ZERO (test_crypto());
 

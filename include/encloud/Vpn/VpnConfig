@@ -119,6 +119,7 @@ private:
     // configuration
     //
     bool _client;
+    bool _nobind;
     bool _compEnabled;
     Dev _dev;
 
