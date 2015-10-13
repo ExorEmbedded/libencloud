@@ -21,6 +21,14 @@ Client::Client ()
     , _sslError(false)
 {
     LIBENCLOUD_TRACE;
+
+    _qnam = new QNetworkAccessManager;
+    LIBENCLOUD_ERR_IF (_qnam == NULL);
+
+    _connectQnam();
+
+err:
+    return;
 }
 
 Client::~Client ()
@@ -91,14 +99,6 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkReply *reply = NULL;
     _sslError = false;
     _response = "";
-
-    if (_qnam == NULL)
-    {
-        _qnam = new QNetworkAccessManager;
-        LIBENCLOUD_ERR_IF (_qnam == NULL);
-
-        _connectQnam();
-    }
 
 #ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
