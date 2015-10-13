@@ -71,6 +71,11 @@ int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
             sslconf.setPrivateKey(key);
             break;
         }
+        case Auth::CookieType:
+        {
+            // do nothing - we assume cookie headers are set automatically
+            break;
+        }
         default:
             goto err;
     }

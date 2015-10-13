@@ -32,6 +32,8 @@ public:
 		MSG_TYPE_POST
 	} MsgType;
 
+    QNetworkAccessManager *getNetworkAccessManager ();
+    int setNetworkAccessManager (QNetworkAccessManager *qnam);
     void setVerifyCA (bool b = true);
     void setDebug (bool b = true);
 
@@ -60,10 +62,14 @@ protected slots:
     void _finished (QNetworkReply *reply);
 
 protected:
+    void _connectQnam();
+
+    QNetworkAccessManager *_qnam;
+    bool _qnamExternal;
+    QString _response;
     bool _verifyCA;
     bool _debug;
     bool _sslError;
-    QNetworkAccessManager _qnam;
 };
 
 } // namespace libencloud

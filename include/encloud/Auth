@@ -38,6 +38,7 @@ public:
         //
         UserpassType = 0,
         CertificateType,
+        CookieType,
         
         //
         // (id == ProxyId)

@@ -14,23 +14,49 @@
 namespace libencloud {
 
 Client::Client ()
-    : _verifyCA(true)
+    : _qnam(NULL)
+    , _qnamExternal(false)
+    , _verifyCA(true)
     , _debug(true)
     , _sslError(false)
 {
     LIBENCLOUD_TRACE;
-    
-    connect(&_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
-            SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
-    connect(&_qnam, SIGNAL(sslErrors(QNetworkReply *,QList<QSslError>)), this,
-            SLOT(_sslErrors(QNetworkReply *,QList<QSslError>)));
-    connect(&_qnam, SIGNAL(finished(QNetworkReply *)), this,
-            SLOT(_finished(QNetworkReply *)));
+
+    _qnam = new QNetworkAccessManager;
+    LIBENCLOUD_ERR_IF (_qnam == NULL);
+
+    _connectQnam();
+
+err:
+    return;
 }
 
 Client::~Client ()
 {
     LIBENCLOUD_TRACE;
+
+    if (!_qnamExternal)
+        LIBENCLOUD_DELETE(_qnam);
+}
+
+QNetworkAccessManager *Client::getNetworkAccessManager ()
+{
+    return _qnam;
+}
+
+int Client::setNetworkAccessManager (QNetworkAccessManager *qnam)
+{
+    LIBENCLOUD_ERR_IF (qnam == NULL);
+    LIBENCLOUD_ERR_IF (_qnamExternal);  // has already been set externally
+
+    LIBENCLOUD_DELETE (_qnam);
+    
+    _qnam = qnam;
+    _qnamExternal = true;
+
+    _connectQnam();
+err:
+    return ~0;
 }
 
 void Client::setVerifyCA (bool b) 
@@ -72,6 +98,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkRequest request(url);
     QNetworkReply *reply = NULL;
     _sslError = false;
+    _response = "";
 
 #ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
@@ -95,14 +122,14 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     if ((msgType == MSG_TYPE_GET) ||
             (msgType == MSG_TYPE_NONE && data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((reply = _qnam.get(request)) == NULL,
+        EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
                 tr("Client failed creating GET request"));
     }
     else if ((msgType == MSG_TYPE_POST) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((reply = _qnam.post(request, data)) == NULL,
-                tr("Client falied creating POST request"));
+        EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
+                tr("Client failed creating POST request"));
     } else {
         LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
     }
@@ -214,8 +241,6 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  */
 void Client::_finished (QNetworkReply *reply) 
 { 
-    QString response;
-
     // Possible error code remappings (if required because they should not
     // occur with proper configuration):
     //  - handshake failed (6)
@@ -224,17 +249,27 @@ void Client::_finished (QNetworkReply *reply)
     LIBENCLOUD_ERR_MSG_IF (reply->error(),
             "[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
 
-    response = reply->readAll();
+    _response = reply->readAll();
 
-    CLIENT_DBG("[Client] ### <<<<< ### " << response);
+    CLIENT_DBG("[Client] ### <<<<< ### " << _response);
 
     reply->deleteLater();
 
-    emit complete(response);
+    emit complete(_response);
 
     return;
 err:
     reply->deleteLater();
+}
+
+void Client::_connectQnam()
+{
+    connect(_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
+            SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
+    connect(_qnam, SIGNAL(sslErrors(QNetworkReply *,QList<QSslError>)), this,
+            SLOT(_sslErrors(QNetworkReply *,QList<QSslError>)));
+    connect(_qnam, SIGNAL(finished(QNetworkReply *)), this,
+            SLOT(_finished(QNetworkReply *)));
 }
 
 } // namespace libencloud
