@@ -71,6 +71,24 @@ void Client::setDebug (bool b)
     _debug = b;
 }
 
+void Client::reset ()
+{
+    if (_qnamExternal)
+        return;
+
+    disconnect(_qnam, NULL, NULL, NULL);
+
+    if (_qnam)
+        _qnam->deleteLater();
+
+    _qnam = new QNetworkAccessManager;
+    LIBENCLOUD_ERR_IF (_qnam == NULL);
+
+    _connectQnam();
+err:
+    return;
+}
+
 void Client::run (const QUrl &url, const QUrl &params,
 		const QMap<QByteArray, QByteArray> &headers, const QSslConfiguration &conf)
 {

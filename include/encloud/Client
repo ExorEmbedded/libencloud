@@ -34,8 +34,11 @@ public:
 
     QNetworkAccessManager *getNetworkAccessManager ();
     int setNetworkAccessManager (QNetworkAccessManager *qnam);
+
     void setVerifyCA (bool b = true);
     void setDebug (bool b = true);
+
+    void reset ();
 
 	// GET if no params are provided, otherwise POST them (form)
     void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
