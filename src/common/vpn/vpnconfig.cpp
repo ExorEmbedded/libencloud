@@ -576,13 +576,9 @@ const QString &VpnConfig::getCertPath () const
 
 int VpnConfig::setCertPath (const QString &certPath)
 {
-    LIBENCLOUD_ERR_IF (certPath == "");
-
     _certPath = certPath;
 
     return 0;
-err:
-    return ~0;
 }
 
 const QString &VpnConfig::getKeyPath () const
@@ -592,13 +588,9 @@ const QString &VpnConfig::getKeyPath () const
 
 int VpnConfig::setKeyPath (const QString &keyPath)
 {
-    LIBENCLOUD_ERR_IF (keyPath == "");
-
     _keyPath = keyPath;
 
     return 0;
-err:
-    return ~0;
 }
 
 const QString &VpnConfig::getP12Path () const
@@ -608,13 +600,9 @@ const QString &VpnConfig::getP12Path () const
 
 int VpnConfig::setP12Path (const QString &p12Path)
 {
-    LIBENCLOUD_ERR_IF (p12Path == "");
-
     _p12Path = p12Path;
 
     return 0;
-err:
-    return ~0;
 }
 
 //
