@@ -7,6 +7,8 @@ next:
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
 	- [FEATURE] CONNECT-257 One-Time Password support
+	- [FEATURE] CONNECT-260 Profile Import Tool (legacy VPN Client and App < 3.6.0)
+	- [FEATURE] CONNECT-268 Cookie-based authentication support
 
 libencloud 0.8.0 (26/06/2015)
 	- vpn: headers are now public; improved internal representation; added helper functions and 
