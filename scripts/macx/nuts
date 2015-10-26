@@ -430,7 +430,7 @@ nuts_cidrisvalid ()
 
     local cidr=$1
 
-    nuts_isint $cidr && [ $cidr -ge 0 ] && [ $cidr -lt 32 ] || return 1
+    nuts_isint $cidr && [ $cidr -ge 0 ] && [ $cidr -le 32 ] || return 1
 
     return 0
 }
@@ -439,6 +439,7 @@ nuts_cidrisvalid_test ()
     nuts_chk nuts_cidrisvalid 8
     nuts_chk nuts_cidrisvalid 24
     nuts_chk nuts_cidrisvalid 25
+    nuts_chk nuts_cidrisvalid 32
 
     nuts_chkko nuts_cidrisvalid 33
     nuts_chkko nuts_cidrisvalid foo
@@ -502,13 +503,19 @@ nuts_mask2cidr ()
     local bin=$(nuts_addr2bin $mask)
     local firstzero=$(echo -n $bin | awk 'END{print index($0,"0")}')
 
-    echo -n $(($firstzero-1))
+    if [ $firstzero -eq 0 ]; then
+        echo -n 32
+    else
+        echo -n $(($firstzero-1))
+    fi
 }
 nuts_mask2cidr_test ()
 {
+    nuts_chk [ "$(nuts_mask2cidr 0.0.0.0)" = "0" ]
     nuts_chk [ "$(nuts_mask2cidr 255.0.0.0)" = "8" ]
     nuts_chk [ "$(nuts_mask2cidr 255.255.255.0)" = "24" ]
     nuts_chk [ "$(nuts_mask2cidr 255.255.255.128)" = "25" ]
+    nuts_chk [ "$(nuts_mask2cidr 255.255.255.255)" = "32" ]
 
     nuts_chkko nuts_mask2cidr foo
     nuts_chkko nuts_mask2cidr 255.255.255
@@ -565,6 +572,7 @@ nuts_cidr2mask_test ()
     nuts_chk [ "$(nuts_cidr2mask 8)" = "255.0.0.0" ]
     nuts_chk [ "$(nuts_cidr2mask 24)" = "255.255.255.0" ]
     nuts_chk [ "$(nuts_cidr2mask 25)" = "255.255.255.128" ]
+    nuts_chk [ "$(nuts_cidr2mask 32)" = "255.255.255.255" ]
 
     nuts_chkko nuts_cidr2mask foo
     nuts_chkko nuts_cidr2mask 33

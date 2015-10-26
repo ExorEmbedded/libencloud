@@ -4,6 +4,7 @@ next:
 	- [FIX] CONNECT-235 DNS configuration not removed upon disconnect on OSX Yosemite
 	- [FIX] CONNECT-241 OSX: Routing rule for Direct All traffic through the VPN is not created
 	- [FIX] CONNECT-253 "Undefined fields in profile" displayed erroneously
+	- [FIX] CONNECT-290 Routing on OSX fails if /32 networks are pushed
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
 	- [FEATURE] CONNECT-257 One-Time Password support
