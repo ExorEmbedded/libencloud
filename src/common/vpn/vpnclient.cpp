@@ -435,7 +435,11 @@ void VpnClient::processReadyRead ()
         //qDebug() << "newline: " << line;
         
 #ifdef LIBENCLOUD_MODE_QCC
+#  ifdef LIBENCLOUD_SPLITDEPS
+        // avoid flooding on devices
+#  else
         LIBENCLOUD_LOG(line.prepend("[VPN] "));
+#  endif
 #else
         __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
 #endif

@@ -35,6 +35,7 @@ public slots:
     void authSupplied (const Auth &auth);
 
 private slots:
+    void _error (const libencloud::Error &error);
     void _clientComplete (const QString &response);
 
 private:

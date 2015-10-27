@@ -14,7 +14,8 @@
 namespace libencloud {
 
 Client::Client ()
-    : _qnam(NULL)
+    : _reply(NULL)
+    , _qnam(NULL)
     , _qnamExternal(false)
     , _verifyCA(true)
     , _debug(true)
@@ -27,6 +28,9 @@ Client::Client ()
 
     _connectQnam();
 
+    _timer.setSingleShot(true);
+    connect(&_timer, SIGNAL(timeout()), this,
+            SLOT(_timeout()));
 err:
     return;
 }
@@ -114,9 +118,10 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     //CLIENT_DBG(" ### >>>>> ### " << data);
 
     QNetworkRequest request(url);
-    QNetworkReply *reply = NULL;
     _sslError = false;
     _response = "";
+
+    LIBENCLOUD_RETURN_IF (_reply != NULL, );
 
 #ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
@@ -140,20 +145,22 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     if ((msgType == MSG_TYPE_GET) ||
             (msgType == MSG_TYPE_NONE && data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
+        EMIT_ERROR_ERR_IF ((_reply = _qnam->get(request)) == NULL,
                 tr("Client failed creating GET request"));
     }
     else if ((msgType == MSG_TYPE_POST) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
-                tr("Client failed creating POST request"));
+        EMIT_ERROR_ERR_IF ((_reply = _qnam->post(request, data)) == NULL,
+                tr("Client falied creating POST request"));
     } else {
         LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
     }
 
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
+    connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), 
             SLOT(_networkError(QNetworkReply::NetworkError)));
+
+    _timer.start(LIBENCLOUD_CLIENT_TIMEOUT * 1000);
 err:
     return;
 }
@@ -259,25 +266,39 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  */
 void Client::_finished (QNetworkReply *reply) 
 { 
+
+    _timer.stop();
+
     // Possible error code remappings (if required because they should not
     // occur with proper configuration):
     //  - handshake failed (6)
     //  - key values mismatch (99)
-
-    LIBENCLOUD_ERR_MSG_IF (reply->error(),
-            "[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
+    if (reply->error())
+    {
+        LIBENCLOUD_DBG("[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
+        goto err;
+    }
 
     _response = reply->readAll();
 
     CLIENT_DBG("[Client] ### <<<<< ### " << _response);
 
     reply->deleteLater();
+    _reply = NULL;
 
     emit complete(_response);
 
     return;
 err:
     reply->deleteLater();
+    _reply = NULL;
+}
+
+void Client::_timeout ()
+{
+    LIBENCLOUD_TRACE;
+
+    _reply->abort();
 }
 
 void Client::_connectQnam()

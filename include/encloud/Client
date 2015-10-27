@@ -63,16 +63,19 @@ protected slots:
     void _sslErrors (QNetworkReply *reply, const QList<QSslError> &errors);
     void _networkError (QNetworkReply::NetworkError err);
     void _finished (QNetworkReply *reply);
+    void _timeout ();
 
 protected:
     void _connectQnam();
 
+    QNetworkReply *_reply;
     QNetworkAccessManager *_qnam;
     bool _qnamExternal;
     QString _response;
     bool _verifyCA;
     bool _debug;
     bool _sslError;
+    QTimer _timer;
 };
 
 } // namespace libencloud

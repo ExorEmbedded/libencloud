@@ -98,12 +98,12 @@
 #define LIBENCLOUD_LOG(msg) __LIBENCLOUD_MSG(-1, "LOG", msg)
 
 // New Qt-specific macros
-#define LIBENCLOUD_EMIT(sig) do { LIBENCLOUD_ERR("emitting " << #sig); emit(sig); } while (0)
-#define LIBENCLOUD_EMIT_ERR(sig) do { LIBENCLOUD_ERR(""); emit(sig); goto err; } while (0)
-#define LIBENCLOUD_EMIT_RETURN_IF(cond, sig, rc) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); return rc; } } while (0)
-#define LIBENCLOUD_EMIT_RETURN_MSG_IF(cond, sig, msg, rc) do { if (cond) { LIBENCLOUD_ERR(msg); emit(sig); return rc; } } while (0)
-#define LIBENCLOUD_EMIT_ERR_IF(cond, sig) do { if (cond) { LIBENCLOUD_ERR(""); emit(sig); goto err; } } while (0)
-#define LIBENCLOUD_EMIT_ERR_MSG_IF(cond, sig, msg) do { if (cond) { LIBENCLOUD_ERR(msg); emit(sig); goto err; } } while (0)
+#define LIBENCLOUD_EMIT(sig) do { LIBENCLOUD_DBG("emitting " << #sig); emit(sig); } while (0)
+#define LIBENCLOUD_EMIT_ERR(sig) do { LIBENCLOUD_DBG(""); emit(sig); goto err; } while (0)
+#define LIBENCLOUD_EMIT_RETURN_IF(cond, sig, rc) do { if (cond) { LIBENCLOUD_DBG(""); emit(sig); return rc; } } while (0)
+#define LIBENCLOUD_EMIT_RETURN_MSG_IF(cond, sig, msg, rc) do { if (cond) { LIBENCLOUD_DBG(msg); emit(sig); return rc; } } while (0)
+#define LIBENCLOUD_EMIT_ERR_IF(cond, sig) do { if (cond) { LIBENCLOUD_DBG(""); emit(sig); goto err; } } while (0)
+#define LIBENCLOUD_EMIT_ERR_MSG_IF(cond, sig, msg) do { if (cond) { LIBENCLOUD_DBG(msg); emit(sig); goto err; } } while (0)
 
 #define LIBENCLOUD_OUT(msg) qDebug().nospace() << msg
 

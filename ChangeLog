@@ -5,6 +5,7 @@ next:
 	- [FIX] CONNECT-241 OSX: Routing rule for Direct All traffic through the VPN is not created
 	- [FIX] CONNECT-253 "Undefined fields in profile" displayed erroneously
 	- [FIX] CONNECT-290 Routing on OSX fails if /32 networks are pushed
+	- [FIX] CONNECT-297 [DEVICE-ONLY] Avoid file descriptor leak upon failure if autoretry is set
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
 	- [FEATURE] CONNECT-257 One-Time Password support

@@ -95,6 +95,7 @@ int SetupMsg::process ()
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
+    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
@@ -124,6 +125,16 @@ void SetupMsg::authSupplied (const Auth &auth)
 //
 // private slots
 // 
+
+void SetupMsg::_error (const libencloud::Error &error)
+{
+    LIBENCLOUD_UNUSED(error);
+
+    LIBENCLOUD_TRACE;
+
+    sender()->deleteLater();
+}
+
 void SetupMsg::_clientComplete (const QString &response)
 {
     LIBENCLOUD_TRACE;

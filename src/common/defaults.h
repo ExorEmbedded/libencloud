@@ -71,6 +71,9 @@ static char libEncloudTapNameBuffer [256];
 // timeout without exponential backoff
 #define LIBENCLOUD_RETRY_TIMEOUT        5
 
+// time for single requests
+#define LIBENCLOUD_CLIENT_TIMEOUT       15
+
 // maximum time allowed to connect to Cloud
 #define LIBENCLOUD_TIMEOUT              60     /* seconds */
 

@@ -2,7 +2,7 @@
 #include <QString>
 #include <QTextStream>
 #include <QTimer>
-#include <encloud/vpn/VpnManager>
+#include <encloud/Vpn/VpnManager>
 #include <common/common.h>
 #include <common/config.h>
 
