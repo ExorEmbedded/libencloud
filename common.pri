@@ -48,6 +48,7 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 # global defs
 #
 PKGNAME = libencloud
+SRCBASEDIR = $${PWD}
 
 # [ client/package version ]
 # *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
@@ -55,10 +56,11 @@ PKGNAME = libencloud
 # Switchboard update checks
 modeqcc:!splitdeps {
     endian {
-        PRODUCT_SRC = ../connectapp
+        PRODUCT_SRC = $$SRCBASEDIR/../connectapp
     } else {
-        PRODUCT_SRC = ../jmconnect
+        PRODUCT_SRC = $$SRCBASEDIR/../jmconnect
     }
+    DEFINES += PRODUCT_SRC=$$PRODUCT_SRC
     !exists($${PRODUCT_SRC}): error(Could not find main application sources! Expected in $${PRODUCT_SRC})
     include($${PRODUCT_SRC}/version.pri)
 } else {
@@ -152,7 +154,6 @@ splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
-SRCBASEDIR = $${PWD}
 PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }

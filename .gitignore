@@ -30,5 +30,7 @@ release/
 /test/unit/unit
 /test/unit-sec/unit-sec
 
+src/common/qcc_version.h
+
 # dist-generated files
 /libencloud-*

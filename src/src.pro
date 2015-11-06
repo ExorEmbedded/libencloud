@@ -19,6 +19,24 @@ win32 {
     CONFIG += shared
 }
 
+# touch a version.h file to allow proper version update in about fields
+modeqcc:!splitdeps {
+    PHONY_DEPS = $${PRODUCT_SRC}/version.pri
+    headergen.input = PHONY_DEPS
+    headergen.output = $${_PRO_FILE_PWD_}/common/qcc_version.h
+    headergen.variable_out = HEADERS
+    unix { # needs escaping
+        headergen.commands =  echo "/\\* $$_DATE_ : FAKE HEADER USED TO TRIGGER REBUILD OF INCLUDER FILE \\*/" > $${_PRO_FILE_PWD_}/common/qcc_version.h
+    } else { # dislikes escaping
+        headergen.commands =  echo "/* $$_DATE_ : FAKE HEADER USED TO TRIGGER REBUILD OF INCLUDER FILE */" > $${_PRO_FILE_PWD_}/common/qcc_version.h
+    }
+    headergen.name = CREATE $${_PRO_FILE_PWD_}/common/qcc_version.h
+    headergen.CONFIG += combine no_link
+    QMAKE_EXTRA_COMPILERS += headergen
+
+    HEADERS += $${_PRO_FILE_PWD_}/common/qcc_version.h
+}
+
 #
 # common sources
 # 
