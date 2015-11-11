@@ -241,7 +241,9 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     //
     // consistency checks
     //
-    LIBENCLOUD_EMIT_ERR_IF (config.fromFile(configPath, false),
+
+    // parse = true so we can check consistency (e.g proxy+TCP check below)
+    LIBENCLOUD_EMIT_ERR_IF (config.fromFile(configPath, true),
             sigError(this->err = ConfigError));
 #ifndef LIBENCLOUD_MODE_VPN
     if (proxyAuth.isValid())
