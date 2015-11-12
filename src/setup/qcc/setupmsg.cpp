@@ -4,7 +4,7 @@
 #include <common/common.h>
 #include <common/config.h>
 #include <setup/qcc/setupmsg.h>
-#if defined(LIBENCLOUD_MODE_QCC) && defined(LIBENCLOUD_SPLITDEPS)
+#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
 #  include <common/qcc_version.h>
 #endif
 
