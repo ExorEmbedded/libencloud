@@ -8,6 +8,7 @@ next:
 	- [FIX] CONNECT-297 [DEVICE-ONLY] Avoid file descriptor leak upon failure if autoretry is set
 	- [FIX] CONNECT-310 Incremental build does not update version in User-Agent
 	- [FIX] CONNECT-313 Unable to connect to the Switchboard if HTTP Proxy is configured
+	- [FIX] CONNECT-314 [DEVICE-ONLY] Stopping service hangs until timeout
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
 	- [FEATURE] CONNECT-257 One-Time Password support
