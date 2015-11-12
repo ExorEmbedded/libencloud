@@ -298,6 +298,8 @@ nuts_hex2bin_test ()
 # e.g. 192.168.0.1.foo => 1 (failure)
 nuts_addrisvalid ()
 {
+    [ "${NUTS_OPTIMIZE}" = "1" ] && return 0
+
     [ $# -eq 1 ] || return 1
 
     local addr=$1
@@ -874,14 +876,11 @@ nuts_sort ()
 {
     local addr
 
-    for net in $@; do
+    local sorted=$(for net in $@; do
        addr=$(nuts_netgetaddr $net)
        nuts_addrisvalid $addr || return 1
-    done
-
-    local sorted=$(for net in $@; do
-        echo $(nuts_addr2dec $net)/$(nuts_netgetcidr $net)
-    done | sort)
+       echo $(nuts_addr2dec $net)/$(nuts_netgetcidr $net)
+    done | sort -n)
 
     local decaddr
     local binnet
@@ -900,8 +899,8 @@ nuts_sort ()
 
 nuts_sort_test ()
 {
-    nuts_chk [ "$(nuts_sort 192.168.2.0/24 192.168.0.0/16 255.255.0.0/16 10.0.0.0/8 192.168.1.0/24)" = \
-        "10.0.0.0/8 192.168.0.0/16 192.168.1.0/24 192.168.2.0/24 255.255.0.0/16" ]
+    nuts_chk [ "$(nuts_sort 192.168.2.0/24 1.2.3.4/24 1.2.3.3/24 61.62.63.64/24 192.168.0.0/16 255.255.0.0/16 10.0.0.0/8 192.168.1.0/24)" = \
+        "1.2.3.3/24 1.2.3.4/24 10.0.0.0/8 61.62.63.64/24 192.168.0.0/16 192.168.1.0/24 192.168.2.0/24 255.255.0.0/16" ]
 }
 
 # Check if two networks (must be in CIDR format) are adjacent 

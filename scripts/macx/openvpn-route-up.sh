@@ -11,6 +11,9 @@
 #   before being fixed with addroute()
 
 this_path=$(dirname "$0")
+
+# disable strict consistency checks to speed up processing
+NUTS_OPTIMIZE=1
 . "${this_path}/nuts"
 
 route_path="/sbin/route"
@@ -70,27 +73,16 @@ nuts_info "CIDRs: ${cidrs}"
 
 # sort networks
 cidrs_sorted=$(nuts_sort ${cidrs})
+
+nuts_info "Sorted CIDRs: $cidrs_sorted"
+
+# second run appends gateway
 cidrs_gw=""
-
-# second run sorts original data based on cidrs_sorted
-for cs in ${cidrs_sorted}; do
-
-    for ((i = 1; i <= ${n_nets}; i++)); do
-
-        network=$(eval echo \${route_network_${i}})
-        netmask=$(eval echo \${route_netmask_${i}})
-        gateway=$(eval echo \${route_gateway_${i}})
-        cidr=$(nuts_mask2cidr "$netmask")
-
-        if [ "$cs" = "${network}/${cidr}" ]; then
-            cidrs_gw="${cidrs_gw} ${cs}_${gateway}"
-        fi
-
-    done
-    
+for cidr in ${cidrs_sorted}; do
+    cidrs_gw="${cidrs_gw} ${cidr}_${route_vpn_gateway}"
 done
 
-nuts_info "Sorted CIDRs_GW: $cidrs_gw"
+nuts_info "CIDRs_GW: $cidrs_gw"
 
 cidr_prev=""
 gw_prev=""
@@ -110,8 +102,11 @@ for cg in ${cidrs_gw}; do
             issuper="1"
             issuper_prev="1"
         fi
-        delroute $cidr_prev $gw_prev
-        addroute $cidr_prev $gw_prev $issuper_prev
+
+        if [ "$issuper_prev" = "1" ]; then
+            delroute $cidr_prev $gw_prev
+            addroute $cidr_prev $gw_prev $issuper_prev
+        fi
     fi
 
     cidr_prev=$cidr
@@ -119,8 +114,10 @@ for cg in ${cidrs_gw}; do
     issuper_prev=$issuper
 done
 
-delroute "$cidr_prev" "$gw_prev"
-addroute "$cidr_prev" "$gw_prev" $issuper_prev
+if [ "$issuper_prev" = "1" ]; then
+    delroute "$cidr_prev" "$gw_prev"
+    addroute "$cidr_prev" "$gw_prev" $issuper_prev
+fi
 
 nuts_info "$0 OK"
 
