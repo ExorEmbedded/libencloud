@@ -9,6 +9,7 @@ next:
 	- [FIX] CONNECT-310 Incremental build does not update version in User-Agent
 	- [FIX] CONNECT-313 Unable to connect to the Switchboard if HTTP Proxy is configured
 	- [FIX] CONNECT-314 [DEVICE-ONLY] Stopping service hangs until timeout
+	- [FIX] CONNECT-315 In Switchboard mode Mac OSX client doesn't receive the routing rules in case of real IPs
 	- [IMPROVEMENT] CONNECT-219 Avoid file dump when Connection Profiles are unchanged
 	- [IMPROVEMENT] CONNECT-248 Add Endian prefix to product name in shortcuts
 	- [FEATURE] CONNECT-257 One-Time Password support

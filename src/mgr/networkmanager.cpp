@@ -270,7 +270,12 @@ void NetworkManager::addRoute (const QString &endpoint)
                 _gw);
     else // network
         _processManager->start("route", "add -net " + ipmask.first +
-                " netmask " + ipmask.second +
+# ifdef Q_OS_MAC
+                " -netmask " +
+# else
+                " netmask " +
+# endif
+                ipmask.second +
 # ifdef Q_OS_MAC
                 " " +
 # else
@@ -300,7 +305,12 @@ void NetworkManager::delRoute (const QString &endpoint)
         _processManager->start("route", "delete " + ipmask.first);
     else
         _processManager->start("route", "delete -net " + ipmask.first +
-                " netmask " + ipmask.second);
+# ifdef Q_OS_MAC
+                " -netmask " +
+# else
+                " netmask " +
+# endif
+                ipmask.second);
 #endif
 
 err:
