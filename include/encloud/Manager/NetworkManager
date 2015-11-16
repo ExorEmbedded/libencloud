@@ -64,6 +64,7 @@ protected slots:
     void finishedReadRoutes (int exitCode, QProcess::ExitStatus exitStatus);
 
 protected:
+    QString padIp4 (const QString &ip);
     void readRoutes (Operation op, bool sync = false);
     void readRoutesEx (QProcess *process);
     void addRoute (const QString &endpoint);
