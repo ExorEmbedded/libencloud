@@ -55,10 +55,10 @@ SRCBASEDIR = $${PWD}
 # used for version in User Agent - particularly important in modeqcc for
 # Switchboard update checks
 modeqcc:!splitdeps {
-    endian {
-        PRODUCT_SRC = $$SRCBASEDIR/../connectapp
-    } else {
+    exor {
         PRODUCT_SRC = $$SRCBASEDIR/../jmconnect
+    } else {  # endian, panda
+        PRODUCT_SRC = $$SRCBASEDIR/../connectapp
     }
     DEFINES += PRODUCT_SRC=$$PRODUCT_SRC
     !exists($${PRODUCT_SRC}): error(Could not find main application sources! Expected in $${PRODUCT_SRC})
@@ -88,8 +88,10 @@ endian {
 } else:exor {
     ORG = Exor
     DEFINES += LIBENCLOUD_EXOR
+} else:panda {
+    ORG = Panda
 } else {
-    error("organisation must be defined (CONFIG += endian|exor)!")
+    error("an organization must be specified in CONFIG!")
 }
 
 #
@@ -130,10 +132,10 @@ modeqcc {
     splitdeps {
         PRODUCT="Encloud"
     } else {
-        endian {
-            PRODUCT="ConnectApp"
-        } else {
+        exor {
             PRODUCT="HMIConnect"
+        } else {  # endian, panda
+            PRODUCT="ConnectApp"
         }
     }
 } else:modeece {
@@ -189,10 +191,10 @@ DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
 OPENSSLPATH = $${OPENSSL_INSTALLPATH}
 windows{
     isEmpty(OPENSSLPATH){
-        endian {
-            OPENSSLPATH="$$SRCBASEDIR/../bins-connectapp/openssl"
-        } else {
+        exor {
             OPENSSLPATH="c:\\openssl"
+        } else {  # endian, panda
+            OPENSSLPATH="$$SRCBASEDIR/../bins-connectapp/openssl"
         }
     }
     !exists($$OPENSSLPATH) {
