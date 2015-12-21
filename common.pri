@@ -50,16 +50,14 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 PKGNAME = libencloud
 SRCBASEDIR = $${PWD}
 
+ENCLOUD_SRC = $$SRCBASEDIR/../encloud
+include($${ENCLOUD_SRC}/defines.pri)
+
 # [ client/package version ]
 # *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # used for version in User Agent - particularly important in modeqcc for
 # Switchboard update checks
 modeqcc:!splitdeps {
-    exor {
-        PRODUCT_SRC = $$SRCBASEDIR/../jmconnect
-    } else {  # endian, panda
-        PRODUCT_SRC = $$SRCBASEDIR/../connectapp
-    }
     DEFINES += PRODUCT_SRC=$$PRODUCT_SRC
     !exists($${PRODUCT_SRC}): error(Could not find main application sources! Expected in $${PRODUCT_SRC})
     include($${PRODUCT_SRC}/version.pri)
@@ -83,13 +81,10 @@ DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 }
 
 endian {
-    ORG = Endian
     DEFINES += LIBENCLOUD_ENDIAN
 } else:exor {
-    ORG = Exor
     DEFINES += LIBENCLOUD_EXOR
 } else:panda {
-    ORG = Panda
 } else {
     error("an organization must be specified in CONFIG!")
 }
@@ -127,36 +122,22 @@ win32 {
 
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
-
-    # special case for Yocto - currently we use QCC mode also on devices
-    splitdeps {
-        PRODUCT="Encloud"
-    } else {
-        exor {
-            PRODUCT="HMIConnect"
-        } else {  # endian, panda
-            PRODUCT="ConnectApp"
-        }
-    }
 } else:modeece {
-    PRODUCT="Encloud"
     DEFINES += LIBENCLOUD_MODE_ECE
 } else:modesece {
-    PRODUCT="SECE"
     DEFINES += LIBENCLOUD_MODE_SECE
 } else:modevpn {
-    PRODUCT="OVPN"
     DEFINES += LIBENCLOUD_MODE_VPN
 } else {
     error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
 }
-DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT}\\\"
+DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 
 splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
-PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT}
+PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
