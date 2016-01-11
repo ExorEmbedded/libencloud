@@ -1,6 +1,8 @@
 ChangeLog file for Endian libencloud
 
 next:
+	- [FIX] CONNECT-104 Connection becomes unstable when the same user is logged in multiple clients
+	  Catch and throw error upon already_connected during setup
 	- [FIX] CONNECT-235 DNS configuration not removed upon disconnect on OSX Yosemite
 	- [FIX] CONNECT-241 OSX: Routing rule for Direct All traffic through the VPN is not created
 	- [FIX] CONNECT-253 "Undefined fields in profile" displayed erroneously

@@ -212,6 +212,9 @@ int SetupMsg::_decodeResponse (const QString &response)
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
             error(Error(tr("VPN Configuration from Switchboard not valid"))));
 
+    LIBENCLOUD_EMIT_ERR_IF (!json["already_connected"].isNull() && json["already_connected"].toBool(),
+            error(Error(Error::CodeAuthAlreadyConnected)));
+
     if (!json["fallback_openvpn_conf"].isNull())
     {
         _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString());
@@ -233,10 +236,6 @@ int SetupMsg::_decodeResponse (const QString &response)
         map["fallback_openvpn_internal_ip"] = json["fallback_openvpn_internal_ip"];
     map["available_pages"] = json["available_pages"];
     _serverConfig["server"] = map;
-
-    map.clear();
-    map["already_connected"] = json["already_connected"];
-    _serverConfig["client"] = map;
 
     emit (serverConfigSupply(_serverConfig));
 
