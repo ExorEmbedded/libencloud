@@ -191,9 +191,9 @@ windows{
 about {
     win32 {
         PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
-        LIBS += $$PRE_TARGETDEPS
+        ABOUT_LIBS += $$PRE_TARGETDEPS
     } unix {
-        LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
+        ABOUT_LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
     }
 }
 

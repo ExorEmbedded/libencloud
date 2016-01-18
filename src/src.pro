@@ -178,6 +178,11 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += $${_PRO_FILE_PWD_}/http/*.h
 SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
 
+# other libs
+about {
+    LIBS += $${ABOUT_LIBS}
+}
+
 # installation
 target.path = $$LIBDIR
 INSTALLS += target

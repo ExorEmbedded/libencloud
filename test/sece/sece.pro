@@ -50,3 +50,6 @@ nodll {
     message($$LIBS)
 }
 
+about {
+    LIBS += $${ABOUT_LIBS}
+}
