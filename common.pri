@@ -187,6 +187,24 @@ windows{
     LIBS += -lssl -lcrypto
 }
 
+# libabout
+about {
+    win32 {
+        PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
+        LIBS += $$PRE_TARGETDEPS
+    } unix {
+        LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
+    }
+}
+
+# for SHGetFolderPath()
+win32 {
+    !wince {
+        LIBS += -lshfolder
+    }
+}
+
+
 #
 # build settings
 # 
