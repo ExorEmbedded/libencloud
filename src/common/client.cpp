@@ -324,7 +324,6 @@ void Connection::_timeout ()
 {
     //LIBENCLOUD_TRACE;
 
-    _reply->abort();
     _client->_conns.remove(_reply);
 
     LIBENCLOUD_DELETE_LATER(_reply);
