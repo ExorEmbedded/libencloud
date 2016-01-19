@@ -325,9 +325,9 @@ void Connection::_timeout ()
     //LIBENCLOUD_TRACE;
 
     _reply->abort();
-    _reply->deleteLater();
     _client->_conns.remove(_reply);
-    _reply = NULL;
+
+    LIBENCLOUD_DELETE_LATER(_reply);
 
     deleteLater();
 }
@@ -335,8 +335,6 @@ void Connection::_timeout ()
 Connection::~Connection ()
 {
     //LIBENCLOUD_TRACE;
-
-    LIBENCLOUD_DELETE(_reply);
 }
 
 } // namespace libencloud
