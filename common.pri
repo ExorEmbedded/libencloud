@@ -120,6 +120,13 @@ win32 {
     LIBEXT = a
 }
 
+# keep build files separate from sources
+UI_DIR = build/uics
+MOC_DIR = build/mocs
+OBJECTS_DIR = build/objs
+Release:DESTDIR = release
+Debug:DESTDIR = debug
+
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
 } else:modeece {
@@ -190,8 +197,7 @@ windows{
 # libabout
 about {
     win32 {
-        PRE_TARGETDEPS  += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
-        ABOUT_LIBS += $$PRE_TARGETDEPS
+        ABOUT_LIBS += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
     } unix {
         ABOUT_LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
     }
@@ -231,9 +237,3 @@ windows {  # used only for dev - installer handles positioning on target
     CONFDIR = /etc/encloud
 }
 
-# keep build files separate from sources
-UI_DIR = build/uics
-MOC_DIR = build/mocs
-OBJECTS_DIR = build/objs
-Release:DESTDIR = release
-Debug:DESTDIR = debug
