@@ -1,6 +1,6 @@
 ChangeLog file for Endian libencloud
 
-next:
+libencloud 0.9.0 (11/02/2016):
 	- [FIX] CONNECT-104 Connection becomes unstable when the same user is logged in multiple clients
 	  Catch and throw error upon already_connected during setup
 	- [FIX] CONNECT-235 DNS configuration not removed upon disconnect on OSX Yosemite
