@@ -1,5 +1,8 @@
 ChangeLog file for Endian libencloud
 
+next:
+	- [FEATURE] CONNECT-270 2-Factor VPN Authentication via Certificate + Username/Password
+
 libencloud 0.9.0 (11/02/2016):
 	- [FIX] CONNECT-104 Connection becomes unstable when the same user is logged in multiple clients
 	  Catch and throw error upon already_connected during setup

@@ -167,17 +167,15 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     if (sbAuth.isValid())
     {
-        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_NONE)
-        {
-            // we assume that authentication is file-based
-            // e.g. PKCS12 specified directly in OpenVPN configuration
-        }
-        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
+        Auth::Type authType = sbAuth.getType();
+
+        if (authType == Auth::UserpassType || authType == Auth::CertificateUserpassType)
         {
             args << "--auth-user-pass";
             args << "--auth-nocache";
         }
-        else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
+
+        if (authType == Auth::CertificateType || authType == Auth::CertificateUserpassType)
         {
             if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
             {
@@ -189,7 +187,14 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
                 args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
             }
         }
-    } 
+        /*
+        if (authType == Auth::NoneType)
+        {
+            // we assume that authentication is file-based
+            // e.g. PKCS12 specified directly in OpenVPN configuration
+        }
+        */
+    }
 
     if (proxyAuth.isValid())
     {

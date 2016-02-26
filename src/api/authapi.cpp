@@ -34,13 +34,24 @@ void AuthApi::authSupply (const Auth &auth)
     LIBENCLOUD_DBG("[AuthApi] auth url: " << url.toString() << 
             ", auth: " << auth.toString());
 
+    libencloud::Auth::Type type = auth.getType();
+
     _params.clear();
     _params.addQueryItem("id", auth.getStrId());
     _params.addQueryItem("type", auth.getStrType());
     _params.addQueryItem("url", auth.getUrl());
-    _params.addQueryItem("user", auth.getUser());
-    _params.addQueryItem("pass", auth.getPass());
-    _params.addQueryItem("path", auth.getPath());
+
+    if (type != Auth::CertificateType)
+    {
+        _params.addQueryItem("user", auth.getUser());
+        _params.addQueryItem("pass", auth.getPass());
+    }
+
+    if (type == Auth::CertificateType || type == Auth::CertificateUserpassType)
+    {
+        _params.addQueryItem("path", auth.getPath());
+        _params.addQueryItem("p12pass", auth.getP12Pass());
+    }
 
     _client.run(url, _params, _headers, _config);
 }

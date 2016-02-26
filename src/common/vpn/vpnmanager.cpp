@@ -228,7 +228,7 @@ void VpnManager::parseLinePass (QByteArray rest)
     {
         LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid(), authRequired(Auth::SwitchboardId));
 
-        sendAuth("Private Key", "", _sbAuth.getPass());
+        sendAuth("Private Key", "", _sbAuth.getP12Pass());
     }
     else if (qstrcmp(rest, "Need 'HTTP Proxy' username/password") == 0)
     {
@@ -360,7 +360,7 @@ void VpnManager::authSupplied (const Auth &auth)
             _proxyAuth = auth;
             break;
         default:
-            LIBENCLOUD_ERR("bad id");
+            break;
     }
 
     return;

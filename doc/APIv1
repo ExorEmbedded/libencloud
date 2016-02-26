@@ -64,11 +64,12 @@
     e.g. 3              id=sb&type=x509&url=<url>&pass=mypass&path=c:\key.p12
 
     Def "id"            OPTIONAL authentication identifier: "sb" (default), "proxy"
-    Def "type"          OPTIONAL type of authentication: "user-pass" (default), "x509"
+    Def "type"          OPTIONAL type of authentication: "user-pass" (default), "x509" or "x509-user-pass" (2-factor)
     Def "url"           destination url (for Switchboard login or proxy)
-    Def "user"          user for authentication
-    Def "pass"          password for authentication
-    Def "path"          OPTIONAL path (for type=x509)
+    Def "user"          OPTIONAL user for authentication (type="user-pass" or "x509-user-pass")
+    Def "pass"          OPTIONAL password for authentication (type="user-pass" or "x509-user-pass")
+    Def "path"          OPTIONAL path (for type="x509")
+    Def "p12pass"       OPTIONAL path (for type="x509-user-pass")
 
 
 [ Setup API ]             

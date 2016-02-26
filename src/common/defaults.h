@@ -142,6 +142,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_AUTH_NONE            "none"
 #define LIBENCLOUD_AUTH_USERPASS        "user-pass"
 #define LIBENCLOUD_AUTH_X509            "x509"
+#define LIBENCLOUD_AUTH_X509_USERPASS   "x509-user-pass"  // 2-factor
 #define LIBENCLOUD_AUTH_CERTKEY         "cert-key"
 #define LIBENCLOUD_AUTH_PKCS12          "pkcs12"
 #define LIBENCLOUD_CA_FILE              "ca.pem"

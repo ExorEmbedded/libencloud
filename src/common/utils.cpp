@@ -87,6 +87,8 @@ LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path)
     LIBENCLOUD_ERR_IF (file.write(ba) == -1);
     file.close();
 
+    QFile::setPermissions(path, QFile::ReadOwner|QFile::WriteOwner);
+
     return 0;
 err:
     if (file.error())
