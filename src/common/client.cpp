@@ -272,6 +272,8 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  */
 void Client::_finished (QNetworkReply *reply) 
 { 
+    LIBENCLOUD_RETURN_IF (reply == NULL, );
+
     Connection *conn = _conns[reply];
 
     // Possible error code remappings (if required because they should not
@@ -289,12 +291,14 @@ void Client::_finished (QNetworkReply *reply)
 
     CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
 
+    disconnect(reply, NULL, NULL, NULL);
     _conns.remove(reply);
     conn->deleteLater();
 
     emit complete(_response);
     return;
 err:
+    disconnect(reply, NULL, NULL, NULL);
     _conns.remove(reply);
     conn->deleteLater();
     return;
@@ -327,9 +331,12 @@ void Connection::_timeout ()
 {
     //LIBENCLOUD_TRACE;
 
-    _client->_conns.remove(_reply);
-
-    LIBENCLOUD_DELETE_LATER(_reply);
+    if (_reply)
+    {
+        disconnect(_reply, NULL, NULL, NULL);
+        _client->_conns.remove(_reply);
+        LIBENCLOUD_DELETE_LATER(_reply);
+    }
 
     deleteLater();
 }
