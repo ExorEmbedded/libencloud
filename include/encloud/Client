@@ -88,6 +88,7 @@ protected slots:
 protected:
     void _connectQnam();
 
+    static quint32 _id;
     QMap<QObject *, Connection *> _conns;
     QNetworkAccessManager *_qnam;
     bool _qnamExternal;

@@ -14,6 +14,8 @@
 
 namespace libencloud {
 
+quint32 Client::_id = 0;
+
 Client::Client ()
     : _qnam(NULL)
     , _qnamExternal(false)
@@ -113,7 +115,7 @@ void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 		const QByteArray &data, const QSslConfiguration &conf)
 {
-    CLIENT_DBG("[Client] to: " << url.toString());
+    CLIENT_DBG("[Client] id: " << QString::number(++_id) << " to: " << url.toString());
     //CLIENT_DBG(" ### >>>>> ### " << data);
 
     Connection *conn = NULL;
@@ -278,13 +280,14 @@ void Client::_finished (QNetworkReply *reply)
     //  - key values mismatch (99)
     if (reply->error())
     {
-        LIBENCLOUD_DBG("[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
+        LIBENCLOUD_DBG("[Client] Error in reply id " << QString::number(_id) <<
+                " (" << reply->error() << "): " << reply->errorString());
         goto err;
     }
 
     _response = reply->readAll();
 
-    CLIENT_DBG("[Client] ### <<<<< ### " << _response);
+    CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
 
     _conns.remove(reply);
     conn->deleteLater();
