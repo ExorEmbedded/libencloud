@@ -78,16 +78,23 @@ void Client::setDebug (bool b)
 
 void Client::reset ()
 {
-    if (_qnamExternal)
-        return;
+    LIBENCLOUD_TRACE;
 
-    disconnect(_qnam, NULL, NULL, NULL);
+    // also stops timers associated with connections
+    qDeleteAll(_conns);
+    _conns.clear();
 
     if (_qnam)
-        _qnam->deleteLater();
+        disconnect(_qnam, NULL, this, NULL);
 
-    _qnam = new QNetworkAccessManager;
-    LIBENCLOUD_ERR_IF (_qnam == NULL);
+    if (!_qnamExternal)
+    {
+        if (_qnam)
+            _qnam->deleteLater();
+
+        _qnam = new QNetworkAccessManager;
+        LIBENCLOUD_ERR_IF (_qnam == NULL);
+    }
 
     _connectQnam();
 err:
@@ -291,14 +298,14 @@ void Client::_finished (QNetworkReply *reply)
 
     CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
 
-    disconnect(reply, NULL, NULL, NULL);
+    disconnect(reply, NULL, this, NULL);
     _conns.remove(reply);
     conn->deleteLater();
 
     emit complete(_response);
     return;
 err:
-    disconnect(reply, NULL, NULL, NULL);
+    disconnect(reply, NULL, this, NULL);
     _conns.remove(reply);
     conn->deleteLater();
     return;
@@ -306,6 +313,9 @@ err:
 
 void Client::_connectQnam()
 {
+    if (_qnam == NULL)
+        return;
+
     connect(_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
     connect(_qnam, SIGNAL(sslErrors(QNetworkReply *,QList<QSslError>)), this,
@@ -331,9 +341,11 @@ void Connection::_timeout ()
 {
     //LIBENCLOUD_TRACE;
 
+    LIBENCLOUD_DBG("[Client] id " << QString::number(_client->_id));
+
     if (_reply)
     {
-        disconnect(_reply, NULL, NULL, NULL);
+        disconnect(_reply, NULL, this, NULL);
         _client->_conns.remove(_reply);
         LIBENCLOUD_DELETE_LATER(_reply);
     }

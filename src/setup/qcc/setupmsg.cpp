@@ -63,6 +63,8 @@ int SetupMsg::process ()
     QSslConfiguration sslconf;
     QSslCertificate cert;
     
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+
     LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
 
     QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
@@ -72,8 +74,6 @@ int SetupMsg::process ()
         emit authRequired(Auth::SwitchboardId);
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
-
-    EMIT_ERROR_ERR_IF (_cfg == NULL);
 
     // client already destroyed via deleteLater()
     //LIBENCLOUD_DELETE (_client);
@@ -246,6 +246,8 @@ err:
 
 int SetupMsg::_unpackResponse ()
 {
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+
     QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
 
