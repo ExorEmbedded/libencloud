@@ -30,7 +30,7 @@ VpnConfig::VpnConfig (const QVariantMap &vm)
     _valid = true;
     _isFile = false;
 err:
-    return ;
+    return;
 }
 
 // From QCC-style string
@@ -53,6 +53,7 @@ int VpnConfig::clear ()
     _valid = false;
     _isFile = false;
     _string = "";
+    _authType = Auth::NoneType;
 
     _client = true;
     _nobind = true;
@@ -340,14 +341,21 @@ int VpnConfig::toFile (const QString &path) const
             out << "</connection>" << endl;
         }
 
-        if (getCaPath() != "")
-            out << "ca" << ' ' << '"' << getCaPath() << '"' << endl;
-        if (getCertPath() != "")
-            out << "cert" << ' ' << '"' << getCertPath() << '"' << endl;
-        if (getKeyPath() != "")
-            out << "key" << ' ' << '"' << getKeyPath() << '"' << endl;
-        if (getP12Path() != "")
-            out << "pkcs12" << ' ' << '"' << getP12Path() << '"' << endl;
+        if (_authType == Auth::NoneType || _authType == Auth::UserpassType)
+        {
+            if (getCaPath() != "")
+                out << "ca" << ' ' << '"' << getCaPath() << '"' << endl;
+        }
+
+        if (_authType == Auth::NoneType || _authType == Auth::CertificateType || _authType == Auth::CertificateUserpassType)
+        {
+            if (getCertPath() != "")
+                out << "cert" << ' ' << '"' << getCertPath() << '"' << endl;
+            if (getKeyPath() != "")
+                out << "key" << ' ' << '"' << getKeyPath() << '"' << endl;
+            if (getP12Path() != "")
+                out << "pkcs12" << ' ' << '"' << getP12Path() << '"' << endl;
+        }
     }
 
     LIBENCLOUD_ERR_IF (!configFile.open(QIODevice::WriteOnly));
@@ -358,6 +366,13 @@ int VpnConfig::toFile (const QString &path) const
 err:
     configFile.close();
     return ~0;
+}
+
+int VpnConfig::setAuthType (Auth::Type authType)
+{
+    _authType = authType;
+
+    return 0;
 }
 
 bool VpnConfig::isCompEnabled () const
