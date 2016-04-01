@@ -120,11 +120,13 @@
                         "start","stop"              GUI/browser
                         "syncRoutes"                Switchboard
                         "open","close"              Switchboard
+                        "setGateway"                OpenVPN up script (Windows-only)
 
     client -> encloud:
 
     e.g. 1              action=start
     e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
+    e.g. 2              action=setGateway&ip=192.168.151.1
 
     encloud -> gui (QCC):
 
