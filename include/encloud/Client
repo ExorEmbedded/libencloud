@@ -2,7 +2,9 @@
 #define _LIBENCLOUD_CLIENT_H_
 
 #include <QObject>
-#include <QUrl>
+// Avoid weird error on OSX:
+//  ./QUrl:1:1: error: source file is not valid UTF-8 <CF><FA><ED><FE><U+0007>
+//#include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkProxy>
