@@ -36,6 +36,10 @@ bool Client::run (const QString &url, const QVariantMap &opts)
     qDebug() << "headers:" << headers;
 
     QStringList postData = opts["postData"].toStringList();
+    QString contentType;
+
+    if (headers.contains("Content-Type"))
+        contentType = headers["Content-Type"];
 
     // if no parameters are passed, we assume GET
     if (postData.size() == 0)
@@ -44,7 +48,7 @@ bool Client::run (const QString &url, const QVariantMap &opts)
     }
     // if json content types is specified, we assume plain data
     // (considering only first -d parameter)
-    else if (headers["Content-Type"] == "application/json")
+    else if (contentType == "application/json")
     {
         client.post(url, headers, postData[0].toUtf8(), conf);
     }
