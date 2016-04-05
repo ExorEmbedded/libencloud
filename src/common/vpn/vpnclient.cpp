@@ -225,12 +225,14 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--dev-node" << LIBENCLOUD_TAPNAME;
 #endif
 
-    // fix routes not being applied properly on OSX in TAP mode
-#ifdef Q_OS_MAC
+    // Scripts are used:
+    //  - on Mac to fix handling of split routes
+    //  - on Windows to pull down routes upon disconnect and system using badcaching
+#ifndef Q_OS_LINUX
     args << "--script-security" << "2";
-    args << "--up" << quote(getBinDir() + "/openvpn-up.sh");
-    args << "--down" << quote(getBinDir() + "/openvpn-down.sh");
-    args << "--route-up" << quote(getBinDir() + "/openvpn-route-up.sh");
+    args << "--up" << quote(getBinDir() + "/openvpn-up" + LIBENCLOUD_SCRIPTEXT);
+    args << "--down" << quote(getBinDir() + "/openvpn-down" + LIBENCLOUD_SCRIPTEXT);
+    args << "--route-up" << quote(getBinDir() + "/openvpn-route-up" + LIBENCLOUD_SCRIPTEXT);
     // avoid bad routes if brought up too early (enpoints unreachable)
     args << "--route-delay" << "2";
 #endif

@@ -5,10 +5,11 @@
 namespace qurl {
 
 Client::Client ()
+    : m_error(false)
 {
-    connect(&client, SIGNAL(error(libencloud::Error)),
+    connect(&m_client, SIGNAL(error(libencloud::Error)),
             this, SLOT(clientError(libencloud::Error)));
-    connect(&client, SIGNAL(complete(QString)),
+    connect(&m_client, SIGNAL(complete(QString)),
             this, SLOT(clientComplete(QString)));
 }
 
@@ -20,6 +21,8 @@ bool Client::run (const QString &url, const QVariantMap &opts)
     QRegExp headerRx("(\\S+):\\ *(\\S+)");
     QRegExp dataRx("(\\S+)=(\\S+)");
 
+    m_error = false;
+
     qDebug() << "url:" << url;
     qDebug() << "opts:" << opts;
 
@@ -30,7 +33,7 @@ bool Client::run (const QString &url, const QVariantMap &opts)
             qDebug() << "Could not parse header:" << header;
             continue;
         }
-        headers[headerRx.cap(1).toUtf8()] = headerRx.cap(2).toUtf8();
+        headers[headerRx.cap(1).toLower().toUtf8()] = headerRx.cap(2).toUtf8();
     }
 
     qDebug() << "headers:" << headers;
@@ -38,19 +41,19 @@ bool Client::run (const QString &url, const QVariantMap &opts)
     QStringList postData = opts["postData"].toStringList();
     QString contentType;
 
-    if (headers.contains("Content-Type"))
-        contentType = headers["Content-Type"];
+    if (headers.contains("content-type"))
+        contentType = headers["content-type"];
 
     // if no parameters are passed, we assume GET
     if (postData.size() == 0)
     {
-        client.get(url, headers, conf);
+        m_client.get(url, headers, conf);
     }
     // if json content types is specified, we assume plain data
     // (considering only first -d parameter)
     else if (contentType == "application/json")
     {
-        client.post(url, headers, postData[0].toUtf8(), conf);
+        m_client.post(url, headers, postData[0].toUtf8(), conf);
     }
     else  // otherwise assume application/x-www-form-urlencoded and setup query params
     {
@@ -67,7 +70,7 @@ bool Client::run (const QString &url, const QVariantMap &opts)
             params.addQueryItem(dataRx.cap(1), dataRx.cap(2));
         }
 
-        client.run(url, params, headers, conf);
+        m_client.run(url, params, headers, conf);
     }
 
     return true;
@@ -76,6 +79,8 @@ bool Client::run (const QString &url, const QVariantMap &opts)
 void Client::clientError (const libencloud::Error &err)
 {
     qDebug() << "err: " << err.toString();
+
+    m_error = true;
 
     qApp->quit();
 }

@@ -97,7 +97,9 @@ int main (int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    return app.exec();
+    app.exec();
+
+    return (client.error() ? EXIT_FAILURE : EXIT_SUCCESS);
 }
 
 void usage (const QStringList &args)
