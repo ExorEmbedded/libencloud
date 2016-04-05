@@ -1,3 +1,12 @@
+#!/bin/sh
+#
+# Notes:
+#   - escape \${var} as => \\${var}
+
+echo "Generating brand-specific OpenVPN scripts"
+
+cat << EOF > openvpn-up.bat
+
 ::
 :: OpenVPN 'up' script for Windows
 :: Sets Encloud gateway so routes can be pulled down manually [CONNECT-333]
@@ -17,7 +26,7 @@ if "%ROUTE_VPN_GATEWAY%" == "" (
 ::
 :: Set locals
 ::
-set LIBENCLOUD_KEY="HKEY_LOCAL_MACHINE\SOFTWARE\Endian\libencloud"
+set LIBENCLOUD_KEY="HKEY_LOCAL_MACHINE\SOFTWARE\\${PACKAGE_ORG}\libencloud"
 set PROGRAMFILES_KEY="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion"
 set TMP_FILE=openvpn-up.bat.tmp
 
@@ -25,7 +34,7 @@ set TMP_FILE=openvpn-up.bat.tmp
 :: Parse port from registry
 ::
 :: The following parsing method works as plain batch not when launched from OpenVPN up script:
-:: for /f "usebackq tokens=1-3" %%i in (`REG QUERY %LIBENCLOUD_KEY% /v port 2^>nul`) do (
+:: for /f "usebackq tokens=1-3" %%i in ('REG QUERY %LIBENCLOUD_KEY% /v port') do (
 ::     set ENCLOUD_PORT=%%k
 :: )
 
@@ -55,8 +64,7 @@ if "%PROGRAMFILES_DIR%" == "" (
 )
 call :log ProgramFilesDir: %PROGRAMFILES_DIR%
 
-:: TODO branding
-set APPBIN_DIR="%PROGRAMFILES_DIR%\Endian\ConnectApp\bin"
+set APPBIN_DIR="%PROGRAMFILES_DIR%\\${PACKAGE_ORG}\\${PACKAGE_PROD_STRIP}\bin"
 
 ::
 :: Set gateway in Encloud Service
@@ -80,3 +88,7 @@ exit /b 0
 ::echo %* >> c:\out.log
 echo %*
 exit /b 0
+
+EOF
+echo "Done"
+exit 0
