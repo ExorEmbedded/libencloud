@@ -26,8 +26,26 @@ if "%ROUTE_VPN_GATEWAY%" == "" (
 ::
 :: Set locals
 ::
-set LIBENCLOUD_KEY="HKEY_LOCAL_MACHINE\SOFTWARE\\${PACKAGE_ORG}\libencloud"
-set PROGRAMFILES_KEY="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion"
+set SOFTWARE32_KEY=HKEY_LOCAL_MACHINE\SOFTWARE
+set SOFTWARE64_KEY=HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node
+set LIBENCLOUD64_KEY=%SOFTWARE64_KEY%\Endian\libencloud
+REG QUERY %LIBENCLOUD64_KEY% >nul
+if %errorlevel% == 0 (
+    set PLATFORM=64
+) else (
+    set PLATFORM=32
+)
+call :log Detected platform: %PLATFORM%
+if %PLATFORM% == 64 (
+    set SOFTWARE_KEY=%SOFTWARE64_KEY%
+    set PROGRAMFILES_VAL="ProgramFilesDir (x86)"
+) else (
+    set SOFTWARE_KEY=%SOFTWARE32_KEY%
+    set PROGRAMFILES_VAL="ProgramFilesDir"
+)
+
+set PROGRAMFILES_KEY=%SOFTWARE_KEY%\Microsoft\Windows\CurrentVersion
+set LIBENCLOUD_KEY=%SOFTWARE_KEY%\Endian\libencloud
 set TMP_FILE=openvpn-up.bat.tmp
 
 ::
@@ -48,14 +66,21 @@ if "%ENCLOUD_PORT%" == "" (
 call :log Read Encloud Port: %ENCLOUD_PORT%
 
 :: We have no environment, so we read also system paths from registry
-REG QUERY %PROGRAMFILES_KEY% /v ProgramFilesDir > %TMP_FILE%
-FOR /F "tokens=3-4" %%i in (%TMP_FILE%) DO (
-    :: Hack to handle possible space (we assume it has max two words)
-    if "%%j" == "" (
-        set PROGRAMFILES_DIR=%%i
-    ) else (
-        set PROGRAMFILES_DIR=%%i %%j
-    )
+REG QUERY %PROGRAMFILES_KEY% /v %PROGRAMFILES_VAL% > %TMP_FILE%
+if %PLATFORM% == 64 (
+    set START_TOKEN=4
+) else (
+    set START_TOKEN=3
+)
+FOR /F "tokens=%START_TOKEN%-6" %%a in (%TMP_FILE%) DO (
+    :: Hack to handle possible space (we assume it has max three words)
+    set PROGRAMFILES_DIR=%%a
+    if "%%b" NEQ "" (
+        set PROGRAMFILES_DIR=!PROGRAMFILES_DIR! %%b
+    ) 
+    if "%%c" NEQ "" (
+        set PROGRAMFILES_DIR=!PROGRAMFILES_DIR! %%c
+    ) 
 )
 del %TMP_FILE%
 if "%PROGRAMFILES_DIR%" == "" (
@@ -64,14 +89,14 @@ if "%PROGRAMFILES_DIR%" == "" (
 )
 call :log ProgramFilesDir: %PROGRAMFILES_DIR%
 
-set APPBIN_DIR="%PROGRAMFILES_DIR%\\${PACKAGE_ORG}\\${PACKAGE_PROD_STRIP}\bin"
+set APPBIN_DIR="%PROGRAMFILES_DIR%\Endian\ConnectApp\bin"
 
 ::
 :: Set gateway in Encloud Service
 ::
-%APPBIN_DIR%\qurl.exe http://localhost:%ENCLOUD_PORT%/api/v1/cloud -d "action=setGateway" -d "ip=%ROUTE_VPN_GATEWAY%"
+%APPBIN_DIR%\qurl.exe http://localhost:%ENCLOUD_PORT%/api/v1/cloud -d action=setGateway -d ip=%ROUTE_VPN_GATEWAY%
 
-if NOT %errorlevel% == 0 (
+if %errorlevel% NEQ 0 (
     call :log CRITICAL: qurl command exited with code: %errorlevel%
     exit /b 1
 )
