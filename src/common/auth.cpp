@@ -242,8 +242,11 @@ const QString &Auth::getUrl () const
 
 int Auth::setUrl (const QString &url)
 {
+    // url can be unspecified (e.g. file-based VPN configuration)
+    /*
     if (!isUrlValid(url))
         return ~0;
+    */
 
     _url = url;
 
@@ -294,8 +297,11 @@ const QString &Auth::getPath () const
 /* Password-based auth or password to decrypt PKCS12 */
 int Auth::setPath (const QString &path)
 {
+    // path can be unspecified (e.g. file-based VPN configuration)
+    /*
     if (!isPathValid(path))
         return ~0;
+    */
 
     _path = path;
 
