@@ -5,7 +5,7 @@
 
 echo "Generating brand-specific OpenVPN scripts"
 
-cat << EOF > openvpn-up.bat
+cat << EOF > openvpn-route-up.bat
 
 ::
 :: OpenVPN 'up' script for Windows
@@ -46,7 +46,7 @@ if %PLATFORM% == 64 (
 
 set PROGRAMFILES_KEY=%SOFTWARE_KEY%\Microsoft\Windows\CurrentVersion
 set LIBENCLOUD_KEY=%SOFTWARE_KEY%\Endian\libencloud
-set TMP_FILE=openvpn-up.bat.tmp
+set TMP_FILE=openvpn-route-up.bat.tmp
 
 ::
 :: Parse port from registry
