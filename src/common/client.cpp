@@ -281,6 +281,8 @@ void Client::_finished (QNetworkReply *reply)
 { 
     LIBENCLOUD_RETURN_IF (reply == NULL, );
 
+    QList<QNetworkReply::RawHeaderPair> headerPairs = reply->rawHeaderPairs();
+    QMap<QByteArray, QByteArray> headers;
     Connection *conn = _conns[reply];
 
     // Possible error code remappings (if required because they should not
@@ -302,7 +304,11 @@ void Client::_finished (QNetworkReply *reply)
     _conns.remove(reply);
     conn->deleteLater();
 
-    emit complete(_response);
+    // convert QList<QNetworkReply::RawHeaderPair> to QMap<QByteArray, QByteArray>
+    foreach (QNetworkReply::RawHeaderPair header, headerPairs)
+        headers[header.first] = header.second;
+
+    emit complete(_response, headers);
     return;
 err:
     disconnect(reply, NULL, this, NULL);

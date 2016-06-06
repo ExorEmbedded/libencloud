@@ -35,7 +35,7 @@ signals:
     void progress (const Progress &progress);
     void ipAssigned (const QString &ip);
     void fallback (bool isFallback);
-    void need (const QString &what);
+    void need (const QString &what, const QVariant &params);
     void authRequired (Auth::Id id);
     void authSupplied (const Auth &auth);
 

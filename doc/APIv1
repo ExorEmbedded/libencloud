@@ -7,6 +7,8 @@
 
     1.1:
         - setup: logPort setting
+    1.2:
+        - extended status/need to support child object parameters
 
 [  Type definitions ]
 
@@ -50,9 +52,14 @@
                     "step": 5                   # total number of steps
                 },
                 "fallback" : true,              # OPTIONAL (default=false) true if fallback VPN server is being used
-                "need" : "license sb_auth"      # OPTIONAL list of space-separated "need" strings
-            }'                                  # to be fulfilled via API. Possible values:
+                "need" : {                      # OPTIONAL needs to be fulfilled via API. Possible values:
                                                 # "license" (SECE), "sb_auth", "proxy_auth"
+                    "license" : {},
+                    "sb_auth" : {
+                        "domains" : [ "myorg1", "myorg2" ]     # optional domains (organizations)
+                    }
+                }
+            }'
 
 
 [ Authentication/Login API ]

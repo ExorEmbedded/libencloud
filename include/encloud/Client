@@ -77,7 +77,7 @@ public:
 
 signals:
     void error (const libencloud::Error &err);
-    void complete (const QString &reponse);
+    void complete (const QString &body, const QMap<QByteArray, QByteArray> &headers);
 
 protected slots:
     void _send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,

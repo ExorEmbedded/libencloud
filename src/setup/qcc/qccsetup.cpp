@@ -19,12 +19,12 @@ QccSetup::QccSetup (Config *cfg)
 
     connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
             this, SLOT(_onError(libencloud::Error)));
-    connect(&_setupMsg, SIGNAL(need(QString)),
-            this, SIGNAL(need(QString)));
+    connect(&_setupMsg, SIGNAL(need(QString, QVariant)),
+            this, SIGNAL(need(QString, QVariant)));
     connect(&_setupMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id)),
-            this, SIGNAL(authRequired(Auth::Id)));
+    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id, QVariant)),
+            this, SIGNAL(authRequired(Auth::Id, QVariant)));
     connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
             this, SIGNAL(serverConfigSupply(QVariant)));
     connect(this, SIGNAL(authSupplied(Auth)),
@@ -63,13 +63,13 @@ err:
     return ~0;
 }
 
-int QccSetup::stop ()
+int QccSetup::stop (bool reset)
 {
     LIBENCLOUD_TRACE;
 
     _retry.stop();
     _fsm.stop();
-    _deinitFsm();
+    _deinitFsm(reset);
 
     return 0;
 }
@@ -208,7 +208,8 @@ int QccSetup::_initFsm ()
     return 0;
 }
 
-int QccSetup::_deinitFsm ()
+// cached message data is cleared only if reset=true (default)
+int QccSetup::_deinitFsm (bool reset)
 {
     _fsm.removeState(_finalState);
     if (m_setupEnabled)
@@ -219,7 +220,8 @@ int QccSetup::_deinitFsm ()
         Q_FOREACH(QAbstractTransition *transition, _setupMsgState->transitions())
             _setupMsgState->removeTransition(transition);
 
-    _setupMsg.clear();
+    if (reset)
+        _setupMsg.clear();
     _clear();
 
     return 0;

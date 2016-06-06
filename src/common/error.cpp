@@ -181,6 +181,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Server Authentication Failure - please check credentials");
         case CodeAuthAlreadyConnected:
             return QObject::tr("Server Authentication Failure - user already connected");
+        case CodeAuthDomainRequired:
+            return QObject::tr("Server Authentication Failure - organization required");
 
         // 4xx
         case CodeProxyAuthFailed:

@@ -44,7 +44,7 @@ Manager::Manager()
     // <= Setup API
     connect(_statusApi, SIGNAL(apiState(libencloud::State)),
             this, SLOT(_statusApiState(libencloud::State)));
-    connect(_statusApi, SIGNAL(apiNeed(QString)),
+    connect(_statusApi, SIGNAL(apiNeed(QString, QVariant)),
             this, SLOT(_statusApiNeed(QString)));
 
     // <= Cloud API

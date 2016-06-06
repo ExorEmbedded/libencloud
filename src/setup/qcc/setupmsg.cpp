@@ -71,7 +71,7 @@ int SetupMsg::process ()
 
     if (!_sbAuth.isValid())
     {
-        emit authRequired(Auth::SwitchboardId);
+        emit authRequired(Auth::SwitchboardId, QVariant());
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
@@ -99,7 +99,8 @@ int SetupMsg::process ()
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+            this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
     _client->run(url, params, headers, sslconf);
@@ -138,11 +139,11 @@ void SetupMsg::_error (const libencloud::Error &error)
     sender()->deleteLater();
 }
 
-void SetupMsg::_clientComplete (const QString &response)
+void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (_decodeResponse(response));
+    LIBENCLOUD_ERR_IF (_decodeResponse(response, headers));
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
@@ -169,7 +170,7 @@ int SetupMsg::_encodeRequest (QUrl &url, QUrl &params)
     return 0;
 }
 
-int SetupMsg::_decodeResponse (const QString &response)
+int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
     QVariantMap json;
     QVariantMap map;
@@ -187,8 +188,22 @@ int SetupMsg::_decodeResponse (const QString &response)
 
         if (sbError == "Unauthorized")
         {
-            emit authRequired(Auth::SwitchboardId);
-            LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeAuthFailed)));
+            QStringList domains;
+
+            if (headers.contains(LIBENCLOUD_SETUP_QCC_DOMAINS_HDR))
+                domains = QString(headers[LIBENCLOUD_SETUP_QCC_DOMAINS_HDR]).split(LIBENCLOUD_SETUP_QCC_DOMAINS_SEPARATOR);
+
+            // If domain header is specified and contains more than one item, user needs to choose Organization
+            if (domains.count() > 1)
+            {
+                emit authRequired(Auth::SwitchboardId, domains);
+                LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeAuthDomainRequired)));
+            }
+            else
+            {
+                emit authRequired(Auth::SwitchboardId, QVariant());
+                LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeAuthFailed)));
+            }
         }
         else
         {

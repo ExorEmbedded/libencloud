@@ -17,7 +17,7 @@ TestApi::TestApi ()
             this, SLOT(_statusApiError(libencloud::Error)));
     connect(&_statusApi, SIGNAL(apiProgress(libencloud::Progress)),
             this, SLOT(_statusApiProgress(libencloud::Progress)));
-    connect(&_statusApi, SIGNAL(apiNeed(QString)),
+    connect(&_statusApi, SIGNAL(apiNeed(QString, QVariant)),
             this, SLOT(_statusApiNeed(QString)));
 
     //
