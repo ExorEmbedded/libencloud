@@ -32,6 +32,7 @@ public:
 
         CodeAuthFailed =            300,
         CodeAuthAlreadyConnected =  310,
+        CodeAuthDomainRequired   =  320,
 
         CodeProxyAuthFailed =       400,
 

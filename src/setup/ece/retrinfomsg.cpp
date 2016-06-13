@@ -45,7 +45,7 @@ int RetrInfoMsg::process ()
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+    connect(_client, SIGNAL(complete(QString, const QMap<QByteArray, QByteArray> &headers)), this, SLOT(_clientComplete(QString)));
 
     _client->run(url, params, QMap<QByteArray, QByteArray>(), config);
 

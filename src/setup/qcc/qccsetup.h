@@ -33,7 +33,7 @@ public:
     QccSetup (Config *cfg);
 
     int start ();
-    int stop ();
+    int stop (bool reset = true);
 
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
@@ -52,8 +52,8 @@ signals:
     //
     // internal -> setup -> core
     //
-    void need (const QString &what);
-    void authRequired (Auth::Id id);
+    void need (const QString &what, const QVariant &params);
+    void authRequired (Auth::Id id, const QVariant &params);
 
     //
     // core -> setup -> internal
@@ -75,7 +75,7 @@ private slots:
 
 private:
     int _initFsm ();
-    int _deinitFsm ();
+    int _deinitFsm (bool reset = true);
     int _initMsg (MessageInterface &msg);
     void _clear ();
     Progress _stateToProgress (QState *state);

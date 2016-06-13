@@ -19,7 +19,7 @@ StatusApi::StatusApi ()
     connect(&_pollTimer, SIGNAL(timeout()), this, SLOT(_pollTimeout()));
 
     connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_clientError(libencloud::Error)));
-    connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)), this, SLOT(_clientComplete(QString)));
 }
 
 StatusApi::~StatusApi ()
@@ -188,19 +188,19 @@ int StatusApi::_parseFallback (const QVariant &v)
 
 int StatusApi::_parseNeed (const QVariant &v)
 {
-    QStringList needs;
+    QVariantMap needs;
 
     if (!v.isNull())
     {
-        needs = v.toString().split(" ");
+        needs = v.toMap();
 
         //LIBENCLOUD_DBG("_needs: " << _needs << ", needs: " << needs);
 
         if (needs != _needs)
         {
-            foreach (QString n, needs)
-                if (!_needs.contains(n))
-                    emit apiNeed(n);
+            foreach (QString k, needs.keys())
+                if (!_needs.contains(k))
+                    emit apiNeed(k, needs[k]);
 
             _needs = needs;
         }
@@ -209,7 +209,7 @@ int StatusApi::_parseNeed (const QVariant &v)
     {
         if (!_needs.isEmpty())
         {
-            emit apiNeed("");
+            emit apiNeed("", QVariant());
             _needs.clear();
         }
     }

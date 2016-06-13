@@ -29,13 +29,13 @@ const Error &HttpHandler::getCoreError () const     { return _coreError; }
 State HttpHandler::getCoreState () const            { return _coreState; }
 Progress HttpHandler::getCoreProgress () const      { return _coreProgress; }
 bool HttpHandler::getFallback () const              { return _isFallback; }
-QString HttpHandler::getNeed () const               { return _needs.join(" "); }
+const QVariantMap &HttpHandler::getNeed () const    { return _needs; }
 
 void HttpHandler::removeNeed (const QString &what)
 {
     LIBENCLOUD_TRACE;
 
-    _needs.removeAll(what);
+    _needs.remove(what);
 }
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -230,12 +230,11 @@ void HttpHandler::_coreFallbackReceived (bool isFallback)
     _isFallback = isFallback;
 }
 
-void HttpHandler::_needReceived (const QString &what)
+void HttpHandler::_needReceived (const QString &what, const QVariant &params)
 {
     LIBENCLOUD_DBG("[Http] what: " << what);
 
-    if (!_needs.contains(what))
-        _needs.append(what);
+    _needs[what] = params;
 }
 
 void HttpHandler::_serverConfigReceived (const QVariant &config)
@@ -251,6 +250,8 @@ void HttpHandler::_serverConfigReceived (const QVariant &config)
 
 void HttpHandler::_clear()
 {
+    LIBENCLOUD_TRACE;
+
     _coreError = Error::CodeSuccess;
     _coreState = StateNone;
     _coreProgress = Progress();

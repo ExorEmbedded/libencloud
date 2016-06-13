@@ -45,7 +45,7 @@ signals:
     //
     // internal -> setup -> core
     //
-    void need (const QString &what);
+    void need (const QString &what, const QVariant &params);
     void authRequired (Auth::Id id);
 
     //
