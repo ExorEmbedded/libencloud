@@ -27,7 +27,7 @@ class LIBENCLOUD_DLLSPEC Connection : public QObject
     Q_OBJECT
 
 public:
-    Connection (Client *client, QNetworkReply *reply);
+    Connection (Client *client, QNetworkReply *reply, int timeout);
     ~Connection ();
 
 protected slots:
@@ -60,6 +60,7 @@ public:
 
     void setVerifyCA (bool b = true);
     void setDebug (bool b = true);
+    void setTimeout (int timeout);
 
     void reset ();
 
@@ -97,6 +98,7 @@ protected:
     QString _response;
     bool _verifyCA;
     bool _debug;
+    int _timeout;
     bool _sslError;
 };
 

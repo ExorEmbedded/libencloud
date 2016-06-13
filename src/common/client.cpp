@@ -21,6 +21,7 @@ Client::Client ()
     , _qnamExternal(false)
     , _verifyCA(true)
     , _debug(true)
+    , _timeout(LIBENCLOUD_CLIENT_TIMEOUT)
     , _sslError(false)
 {
     LIBENCLOUD_TRACE;
@@ -74,6 +75,12 @@ void Client::setVerifyCA (bool b)
 void Client::setDebug (bool b) 
 {
     _debug = b;
+}
+
+// if timeout is <= 0, it is disabled
+void Client::setTimeout (int timeout)
+{
+    _timeout = timeout;
 }
 
 void Client::reset ()
@@ -168,7 +175,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
             this, SLOT(_networkError(QNetworkReply::NetworkError)));
 
-    conn = new Connection(this, reply);
+    conn = new Connection(this, reply, _timeout);
     LIBENCLOUD_ERR_IF (conn == NULL);
 
     _conns[reply] = conn;
@@ -330,23 +337,24 @@ void Client::_connectQnam()
             SLOT(_finished(QNetworkReply *)));
 }
 
-Connection::Connection (Client *client, QNetworkReply *reply)
+Connection::Connection (Client *client, QNetworkReply *reply, int timeout)
     : _client(client)
     , _reply(reply)
 {
     //LIBENCLOUD_TRACE;
 
-    connect(&_timer, SIGNAL(timeout()), this,
-            SLOT(_timeout()));
+    if (timeout > 0)
+    {
+        connect(&_timer, SIGNAL(timeout()), this,
+                SLOT(_timeout()));
 
-    _timer.setSingleShot(true);
-    _timer.start(LIBENCLOUD_CLIENT_TIMEOUT * 1000);
+        _timer.setSingleShot(true);
+        _timer.start(timeout * 1000);
+    }
 }
 
 void Connection::_timeout ()
 {
-    //LIBENCLOUD_TRACE;
-
     LIBENCLOUD_DBG("[Client] id " << QString::number(_client->_id));
 
     if (_reply)

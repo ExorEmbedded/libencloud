@@ -22,6 +22,7 @@ Api::Api ()
     LIBENCLOUD_TRACE;
 
     _client.setDebug(false);
+    _client.setTimeout(-1);
 }
 
 Api::~Api ()
