@@ -193,8 +193,9 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
             if (headers.contains(LIBENCLOUD_SETUP_QCC_DOMAINS_HDR))
                 domains = QString(headers[LIBENCLOUD_SETUP_QCC_DOMAINS_HDR]).split(LIBENCLOUD_SETUP_QCC_DOMAINS_SEPARATOR);
 
-            // If domain header is specified and contains more than one item, user needs to choose Organization
-            if (domains.count() > 1)
+            // If domain header is specified and contains at least one item, a new authentication is required
+            // (with user selection if there are two or more domains to choose from)
+            if (domains.count() > 0)
             {
                 emit authRequired(Auth::SwitchboardId, domains);
                 LIBENCLOUD_EMIT_ERR (error(Error(Error::CodeAuthDomainRequired)));
