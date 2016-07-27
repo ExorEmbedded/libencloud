@@ -28,7 +28,7 @@ if "%ROUTE_VPN_GATEWAY%" == "" (
 ::
 set SOFTWARE32_KEY=HKEY_LOCAL_MACHINE\SOFTWARE
 set SOFTWARE64_KEY=HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node
-set LIBENCLOUD64_KEY=%SOFTWARE64_KEY%\Endian\libencloud
+set LIBENCLOUD64_KEY=%SOFTWARE64_KEY%\\${PACKAGE_ORG}\libencloud
 REG QUERY %LIBENCLOUD64_KEY% >nul
 if %errorlevel% == 0 (
     set PLATFORM=64
@@ -45,7 +45,7 @@ if %PLATFORM% == 64 (
 )
 
 set PROGRAMFILES_KEY=%SOFTWARE_KEY%\Microsoft\Windows\CurrentVersion
-set LIBENCLOUD_KEY=%SOFTWARE_KEY%\Endian\libencloud
+set LIBENCLOUD_KEY=%SOFTWARE_KEY%\\${PACKAGE_ORG}\libencloud
 set TMP_FILE=openvpn-route-up.bat.tmp
 
 ::
@@ -89,7 +89,7 @@ if "%PROGRAMFILES_DIR%" == "" (
 )
 call :log ProgramFilesDir: %PROGRAMFILES_DIR%
 
-set APPBIN_DIR="%PROGRAMFILES_DIR%\Endian\ConnectApp\bin"
+set APPBIN_DIR="%PROGRAMFILES_DIR%\\${PACKAGE_ORG}\\${PACKAGE_PROD_STRIP}\bin"
 
 ::
 :: Set gateway in Encloud Service
