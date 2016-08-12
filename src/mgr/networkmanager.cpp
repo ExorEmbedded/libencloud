@@ -136,6 +136,18 @@ void NetworkManager::finishedReadRoutes (int exitCode, QProcess::ExitStatus exit
 // protected methods
 //
 
+QString NetworkManager::padIp4 (const QString &ip)
+{
+    QString s(ip);
+
+    int nparts = ip.split(".").count();
+
+    for (int i = nparts; i < 4; i++)
+        s += ".0";
+
+    return s;
+}
+
 void NetworkManager::readRoutesEx (QProcess *process)
 {
     //LIBENCLOUD_TRACE;
@@ -154,17 +166,21 @@ void NetworkManager::readRoutesEx (QProcess *process)
     {
         if (regex.indexIn(line) != -1)
         {
-            QString ip = regex.cap(1);
-            QString mask = regex.cap(2);
+            QString dest = regex.cap(1);
+#ifdef Q_OS_WIN
             QString gateway = regex.cap(3);
-            QString interface = regex.cap(4);
-            QString metric = regex.cap(5);
+#else
+            QString gateway = regex.cap(2);
+#endif
+
+            if (dest == "default")
+                continue;
 
             if (_routesOperation == RemoveRoutesOperation &&
                 gateway == _gateway)
-                delRoute(ip);
+                delRoute(dest);
             else
-                currentRoutes.append(ip);
+                currentRoutes.append(padIp4(dest));
         }
     }
 
@@ -270,7 +286,12 @@ void NetworkManager::addRoute (const QString &endpoint)
                 _gw);
     else // network
         _processManager->start("route", "add -net " + ipmask.first +
-                " netmask " + ipmask.second +
+# ifdef Q_OS_MAC
+                " -netmask " +
+# else
+                " netmask " +
+# endif
+                ipmask.second +
 # ifdef Q_OS_MAC
                 " " +
 # else
@@ -300,7 +321,12 @@ void NetworkManager::delRoute (const QString &endpoint)
         _processManager->start("route", "delete " + ipmask.first);
     else
         _processManager->start("route", "delete -net " + ipmask.first +
-                " netmask " + ipmask.second);
+# ifdef Q_OS_MAC
+                " -netmask " +
+# else
+                " netmask " +
+# endif
+                ipmask.second);
 #endif
 
 err:

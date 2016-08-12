@@ -64,11 +64,12 @@
     e.g. 3              id=sb&type=x509&url=<url>&pass=mypass&path=c:\key.p12
 
     Def "id"            OPTIONAL authentication identifier: "sb" (default), "proxy"
-    Def "type"          OPTIONAL type of authentication: "user-pass" (default), "x509"
+    Def "type"          OPTIONAL type of authentication: "user-pass" (default), "x509" or "x509-user-pass" (2-factor)
     Def "url"           destination url (for Switchboard login or proxy)
-    Def "user"          user for authentication
-    Def "pass"          password for authentication
-    Def "path"          OPTIONAL path (for type=x509)
+    Def "user"          OPTIONAL user for authentication (type="user-pass" or "x509-user-pass")
+    Def "pass"          OPTIONAL password for authentication (type="user-pass" or "x509-user-pass")
+    Def "path"          OPTIONAL path (for type="x509")
+    Def "p12pass"       OPTIONAL path (for type="x509-user-pass")
 
 
 [ Setup API ]             
@@ -107,10 +108,6 @@
                      "openvpn_internal_ip" : "192.168.150.1",
                      "fallback_openvpn_internal_ip" : "192.168.151.1"
                      "available_pages" : { "settings" : "/manage/access/settings/standalone/",      # [...]
-                 },
-                 "client" : {
-                    "already_connected" : false,
-                 }
              }'
 
 
@@ -123,11 +120,13 @@
                         "start","stop"              GUI/browser
                         "syncRoutes"                Switchboard
                         "open","close"              Switchboard
+                        "setGateway"                OpenVPN up script (Windows-only)
 
     client -> encloud:
 
     e.g. 1              action=start
     e.g. 2              action=syncRoutes&ips=192.168.1.100,192.168.1.101
+    e.g. 2              action=setGateway&ip=192.168.151.1
 
     encloud -> gui (QCC):
 

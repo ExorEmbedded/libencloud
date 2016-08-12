@@ -31,6 +31,7 @@ public:
         CodeServerLicenseInvalid =  203,
 
         CodeAuthFailed =            300,
+        CodeAuthAlreadyConnected =  310,
 
         CodeProxyAuthFailed =       400,
 

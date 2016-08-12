@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_CLOUD_VPNCONFIG_H_
 #define _LIBENCLOUD_PRIV_CLOUD_VPNCONFIG_H_
 
+#include <encloud/Auth>
 #include <encloud/Utils>
 
 namespace libencloud {
@@ -53,6 +54,11 @@ public:
     QString toString () const;
     int fromFile (const QString &path, bool parse = true);
     int toFile (const QString &path) const;
+
+    // Auth Type *can* be set to avoid ambiguities when writing to file
+    // (for example the UI may set p12Path then change to userpass, in which 
+    // case p12Path should no longer be written)
+    int setAuthType (Auth::Type authType);
 
     // Helper access functions - use these methods only if object was created
     // manually or via fromMap() - content is not parsed if creating via
@@ -114,6 +120,8 @@ private:
     bool _valid;
     bool _isFile;
     QString _string;
+
+    Auth::Type _authType;
 
     //
     // configuration

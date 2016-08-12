@@ -63,6 +63,8 @@ int SetupMsg::process ()
     QSslConfiguration sslconf;
     QSslCertificate cert;
     
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+
     LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
 
     QList<QSslCertificate> cas(cert.fromPath(_cfg->config.sslInit.caPath.absoluteFilePath()));
@@ -72,8 +74,6 @@ int SetupMsg::process ()
         emit authRequired(Auth::SwitchboardId);
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
-
-    EMIT_ERROR_ERR_IF (_cfg == NULL);
 
     // client already destroyed via deleteLater()
     //LIBENCLOUD_DELETE (_client);
@@ -212,6 +212,9 @@ int SetupMsg::_decodeResponse (const QString &response)
     LIBENCLOUD_EMIT_ERR_IF (!_vpnConfig.isValid(),
             error(Error(tr("VPN Configuration from Switchboard not valid"))));
 
+    LIBENCLOUD_EMIT_ERR_IF (!json["already_connected"].isNull() && json["already_connected"].toBool(),
+            error(Error(Error::CodeAuthAlreadyConnected)));
+
     if (!json["fallback_openvpn_conf"].isNull())
     {
         _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString());
@@ -234,10 +237,6 @@ int SetupMsg::_decodeResponse (const QString &response)
     map["available_pages"] = json["available_pages"];
     _serverConfig["server"] = map;
 
-    map.clear();
-    map["already_connected"] = json["already_connected"];
-    _serverConfig["client"] = map;
-
     emit (serverConfigSupply(_serverConfig));
 
     return 0;
@@ -247,6 +246,8 @@ err:
 
 int SetupMsg::_unpackResponse ()
 {
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+
     QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
 

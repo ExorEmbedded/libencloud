@@ -79,13 +79,18 @@ LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode)
     return file.open(mode);
 }
 
-LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path)
+LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path, bool text)
 {
     QFile file(path);
+    QIODevice::OpenMode openMode = QIODevice::WriteOnly;
+    if (text)
+        openMode |= QIODevice::Text;
 
-    LIBENCLOUD_ERR_IF (!file.open(QIODevice::WriteOnly | QIODevice::Text));
+    LIBENCLOUD_ERR_IF (!file.open(openMode));
     LIBENCLOUD_ERR_IF (file.write(ba) == -1);
     file.close();
+
+    QFile::setPermissions(path, QFile::ReadOwner|QFile::WriteOwner);
 
     return 0;
 err:

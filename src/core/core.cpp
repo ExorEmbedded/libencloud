@@ -548,6 +548,8 @@ void Core::_actionRequest (const QString &action, const Params &params)
         }
         emit actionRequest(action, params);
     }
+    else if (action == "setGateway")
+        _networkManager->setGateway(paramsFind(params, "ip"));
     else 
         emit error(Error(tr("Invalid action: ") + action));
 

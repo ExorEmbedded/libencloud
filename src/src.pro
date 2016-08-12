@@ -178,23 +178,11 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += $${_PRO_FILE_PWD_}/http/*.h
 SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
 
-# for SHGetFolderPath()
-win32 {
-    !wince {
-        LIBS += -lshfolder
-    }
-}
-
+# other libs
 about {
-    win32 {
-        PRE_TARGETDEPS  += $$OUT_PWD/../about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
-        LIBS += $$PRE_TARGETDEPS
-    } unix {
-        LIBS += -L$$OUT_PWD/../about/$$DESTDIR/ -labout
-    }
+    LIBS += $${ABOUT_LIBS}
 }
 
 # installation
 target.path = $$LIBDIR
 INSTALLS += target
-

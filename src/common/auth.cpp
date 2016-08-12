@@ -17,7 +17,7 @@ Auth::Auth ()
 }
 
 Auth::Auth (Id id, Type type, QString url, 
-        QString user, QString pass, QString path)
+        QString user, QString pass, QString path, QString p12Pass)
     : _valid(false)
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
@@ -27,7 +27,8 @@ Auth::Auth (Id id, Type type, QString url,
             setUrl(url) ||
             setUser(user) ||
             setPass(pass) || 
-            setPath(path))
+            setPath(path) ||
+            setP12Pass(p12Pass))
         goto err;
 
     _valid = true;
@@ -36,8 +37,8 @@ err:
     return; 
 }
 
-Auth::Auth (const QString &id, QString type, QString url, 
-        QString user, QString pass, QString path)
+Auth::Auth (const QString &id, QString type, QString url,
+        QString user, QString pass, QString path, QString p12Pass)
     : _valid(false)
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
@@ -47,7 +48,8 @@ Auth::Auth (const QString &id, QString type, QString url,
             setUrl(url) ||
             setUser(user) ||
             setPass(pass) ||
-            setPath(path))
+            setPath(path) ||
+            setP12Pass(p12Pass))
         goto err;
 
     _valid = true;
@@ -69,10 +71,10 @@ int Auth::validate ()
     LIBENCLOUD_ERR_IF (!isIdValid(_id));
     LIBENCLOUD_ERR_IF (!isTypeValid(_type));
     LIBENCLOUD_ERR_IF (!isUrlValid(_url));
-    LIBENCLOUD_ERR_IF (_type == Auth::UserpassType &&
+    LIBENCLOUD_ERR_IF ((_type == Auth::UserpassType || _type == Auth::CertificateUserpassType) &&
             (!isUserValid(_user) ||
             !isPassValid(_pass)));
-    LIBENCLOUD_ERR_IF (_type == Auth::CertificateType &&
+    LIBENCLOUD_ERR_IF ((_type == Auth::CertificateType || _type == Auth::CertificateUserpassType) &&
             !isPathValid(_path));
 
     _valid = true;
@@ -91,7 +93,6 @@ QString Auth::toString () const
     s += "type: " +     getStrType() + ", ";
     s += "url: " +      getUrl() + ", ";
     s += "user: " +     getUser() + ", ";
-    s += "pass: <not shown>, ";
     s += "path: " +     getPath();
 
     return s;
@@ -104,7 +105,8 @@ bool Auth::operator== (const libencloud::Auth &auth) const
             _url == auth._url &&
             _user == auth._user &&
             _pass == auth._pass &&
-            _path == auth._path);
+            _path == auth._path &&
+            _p12Pass == auth._p12Pass);
 }
 
 QDebug operator<< (QDebug d, const Auth &auth)
@@ -176,6 +178,8 @@ const QString Auth::getStrType () const
             return "user-pass";
         case Auth::CertificateType:
             return "x509";
+        case Auth::CertificateUserpassType:
+            return "x509-user-pass";
         case Auth::HttpProxyType:
             return "http";
         case Auth::SocksProxyType:
@@ -193,6 +197,8 @@ int Auth::setStrType (const QString &type)
         _type = Auth::UserpassType;
     else if (type == "x509")
         _type = Auth::CertificateType;
+    else if (type == "x509-user-pass")
+        _type = Auth::CertificateUserpassType;
     else if (type == "http")
         _type = Auth::HttpProxyType;
     else if (type == "socks")
@@ -236,8 +242,11 @@ const QString &Auth::getUrl () const
 
 int Auth::setUrl (const QString &url)
 {
+    // url can be unspecified (e.g. file-based VPN configuration)
+    /*
     if (!isUrlValid(url))
         return ~0;
+    */
 
     _url = url;
 
@@ -264,7 +273,7 @@ const QString &Auth::getPass () const
     return _pass;
 }
 
-/* Password-based auth OR password to decrypt PKCS12
+/* Password-based auth
 
    Note: no validity checks are performed here so that it can be reset - just
    make sure it's set when validate is called().
@@ -288,10 +297,34 @@ const QString &Auth::getPath () const
 /* Password-based auth or password to decrypt PKCS12 */
 int Auth::setPath (const QString &path)
 {
+    // path can be unspecified (e.g. file-based VPN configuration)
+    /*
     if (!isPathValid(path))
         return ~0;
+    */
 
     _path = path;
+
+    return 0;
+}
+
+const QString &Auth::getP12Pass () const
+{
+    return _p12Pass;
+}
+
+/* Password to decrypt PKCS12 certs
+
+   Note: no validity checks are performed here so that it can be reset - just
+   make sure it's set when validate is called().
+ */
+int Auth::setP12Pass (const QString &pass)
+{
+/*
+    if (!isPassValid(pass))
+        return ~0;
+*/
+    _p12Pass = pass;
 
     return 0;
 }

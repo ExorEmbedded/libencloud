@@ -50,16 +50,14 @@ exists($${LOCALCONFIG}): include($${LOCALCONFIG})
 PKGNAME = libencloud
 SRCBASEDIR = $${PWD}
 
+ENCLOUD_SRC = $$SRCBASEDIR/../encloud
+include($${ENCLOUD_SRC}/defines.pri)
+
 # [ client/package version ]
 # *** DO NOT CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # used for version in User Agent - particularly important in modeqcc for
 # Switchboard update checks
 modeqcc:!splitdeps {
-    endian {
-        PRODUCT_SRC = $$SRCBASEDIR/../connectapp
-    } else {
-        PRODUCT_SRC = $$SRCBASEDIR/../jmconnect
-    }
     DEFINES += PRODUCT_SRC=$$PRODUCT_SRC
     !exists($${PRODUCT_SRC}): error(Could not find main application sources! Expected in $${PRODUCT_SRC})
     include($${PRODUCT_SRC}/version.pri)
@@ -73,7 +71,7 @@ DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
 # [ libencloud version ] 
 # *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.8.0
+VERSION = 0.9.0
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
 
@@ -83,13 +81,12 @@ DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 }
 
 endian {
-    ORG = Endian
     DEFINES += LIBENCLOUD_ENDIAN
 } else:exor {
-    ORG = Exor
     DEFINES += LIBENCLOUD_EXOR
+} else:panda {
 } else {
-    error("organisation must be defined (CONFIG += endian|exor)!")
+    error("an organization must be specified in CONFIG!")
 }
 
 #
@@ -123,38 +120,31 @@ win32 {
     LIBEXT = a
 }
 
+# keep build files separate from sources
+UI_DIR = build/uics
+MOC_DIR = build/mocs
+OBJECTS_DIR = build/objs
+Release:DESTDIR = release
+Debug:DESTDIR = debug
+
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
-
-    # special case for Yocto - currently we use QCC mode also on devices
-    splitdeps {
-        PRODUCT="Encloud"
-    } else {
-        endian {
-            PRODUCT="ConnectApp"
-        } else {
-            PRODUCT="HMIConnect"
-        }
-    }
 } else:modeece {
-    PRODUCT="Encloud"
     DEFINES += LIBENCLOUD_MODE_ECE
 } else:modesece {
-    PRODUCT="SECE"
     DEFINES += LIBENCLOUD_MODE_SECE
 } else:modevpn {
-    PRODUCT="OVPN"
     DEFINES += LIBENCLOUD_MODE_VPN
 } else {
     error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
 }
-DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT}\\\"
+DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 
 splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
-PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT}
+PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
 
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
@@ -189,10 +179,10 @@ DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
 OPENSSLPATH = $${OPENSSL_INSTALLPATH}
 windows{
     isEmpty(OPENSSLPATH){
-        endian {
-            OPENSSLPATH="$$SRCBASEDIR/../bins-connectapp/openssl"
-        } else {
+        exor {
             OPENSSLPATH="c:\\openssl"
+        } else {  # endian, panda
+            OPENSSLPATH="$$SRCBASEDIR/../bins-connectapp/openssl"
         }
     }
     !exists($$OPENSSLPATH) {
@@ -203,6 +193,23 @@ windows{
 } else {
     LIBS += -lssl -lcrypto
 }
+
+# libabout
+about {
+    win32 {
+        ABOUT_LIBS += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
+    } unix {
+        ABOUT_LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
+    }
+}
+
+# for SHGetFolderPath()
+win32 {
+    !wince {
+        LIBS += -lshfolder
+    }
+}
+
 
 #
 # build settings
@@ -230,9 +237,3 @@ windows {  # used only for dev - installer handles positioning on target
     CONFDIR = /etc/encloud
 }
 
-# keep build files separate from sources
-UI_DIR = build/uics
-MOC_DIR = build/mocs
-OBJECTS_DIR = build/objs
-Release:DESTDIR = release
-Debug:DESTDIR = debug

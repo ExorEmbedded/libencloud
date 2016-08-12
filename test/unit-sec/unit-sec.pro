@@ -22,6 +22,9 @@ DEPENDPATH += $$SRCBASEDIR/src/
 # libencloud
 LIBS += -L$$SRCBASEDIR/src/$$DESTDIR
 LIBS += -lencloud$$DBG_SUFFIX
+about {
+    LIBS += $${ABOUT_LIBS}
+}
 
 # json - external linkage only for QJson
 contains(CONFIG, qjson) {

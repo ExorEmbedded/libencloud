@@ -94,6 +94,12 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_EXE                ""
 #endif
 
+#ifdef Q_OS_WIN
+#  define LIBENCLOUD_SCRIPTEXT          ".bat"
+#else
+#  define LIBENCLOUD_SCRIPTEXT          ".sh"
+#endif
+
 #ifndef LIBENCLOUD_SPLITDEPS // relative paths - refer to src/common/config.cpp
 #  ifdef Q_OS_WIN32
 #    define LIBENCLOUD_ETC_PREFIX       LIBENCLOUD_APP "\\etc\\"   // => %ProgramFiles% \ LIBENCLOUD_INSTALLDIR \ etc
@@ -142,6 +148,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_AUTH_NONE            "none"
 #define LIBENCLOUD_AUTH_USERPASS        "user-pass"
 #define LIBENCLOUD_AUTH_X509            "x509"
+#define LIBENCLOUD_AUTH_X509_USERPASS   "x509-user-pass"  // 2-factor
 #define LIBENCLOUD_AUTH_CERTKEY         "cert-key"
 #define LIBENCLOUD_AUTH_PKCS12          "pkcs12"
 #define LIBENCLOUD_CA_FILE              "ca.pem"

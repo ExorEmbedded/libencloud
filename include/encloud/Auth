@@ -11,9 +11,9 @@ namespace libencloud
 
 /**
  * Authentication object used to communicate credentials for:
- *   - user/pass-based SSL and VPN connections
- *   - user/pass-based proxy authentication
- *   - decryption of PKCS12 files which contain X509 certificates/keys
+ *   1) HTTPS connections (user/pass or PKCS12 cert)
+ *   2) VPN connections (user/pass, PKCS12 cert or 2factor PKCS12 cert + user/pass)
+ *   3) proxy authentication (user/pass for NTLM or NCSA)
  */
 class LIBENCLOUD_DLLSPEC Auth
 {
@@ -38,6 +38,7 @@ public:
         //
         UserpassType = 0,
         CertificateType,
+        CertificateUserpassType,  // 2-factor
         CookieType,
         
         //
@@ -52,9 +53,9 @@ public:
 
     Auth ();
     Auth (Id id, Type type = NoneType, QString url = "",
-            QString user = "", QString pass = "", QString path = "");
+            QString user = "", QString pass = "", QString path = "", QString p12Pass = "");
     Auth (const QString &id, QString type = "", QString url = "",
-            QString user = "", QString pass = "", QString path = "");
+            QString user = "", QString pass = "", QString path = "", QString p12Pass = "");
 
     bool isValid () const;
     int validate ();
@@ -96,6 +97,9 @@ public:
     int setPath (const QString &path);
     inline bool isPathValid (const QString &path) { return !(_type == CertificateType && path == ""); };
 
+    const QString &getP12Pass () const;
+    int setP12Pass (const QString &pass);
+
 protected:
     bool _valid;
     Id _id;
@@ -104,6 +108,7 @@ protected:
     QString _user;
     QString _pass;
     QString _path;
+    QString _p12Pass;
 };
 
 }  // namespace libencloud

@@ -1,3 +1,4 @@
+#include <QTimer>
 #include <encloud/Client>
 #include <common/common.h>
 #include <common/config.h>
@@ -13,9 +14,10 @@
 
 namespace libencloud {
 
+quint32 Client::_id = 0;
+
 Client::Client ()
-    : _reply(NULL)
-    , _qnam(NULL)
+    : _qnam(NULL)
     , _qnamExternal(false)
     , _verifyCA(true)
     , _debug(true)
@@ -28,9 +30,6 @@ Client::Client ()
 
     _connectQnam();
 
-    _timer.setSingleShot(true);
-    connect(&_timer, SIGNAL(timeout()), this,
-            SLOT(_timeout()));
 err:
     return;
 }
@@ -38,6 +37,8 @@ err:
 Client::~Client ()
 {
     LIBENCLOUD_TRACE;
+
+    qDeleteAll(_conns);
 
     if (!_qnamExternal)
         LIBENCLOUD_DELETE(_qnam);
@@ -77,16 +78,23 @@ void Client::setDebug (bool b)
 
 void Client::reset ()
 {
-    if (_qnamExternal)
-        return;
+    LIBENCLOUD_TRACE;
 
-    disconnect(_qnam, NULL, NULL, NULL);
+    // also stops timers associated with connections
+    qDeleteAll(_conns);
+    _conns.clear();
 
     if (_qnam)
-        _qnam->deleteLater();
+        disconnect(_qnam, NULL, this, NULL);
 
-    _qnam = new QNetworkAccessManager;
-    LIBENCLOUD_ERR_IF (_qnam == NULL);
+    if (!_qnamExternal)
+    {
+        if (_qnam)
+            _qnam->deleteLater();
+
+        _qnam = new QNetworkAccessManager;
+        LIBENCLOUD_ERR_IF (_qnam == NULL);
+    }
 
     _connectQnam();
 err:
@@ -114,14 +122,14 @@ void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 		const QByteArray &data, const QSslConfiguration &conf)
 {
-    CLIENT_DBG("[Client] to: " << url.toString());
+    CLIENT_DBG("[Client] id: " << QString::number(++_id) << " to: " << url.toString());
     //CLIENT_DBG(" ### >>>>> ### " << data);
 
+    Connection *conn = NULL;
     QNetworkRequest request(url);
+    QNetworkReply *reply = NULL;
     _sslError = false;
     _response = "";
-
-    LIBENCLOUD_RETURN_IF (_reply != NULL, );
 
 #ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
@@ -145,23 +153,28 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     if ((msgType == MSG_TYPE_GET) ||
             (msgType == MSG_TYPE_NONE && data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((_reply = _qnam->get(request)) == NULL,
+        EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
                 tr("Client failed creating GET request"));
     }
     else if ((msgType == MSG_TYPE_POST) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
-        EMIT_ERROR_ERR_IF ((_reply = _qnam->post(request, data)) == NULL,
+        EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
                 tr("Client falied creating POST request"));
     } else {
         LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
     }
 
-    connect(_reply, SIGNAL(error(QNetworkReply::NetworkError)), 
-            SLOT(_networkError(QNetworkReply::NetworkError)));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
+            this, SLOT(_networkError(QNetworkReply::NetworkError)));
 
-    _timer.start(LIBENCLOUD_CLIENT_TIMEOUT * 1000);
+    conn = new Connection(this, reply);
+    LIBENCLOUD_ERR_IF (conn == NULL);
+
+    _conns[reply] = conn;
+    return;
 err:
+    LIBENCLOUD_DELETE(conn);
     return;
 }
 
@@ -266,8 +279,9 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  */
 void Client::_finished (QNetworkReply *reply) 
 { 
+    LIBENCLOUD_RETURN_IF (reply == NULL, );
 
-    _timer.stop();
+    Connection *conn = _conns[reply];
 
     // Possible error code remappings (if required because they should not
     // occur with proper configuration):
@@ -275,40 +289,73 @@ void Client::_finished (QNetworkReply *reply)
     //  - key values mismatch (99)
     if (reply->error())
     {
-        LIBENCLOUD_DBG("[Client] Error in reply (" << reply->error() << "): " << reply->errorString());
+        LIBENCLOUD_DBG("[Client] Error in reply id " << QString::number(_id) <<
+                " (" << reply->error() << "): " << reply->errorString());
         goto err;
     }
 
     _response = reply->readAll();
 
-    CLIENT_DBG("[Client] ### <<<<< ### " << _response);
+    CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
 
-    reply->deleteLater();
-    _reply = NULL;
+    disconnect(reply, NULL, this, NULL);
+    _conns.remove(reply);
+    conn->deleteLater();
 
     emit complete(_response);
-
     return;
 err:
-    reply->deleteLater();
-    _reply = NULL;
-}
-
-void Client::_timeout ()
-{
-    LIBENCLOUD_TRACE;
-
-    _reply->abort();
+    disconnect(reply, NULL, this, NULL);
+    _conns.remove(reply);
+    conn->deleteLater();
+    return;
 }
 
 void Client::_connectQnam()
 {
+    if (_qnam == NULL)
+        return;
+
     connect(_qnam, SIGNAL(proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)), this,
             SLOT(_proxyAuthenticationRequired(const QNetworkProxy &, QAuthenticator *)));
     connect(_qnam, SIGNAL(sslErrors(QNetworkReply *,QList<QSslError>)), this,
             SLOT(_sslErrors(QNetworkReply *,QList<QSslError>)));
     connect(_qnam, SIGNAL(finished(QNetworkReply *)), this,
             SLOT(_finished(QNetworkReply *)));
+}
+
+Connection::Connection (Client *client, QNetworkReply *reply)
+    : _client(client)
+    , _reply(reply)
+{
+    //LIBENCLOUD_TRACE;
+
+    connect(&_timer, SIGNAL(timeout()), this,
+            SLOT(_timeout()));
+
+    _timer.setSingleShot(true);
+    _timer.start(LIBENCLOUD_CLIENT_TIMEOUT * 1000);
+}
+
+void Connection::_timeout ()
+{
+    //LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_DBG("[Client] id " << QString::number(_client->_id));
+
+    if (_reply)
+    {
+        disconnect(_reply, NULL, this, NULL);
+        _client->_conns.remove(_reply);
+        LIBENCLOUD_DELETE_LATER(_reply);
+    }
+
+    deleteLater();
+}
+
+Connection::~Connection ()
+{
+    //LIBENCLOUD_TRACE;
 }
 
 } // namespace libencloud

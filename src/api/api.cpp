@@ -41,6 +41,7 @@ int Api::init ()
 
     // API settings have System Scope (used by Encloud Service)
     __settings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    LIBENCLOUD_DBG("[Api] file: " << __settings->fileName());
     LIBENCLOUD_ERR_IF (__settings == NULL);
 
     _settingsTimer.start(LIBENCLOUD_API_SETTINGS_TOUT);

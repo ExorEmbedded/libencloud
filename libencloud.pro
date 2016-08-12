@@ -6,6 +6,7 @@ SUBDIRS += include
 SUBDIRS += about
 SUBDIRS += src
 SUBDIRS += scripts
+SUBDIRS += tools
 SUBDIRS += etc
 
 !notest:SUBDIRS += test

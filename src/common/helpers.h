@@ -21,6 +21,7 @@
 
 #define LIBENCLOUD_FREE(ptr) do { if (ptr) { free(ptr); ptr = NULL; } } while(0)
 #define LIBENCLOUD_DELETE(ptr) do { if (ptr) { delete ptr; ptr = NULL; } } while(0)
+#define LIBENCLOUD_DELETE_LATER(ptr) do { if (ptr) { ptr->deleteLater(); ptr = NULL; } } while(0)
 
 #define LIBENCLOUD_ONCE for (static bool once = true; once; once = false)
 

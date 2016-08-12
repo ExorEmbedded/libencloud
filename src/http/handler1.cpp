@@ -137,7 +137,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
 #if defined(LIBENCLOUD_MODE_QCC) || defined(LIBENCLOUD_MODE_VPN)
         case LIBENCLOUD_HTTP_METHOD_POST:
         {
-            QString id, type, user, pass, path, aurl;
+            QString id, type, user, pass, path, p12pass, aurl;
 
             LIBENCLOUD_HANDLER_ERR_IF (request.getHeaders()->get("Content-Type") !=
                         "application/x-www-form-urlencoded",
@@ -164,8 +164,9 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
             user = url.queryItemValue("user");
             pass = url.queryItemValue("pass");
             path = url.queryItemValue("path");
+            p12pass = url.queryItemValue("p12pass");
 
-            Auth auth(id, type, aurl, user, pass, path);
+            Auth auth(id, type, aurl, user, pass, path, p12pass);
 
             /* allow empty credentials for reset
             LIBENCLOUD_HANDLER_ERR_IF (!auth.isValid(),

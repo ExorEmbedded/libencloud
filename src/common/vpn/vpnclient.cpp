@@ -167,17 +167,15 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     if (sbAuth.isValid())
     {
-        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_NONE)
-        {
-            // we assume that authentication is file-based
-            // e.g. PKCS12 specified directly in OpenVPN configuration
-        }
-        if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_USERPASS)
+        Auth::Type authType = sbAuth.getType();
+
+        if (authType == Auth::UserpassType || authType == Auth::CertificateUserpassType)
         {
             args << "--auth-user-pass";
             args << "--auth-nocache";
         }
-        else if (_cfg->config.sslOp.auth == LIBENCLOUD_AUTH_X509)
+
+        if (authType == Auth::CertificateType || authType == Auth::CertificateUserpassType)
         {
             if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
             {
@@ -189,7 +187,14 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
                 args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
             }
         }
-    } 
+        /*
+        if (authType == Auth::NoneType)
+        {
+            // we assume that authentication is file-based
+            // e.g. PKCS12 specified directly in OpenVPN configuration
+        }
+        */
+    }
 
     if (proxyAuth.isValid())
     {
@@ -220,12 +225,14 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--dev-node" << LIBENCLOUD_TAPNAME;
 #endif
 
-    // fix routes not being applied properly on OSX in TAP mode
-#ifdef Q_OS_MAC
+    // Scripts are used:
+    //  - on Mac to fix handling of split routes
+    //  - on Windows to pull down routes upon disconnect and system using badcaching
+#ifndef Q_OS_LINUX
     args << "--script-security" << "2";
-    args << "--up" << quote(getBinDir() + "/openvpn-up.sh");
-    args << "--down" << quote(getBinDir() + "/openvpn-down.sh");
-    args << "--route-up" << quote(getBinDir() + "/openvpn-route-up.sh");
+    args << "--up" << quote(getBinDir() + "/openvpn-up" + LIBENCLOUD_SCRIPTEXT);
+    args << "--down" << quote(getBinDir() + "/openvpn-down" + LIBENCLOUD_SCRIPTEXT);
+    args << "--route-up" << quote(getBinDir() + "/openvpn-route-up" + LIBENCLOUD_SCRIPTEXT);
     // avoid bad routes if brought up too early (enpoints unreachable)
     args << "--route-delay" << "2";
 #endif

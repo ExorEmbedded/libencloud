@@ -2,7 +2,9 @@
 #define _LIBENCLOUD_CLIENT_H_
 
 #include <QObject>
-#include <QUrl>
+// Avoid weird error on OSX:
+//  ./QUrl:1:1: error: source file is not valid UTF-8 <CF><FA><ED><FE><U+0007>
+//#include <QUrl>
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkProxy>
@@ -18,9 +20,30 @@
 
 namespace libencloud {
 
+class Client;
+
+class LIBENCLOUD_DLLSPEC Connection : public QObject
+{
+    Q_OBJECT
+
+public:
+    Connection (Client *client, QNetworkReply *reply);
+    ~Connection ();
+
+protected slots:
+    void _timeout ();
+
+private:
+    Client *_client;
+    QNetworkReply *_reply;
+    QTimer _timer;
+};
+
 class LIBENCLOUD_DLLSPEC Client : public QObject
 {
     Q_OBJECT
+
+    friend class Connection;
 
 public:
     Client ();
@@ -63,19 +86,18 @@ protected slots:
     void _sslErrors (QNetworkReply *reply, const QList<QSslError> &errors);
     void _networkError (QNetworkReply::NetworkError err);
     void _finished (QNetworkReply *reply);
-    void _timeout ();
 
 protected:
     void _connectQnam();
 
-    QNetworkReply *_reply;
+    static quint32 _id;
+    QMap<QObject *, Connection *> _conns;
     QNetworkAccessManager *_qnam;
     bool _qnamExternal;
     QString _response;
     bool _verifyCA;
     bool _debug;
     bool _sslError;
-    QTimer _timer;
 };
 
 } // namespace libencloud
