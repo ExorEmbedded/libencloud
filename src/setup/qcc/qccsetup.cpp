@@ -12,15 +12,12 @@ QccSetup::QccSetup (Config *cfg)
     LIBENCLOUD_TRACE;
 
     _initFsm();
-    _initMsg(_setupMsg);
-
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
+    _initMsg(_setupMsg);
     connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
             this, SLOT(_onError(libencloud::Error)));
-    connect(&_setupMsg, SIGNAL(need(QString, QVariant)),
-            this, SIGNAL(need(QString, QVariant)));
     connect(&_setupMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
     connect(&_setupMsg, SIGNAL(authRequired(Auth::Id, QVariant)),
@@ -33,6 +30,12 @@ QccSetup::QccSetup (Config *cfg)
     connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
     connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
+
+    _initMsg(_closeMsg);
+    connect(this, SIGNAL(authSupplied(Auth)),
+            &_closeMsg, SLOT(authSupplied(Auth)));
+    connect(&_closeMsg, SIGNAL(processed()),
+            this, SLOT(_onCloseProcessed()));
 }
 
 int QccSetup::start ()
@@ -63,15 +66,23 @@ err:
     return ~0;
 }
 
-int QccSetup::stop (bool reset)
+int QccSetup::stop (bool reset, bool close)
 {
-    LIBENCLOUD_TRACE;
+    LIBENCLOUD_DBG("reset: " << reset << ", close: " << close);
 
     _retry.stop();
     _fsm.stop();
     _deinitFsm(reset);
 
+    if (!m_setupEnabled)
+        emit stopped();
+    else if (m_setupEnabled && reset && close)
+        // triggers _onCloseProcessed() upon completion
+        LIBENCLOUD_ERR_IF (_closeMsg.process());  
+
     return 0;
+err:
+    return ~0;
 }
 
 const VpnConfig *QccSetup::getVpnConfig () const
@@ -133,6 +144,13 @@ void QccSetup::_onProcessed ()
     LIBENCLOUD_TRACE;
 
     emit completed();
+}
+
+void QccSetup::_onCloseProcessed ()
+{
+    LIBENCLOUD_TRACE;
+
+    emit stopped();
 }
 
 void QccSetup::_onErrorState ()

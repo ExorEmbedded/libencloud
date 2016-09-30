@@ -105,6 +105,7 @@ SOURCES += common/utils.cpp
 !nocloud {
     HEADERS += $${PUBINCLUDEDIR}/Vpn/Vpn*
     SOURCES += $${_PRO_FILE_PWD_}/common/vpn/*.cpp
+    DEPENDPATH += $${_PRO_FILE_PWD_}/common/vpn
 }
 
 #
@@ -115,6 +116,7 @@ HEADERS += $${PUBINCLUDEDIR}/Manager/NetworkManager
 HEADERS += $${PUBINCLUDEDIR}/Manager/ProcessManager
 HEADERS += $${PUBINCLUDEDIR}/Manager/Process
 SOURCES += $${_PRO_FILE_PWD_}/mgr/*.cpp
+DEPENDPATH += $${_PRO_FILE_PWD_}/mgr
 
 HEADERS += $${PUBINCLUDEDIR}/Core
 SOURCES += core/core.cpp
@@ -129,16 +131,20 @@ SOURCES += core/core.cpp
     modeqcc {
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
+        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
     }
     modeece | modesece {
         HEADERS += $${_PRO_FILE_PWD_}/setup/ece/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/ece/*.cpp
+        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/ece
     }
     modevpn {
         HEADERS += $${_PRO_FILE_PWD_}/setup/vpn/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/vpn/*.cpp
+        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/vpn
     }
 }
+
 
 #
 # cloud sources
@@ -147,6 +153,7 @@ SOURCES += core/core.cpp
 !nocloud {
     HEADERS += $${_PRO_FILE_PWD_}/cloud/*.h
     SOURCES += $${_PRO_FILE_PWD_}/cloud/*.cpp
+    DEPENDPATH += $${_PRO_FILE_PWD_}/cloud
 }
 
 #
@@ -162,6 +169,7 @@ SOURCES += core/core.cpp
     HEADERS += $${PUBINCLUDEDIR}/Api/SetupApi
     HEADERS += $${PUBINCLUDEDIR}/Api/StatusApi
     SOURCES += $${_PRO_FILE_PWD_}/api/*.cpp
+    DEPENDPATH += $${_PRO_FILE_PWD_}/api
 }
 
 #
@@ -177,6 +185,7 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpHeaders
 HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += $${_PRO_FILE_PWD_}/http/*.h
 SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
+DEPENDPATH += $${_PRO_FILE_PWD_}/http
 
 # other libs
 about {

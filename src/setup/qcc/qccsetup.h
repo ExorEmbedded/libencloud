@@ -7,7 +7,7 @@
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/qcc/setupmsg.h>
-#include <setup/qcc/loginmsg.h>
+#include <setup/qcc/closemsg.h>
 
 namespace libencloud {
 
@@ -33,7 +33,7 @@ public:
     QccSetup (Config *cfg);
 
     int start ();
-    int stop (bool reset = true);
+    int stop (bool reset, bool close);
 
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
@@ -48,6 +48,7 @@ signals:
     void progress (const Progress &progress);
     void serverConfigSupply (const QVariant &variant);
     void completed ();
+    void stopped ();
 
     //
     // internal -> setup -> core
@@ -69,6 +70,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _onProcessed ();
+    void _onCloseProcessed ();
     void _onErrorState ();
     void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
@@ -92,7 +94,10 @@ private:
     QState _setupMsgSt, *_setupMsgState;
     QState _finalSt, *_finalState;
 
-    LoginMsg _loginMsg;
+    CloseMsg _closeMsg;
+
+    // DEPRECATED in favour of closeMsg
+    //LoginMsg _loginMsg;
 
     bool _isError;
     Error _error;

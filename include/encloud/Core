@@ -60,6 +60,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
+    void _setupStopped ();
     void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
     void _progressReceived (const Progress &p);
@@ -84,6 +85,7 @@ private:
 
     bool _isValid;
     Mode _mode;
+    State _state;
 
     Config *_cfg;
     SetupInterface *_setup;

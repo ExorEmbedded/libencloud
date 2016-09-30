@@ -39,6 +39,7 @@ namespace libencloud {
 Core::Core (Mode mode)
     : _isValid(false)
     , _mode(mode)
+    , _state(StateIdle)
     , _setup(NULL)
     , _setupObj(NULL)
     , _cloud(NULL)
@@ -140,16 +141,10 @@ int Core::stop ()
     _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
-    _setup->stop();
+    _setup->stop(true, (_state == StateConnect || _state == StateCloud));
 #endif
 
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    _cloud->stop();
-#endif
-
-    emit authSupplied(Auth());
-    emit stateChanged(StateIdle);
-    emit progress(Progress());
+    // _setupStopped() will be triggered
 
     return 0;
 }
@@ -292,7 +287,7 @@ void Core::_stateChanged (State state)
     LIBENCLOUD_DBG("[Core] state: " << QString::number(state) << " (" <<
             stateToString(state) << ")");
 
-    // do stuff based on global state
+    _state = state;
 }
 
 void Core::_stateEntered ()
@@ -347,6 +342,17 @@ void Core::_setupCompleted ()
     }
 err:
     return;
+}
+
+void Core::_setupStopped ()
+{
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    _cloud->stop();
+#endif
+
+    emit authSupplied(Auth());
+    emit stateChanged(StateIdle);
+    emit progress(Progress());
 }
 
 void Core::_fallback (bool isFallback)
@@ -653,6 +659,8 @@ int Core::_initSetup ()
     // setup completion handling
     connect(_setupObj, SIGNAL(completed()), 
             this, SLOT(_setupCompleted()));
+    connect(_setupObj, SIGNAL(stopped()), 
+            this, SLOT(_setupStopped()));
 
     return 0;
 err:

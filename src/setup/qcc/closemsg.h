@@ -1,34 +1,24 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_CLOSEMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_QCC_CLOSEMSG_H_
 
-#include <QString>
-#include <QVariant>
-#include <encloud/Auth>
-#include <encloud/Client>
-#include <encloud/Vpn/VpnConfig>
 #include <common/message.h>
 
-#define LIBENCLOUD_SETUP_QCC_CONFIG_URL        "/manage/status/status.access.config/"
-#define LIBENCLOUD_SETUP_QCC_DOMAINS_HDR        "Endian-Domains"
-#define LIBENCLOUD_SETUP_QCC_DOMAINS_SEPARATOR  ','
+#define LIBENCLOUD_SETUP_QCC_CLOSE_URL        "/manage/commands/commands.access.client.closeVPNConnection/"
 
 namespace libencloud {
 
-class SetupMsg : public QObject, public MessageInterface
+class CloseMsg : public QObject, public MessageInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
-    SetupMsg();
+    CloseMsg();
     int clear ();
-    const VpnConfig *getVpnConfig () const;
-    const VpnConfig *getFallbackVpnConfig () const;
 
 signals:
     void error (const libencloud::Error &err);
     void authRequired (Auth::Id id, const QVariant &params);
-    void serverConfigSupply (const QVariant &variant);
     void processed ();
 
 public slots:
@@ -43,18 +33,19 @@ private:
     int _packRequest ();
     int _encodeRequest (QUrl &url, QUrl &params);
     int _decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers);
-    int _unpackResponse ();
 
     //request inputs
     Auth _sbAuth;
 
+    /*
     //response outputs
     VpnConfig _vpnConfig;
     VpnConfig _fallbackVpnConfig;
     QSslCertificate _caCert;
     QVariantMap _serverConfig;
+    */
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_CLOSEMSG_H_ */
