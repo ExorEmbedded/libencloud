@@ -49,6 +49,7 @@ Core::Core (Mode mode)
     , _cloudApi(NULL)
     , _clientPort(-1)
     , _logPort(-1)
+    , _qnam(NULL)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
 {
@@ -58,6 +59,7 @@ Core::Core (Mode mode)
             << " rev: " << qPrintable(info::revision())
             << " mode: " << QString::number(_mode);
 
+    LIBENCLOUD_ERR_IF (_init());
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
@@ -71,7 +73,6 @@ Core::Core (Mode mode)
 
     LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
-    LIBENCLOUD_ERR_IF (_init());
 
     _isValid = true;
 
@@ -85,6 +86,7 @@ Core::~Core ()
 
     g_libencloudCfg = NULL;
 
+    LIBENCLOUD_DELETE(_qnam);
     LIBENCLOUD_DELETE(_networkManager);
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
@@ -633,6 +635,7 @@ int Core::_initSetup ()
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif
+    LIBENCLOUD_ERR_IF (_setup->setNetworkAccessManager(_qnam));
     LIBENCLOUD_ERR_IF (_setup == NULL);
 
     _setupObj = _setup;
@@ -758,10 +761,13 @@ int Core::_initFsm ()
     return 0;
 }
 
-// Init other local objects
+// Init local objects
 int Core::_init ()
 {
     connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
+
+    _qnam = new QNetworkAccessManager;
+    LIBENCLOUD_ERR_IF (_qnam == NULL);
 
     _networkManager = new NetworkManager;
     LIBENCLOUD_ERR_IF (_networkManager == NULL);

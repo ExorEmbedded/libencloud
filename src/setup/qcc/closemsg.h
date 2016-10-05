@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_QCC_CLOSEMSG_H_
 #define _LIBENCLOUD_PRIV_SETUP_QCC_CLOSEMSG_H_
 
+#include <QNetworkAccessManager>
 #include <common/message.h>
 
 #define LIBENCLOUD_SETUP_QCC_CLOSE_URL        "/manage/commands/commands.access.client.closeVPNConnection/"
@@ -15,10 +16,10 @@ class CloseMsg : public QObject, public MessageInterface
 public:
     CloseMsg();
     int clear ();
+    int setNetworkAccessManager (QNetworkAccessManager *qnam);
 
 signals:
     void error (const libencloud::Error &err);
-    void authRequired (Auth::Id id, const QVariant &params);
     void processed ();
 
 public slots:
@@ -36,14 +37,7 @@ private:
 
     //request inputs
     Auth _sbAuth;
-
-    /*
-    //response outputs
-    VpnConfig _vpnConfig;
-    VpnConfig _fallbackVpnConfig;
-    QSslCertificate _caCert;
-    QVariantMap _serverConfig;
-    */
+    QNetworkAccessManager *_qnam;
 };
 
 } // namespace libencloud

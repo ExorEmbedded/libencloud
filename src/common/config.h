@@ -98,6 +98,7 @@ public:
     QString sbinPrefix;
     QString dataPrefix;
     QString logPrefix;
+    QString userDataPrefix;
 
 protected slots:
 
@@ -105,6 +106,7 @@ protected slots:
 
 protected:
     int _parse (const QVariantMap &jo);
+    int _parsePaths (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
     int _parseSslInit (const QVariantMap &jo);
     int _parseSslOp (const QVariantMap &jo);

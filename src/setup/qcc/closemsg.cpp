@@ -1,4 +1,5 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
+#include <encloud/CookieJar>
 #include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
@@ -21,6 +22,7 @@ namespace libencloud {
 
 CloseMsg::CloseMsg ()
     : MessageInterface()
+    , _qnam(NULL)
 {
     clear();
 }
@@ -32,6 +34,15 @@ int CloseMsg::clear ()
     MessageInterface::clear();
 
     _sbAuth = Auth();
+
+    return 0;
+}
+
+int CloseMsg::setNetworkAccessManager (QNetworkAccessManager *qnam)
+{
+    LIBENCLOUD_RETURN_IF (qnam == NULL, ~0);
+
+    _qnam = qnam;
 
     return 0;
 }
@@ -49,8 +60,10 @@ int CloseMsg::process ()
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration sslconf;
+    CookieJar *cookieJar = NULL;
     
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+    LIBENCLOUD_RETURN_IF (_qnam == NULL, ~0);
 
     LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
 
@@ -64,14 +77,20 @@ int CloseMsg::process ()
 
     LIBENCLOUD_DBG("[Setup] User Agent: " << headers["User-Agent"]);
 
-    // Setup authentication data
-    LIBENCLOUD_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
-
+    // Don't set credentials - use cookie authentication to handle OTP scenario
+    url.setUrl(_sbAuth.getUrl());
     url.setPath(LIBENCLOUD_SETUP_QCC_CLOSE_URL);
 
     LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
 
+    LIBENCLOUD_ERR_IF (_cfg->userDataPrefix.isEmpty());
+    LIBENCLOUD_ERR_IF ((cookieJar = new CookieJar(_cfg->userDataPrefix + "/cookies")) == NULL);
+    // hosts and paths are under our control => there's no need for a restrictive cookiejar
+    cookieJar->setRestricted(false);  
+    _qnam->setCookieJar(cookieJar);
+
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
+    LIBENCLOUD_ERR_IF ((_client->setNetworkAccessManager(_qnam)));
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));

@@ -43,6 +43,7 @@ int QccSetup::start ()
     LIBENCLOUD_TRACE;
 
     _initFsm();
+    _closeMsg.setNetworkAccessManager(getNetworkAccessManager());
 
     if (!m_setupEnabled)
     {

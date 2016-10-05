@@ -53,6 +53,9 @@ SOURCES += common/auth.cpp
 HEADERS += $${PUBINCLUDEDIR}/Client
 SOURCES += common/client.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/CookieJar
+SOURCES += common/cookiejar.cpp
+
 HEADERS += $${PUBINCLUDEDIR}/Error
 SOURCES += common/error.cpp
 

@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_H_
 #define _LIBENCLOUD_PRIV_SETUP_H_
 
+#include <QNetworkAccessManager>
 #include <QObject>
 #include <QString>
 #include <QtPlugin>
@@ -18,6 +19,9 @@ class SetupInterface : public QObject
 public:
     SetupInterface (Config *cfg);
     virtual ~SetupInterface () {};
+
+    QNetworkAccessManager *getNetworkAccessManager ();
+    int setNetworkAccessManager (QNetworkAccessManager *qnam);
 
     virtual int start () = 0;
     virtual int stop (bool reset = true, bool close = false) = 0;
@@ -53,6 +57,7 @@ signals:
 
 protected:
     Config *_cfg;
+    QNetworkAccessManager *_qnam;
 };
 
 } // namespace libencloud

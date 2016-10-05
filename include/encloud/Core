@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_CORE_H_
 #define _LIBENCLOUD_CORE_H_
 
+#include <QNetworkAccessManager>
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
@@ -9,7 +10,6 @@
 #include <encloud/Auth>
 #include <encloud/Common>
 #include <encloud/Error>
-#include <encloud/Manager/NetworkManager>
 #include <encloud/Manager/NetworkManager>
 #include <encloud/Progress>
 #include <encloud/Proxy>
@@ -104,6 +104,7 @@ private:
     int _logPort;
     Watchdog _clientWatchdog;
 
+    QNetworkAccessManager *_qnam;
     NetworkManager *_networkManager;
     libencloud::ProxyFactory *_proxyFactory;
     Auth _sbAuth;

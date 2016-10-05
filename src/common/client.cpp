@@ -62,6 +62,8 @@ int Client::setNetworkAccessManager (QNetworkAccessManager *qnam)
     _qnamExternal = true;
 
     _connectQnam();
+
+    return 0;
 err:
     return ~0;
 }
