@@ -60,7 +60,6 @@ int CloseMsg::process ()
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration sslconf;
-    CookieJar *cookieJar = NULL;
     
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
     LIBENCLOUD_RETURN_IF (_qnam == NULL, ~0);
@@ -70,25 +69,29 @@ int CloseMsg::process ()
     LIBENCLOUD_ERR_IF (!_sbAuth.isValid());
 
     // client already destroyed via deleteLater()
-    //LIBENCLOUD_DELETE (_client);
+    //LIBENCLOUD_DELETE_LATER (_client);
 
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
 
     LIBENCLOUD_DBG("[Setup] User Agent: " << headers["User-Agent"]);
 
-    // Don't set credentials - use cookie authentication to handle OTP scenario
-    url.setUrl(_sbAuth.getUrl());
-    url.setPath(LIBENCLOUD_SETUP_QCC_CLOSE_URL);
-
-    LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
+    // in Client mode we use Cookie Auth to handle OTP scenario, whereas devices only use Basic Auth
+#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
+    CookieJar *cookieJar = NULL;
+    LIBENCLOUD_NOTICE("[Setup] Closing connection using Cookie Auth");
 
     LIBENCLOUD_ERR_IF (_cfg->userDataPrefix.isEmpty());
     LIBENCLOUD_ERR_IF ((cookieJar = new CookieJar(_cfg->userDataPrefix + "/cookies")) == NULL);
     // hosts and paths are under our control => there's no need for a restrictive cookiejar
-    cookieJar->setRestricted(false);  
+    cookieJar->setRestricted(false);
     _qnam->setCookieJar(cookieJar);
+#else
+    LIBENCLOUD_NOTICE("[Setup] Closing connection using Basic Auth");
 
+    // Setup authentication data
+    LIBENCLOUD_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
+#endif
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
     LIBENCLOUD_ERR_IF ((_client->setNetworkAccessManager(_qnam)));
 
@@ -96,13 +99,16 @@ int CloseMsg::process ()
     connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
             this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
-
     _client->setVerifyCA(false); // already verified in setupmsg
+
+    url.setUrl(_sbAuth.getUrl());
+    url.setPath(LIBENCLOUD_SETUP_QCC_CLOSE_URL);
+
     _client->run(url, params, headers, sslconf);
 
     return 0;
 err:
-    LIBENCLOUD_DELETE(_client);
+    LIBENCLOUD_DELETE_LATER(_client);
     return ~0;
 }
 
