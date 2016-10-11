@@ -14,7 +14,7 @@ CookieJar::CookieJar (const QString &path, QObject *parent)
 
     LIBENCLOUD_RETURN_IF (path.isEmpty(), );
 
-    m_settings = new QSettings(path, QSettings::NativeFormat);
+    m_settings = new QSettings(path, QSettings::IniFormat);
     LIBENCLOUD_RETURN_IF (m_settings == NULL, );
 
     LIBENCLOUD_DBG("[CookieJar] settings file: " << m_settings->fileName());
