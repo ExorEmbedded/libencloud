@@ -66,7 +66,7 @@ int CloseMsg::process ()
 
     LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
 
-    LIBENCLOUD_ERR_IF (!_sbAuth.isValid());
+    LIBENCLOUD_RETURN_IF (!_sbAuth.isValid(), ~0);
 
     // client already destroyed via deleteLater()
     //LIBENCLOUD_DELETE_LATER (_client);
