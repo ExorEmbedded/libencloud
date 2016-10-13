@@ -75,7 +75,7 @@ int QccSetup::stop (bool reset, bool close)
     _fsm.stop();
     _deinitFsm(reset);
 
-    if (!m_setupEnabled)
+    if (!m_setupEnabled || (reset && !close))
         emit stopped();
     else if (m_setupEnabled && reset && close)
         // triggers _onCloseProcessed() upon completion
