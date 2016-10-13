@@ -158,6 +158,9 @@ int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const
     conn = new Connection(this, reply, _timeout, _timeoutRetry);
     LIBENCLOUD_ERR_IF (conn == NULL);
 
+    connect(conn, SIGNAL(error(libencloud::Error)), 
+            this, SIGNAL(error(libencloud::Error)));
+
     conn->msgType = msgType;
     conn->request = request;
     conn->data = data;
@@ -364,6 +367,7 @@ Connection::Connection (Client *client, QNetworkReply *reply, int timeout, bool 
                 SLOT(_timeout()));
 
         _timer.setSingleShot(true);
+        //LIBENCLOUD_TRACE_MSG("[Client] starting timer: " << timeout);
         _timer.start(timeout * 1000);
     }
 }
@@ -384,6 +388,8 @@ void Connection::_timeout ()
         LIBENCLOUD_DBG("[Client] retrying last request");
         _client->_sendRequest(msgType, request, data);
     }
+    else
+        LIBENCLOUD_EMIT(error(Error(Error::CodeClientTimeout)));
 
     deleteLater();
 }

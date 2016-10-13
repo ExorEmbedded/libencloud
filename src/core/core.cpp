@@ -143,7 +143,9 @@ int Core::stop ()
     _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
-    _setup->stop(true, (_state == StateConnect || _state == StateCloud));
+    _setup->stop(true, (_state == StateSetup ||
+                _state == StateConnect || 
+                _state == StateCloud));
 #endif
 
     // _setupStopped() will be triggered
