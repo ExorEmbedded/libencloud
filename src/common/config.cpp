@@ -137,6 +137,8 @@ err:
 
 int Config::_parse (const QVariantMap &jo)
 {
+    LIBENCLOUD_ERR_IF (_parsePaths(jo));
+
     if (jo["is_profile"].isNull())
         config.isProfile = false;
     else
@@ -207,6 +209,18 @@ int Config::_parse (const QVariantMap &jo)
     return 0;
 err:
     return ~0;
+}
+
+int Config::_parsePaths (const QVariantMap &jo)
+{
+    if (jo["paths"].isValid())
+    {
+        QVariantMap jot = jo["paths"].toMap();
+        if (jot["userDataPrefix"].isValid())
+            userDataPrefix = jot["userDataPrefix"].toString();
+    }
+
+    return 0;
 }
 
 int Config::_parseSb (const QVariantMap &jo)

@@ -152,7 +152,9 @@ int VpnConfig::fromString (const QString &s, bool parse)
             nParams--;
 
             if (key == "client")
-                ;  // already default behaviour
+            {
+                // already default behaviour
+            }
             if (key == "comp-lzo")
             {
                 if (nParams == 0)

@@ -17,7 +17,7 @@ class RetrInfoMsg : public QObject, public MessageInterface
 
 signals:
     void error (const libencloud::Error &err);
-    void need (const QString &what);
+    void need (const QString &what, const QVariant &params);
     void processed ();
 
 public slots:

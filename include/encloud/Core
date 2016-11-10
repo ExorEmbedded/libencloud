@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_CORE_H_
 #define _LIBENCLOUD_CORE_H_
 
+#include <QNetworkAccessManager>
 #include <QObject>
 #include <QStateMachine>
 #include <QString>
@@ -9,7 +10,6 @@
 #include <encloud/Auth>
 #include <encloud/Common>
 #include <encloud/Error>
-#include <encloud/Manager/NetworkManager>
 #include <encloud/Manager/NetworkManager>
 #include <encloud/Progress>
 #include <encloud/Proxy>
@@ -49,7 +49,7 @@ signals:
     void stateChanged (State state);
     void progress (const Progress &p);
     void fallback (bool isFallback);
-    void need (const QString &what);
+    void need (const QString &what, const QVariant &params);
     void authSupplied (const Auth &auth);
     void serverConfigSupply (const QVariant &variant);
     void actionRequest (const QString &action, const libencloud::Params &params);
@@ -60,11 +60,12 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
+    void _setupStopped ();
     void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
     void _progressReceived (const Progress &p);
     void _authSupplied (const Auth &auth);
-    void _authRequired (Auth::Id id);
+    void _authRequired (Auth::Id id, QVariant params = QVariant());
     void _clientPortReceived (int port);
     void _logPortReceived (int port);
     void _serverConfigReceived (const QVariant &variant);
@@ -84,6 +85,7 @@ private:
 
     bool _isValid;
     Mode _mode;
+    State _state;
 
     Config *_cfg;
     SetupInterface *_setup;
@@ -102,6 +104,7 @@ private:
     int _logPort;
     Watchdog _clientWatchdog;
 
+    QNetworkAccessManager *_qnam;
     NetworkManager *_networkManager;
     libencloud::ProxyFactory *_proxyFactory;
     Auth _sbAuth;

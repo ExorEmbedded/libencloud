@@ -1,6 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_H_
 #define _LIBENCLOUD_PRIV_SETUP_H_
 
+#include <QNetworkAccessManager>
 #include <QObject>
 #include <QString>
 #include <QtPlugin>
@@ -19,8 +20,11 @@ public:
     SetupInterface (Config *cfg);
     virtual ~SetupInterface () {};
 
+    QNetworkAccessManager *getNetworkAccessManager ();
+    int setNetworkAccessManager (QNetworkAccessManager *qnam);
+
     virtual int start () = 0;
-    virtual int stop () = 0;
+    virtual int stop (bool reset = true, bool close = false) = 0;
 
     virtual const VpnConfig *getVpnConfig () const = 0;
     virtual const VpnConfig *getFallbackVpnConfig () const = 0;
@@ -38,8 +42,8 @@ signals:
     //
     // internal -> setup -> core
     //
-    virtual void need (const QString &what) = 0;
-    virtual void authRequired (Auth::Id id) = 0;
+    virtual void need (const QString &what, const QVariant &params) = 0;
+    virtual void authRequired (Auth::Id id, const QVariant &params) = 0;
 
     //
     // core -> setup -> internal
@@ -53,6 +57,7 @@ signals:
 
 protected:
     Config *_cfg;
+    QNetworkAccessManager *_qnam;
 };
 
 } // namespace libencloud

@@ -43,7 +43,7 @@ public:
     State getCoreState () const;
     Progress getCoreProgress () const;
     bool getFallback () const;
-    QString getNeed () const;
+    const QVariantMap &getNeed () const;
     void removeNeed (const QString &what);
 
 #ifdef LIBENCLOUD_MODE_ECE
@@ -92,7 +92,7 @@ private slots:
     void _coreStateChanged (State state);
     void _coreProgressReceived (const Progress &progress);
     void _coreFallbackReceived (bool isFallback);
-    void _needReceived (const QString &what);
+    void _needReceived (const QString &what, const QVariant &params);
     void _serverConfigReceived (const QVariant &config);
 
 private:
@@ -103,7 +103,7 @@ private:
     State _coreState;
     Progress _coreProgress;
     bool _isFallback;
-    QStringList _needs;
+    QVariantMap _needs;
 
     QUuid _poi;
 

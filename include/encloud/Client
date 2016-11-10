@@ -22,21 +22,35 @@ namespace libencloud {
 
 class Client;
 
+typedef enum {
+	MSG_TYPE_NONE,
+	MSG_TYPE_GET,
+	MSG_TYPE_POST
+} MsgType;
+
 class LIBENCLOUD_DLLSPEC Connection : public QObject
 {
     Q_OBJECT
 
+    friend class Client;
+
 public:
-    Connection (Client *client, QNetworkReply *reply);
+    Connection (Client *client, QNetworkReply *reply, int timeout, bool timeoutRetry);
     ~Connection ();
 
 protected slots:
     void _timeout ();
 
+protected:
+    MsgType msgType;
+    QNetworkRequest request;
+    QByteArray data;
+
 private:
     Client *_client;
     QNetworkReply *_reply;
     QTimer _timer;
+    bool _timeoutRetry;
 };
 
 class LIBENCLOUD_DLLSPEC Client : public QObject
@@ -49,17 +63,12 @@ public:
     Client ();
     ~Client ();
 
-	typedef enum {
-		MSG_TYPE_NONE,
-		MSG_TYPE_GET,
-		MSG_TYPE_POST
-	} MsgType;
-
     QNetworkAccessManager *getNetworkAccessManager ();
     int setNetworkAccessManager (QNetworkAccessManager *qnam);
 
     void setVerifyCA (bool b = true);
     void setDebug (bool b = true);
+    void setTimeout (int timeout, bool retry = false);
 
     void reset ();
 
@@ -77,9 +86,10 @@ public:
 
 signals:
     void error (const libencloud::Error &err);
-    void complete (const QString &reponse);
+    void complete (const QString &body, const QMap<QByteArray, QByteArray> &headers);
 
 protected slots:
+    int _sendRequest(MsgType msgType, const QNetworkRequest &request, const QByteArray &data);
     void _send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 			const QByteArray &data, const QSslConfiguration &conf);
     void _proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenticator *authenticator);
@@ -97,6 +107,8 @@ protected:
     QString _response;
     bool _verifyCA;
     bool _debug;
+    int _timeout;
+    bool _timeoutRetry;
     bool _sslError;
 };
 

@@ -2,8 +2,9 @@
 # Sample local config - uncomment at wish
 #
 
-#CONFIG += debug
-#CONFIG += modesece
 #CONFIG += exor
+#CONFIG += splitdeps
+#CONFIG += modeqcc
 #CONFIG += nogui
 #CONFIG += notest
+#CONFIG += debug

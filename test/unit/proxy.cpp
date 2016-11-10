@@ -32,7 +32,7 @@ void TestProxy::run ()
 
     connect(&_client, SIGNAL(error(libencloud::Error)),
             this, SLOT(_clientError(libencloud::Error)));
-    connect(&_client, SIGNAL(complete(QString)),
+    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
             this, SLOT(_clientComplete(QString)));
 
     _proxy.setType(LIBENCLOUD_TEST_PROXY_TYPE);

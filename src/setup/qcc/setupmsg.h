@@ -9,6 +9,8 @@
 #include <common/message.h>
 
 #define LIBENCLOUD_SETUP_QCC_CONFIG_URL        "/manage/status/status.access.config/"
+#define LIBENCLOUD_SETUP_QCC_DOMAINS_HDR        "Endian-Domains"
+#define LIBENCLOUD_SETUP_QCC_DOMAINS_SEPARATOR  ','
 
 namespace libencloud {
 
@@ -25,8 +27,7 @@ public:
 
 signals:
     void error (const libencloud::Error &err);
-    void need (const QString &what);
-    void authRequired (Auth::Id id);
+    void authRequired (Auth::Id id, const QVariant &params);
     void serverConfigSupply (const QVariant &variant);
     void processed ();
 
@@ -36,12 +37,12 @@ public slots:
 
 private slots:
     void _error (const libencloud::Error &error);
-    void _clientComplete (const QString &response);
+    void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers);
 
 private:
     int _packRequest ();
     int _encodeRequest (QUrl &url, QUrl &params);
-    int _decodeResponse (const QString &response);
+    int _decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers);
     int _unpackResponse ();
 
     //request inputs

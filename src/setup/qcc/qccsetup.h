@@ -7,7 +7,7 @@
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/qcc/setupmsg.h>
-#include <setup/qcc/loginmsg.h>
+#include <setup/qcc/closemsg.h>
 
 namespace libencloud {
 
@@ -33,7 +33,7 @@ public:
     QccSetup (Config *cfg);
 
     int start ();
-    int stop ();
+    int stop (bool reset, bool close);
 
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
@@ -48,12 +48,13 @@ signals:
     void progress (const Progress &progress);
     void serverConfigSupply (const QVariant &variant);
     void completed ();
+    void stopped ();
 
     //
     // internal -> setup -> core
     //
-    void need (const QString &what);
-    void authRequired (Auth::Id id);
+    void need (const QString &what, const QVariant &params);
+    void authRequired (Auth::Id id, const QVariant &params);
 
     //
     // core -> setup -> internal
@@ -69,13 +70,14 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _onProcessed ();
+    void _onCloseProcessed ();
     void _onErrorState ();
     void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
 
 private:
     int _initFsm ();
-    int _deinitFsm ();
+    int _deinitFsm (bool reset = true);
     int _initMsg (MessageInterface &msg);
     void _clear ();
     Progress _stateToProgress (QState *state);
@@ -92,7 +94,10 @@ private:
     QState _setupMsgSt, *_setupMsgState;
     QState _finalSt, *_finalState;
 
-    LoginMsg _loginMsg;
+    CloseMsg _closeMsg;
+
+    // DEPRECATED in favour of closeMsg
+    //LoginMsg _loginMsg;
 
     bool _isError;
     Error _error;

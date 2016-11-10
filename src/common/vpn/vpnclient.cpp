@@ -226,15 +226,25 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 #endif
 
     // Scripts are used:
+    //  - on Linux to run generic scripts in /etc/openvpn/*.d (devices only)
     //  - on Mac to fix handling of split routes
-    //  - on Windows to pull down routes upon disconnect and system using badcaching
-#ifndef Q_OS_LINUX
+    //  - on Windows to pull down routes upon disconnect (system caching badly)
     args << "--script-security" << "2";
+#ifndef Q_OS_LINUX
     args << "--up" << quote(getBinDir() + "/openvpn-up" + LIBENCLOUD_SCRIPTEXT);
     args << "--down" << quote(getBinDir() + "/openvpn-down" + LIBENCLOUD_SCRIPTEXT);
     args << "--route-up" << quote(getBinDir() + "/openvpn-route-up" + LIBENCLOUD_SCRIPTEXT);
     // avoid bad routes if brought up too early (enpoints unreachable)
     args << "--route-delay" << "2";
+#else  // Q_OS_LINUX
+#ifdef LIBENCLOUD_SPLITDEPS  // device mode
+    if (QFileInfo("/etc/openvpn/ifup.client.d").isDir())
+        args << "--up" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/ifup.client.d";
+    if (QFileInfo("/etc/openvpn/ifdown.client.d").isDir())
+        args << "--down" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/ifdown.client.d";
+    if (QFileInfo("/etc/openvpn/custom.client.d").isDir())
+        args << "--custom" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/custom.client.d";
+#endif
 #endif
 
     // Note: '--remote' overrides breaks proxy (Assertion failed at proxy.c:217)
@@ -433,24 +443,20 @@ void VpnClient::processReadyRead ()
 
     foreach  (QString line, log.split(QRegExp("[\r\n]"), QString::SkipEmptyParts))
     {
+        line = qPrintable(line.trimmed());
         //qDebug() << "line: " << line;
 
         // remove leading timestamp
-        QRegExp dateRE("^\\w{3} \\w{3} \\d{2} \\d{2}:\\d{2}:\\d{2} \\d{4} ");
+        QRegExp dateRE("^\\w{3}\\s+\\w{3}\\s+\\d{1,2}\\s+\\d{2}:\\d{2}:\\d{2}\\s+\\d{4}");
 
         if (dateRE.indexIn(line) != -1)
             line.remove(0, dateRE.matchedLength());
-
         //qDebug() << "newline: " << line;
         
-#ifdef LIBENCLOUD_MODE_QCC
-#  ifdef LIBENCLOUD_SPLITDEPS
-        // avoid flooding on devices
-#  else
+#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)  // client mode
         LIBENCLOUD_LOG(line.prepend("[VPN] "));
-#  endif
-#else
-        __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
+#else  // device mode
+        __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", qPrintable(line.prepend("[VPN] ")));
 #endif
     }
 }

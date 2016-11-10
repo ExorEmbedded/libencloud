@@ -39,6 +39,7 @@ namespace libencloud {
 Core::Core (Mode mode)
     : _isValid(false)
     , _mode(mode)
+    , _state(StateIdle)
     , _setup(NULL)
     , _setupObj(NULL)
     , _cloud(NULL)
@@ -48,6 +49,7 @@ Core::Core (Mode mode)
     , _cloudApi(NULL)
     , _clientPort(-1)
     , _logPort(-1)
+    , _qnam(NULL)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
 {
@@ -57,6 +59,7 @@ Core::Core (Mode mode)
             << " rev: " << qPrintable(info::revision())
             << " mode: " << QString::number(_mode);
 
+    LIBENCLOUD_ERR_IF (_init());
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
@@ -70,7 +73,6 @@ Core::Core (Mode mode)
 
     LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
-    LIBENCLOUD_ERR_IF (_init());
 
     _isValid = true;
 
@@ -84,6 +86,7 @@ Core::~Core ()
 
     g_libencloudCfg = NULL;
 
+    LIBENCLOUD_DELETE(_qnam);
     LIBENCLOUD_DELETE(_networkManager);
     LIBENCLOUD_DELETE(_cfg);
     LIBENCLOUD_DELETE(_setup);
@@ -140,16 +143,10 @@ int Core::stop ()
     _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
-    _setup->stop();
+    _setup->stop(true, (_state == StateConnect || _state == StateCloud));
 #endif
 
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    _cloud->stop();
-#endif
-
-    emit authSupplied(Auth());
-    emit stateChanged(StateIdle);
-    emit progress(Progress());
+    // _setupStopped() will be triggered
 
     return 0;
 }
@@ -233,8 +230,8 @@ int Core::attachServer (Server *server)
             obj, SLOT(_coreProgressReceived(Progress)));
     connect(this, SIGNAL(fallback(bool)), 
             obj, SLOT(_coreFallbackReceived(bool)));
-    connect(this, SIGNAL(need(QString)), 
-            obj, SLOT(_needReceived(QString)));
+    connect(this, SIGNAL(need(QString, QVariant)), 
+            obj, SLOT(_needReceived(QString, QVariant)));
 
 #ifdef LIBENCLOUD_MODE_SECE
     connect(obj, SIGNAL(licenseSend(QUuid)), 
@@ -258,8 +255,8 @@ int Core::attachServer (Server *server)
 #ifndef LIBENCLOUD_DISABLE_SETUP
     connect(this, SIGNAL(authSupplied(Auth)), 
            _setupObj, SIGNAL(authSupplied(Auth)));
-    connect(_setupObj, SIGNAL(authRequired(Auth::Id)), 
-           this, SLOT(_authRequired(Auth::Id)));
+    connect(_setupObj, SIGNAL(authRequired(Auth::Id, QVariant)), 
+           this, SLOT(_authRequired(Auth::Id, QVariant)));
 #endif
 #ifndef LIBENCLOUD_DISABLE_CLOUD
     connect(this, SIGNAL(authSupplied(Auth)), 
@@ -292,7 +289,7 @@ void Core::_stateChanged (State state)
     LIBENCLOUD_DBG("[Core] state: " << QString::number(state) << " (" <<
             stateToString(state) << ")");
 
-    // do stuff based on global state
+    _state = state;
 }
 
 void Core::_stateEntered ()
@@ -349,6 +346,17 @@ err:
     return;
 }
 
+void Core::_setupStopped ()
+{
+#ifndef LIBENCLOUD_DISABLE_CLOUD
+    _cloud->stop();
+#endif
+
+    emit authSupplied(Auth());
+    emit stateChanged(StateIdle);
+    emit progress(Progress());
+}
+
 void Core::_fallback (bool isFallback)
 {
     LIBENCLOUD_DBG("[Core] fallback: " << isFallback);
@@ -363,10 +371,23 @@ void Core::_errorReceived (const libencloud::Error &err)
 {
     LIBENCLOUD_DBG("[Core] " << err.toString());
 
-   // QCC stops progress upon critical errors for user intervention
-   // while ECE and SECE keep on retrying automatically (in internal modules)
-    if (!_cfg->config.autoretry)
-        stop();
+    switch (err.getCode())
+    {
+      // non-critical errors - just stop FSM
+        case libencloud::Error::CodeAuthDomainRequired:
+            // stop setup without resetting cached data
+            _setup->stop(false);
+            _fsm.stop();
+            return;
+
+       // critical errors
+       default:
+           // QCC stops progress upon critical errors for user intervention
+           // while ECE and SECE keep on retrying automatically (in internal modules)
+           if (!_cfg->config.autoretry)
+               stop();
+           break;
+    }
 
     emit stateChanged(StateError);
     emit error(err);
@@ -447,15 +468,19 @@ err:
     return;
 }
 
-void Core::_authRequired (Auth::Id id)
+void Core::_authRequired (Auth::Id id, QVariant params)
 {
     switch (id)
     {
         case Auth::SwitchboardId:
-            emit need("sb_auth");
+        {
+            QVariantMap needParams;
+            needParams["domains"] = params.toList();
+            emit need("sb_auth", needParams);
             break;
+        }
         case Auth::ProxyId:
-            emit need("proxy_auth");
+            emit need("proxy_auth", QVariant());
             break;
         default:
             LIBENCLOUD_ERR_IF (1);
@@ -516,7 +541,7 @@ void Core::_logPortReceived (int port)
 // This handler is triggered for all API receivers
 void Core::_actionRequest (const QString &action, const Params &params)
 {
-//    LIBENCLOUD_DBG ("action: " << action << ", params: " << params);
+    LIBENCLOUD_DBG ("action: " << action);
     
     //
     // handled locally
@@ -610,6 +635,7 @@ int Core::_initSetup ()
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif
+    LIBENCLOUD_ERR_IF (_setup->setNetworkAccessManager(_qnam));
     LIBENCLOUD_ERR_IF (_setup == NULL);
 
     _setupObj = _setup;
@@ -624,8 +650,8 @@ int Core::_initSetup ()
             this, SLOT(_progressReceived(Progress)));
 
     // need message signal forwarding
-    connect(_setupObj, SIGNAL(need(QString)), 
-            this, SIGNAL(need(QString)));
+    connect(_setupObj, SIGNAL(need(QString, QVariant)), 
+            this, SIGNAL(need(QString, QVariant)));
 
     // server configuration handling and forwarding
     connect(_setupObj, SIGNAL(serverConfigSupply(QVariant)), 
@@ -636,6 +662,8 @@ int Core::_initSetup ()
     // setup completion handling
     connect(_setupObj, SIGNAL(completed()), 
             this, SLOT(_setupCompleted()));
+    connect(_setupObj, SIGNAL(stopped()), 
+            this, SLOT(_setupStopped()));
 
     return 0;
 err:
@@ -670,8 +698,8 @@ int Core::_initCloud ()
             this, SLOT(_progressReceived(Progress)));
 
     // need message signal forwarding
-    connect(_cloudObj, SIGNAL(need(QString)), 
-            this, SIGNAL(need(QString)));
+    connect(_cloudObj, SIGNAL(need(QString, QVariant)), 
+            this, SIGNAL(need(QString, QVariant)));
 
     return 0;
 err:
@@ -733,10 +761,13 @@ int Core::_initFsm ()
     return 0;
 }
 
-// Init other local objects
+// Init local objects
 int Core::_init ()
 {
     connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
+
+    _qnam = new QNetworkAccessManager;
+    LIBENCLOUD_ERR_IF (_qnam == NULL);
 
     _networkManager = new NetworkManager;
     LIBENCLOUD_ERR_IF (_networkManager == NULL);

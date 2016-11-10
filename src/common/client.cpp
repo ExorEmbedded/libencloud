@@ -21,6 +21,8 @@ Client::Client ()
     , _qnamExternal(false)
     , _verifyCA(true)
     , _debug(true)
+    , _timeout(LIBENCLOUD_CLIENT_TIMEOUT)
+    , _timeoutRetry(false)
     , _sslError(false)
 {
     LIBENCLOUD_TRACE;
@@ -60,6 +62,8 @@ int Client::setNetworkAccessManager (QNetworkAccessManager *qnam)
     _qnamExternal = true;
 
     _connectQnam();
+
+    return 0;
 err:
     return ~0;
 }
@@ -74,6 +78,13 @@ void Client::setVerifyCA (bool b)
 void Client::setDebug (bool b) 
 {
     _debug = b;
+}
+
+// if timeout is <= 0, it is disabled
+void Client::setTimeout (int timeout, bool retry)
+{
+    _timeout = timeout;
+    _timeoutRetry = retry;
 }
 
 void Client::reset ()
@@ -119,17 +130,52 @@ void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 	_send(MSG_TYPE_POST, url, headers, data, conf);
 }
 
+int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const QByteArray &data)
+{
+    Connection *conn = NULL;
+    QNetworkReply *reply = NULL;
+    _sslError = false;
+    _response = "";
+
+    if ((msgType == MSG_TYPE_GET) ||
+            (msgType == MSG_TYPE_NONE && data.isEmpty()))
+    {
+        EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
+                tr("Client failed creating GET request"));
+    }
+    else if ((msgType == MSG_TYPE_POST) ||
+            (msgType == MSG_TYPE_NONE && !data.isEmpty()))
+    {
+        EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
+                tr("Client falied creating POST request"));
+    } else {
+        LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
+    }
+
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
+            this, SLOT(_networkError(QNetworkReply::NetworkError)));
+
+    conn = new Connection(this, reply, _timeout, _timeoutRetry);
+    LIBENCLOUD_ERR_IF (conn == NULL);
+
+    conn->msgType = msgType;
+    conn->request = request;
+    conn->data = data;
+
+    _conns[reply] = conn;
+    return 0;
+err:
+    LIBENCLOUD_DELETE(conn);
+    return ~0;
+}
+
 void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 		const QByteArray &data, const QSslConfiguration &conf)
 {
     CLIENT_DBG("[Client] id: " << QString::number(++_id) << " to: " << url.toString());
     //CLIENT_DBG(" ### >>>>> ### " << data);
 
-    Connection *conn = NULL;
     QNetworkRequest request(url);
-    QNetworkReply *reply = NULL;
-    _sslError = false;
-    _response = "";
 
 #ifndef Q_OS_WINCE
     if (conf.caCertificates().count()) {
@@ -150,32 +196,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
         request.setRawHeader(mi.key(), mi.value());
 
-    if ((msgType == MSG_TYPE_GET) ||
-            (msgType == MSG_TYPE_NONE && data.isEmpty()))
-    {
-        EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
-                tr("Client failed creating GET request"));
-    }
-    else if ((msgType == MSG_TYPE_POST) ||
-            (msgType == MSG_TYPE_NONE && !data.isEmpty()))
-    {
-        EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
-                tr("Client falied creating POST request"));
-    } else {
-        LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
-    }
-
-    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), 
-            this, SLOT(_networkError(QNetworkReply::NetworkError)));
-
-    conn = new Connection(this, reply);
-    LIBENCLOUD_ERR_IF (conn == NULL);
-
-    _conns[reply] = conn;
-    return;
-err:
-    LIBENCLOUD_DELETE(conn);
-    return;
+    _sendRequest(msgType, request, data);
 }
 
 //
@@ -281,6 +302,8 @@ void Client::_finished (QNetworkReply *reply)
 { 
     LIBENCLOUD_RETURN_IF (reply == NULL, );
 
+    QList<QNetworkReply::RawHeaderPair> headerPairs = reply->rawHeaderPairs();
+    QMap<QByteArray, QByteArray> headers;
     Connection *conn = _conns[reply];
 
     // Possible error code remappings (if required because they should not
@@ -302,7 +325,11 @@ void Client::_finished (QNetworkReply *reply)
     _conns.remove(reply);
     conn->deleteLater();
 
-    emit complete(_response);
+    // convert QList<QNetworkReply::RawHeaderPair> to QMap<QByteArray, QByteArray>
+    foreach (QNetworkReply::RawHeaderPair header, headerPairs)
+        headers[header.first] = header.second;
+
+    emit complete(_response, headers);
     return;
 err:
     disconnect(reply, NULL, this, NULL);
@@ -324,23 +351,25 @@ void Client::_connectQnam()
             SLOT(_finished(QNetworkReply *)));
 }
 
-Connection::Connection (Client *client, QNetworkReply *reply)
+Connection::Connection (Client *client, QNetworkReply *reply, int timeout, bool timeoutRetry)
     : _client(client)
     , _reply(reply)
+    , _timeoutRetry(timeoutRetry)
 {
     //LIBENCLOUD_TRACE;
 
-    connect(&_timer, SIGNAL(timeout()), this,
-            SLOT(_timeout()));
+    if (timeout > 0)
+    {
+        connect(&_timer, SIGNAL(timeout()), this,
+                SLOT(_timeout()));
 
-    _timer.setSingleShot(true);
-    _timer.start(LIBENCLOUD_CLIENT_TIMEOUT * 1000);
+        _timer.setSingleShot(true);
+        _timer.start(timeout * 1000);
+    }
 }
 
 void Connection::_timeout ()
 {
-    //LIBENCLOUD_TRACE;
-
     LIBENCLOUD_DBG("[Client] id " << QString::number(_client->_id));
 
     if (_reply)
@@ -348,6 +377,12 @@ void Connection::_timeout ()
         disconnect(_reply, NULL, this, NULL);
         _client->_conns.remove(_reply);
         LIBENCLOUD_DELETE_LATER(_reply);
+    }
+
+    if (_timeoutRetry)
+    {
+        LIBENCLOUD_DBG("[Client] retrying last request");
+        _client->_sendRequest(msgType, request, data);
     }
 
     deleteLater();

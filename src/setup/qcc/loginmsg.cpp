@@ -64,7 +64,7 @@ int LoginMsg::process ()
 
     // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+    connect(_client, SIGNAL(complete(QString, const QMap<QByteArray, QByteArray> &headers)), this, SLOT(_clientComplete(QString)));
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
     _client->run(url, params, headers, sslconf);

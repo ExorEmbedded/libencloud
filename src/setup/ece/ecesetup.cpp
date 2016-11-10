@@ -161,7 +161,7 @@ int EceSetup::_initFsm ()
 
     _initMsg(_retrInfoMsg);
     connect(&_retrInfoMsg, SIGNAL(error(libencloud::Error)), this, SLOT(_onError(libencloud::Error)));
-    connect(&_retrInfoMsg, SIGNAL(need(QString)), this, SIGNAL(need(QString)));
+    connect(&_retrInfoMsg, SIGNAL(need(QString, QVariant)), this, SIGNAL(need(QString, QVariant)));
     // only SECE needs license, which is received via setup module
 #ifdef LIBENCLOUD_MODE_SECE
     connect(this, SIGNAL(licenseForward(QUuid)), &_retrInfoMsg, SLOT(licenseReceived(QUuid)));

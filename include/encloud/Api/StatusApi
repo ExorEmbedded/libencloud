@@ -44,7 +44,7 @@ signals:
     void apiError (const libencloud::Error &err);
     void apiProgress (const libencloud::Progress &progress);
     void apiFallback (bool isFallback);
-    void apiNeed (const QString &need);
+    void apiNeed (const QString &need, const QVariant &params);
 
     //
     // Local signals 
@@ -74,7 +74,7 @@ protected:
     Error _error;
     Progress _progress;
     int _isFallback;  // tristate (-1 = null)
-    QStringList _needs;
+    QVariantMap _needs;
 };
 
 }  // namespace libencloud

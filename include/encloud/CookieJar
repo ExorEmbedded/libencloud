@@ -1,0 +1,48 @@
+#ifndef _LIBENCLOUD_COOKIEJAR_H_
+#define _LIBENCLOUD_COOKIEJAR_H_
+
+#include <QNetworkCookieJar>
+#include <QSettings>
+#include <QStringList>
+#include <encloud/Common>
+
+namespace libencloud 
+{
+
+/**
+ * Basic global cookie persistent storage (no URL-specific handling - content
+ * received from server is trusted) with a couple of extras:
+ * 1) Expose cookies to required server addresses via addKnownHost(): cookie auth login is
+ * performed on server's VPN address for navigation, but Guacamole sends URLs
+ * containing sever's external IP
+ * 2) Allow cookies to be emptied via reset() - required for logout
+ */
+class LIBENCLOUD_DLLSPEC CookieJar : public QNetworkCookieJar
+{
+    Q_OBJECT
+
+public:
+    explicit CookieJar (const QString &path, QObject *parent = NULL);
+    virtual ~CookieJar ();
+
+    void setRestricted(bool restricted = true);
+
+    void addKnownHost(const QString &host);
+    QList<QNetworkCookie> get();
+    void reset ();
+
+protected:
+
+    QList<QNetworkCookie> cookiesForUrl(const QUrl & url) const;
+    bool setCookiesFromUrl (const QList<QNetworkCookie> &cookieList, const QUrl &url);
+
+    void load();
+
+    bool m_restricted;
+    QStringList m_knownHosts;
+    QSettings *m_settings;
+};
+
+}  // namespace libencloud
+
+#endif  /* _LIBENCLOUD_COOKIEJAR_H_ */

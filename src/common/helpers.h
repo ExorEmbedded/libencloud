@@ -33,8 +33,8 @@
         if (lev <= g_libencloudLogLev) { \
             if (libencloud::Logger::connected()) \
             { \
-                QString __s; \
-                QTextStream __ts(&__s); \
+                static QString __s; __s.clear(); \
+                static QTextStream __ts(&__s); __ts.reset(); __ts.setString(&__s);  \
                 __ts << qPrintable(QDateTime::currentDateTime().toString()) \
                         << " [" << QThread::currentThreadId() \
                         << "] [" << levstr << "] [" << LIBENCLOUD_APP << ":" << __FILE__ << ":" \
@@ -54,15 +54,13 @@
         if (lev <= g_libencloudLogLev) { \
             if (libencloud::Logger::connected()) \
             { \
-                QString __s; \
-                QTextStream __ts(&__s); \
-                __ts << qPrintable(QDateTime::currentDateTime().toString()) \
-                        << " [" << levstr << "] [" << LIBENCLOUD_APP  "] " << msg; \
+                static QString __s; __s.clear(); \
+                static QTextStream __ts; __ts.reset(); __ts.setString(&__s);\
+                __ts << " [" << levstr << "] " << msg; \
                 libencloud::Logger::send(__s + "\n"); \
             } \
             else \
-                qDebug().nospace() << qPrintable(QDateTime::currentDateTime().toString()) \
-                        << " [" << levstr << "] [" << LIBENCLOUD_APP << "] " << msg; \
+                qDebug().nospace() << " [" << levstr << "] " << msg; \
         } \
     } while (0);
 

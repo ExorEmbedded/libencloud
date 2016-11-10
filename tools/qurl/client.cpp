@@ -9,7 +9,7 @@ Client::Client ()
 {
     connect(&m_client, SIGNAL(error(libencloud::Error)),
             this, SLOT(clientError(libencloud::Error)));
-    connect(&m_client, SIGNAL(complete(QString)),
+    connect(&m_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
             this, SLOT(clientComplete(QString)));
 }
 

@@ -14,7 +14,7 @@ ConfigApi::ConfigApi ()
     LIBENCLOUD_TRACE;
 
     connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(&_client, SIGNAL(complete(QString)), this, SLOT(_clientComplete(QString)));
+    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)), this, SLOT(_clientComplete(QString)));
 }
 
 ConfigApi::~ConfigApi ()
