@@ -20,6 +20,10 @@ namespace libencloud {
 namespace crypto {
 
 typedef enum {
+    Aes128CfbCipher,
+    Aes256CfbCipher,
+    Aes128Cfb8Cipher,
+    Aes256Cfb8Cipher,
     Aes256CbcCipher,
     Aes256EcbCipher
 } Cipher;

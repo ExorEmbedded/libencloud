@@ -244,6 +244,22 @@ int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::C
 {
     switch (cipher)
     {
+        case libencloud::crypto::Aes128CfbCipher:
+            ec->cipher = EVP_aes_128_cfb();
+            break;
+
+        case libencloud::crypto::Aes256CfbCipher:
+            ec->cipher = EVP_aes_256_cfb();
+            break;
+
+        case libencloud::crypto::Aes128Cfb8Cipher:
+            ec->cipher = EVP_aes_128_cfb8();
+            break;
+
+        case libencloud::crypto::Aes256Cfb8Cipher:
+            ec->cipher = EVP_aes_256_cfb8();
+            break;
+
         case libencloud::crypto::Aes256CbcCipher:
             ec->cipher = EVP_aes_256_cbc();
             break;
@@ -509,7 +525,7 @@ int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long p
 
 #ifdef LIBENCLOUD_CRYPTO_DEBUG
     fprintf(stderr, "<Key: \n");
-    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_key_length(ctx));
     fprintf(stderr, "<iv: \n");
     BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
     fprintf(stderr, "<Plaintext: \n");
@@ -569,7 +585,7 @@ int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long c
 
 #ifdef LIBENCLOUD_CRYPTO_DEBUG
     fprintf(stderr, "<Key: \n");
-    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_key_length(ctx));
     fprintf(stderr, "<iv: \n");
     BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
     fprintf(stderr, "<Ciphertext: \n");
