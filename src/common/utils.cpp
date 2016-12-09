@@ -34,7 +34,7 @@ LIBENCLOUD_DLLSPEC QString getHwInfo (void)
     LIBENCLOUD_DBG("[Utils] hwInfo: " << hwInfo);
 
 #ifndef Q_OS_WINCE
-    LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
+    LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5_hex(NULL, (unsigned char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
 #else
     res = QString::fromLatin1(QCryptographicHash::hash(hwInfo.toUtf8(), QCryptographicHash::Md5));
@@ -164,6 +164,13 @@ LIBENCLOUD_DLLSPEC int string2Bool (const QString &s, bool &b)
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 {
     return uuid.toString().remove('{').remove('}').toUpper();
+}
+
+LIBENCLOUD_DLLSPEC QString base642Url (const QString &s)
+{
+    return QString(s).
+              replace("/", "_").
+              replace("=", "");
 }
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)

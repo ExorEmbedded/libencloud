@@ -134,7 +134,15 @@ SOURCES += core/core.cpp
     modeqcc {
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
+        HEADERS += $${_PRO_FILE_PWD_}/setup/reg/*.h
+        SOURCES += $${_PRO_FILE_PWD_}/setup/reg/*.cpp
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
+        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/reg
+
+        # Agent mode requires Yaml parsing
+        QTYAML_PATH = $${_PRO_FILE_PWD_}/../../qtyaml
+        INCLUDEPATH += $${QTYAML_PATH}/src
+        LIBS += -L$${QTYAML_PATH}/bin/release -lqtyaml
     }
     modeece | modesece {
         HEADERS += $${_PRO_FILE_PWD_}/setup/ece/*.h

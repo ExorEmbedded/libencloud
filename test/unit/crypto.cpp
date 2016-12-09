@@ -33,6 +33,9 @@ int test_crypto ()
 
     libencloud_crypto_t ec;
 
+    unsigned char md[LIBENCLOUD_CRYPTO_MAX_MD_SZ];
+    unsigned int md_sz;
+
     TEST_ZERO (libencloud_crypto_init(&ec));
     TEST_ZERO (libencloud_crypto_set_zeropad(&ec, true));
     TEST_ZERO (libencloud_crypto_set_name_cb(&ec, &__name_cb, NULL));
@@ -46,8 +49,11 @@ int test_crypto ()
     TEST_ZERO (libencloud_crypto_genkey(&ec, 4096, TEST_CRYPTO_OUTFILE));
     TEST_ZERO (libencloud_crypto_gencsr(&ec, TEST_CRYPTO_OUTFILE, NULL, NULL));
 
-    s = libencloud_crypto_md5(&ec, (char *) "foo bar", strlen("foo bar"));
+    s = libencloud_crypto_md5_hex(&ec, (unsigned char *) "foo bar", strlen("foo bar"));
     TEST_ZERO (strcmp(s, "327B6F07435811239BC47E1544353273"));
+
+    TEST_ZERO (libencloud_crypto_digest(&ec, (unsigned char *) "foo bar", strlen("foo bar"), md, &md_sz));
+    TEST_EQUALS (QByteArray((const char *) md, md_sz).toHex().toUpper(), "327B6F07435811239BC47E1544353273");
 
     TEST_ZERO (test_crypto_encdec(&ec, "123", "x"));
     TEST_ZERO (test_crypto_encdec(&ec, "01234567890123456789012345678901", "x               ")); //=block size

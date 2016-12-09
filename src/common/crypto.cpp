@@ -1,7 +1,6 @@
 #include <QStringList>
 #include <string.h>
 #include <openssl/rand.h>
-#include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
@@ -229,6 +228,7 @@ int libencloud_crypto_init (libencloud_crypto_t *ec)
 
     memset(ec, 0, sizeof(libencloud_crypto_t));
     ec->cipher = EVP_aes_256_cbc();
+    ec->digest = EVP_md5();
     ec->zeropad = false;
 
     LIBENCLOUD_ONCE
@@ -246,30 +246,50 @@ int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::C
     {
         case libencloud::crypto::Aes128CfbCipher:
             ec->cipher = EVP_aes_128_cfb();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes256CfbCipher:
             ec->cipher = EVP_aes_256_cfb();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes128Cfb8Cipher:
             ec->cipher = EVP_aes_128_cfb8();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes256Cfb8Cipher:
             ec->cipher = EVP_aes_256_cfb8();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes256CbcCipher:
             ec->cipher = EVP_aes_256_cbc();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes256EcbCipher:
             ec->cipher = EVP_aes_256_ecb();
-            break;
+            return 0;
     }
 
-    return 0;
+    return ~0;
+}
+
+int libencloud_crypto_set_digest (libencloud_crypto_t *ec, libencloud::crypto::Digest digest)
+{
+    switch (digest)
+    {
+        case libencloud::crypto::Md5Digest:
+            ec->digest = EVP_md5();
+            return 0;
+
+        case libencloud::crypto::Sha1Digest:
+            ec->digest = EVP_sha1();
+            return 0;
+
+        case libencloud::crypto::Sha256Digest:
+            ec->digest = EVP_sha256();
+            return 0;
+    }
+
+    return ~0;
 }
 
 /** \brief Do manual zero-padding - e.g. for pycryto compatibility
@@ -480,8 +500,10 @@ err:
  * \brief Calculate md5sum of {buf, buf_sz} and return it as a null-terminated string 
  * 
  * Result string must be free()d by caller.
+ * 
+ * == DEPRECATED == in favour of the more generic libencloud_crypto_digest()
  */
-char *libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_sz)
+char *libencloud_crypto_md5_hex (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz)
 {
     unsigned char md5[MD5_DIGEST_LENGTH];
     char *s = NULL;
@@ -490,7 +512,7 @@ char *libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_
     LIBENCLOUD_UNUSED(ec);
 
     LIBENCLOUD_ERR_IF (buf == NULL);
-    LIBENCLOUD_ERR_IF (buf_sz <= 0);
+    LIBENCLOUD_ERR_IF (buf_sz == 0);
 
     LIBENCLOUD_ERR_IF (!EVP_Digest(buf, buf_sz, md5, NULL, EVP_md5(), NULL));
     LIBENCLOUD_ERR_IF ((s = (char *) calloc(1, sizeof(char) * MD5_DIGEST_LENGTH*2 + 1)) == NULL);
@@ -506,6 +528,21 @@ err:
         free(s);
 
     return NULL;
+}
+
+int libencloud_crypto_digest (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz,
+    unsigned char *md, unsigned int *md_sz)
+{
+    LIBENCLOUD_ERR_IF (buf == NULL);
+    LIBENCLOUD_ERR_IF (buf_sz == 0);
+    LIBENCLOUD_ERR_IF (md == NULL);
+    LIBENCLOUD_ERR_IF (md_sz == NULL);
+
+    LIBENCLOUD_ERR_IF (!EVP_Digest(buf, buf_sz, md, md_sz, ec->digest, NULL));
+
+    return 0;
+err:
+    return ~0;
 }
 
 int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long ptext_sz,

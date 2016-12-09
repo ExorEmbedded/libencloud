@@ -147,7 +147,7 @@ Definitions
                     "start","stop"              GUI/browser
                     "syncRoutes"                Switchboard
                     "open","close"              Switchboard
-                     "setGateway"                OpenVPN up script (Windows-only)
+                    "setGateway"                OpenVPN up script (Windows-only)
 
 client -> encloud:
 

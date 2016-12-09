@@ -26,6 +26,7 @@ LIBENCLOUD_DLLSPEC int rmRec (const QString &dir);
 LIBENCLOUD_DLLSPEC QString bool2String (bool b);
 LIBENCLOUD_DLLSPEC int string2Bool (const QString &s, bool &b);
 LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid);
+LIBENCLOUD_DLLSPEC QString base642Url (const QString &b64);
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
 

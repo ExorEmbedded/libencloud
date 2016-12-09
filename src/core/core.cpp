@@ -15,6 +15,7 @@
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
 #include <setup/qcc/qccsetup.h>
+#include <setup/reg/regsetup.h>
 #endif
 #if defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
 #include <setup/ece/ecesetup.h>
@@ -63,6 +64,7 @@ Core::Core (Mode mode)
     LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
+    // Setup and cloud initally use defaults
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_ERR_IF (_initSetup());
 #endif
@@ -102,6 +104,8 @@ int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
+    LIBENCLOUD_ERR_IF (!(_state == StateIdle || _state == StateError));
+
     // Connect Client starts immediately
     if (!_cfg->config.decongest)
     {
@@ -111,14 +115,18 @@ int Core::start ()
 
     // for ECE and SECE startup is automated so we introduce a random pause of
     // 0-5 secs to avoid server congestion due to excessive simultaneous connections
-    int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
+    {
+        int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
 
-    LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
-            .arg(QString::number(msecs)));
+        LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
+                .arg(QString::number(msecs)));
 
-    QTimer::singleShot(msecs, this, SLOT(_start()));
+        QTimer::singleShot(msecs, this, SLOT(_start()));
+    }
 
     return 0;
+err:
+    return ~0;
 }
 
 void Core::_start ()
@@ -248,27 +256,16 @@ int Core::attachServer (Server *server)
 #endif
 
     // when auth is supplied, it is forwarded to all modules, while
-    // authentication requests are reemitted in _authRequired as need signals
+    // authentication requests are reemitted in _authRequired as "need" signals
     // for handler
     connect(obj, SIGNAL(authSupplied(Auth)), 
            this, SLOT(_authSupplied(Auth)));
-#ifndef LIBENCLOUD_DISABLE_SETUP
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _setupObj, SIGNAL(authSupplied(Auth)));
-    connect(_setupObj, SIGNAL(authRequired(Auth::Id, QVariant)), 
-           this, SLOT(_authRequired(Auth::Id, QVariant)));
-#endif
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _cloudObj, SIGNAL(authSupplied(Auth)));
-    connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
-           this, SLOT(_authRequired(Auth::Id)));
-#endif
-
     connect(obj, SIGNAL(actionRequest(QString, Params)), 
             this, SLOT(_actionRequest(QString, Params)));
     connect(obj, SIGNAL(configSupplied(QVariant)),
             _cfg, SLOT(receive(QVariant)));
+    connect(obj, SIGNAL(configSupplied(QVariant)),
+            this, SLOT(_configReceived(QVariant)));
 
     // attach core configuration
     server->_cfg = _cfg;
@@ -391,6 +388,30 @@ void Core::_errorReceived (const libencloud::Error &err)
 
     emit stateChanged(StateError);
     emit error(err);
+}
+
+void Core::_configReceived (const QVariant &config)
+{
+    // ignore resets
+    if (config.toMap()["reset"].toBool())
+        return;
+
+    if (config.toMap()["setup"].toMap()["agent"].isNull())
+        return;
+
+    _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
+
+#if !defined(LIBENCLOUD_DISABLE_SETUP)
+    LIBENCLOUD_ERR_IF (_initSetup());
+#endif
+
+#if !defined(LIBENCLOUD_DISABLE_CLOUD)
+    _cloud->setSetup(_setup);
+#endif
+
+    LIBENCLOUD_ERR_IF (_initFsm());
+err:
+    return;
 }
 
 // Remap step/nsteps and forward signal for http handler
@@ -628,8 +649,15 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
+    // reset pre-existing instances
+    LIBENCLOUD_DELETE_LATER(_setup);
+
 #if defined(LIBENCLOUD_MODE_QCC)
-    _setup = new QccSetup(_cfg);
+    LIBENCLOUD_DBG("[Core] setupAgent: " << _cfg->config.setupAgent);
+    if (_cfg->config.setupAgent)
+        _setup = new RegSetup(_cfg);  // agent mode
+    else
+        _setup = new QccSetup(_cfg);  // app mode (default)
 #elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
     _setup = new EceSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_VPN)
@@ -644,6 +672,14 @@ int Core::_initSetup ()
     // error signal handling
     connect(_setupObj, SIGNAL(error(libencloud::Error)), 
             this, SLOT(_errorReceived(libencloud::Error)));
+
+    // authentication signal handling
+    connect(this, SIGNAL(authSupplied(Auth)), 
+           _setupObj, SIGNAL(authSupplied(Auth)));
+    connect(_setupObj, SIGNAL(authRequired(Auth::Id, QVariant)), 
+           this, SLOT(_authRequired(Auth::Id, QVariant)));
+    connect(_setupObj, SIGNAL(authChanged(Auth)),
+           this, SIGNAL(authSupplied(Auth)));
 
     // progress signal handling
     connect(_setupObj, SIGNAL(progress(Progress)), 
@@ -674,6 +710,9 @@ int Core::_initCloud ()
 {
     LIBENCLOUD_TRACE;
 
+    // reset pre-existing instances
+    LIBENCLOUD_DELETE_LATER(_cloud);
+
     _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
     _cloud->setSetup(_setup);
@@ -684,6 +723,12 @@ int Core::_initCloud ()
     // error signal handling
     connect(_cloudObj, SIGNAL(error(libencloud::Error)), 
             this, SLOT(_errorReceived(libencloud::Error)));
+
+    // authentication signal handling
+    connect(this, SIGNAL(authSupplied(Auth)), 
+           _cloudObj, SIGNAL(authSupplied(Auth)));
+    connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
+           this, SLOT(_authRequired(Auth::Id)));
 
     // state changes forwarding for connecting/connected states
     connect(_cloudObj, SIGNAL(stateChanged(State)), 
@@ -729,9 +774,15 @@ err:
 int Core::_initFsm ()
 {
     LIBENCLOUD_TRACE;
+
+    // clear previous FSM
+    _fsm.stop();
+    Q_FOREACH(QAbstractState *s, _fsm.configuration())
+        _fsm.removeState(s);
     
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_DBG("setupState: " << _setupState);
+    disconnect(_setupState, NULL, NULL, NULL);
     _initialState = _setupState;
     connect(_setupState, SIGNAL(entered()), 
             this, SLOT(_stateEntered()));
@@ -745,6 +796,7 @@ int Core::_initFsm ()
 #if defined(LIBENCLOUD_DISABLE_SETUP)
     _initialState = _cloudState;
 #endif
+    disconnect(_cloudState, NULL, NULL, NULL);
     connect(_cloudState, SIGNAL(entered()), 
             this, SLOT(_stateEntered()));
     connect(_cloudState, SIGNAL(exited()), 
@@ -752,6 +804,8 @@ int Core::_initFsm ()
     _fsm.addState(_cloudState);
 #endif
 
+    Q_FOREACH(QAbstractTransition *t, _setupState->transitions())
+        _setupState->removeTransition(t);
 #if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_CLOUD)
     _setupState->addTransition(_setupObj, SIGNAL(completed()), _cloudState);
 #endif

@@ -63,6 +63,7 @@ private slots:
     void _setupStopped ();
     void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
+    void _configReceived (const QVariant &config);
     void _progressReceived (const Progress &p);
     void _authSupplied (const Auth &auth);
     void _authRequired (Auth::Id id, QVariant params = QVariant());

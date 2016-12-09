@@ -15,6 +15,9 @@
 #include <encloud/Common>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
+#include <openssl/evp.h>
+
+#define LIBENCLOUD_CRYPTO_MAX_MD_SZ    EVP_MAX_MD_SIZE
 
 namespace libencloud {
 namespace crypto {
@@ -28,6 +31,11 @@ typedef enum {
     Aes256EcbCipher
 } Cipher;
 
+typedef enum {
+    Md5Digest,
+    Sha1Digest,
+    Sha256Digest
+} Digest;
 
 //
 // Generic helpers
@@ -77,6 +85,7 @@ struct libencloud_crypto_s
     libencloud_crypto_name_cb name_cb;
     void *name_cb_ctx;
     const EVP_CIPHER *cipher;
+    const EVP_MD *digest;
     bool zeropad;
 };
 typedef struct libencloud_crypto_s libencloud_crypto_t;
@@ -87,13 +96,16 @@ LIBENCLOUD_DLLSPEC int libencloud_crypto_term (libencloud_crypto_t *ec);
 
 /* Settings */
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::Cipher cipher);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_set_digest (libencloud_crypto_t *ec, libencloud::crypto::Digest digest);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_zeropad (libencloud_crypto_t *ec, bool enabled);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_set_name_cb (libencloud_crypto_t *ec, int cb(X509_NAME *n, void *arg), void *ctx);
 
 /* Crypto methods */
 LIBENCLOUD_DLLSPEC int libencloud_crypto_genkey (libencloud_crypto_t *ec, size_t nbits, const char *outfile);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_gencsr (libencloud_crypto_t *ec, const char *keyfile, char **buf, long *buf_sz);
-LIBENCLOUD_DLLSPEC char * libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_sz);
+LIBENCLOUD_DLLSPEC char * libencloud_crypto_md5_hex (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz);
+LIBENCLOUD_DLLSPEC int libencloud_crypto_digest (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz,
+    unsigned char *md, unsigned int *md_sz);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long ptext_sz,
     unsigned char *key, unsigned char *iv, unsigned char *ctext, long *ctext_sz);
 LIBENCLOUD_DLLSPEC int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long ctext_sz,

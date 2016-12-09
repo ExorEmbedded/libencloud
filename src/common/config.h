@@ -56,6 +56,7 @@ typedef struct
     int rsaBits;
 
     bool setupEnabled;
+    bool setupAgent;
 
     QFileInfo vpnExePath;
     QFileInfo vpnConfPath;

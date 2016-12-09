@@ -44,6 +44,7 @@ signals:
     //
     virtual void need (const QString &what, const QVariant &params) = 0;
     virtual void authRequired (Auth::Id id, const QVariant &params) = 0;
+    virtual void authChanged (const Auth &auth) = 0; 
 
     //
     // core -> setup -> internal

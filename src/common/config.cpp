@@ -198,10 +198,19 @@ int Config::_parse (const QVariantMap &jo)
                 "rsa bits must be a multiple of 512!");
     }
 
-    if (jo["setup"].toMap()["enabled"].isNull())
-        config.setupEnabled = true;
-    else  // plain VPN
-        config.setupEnabled = jo["setup"].toMap()["enabled"].toBool();
+    config.setupEnabled = true;
+    config.setupAgent = false;
+
+    if (!jo["setup"].isNull())
+    {
+        QVariantMap setup = jo["setup"].toMap();
+
+        if (!setup["enabled"].isNull())
+            config.setupEnabled = setup["enabled"].toBool();
+
+        if (!setup["agent"].isNull())
+            config.setupAgent = setup["agent"].toBool();
+    }
 
     LIBENCLOUD_ERR_IF (_parseVpn(jo));
     LIBENCLOUD_ERR_IF (_parseLog(jo));

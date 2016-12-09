@@ -1,17 +1,16 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_H_
-#define _LIBENCLOUD_PRIV_SETUP_QCC_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_REG_H_
+#define _LIBENCLOUD_PRIV_SETUP_REG_H_
 
 #include <QStateMachine>
 #include <QtPlugin>
 #include <encloud/Client>
 #include <common/message.h>
 #include <setup/setup.h>
-#include <setup/qcc/setupmsg.h>
-#include <setup/qcc/closemsg.h>
+#include <setup/reg/regmsg.h>
 
 namespace libencloud {
 
-class QccSetup : public SetupInterface
+class RegSetup : public SetupInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::SetupInterface)
@@ -22,15 +21,15 @@ public:
         StateError = 0,
 
         // used for steps
-        StateSetupMsg = 1,
+        StateRegMsg = 1,
         StateReceived,
 
         // used for total count
-        StateFirst = StateSetupMsg,
+        StateFirst = StateRegMsg,
         StateLast = StateReceived
     } State;
 
-    QccSetup (Config *cfg);
+    RegSetup (Config *cfg);
 
     int start ();
     int stop (bool reset, bool close);
@@ -41,6 +40,11 @@ public:
     int getTotalSteps() const;
 
 signals:
+    //
+    // core -> setup -> internal
+    //
+    void authSupplied (const Auth &auth);  
+
     //
     // setup -> core
     //
@@ -58,11 +62,6 @@ signals:
     void authChanged (const Auth &auth);  
 
     //
-    // core -> setup -> internal
-    //
-    void authSupplied (const Auth &auth);  
-
-    //
     // internals
     // 
     void retry ();
@@ -71,7 +70,6 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _onProcessed ();
-    void _onCloseProcessed ();
     void _onErrorState ();
     void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
@@ -91,11 +89,9 @@ private:
 
     QState _errorSt, *_errorState;
 
-    SetupMsg _setupMsg;
-    QState _setupMsgSt, *_setupMsgState;
+    RegMsg _regMsg;
+    QState _regMsgSt, *_regMsgState;
     QState _finalSt, *_finalState;
-
-    CloseMsg _closeMsg;
 
     bool _isError;
     Error _error;
@@ -107,4 +103,4 @@ private:
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_REG_H_ */
