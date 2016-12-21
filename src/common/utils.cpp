@@ -166,9 +166,14 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
     return uuid.toString().remove('{').remove('}').toUpper();
 }
 
+// [https://docs.python.org/2/library/base64.html]
+// Decode string s using the URL- and filesystem-safe alphabet, which
+// substitutes - instead of + and _ instead of / in the standard Base64
+// alphabet.
 LIBENCLOUD_DLLSPEC QString base642Url (const QString &s)
 {
     return QString(s).
+              replace("+", "-").
               replace("/", "_").
               replace("=", "");
 }
