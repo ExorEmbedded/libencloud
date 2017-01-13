@@ -231,18 +231,12 @@ err:
     return ~0;
 }
 
-// Get Activation code
 QString RegMsg::_getCode ()
 {
     if (!_code.isNull())
         return _code;
 
-    QFile activationCodeFile(getCommonAppDataDir() + "activation-code");
-    LIBENCLOUD_ERR_IF (!activationCodeFile.open(QFile::ReadOnly));
-
-    return (_code = activationCodeFile.readLine().trimmed());
-err:
-    return QString();
+    return (_code = getActivationCode());
 }
 
 // Calculate key = sha256(activation_code)

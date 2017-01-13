@@ -272,7 +272,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
     else
         extraMsg = json["error"].toString();
 
-    CLIENT_DBG("[Client] error: " << extraMsg);
+    CLIENT_DBG("[Client] error " << err << ": " << extraMsg);
 
     switch (err)
     {
@@ -287,6 +287,9 @@ void Client::_networkError (QNetworkReply::NetworkError err)
             if (_sslError)
                 break;
 
+        case QNetworkReply::ContentNotFoundError:
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerNotFound, extraMsg)));
+            break;
             // else follow through
         default:
             // url is too much detail for end user

@@ -229,10 +229,8 @@ err:
     return ~0;
 }
 
-static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
+void mapMerge (QVariantMap &to, const QVariantMap &from)
 {
-    QVariantMap m = to;
-
     //LIBENCLOUD_DBG("to: " << to);
     //LIBENCLOUD_DBG("from: " << from);
 
@@ -243,7 +241,7 @@ static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
         //LIBENCLOUD_DBG("insert: " << iter.key() << " = " << iter.value());
 
         QVariantMap fromMap = from[iter.key()].toMap();
-        QVariantMap newMap = m[iter.key()].toMap();
+        QVariantMap newMap = to[iter.key()].toMap();
 
         if (!newMap.isEmpty() && !fromMap.isEmpty())
         {
@@ -256,50 +254,13 @@ static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
             //LIBENCLOUD_DBG("fromMap: " << fromMap);
             //LIBENCLOUD_DBG("newMap: " << newMap);
 
-            m[iter.key()] = newMap;
+            to[iter.key()] = newMap;
         }
         else 
         {
-            m[iter.key()] = iter.value();
+            to[iter.key()] = iter.value();
         }
     }
-
-    //LIBENCLOUD_DBG("m: " << m);
-
-    return m;
-}
-
-LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
-{
-    QVariantMap mTo = to.toMap();
-    QVariantMap mFrom = from.toMap();
-
-    //LIBENCLOUD_DBG("TO: " << to);
-    //LIBENCLOUD_DBG("FROM: " << from);
-
-    for (QVariantMap::const_iterator iter = mFrom.begin();
-        iter != mFrom.end();
-        ++iter)
-    {
-        if (iter.value().canConvert<QVariantMap>())
-        {
-            variantMerge(
-                    qvariant_cast<QVariantMap>(to)[iter.key()],
-                    iter.value()
-                    );
-
-            mTo[iter.key()] = _mapMerge(
-                    mTo[iter.key()].toMap(),
-                    iter.value().toMap()
-                    );
-        }
-        else  // not a map - simple copy
-        {
-            mTo[iter.key()] = iter.value();
-        }
-    }
-
-    to = mTo;
 }
 
 LIBENCLOUD_DLLSPEC bool validIp (const QString &s)

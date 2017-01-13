@@ -33,7 +33,7 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
 LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out,
         bool wait = true, bool debug = true);
 
-LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from);
+LIBENCLOUD_DLLSPEC void mapMerge (QVariantMap &to, const QVariantMap &from);
 
 LIBENCLOUD_DLLSPEC bool validIp (const QString &s);
 LIBENCLOUD_DLLSPEC bool validHost (const QString &s);

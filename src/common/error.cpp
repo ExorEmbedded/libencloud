@@ -175,6 +175,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Generic Server Error");
         case CodeServerLicenseInvalid:
             return QObject::tr("Server reported Invalid License");
+        case CodeServerNotFound:
+            return QObject::tr("Server reported content not found");
 
         // 3xx
         case CodeAuthFailed:

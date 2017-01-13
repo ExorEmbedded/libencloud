@@ -81,7 +81,7 @@ public:
 
     /* Configuration loading and debugging */
     int loadFromFile ();
-    QVariant getVariant ();
+    QVariantMap getMap ();
     QString dump ();
 
     /* Configuration objects are publicly accessible */
@@ -106,6 +106,7 @@ protected slots:
     void receive (const QVariant &cfg); 
 
 protected:
+    int _loadExt ();
     int _parse (const QVariantMap &jo);
     int _parsePaths (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
@@ -116,8 +117,8 @@ protected:
     int _parseLog (const QVariantMap &jo);
     QString _joinPaths (const QString &prefix, const QString &path, bool keepRelative = false);
 
-    QVariant _json;
-    QVariant _jsonOrig;
+    QVariantMap _json;
+    QVariantMap _jsonOrig;
 };
 
 } // namespace libencloud

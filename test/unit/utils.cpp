@@ -7,25 +7,25 @@ void TestUtils::run ()
 {
     TEST_TRACE;
 
-    testVariantMerge(
+    testMapMerge(
             "{ \"foo\" : 123 }",
             "{ \"foo\" : 456 }",
             "{ \"foo\" : 456 }"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{}",
             "{ \"foo\" : 123 }",
             "{ \"foo\" : 123 }"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{ \"foo\" : 123 }",
             "{ \"bar\" : 456 }",
             "{ \"foo\" : 123, \"bar\" : 456 }"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{ \"foo\" : 123 }",
             "{ \"bar\" : 456, "
                 "\"sub\" : { \"a\" : 1, \"b\" : 2 }"
@@ -35,7 +35,7 @@ void TestUtils::run ()
             "}"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{"
                 "\"sub\" : { \"a\" : 1, \"b\" : 2 }"
             "}",
@@ -47,7 +47,7 @@ void TestUtils::run ()
             "}"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{"
                 "\"sub\" : { \"a\" : 1, \"b\" : 2 }"
             "}",
@@ -59,13 +59,13 @@ void TestUtils::run ()
             "}"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{ \"a\" : 1, \"b\" : 2 }",
             "{ \"a\" : { \"a1\" : 11, \"a2\" : 12 }, \"c\" : 3 }",
             "{ \"a\" : { \"a1\" : 11, \"a2\" : 12 }, \"b\" : 2, \"c\" : 3 }"
             );
 
-    testVariantMerge(
+    testMapMerge(
             "{"
             "   \"log\" : false, \"ssl\" : { \"init\" : { \"verify_ca\" : false } }"
             "}",
@@ -78,28 +78,27 @@ void TestUtils::run ()
             );
 }
 
-void TestUtils::testVariantMerge (const QString &to, const QString &from, const QString &exp)
+void TestUtils::testMapMerge (const QString &to, const QString &from, const QString &exp)
 {
     bool ok = true;
-    QVariant jfrom;
-    QVariant jto;
-    QVariant jout;
-    QVariant jexp;
+    QVariantMap mfrom;
+    QVariantMap mto;
+    QVariantMap mexp;
 
     LIBENCLOUD_DBG ("IN to: " << to << ", from: " << from << ", exp: " << exp);
 
-    jfrom = libencloud::json::parse(from, ok);
+    mfrom = libencloud::json::parse(from, ok).toMap();
     QVERIFY (ok);
 
-    jto = libencloud::json::parse(to, ok);
+    mto = libencloud::json::parse(to, ok).toMap();
     QVERIFY (ok);
 
-    jexp = libencloud::json::parse(exp, ok);
+    mexp = libencloud::json::parse(exp, ok).toMap();
     QVERIFY (ok);
 
-    libencloud::utils::variantMerge(jto, jfrom);
+    libencloud::utils::mapMerge(mto, mfrom);
 
-    LIBENCLOUD_DBG ("OUT to: " << libencloud::json::serialize(jto, ok));
+    LIBENCLOUD_DBG ("OUT to: " << libencloud::json::serialize(mto, ok));
 
-    QVERIFY(jto == jexp);
+    QVERIFY(mto == mexp);
 };

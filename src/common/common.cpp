@@ -4,6 +4,7 @@
 #  include <shlobj.h>
 #endif
 #include <encloud/Common>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -71,6 +72,31 @@ LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package)
     LIBENCLOUD_UNUSED(package);
     return QString(LIBENCLOUD_LOG_PREFIX);
 #endif
+}
+
+// Agent mode
+LIBENCLOUD_DLLSPEC QString getActivationCode ()
+{
+    QFile activationCodeFile(getCommonAppDataDir() + "activation-code");
+    LIBENCLOUD_ERR_IF (!activationCodeFile.open(QFile::ReadOnly));
+
+    return activationCodeFile.readLine().trimmed();
+err:
+    return QString();
+}
+
+LIBENCLOUD_DLLSPEC int setActivationCode (const QString &code)
+{
+    LIBENCLOUD_DBG("Writing to: " << getCommonAppDataDir() + "activation-code");
+
+    LIBENCLOUD_ERR_IF (utils::bytes2File(
+                code.toAscii(),
+                getCommonAppDataDir() + "activation-code",
+                true));
+
+    return 0;
+err:
+    return ~0;
 }
 
 }  // namespace libencloud

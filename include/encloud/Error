@@ -29,6 +29,7 @@ public:
         CodeServerVerifyFailed =    201,
         CodeServerError =           202,
         CodeServerLicenseInvalid =  203,
+        CodeServerNotFound       =  204,
 
         CodeAuthFailed =            300,
         CodeAuthAlreadyConnected =  310,
