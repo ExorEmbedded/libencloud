@@ -241,18 +241,23 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
             case QSslError::SelfSignedCertificateInChain:
             case QSslError::UnableToGetLocalIssuerCertificate:
             case QSslError::UnableToVerifyFirstCertificate:
+            case QSslError::HostNameMismatch:
                 if (_verifyCA)
                 {
                     CLIENT_DBG("[Client] CRITICAL QSslError (" << (int) err.error() << "): " << err.errorString());
                     LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed)));
                     _sslError = true;
-                    break;
                 }
-                // else follow through/ignore
-            case QSslError::HostNameMismatch:
-                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                else
+                    ignoreErrors.append(err);
+                break;
+            /*
+            case QSslError::HostNameMismatch:  // hostname verification is critical to avoid MITM attacks [rfc6125]
+                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString());
                 ignoreErrors.append(err);
                 break;
+            */
+            // else follow through/ignore
             default:
                 EMIT_ERROR("QSslError (" + QString::number(err.error()) + "): " + err.errorString()); 
                 _sslError = true;
