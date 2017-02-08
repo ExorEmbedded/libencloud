@@ -181,11 +181,25 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkRequest request(url);
 
 #ifndef Q_OS_WINCE
-    if (conf.caCertificates().count()) {
-        LIBENCLOUD_DBG("[Client] CA Cert issuer: " <<
-                conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
+    if (url.scheme() == LIBENCLOUD_SCHEME_HTTPS)
+    {
+        QSslConfiguration sslConf(conf);
+
+        if (sslConf.caCertificates().count() == 0)
+        {
+            sslConf.setCaCertificates(QSslConfiguration::defaultConfiguration().caCertificates());
+            LIBENCLOUD_DBG(QString("[Client] Loaded %1 System CA Certificates").arg(sslConf.caCertificates().count()))
+        }
+
+        /*
+        Q_FOREACH(QSslCertificate cert, sslConf.caCertificates())
+        {
+            LIBENCLOUD_DBG("[Client] CA Cert issuer: " << cert.issuerInfo(QSslCertificate::CommonName));
+        }
+        */
+
+        request.setSslConfiguration(sslConf);
     }
-    request.setSslConfiguration(conf);
 #endif
 
     // default headers
