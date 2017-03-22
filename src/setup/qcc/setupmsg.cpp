@@ -256,7 +256,7 @@ err:
 
 int SetupMsg::_unpackResponse ()
 {
-    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
+    LIBENCLOUD_EMIT_RETURN_IF (_cfg == NULL, error(Error(Error::CodeGeneric)), ~0);
 
     QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
