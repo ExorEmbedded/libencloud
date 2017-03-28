@@ -41,6 +41,7 @@ Client::~Client ()
     LIBENCLOUD_TRACE;
 
     qDeleteAll(_conns);
+    _conns.clear();
 
     if (!_qnamExternal)
         LIBENCLOUD_DELETE(_qnam);
@@ -181,11 +182,25 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     QNetworkRequest request(url);
 
 #ifndef Q_OS_WINCE
-    if (conf.caCertificates().count()) {
-        LIBENCLOUD_DBG("[Client] CA Cert issuer: " <<
-                conf.caCertificates().first().issuerInfo(QSslCertificate::CommonName));
+    if (url.scheme() == LIBENCLOUD_SCHEME_HTTPS)
+    {
+        QSslConfiguration sslConf(conf);
+
+        if (sslConf.caCertificates().count() == 0)
+        {
+            sslConf.setCaCertificates(QSslConfiguration::defaultConfiguration().caCertificates());
+            LIBENCLOUD_DBG(QString("[Client] Loaded %1 System CA Certificates").arg(sslConf.caCertificates().count()))
+        }
+
+        /*
+        Q_FOREACH(QSslCertificate cert, sslConf.caCertificates())
+        {
+            LIBENCLOUD_DBG("[Client] CA Cert issuer: " << cert.issuerInfo(QSslCertificate::CommonName));
+        }
+        */
+
+        request.setSslConfiguration(sslConf);
     }
-    request.setSslConfiguration(conf);
 #endif
 
     // default headers
@@ -215,7 +230,7 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
 }
 
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
-{ 
+{
 #ifndef Q_OS_WINCE
     QList<QSslError> ignoreErrors;
 
@@ -227,18 +242,23 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
             case QSslError::SelfSignedCertificateInChain:
             case QSslError::UnableToGetLocalIssuerCertificate:
             case QSslError::UnableToVerifyFirstCertificate:
+            case QSslError::HostNameMismatch:
                 if (_verifyCA)
                 {
                     CLIENT_DBG("[Client] CRITICAL QSslError (" << (int) err.error() << "): " << err.errorString());
                     LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed)));
                     _sslError = true;
-                    break;
                 }
-                // else follow through/ignore
-            case QSslError::HostNameMismatch:
-                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString()); 
+                else
+                    ignoreErrors.append(err);
+                break;
+            /*
+            case QSslError::HostNameMismatch:  // hostname verification is critical to avoid MITM attacks [rfc6125]
+                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString());
                 ignoreErrors.append(err);
                 break;
+            */
+            // else follow through/ignore
             default:
                 EMIT_ERROR("QSslError (" + QString::number(err.error()) + "): " + err.errorString()); 
                 _sslError = true;
@@ -305,12 +325,13 @@ void Client::_networkError (QNetworkReply::NetworkError err)
  * delete it inside the slot connected to finished()"
  */
 void Client::_finished (QNetworkReply *reply) 
-{ 
+{
     LIBENCLOUD_RETURN_IF (reply == NULL, );
 
     QList<QNetworkReply::RawHeaderPair> headerPairs = reply->rawHeaderPairs();
     QMap<QByteArray, QByteArray> headers;
     Connection *conn = _conns[reply];
+    conn->stop();
 
     // Possible error code remappings (if required because they should not
     // occur with proper configuration):
@@ -327,18 +348,14 @@ void Client::_finished (QNetworkReply *reply)
 
     CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
 
-    disconnect(reply, NULL, this, NULL);
-    _conns.remove(reply);
-    conn->deleteLater();
-
     // convert QList<QNetworkReply::RawHeaderPair> to QMap<QByteArray, QByteArray>
     foreach (QNetworkReply::RawHeaderPair header, headerPairs)
         headers[header.first] = header.second;
 
     emit complete(_response, headers);
-    return;
+
 err:
-    disconnect(reply, NULL, this, NULL);
+    disconnect(reply, NULL, NULL, NULL);
     _conns.remove(reply);
     conn->deleteLater();
     return;
@@ -375,16 +392,18 @@ Connection::Connection (Client *client, QNetworkReply *reply, int timeout, bool 
     }
 }
 
+void Connection::stop ()
+{
+    //LIBENCLOUD_TRACE;
+
+    _timer.stop();
+    disconnect(&_timer, NULL, NULL, NULL);
+}
+
 void Connection::_timeout ()
 {
-    LIBENCLOUD_DBG("[Client] id " << QString::number(_client->_id));
-
     if (_reply)
-    {
-        disconnect(_reply, NULL, this, NULL);
         _client->_conns.remove(_reply);
-        LIBENCLOUD_DELETE_LATER(_reply);
-    }
 
     if (_timeoutRetry)
     {
@@ -400,6 +419,14 @@ void Connection::_timeout ()
 Connection::~Connection ()
 {
     //LIBENCLOUD_TRACE;
+
+    stop();
+
+    if (_reply)
+    {
+        disconnect(_reply, NULL, NULL, NULL);
+        LIBENCLOUD_DELETE (_reply);
+    }
 }
 
 } // namespace libencloud
