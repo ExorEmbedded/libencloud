@@ -84,10 +84,11 @@ bool CookieJar::setCookiesFromUrl (const QList<QNetworkCookie> &cookieList, cons
             ));
 
         m_settings->setValue(cookie.name(), cookie.value());
-        m_settings->sync();
     }
 
     m_settings->endGroup();
+
+    m_settings->sync();
 
     return QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
 }
@@ -107,8 +108,8 @@ void CookieJar::load ()
     {
         QNetworkCookie cookie;
 
-        cookie.setName(key.toUtf8());
-        cookie.setValue(m_settings->value(key).toString().toUtf8());
+        cookie.setName(key.toLocal8Bit());
+        cookie.setValue(m_settings->value(key).toString().toLocal8Bit());
 
         LIBENCLOUD_TRACE_MSG(qPrintable(QString("[CookieJar] load: (%1=%2)")
             .arg(QString(cookie.name()))
