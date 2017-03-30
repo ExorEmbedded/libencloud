@@ -323,10 +323,8 @@ QString VpnManager::escape (const QString &s)
 {
     QString s2(s);
 
-    return s2.replace("\"", "\\\"")
-             .replace("\\", "\\\\");
-
-    return s2;
+    return s2.replace("\\", "\\\\")
+             .replace("\"", "\\\"");
 }
 
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
