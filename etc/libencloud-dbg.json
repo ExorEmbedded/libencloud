@@ -17,7 +17,7 @@
       "ca" : "op_ca.pem",
       "cert" : "op_cert.pem",
       "key" : "op_key.pem"
-    },
+    }
   },
   
   "log" : {
