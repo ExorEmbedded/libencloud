@@ -66,13 +66,14 @@ static char libEncloudTapNameBuffer [256];
 // do NOT change this - Switchboard relies on it!
 #define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION " (" LIBENCLOUD_OS_STR ")"
 
-#define LIBENCLOUD_SB_URL               "https://switchboard-host/"
+#define LIBENCLOUD_SCHEME_HTTPS         "https"
+#define LIBENCLOUD_SB_URL               LIBENCLOUD_SCHEME_HTTPS "://switchboard-host/"
 
 // timeout without exponential backoff
 #define LIBENCLOUD_RETRY_TIMEOUT        5
 
 // time for single requests
-#define LIBENCLOUD_CLIENT_TIMEOUT       15
+#define LIBENCLOUD_CLIENT_TIMEOUT       30
 
 // maximum time allowed to connect to Cloud
 #define LIBENCLOUD_TIMEOUT              60     /* seconds */

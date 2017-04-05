@@ -319,6 +319,14 @@ err:
     return;
 }
 
+QString VpnManager::escape (const QString &s)
+{
+    QString s2(s);
+
+    return s2.replace("\\", "\\\\")
+             .replace("\"", "\\\"");
+}
+
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
 {
     LIBENCLOUD_DBG("[VPNManager] Sending auth type: " << type << " user: " << user << " pass: <not shown>");
@@ -328,17 +336,11 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
     QTextStream ts(this->socket);
 
-    QString escapedUser = user;
-    escapedUser.replace("\"", "\\\"");
-
-    QString escapedPass = pass;
-    escapedPass.replace("\"", "\\\"");
-
     if (user != "")
-        ts << "username \"" << type << "\" \"" << escapedUser << "\"\r\n";
+        ts << "username \"" << type << "\" \"" << escape(user) << "\"\r\n";
 
     if (pass != "")
-        ts << "password \"" << type << "\" \"" << escapedPass << "\"\r\n";
+        ts << "password \"" << type << "\" \"" << escape(pass) << "\"\r\n";
 
     this->socket->flush();
 }

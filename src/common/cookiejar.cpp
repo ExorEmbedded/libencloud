@@ -14,7 +14,7 @@ CookieJar::CookieJar (const QString &path, QObject *parent)
 
     LIBENCLOUD_RETURN_IF (path.isEmpty(), );
 
-    m_settings = new QSettings(path, QSettings::NativeFormat);
+    m_settings = new QSettings(path, QSettings::IniFormat);
     LIBENCLOUD_RETURN_IF (m_settings == NULL, );
 
     LIBENCLOUD_DBG("[CookieJar] settings file: " << m_settings->fileName());
@@ -84,10 +84,11 @@ bool CookieJar::setCookiesFromUrl (const QList<QNetworkCookie> &cookieList, cons
             ));
 
         m_settings->setValue(cookie.name(), cookie.value());
-        m_settings->sync();
     }
 
     m_settings->endGroup();
+
+    m_settings->sync();
 
     return QNetworkCookieJar::setCookiesFromUrl(cookieList, url);
 }
@@ -107,8 +108,8 @@ void CookieJar::load ()
     {
         QNetworkCookie cookie;
 
-        cookie.setName(key.toUtf8());
-        cookie.setValue(m_settings->value(key).toString().toUtf8());
+        cookie.setName(key.toLocal8Bit());
+        cookie.setValue(m_settings->value(key).toString().toLocal8Bit());
 
         LIBENCLOUD_TRACE_MSG(qPrintable(QString("[CookieJar] load: (%1=%2)")
             .arg(QString(cookie.name()))

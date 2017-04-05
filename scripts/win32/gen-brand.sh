@@ -3,13 +3,14 @@
 # Notes:
 #   - escape \${var} as => \\${var}
 
-echo "Generating brand-specific OpenVPN scripts"
+echo "Generating brand-specific OpenVPN scripts for Windows"
 
 cat << EOF > openvpn-route-up.bat
 
 ::
-:: OpenVPN 'up' script for Windows
-:: Sets Encloud gateway so routes can be pulled down manually [CONNECT-333]
+:: OpenVPN 'up' script for Windows:
+::  1) Sets Encloud gateway to be used when adding and deleting routes
+::    (Switchboard's "openvpn_internal_ip" is unreliable on multicore [CONNECT-377])
 ::
 
 @echo off
