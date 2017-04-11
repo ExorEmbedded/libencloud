@@ -18,9 +18,6 @@ HEADERS += *.h
 INCLUDEPATH += $$SRCBASEDIR/src/
 DEPENDPATH += $$SRCBASEDIR/src/
 
-INCLUDEPATH += /Users/stewy/local/src/qtyaml/src
-LIBS += -L/Users/stewy/local/src/qtyaml/bin/release -lqtyaml
-
 # libencloud
 LIBS += -L$$SRCBASEDIR/src/$$DESTDIR
 LIBS += -lencloud$$DBG_SUFFIX
@@ -36,7 +33,7 @@ contains(CONFIG, qjson) {
 # command to run upon 'make check'
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
 macx {
-    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:/Users/stewy/local/src/qtyaml/bin/release:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$SRCBASEDIR/../yaml-cpp/src/release:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 } else {
     check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 }

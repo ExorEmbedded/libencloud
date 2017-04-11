@@ -198,6 +198,14 @@ windows{
     LIBS += -lssl -lcrypto
 }
 
+# yaml
+!splitdeps {
+    QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
+    INCLUDEPATH += $${QTYAML_PATH}/include
+    LIBS += -L$${QTYAML_PATH}/src/release 
+}
+LIBS += -lyaml-cpp
+
 # libabout
 about {
     win32 {

@@ -1,29 +1,17 @@
+#include <yaml-cpp/yaml.h>
 #include "test.h"
 #include "Yaml.h"
-#include <qyamldocument.h>
-#include <qyamlmapping.h>
-#include <qyamlsequence.h>
 
 void TestYaml::run ()
 {
     TEST_TRACE;
 
-#if 0
-    // simple test
-    test("{ \"teststr\" : \"mystr\", \"testint\" : 123 }", false);
-
-    // with newlines and tabs
-    test("\n{\n\t\"teststr\":\t\"mystr\",\n\t\"testint\":\t123\n}\n", false);
-
-    // JSONP
-    test("jsonpCallback({ \"teststr\" : \"mystr\", \"testint\" : 123 })", true);
-#endif
     test();
 }
 
 void TestYaml::test ()
 {
-    QString s =
+    std::string input = 
 "foo: bar                   \n"\
 "tree:                      \n"\
 "   - id: 1                 \n"\
@@ -41,23 +29,31 @@ void TestYaml::test ()
 "        - id:  3           \n"\
 "          val: d           \n";
 
-    QtYAML::DocumentList docs = QtYAML::Document::fromYaml(s.toUtf8());
-    QtYAML::Mapping mapping = docs.first().mapping();
-    QtYAML::Sequence ids;
+    std::stringstream stream(input);
+    YAML::Parser parser(stream);
+    YAML::Node doc;
+    parser.GetNextDocument(doc);
 
-    TEST_EQUALS(mapping["foo"].toString(), "bar");
+    std::string s;
+    doc["foo"] >> s;
+    TEST_EQUALS(QString::fromUtf8(s.c_str()), "bar");
 
-    ids = mapping["tree"].toSequence();
-    TEST_EQUALS(ids.size(), 2);
+    const YAML::Node &doc2 = doc["tree"];
 
-    mapping = ids[1].toMapping();
-    TEST_EQUALS(mapping["val"].toString(), "y");
+    TEST_EQUALS(doc2.size(), 2);
 
-    ids = mapping["leaf"].toSequence();
-    TEST_EQUALS(ids.size(), 3);
+    doc2[0]["val"] >> s;
+    TEST_EQUALS(QString::fromUtf8(s.c_str()), "x");
 
-    mapping = ids[2].toMapping();
-    TEST_EQUALS(mapping["val"].toString(), "d");
+    doc2[1]["val"] >> s;
+    TEST_EQUALS(QString::fromUtf8(s.c_str()), "y");
+
+    const YAML::Node &doc3 = doc2[1]["leaf"];
+    TEST_EQUALS(doc3.size(), 3);
+
+    doc3[2]["val"] >> s;
+    TEST_EQUALS(QString::fromUtf8(s.c_str()), "d");
+    
 err:
     return;
 };

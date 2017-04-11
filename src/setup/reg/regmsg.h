@@ -1,8 +1,7 @@
 #ifndef _LIBENCLOUD_PRIV_SETUP_QCC_REGMSG_H_
 #define _LIBENCLOUD_PRIV_SETUP_QCC_REGMSG_H_
 
-#include <qyamldocument.h>
-#include <qyamlmapping.h>
+#include <yaml-cpp/yaml.h>
 #include <QString>
 #include <QVariant>
 #include <encloud/Auth>
@@ -52,9 +51,11 @@ private:
     QByteArray _getKey ();
     QString _calcRegPath ();
     QByteArray _decrypt (const QByteArray &enc);
+    QString _yamlNodeToStr (const YAML::Node *nodeP);
+    int _yamlNodeToInt (const YAML::Node *nodeP);
     int _decodeConfig (const QByteArray &enc);
-    int _decodeConfigVpn (const QtYAML::Mapping &mapping);
-    int _decodeConfigFallbackVpn (const QtYAML::Mapping &mapping);
+    int _decodeConfigVpn (const YAML::Node &node);
+    int _decodeConfigFallbackVpn (const YAML::Node &node);
 
     // request inputs
     Auth _sbAuth;

@@ -99,6 +99,7 @@ int RegMsg::process ()
 
     LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
 
+    LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
@@ -112,7 +113,7 @@ int RegMsg::process ()
 
     return 0;
 err:
-    LIBENCLOUD_DELETE(_client);
+    LIBENCLOUD_DELETE_LATER(_client);
     return ~0;
 }
 
@@ -140,8 +141,6 @@ void RegMsg::_error (const libencloud::Error &error)
     LIBENCLOUD_UNUSED(error);
 
     LIBENCLOUD_TRACE;
-
-    sender()->deleteLater();
 }
 
 void RegMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
@@ -152,12 +151,10 @@ void RegMsg::_clientComplete (const QString &response, const QMap<QByteArray, QB
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
-    sender()->deleteLater();
     return;
 
 err:
     emit error(Error(Error::CodeSetupFailure));
-    sender()->deleteLater();
 }
 
 //
@@ -295,33 +292,57 @@ err:
     return QByteArray();
 }
 
+QString RegMsg::_yamlNodeToStr (const YAML::Node *nodeP)
+{
+    std::string s;
+
+    *nodeP >> s;
+
+    return QString::fromUtf8(s.c_str());
+}
+
+int RegMsg::_yamlNodeToInt (const YAML::Node *nodeP)
+{
+    int i;
+
+    *nodeP >> i;
+
+    return i;
+}
+
 int RegMsg::_decodeConfig (const QByteArray &config)
 {
-    //LIBENCLOUD_DBG("config: " << config);
+    //LIBENCLOUD_DBG("RegMsg::config: " << config);
 
-    QtYAML::DocumentList docs = QtYAML::Document::fromYaml(config);
-    QtYAML::Mapping mapping;
+    YAML::Node node;
+    const YAML::Node *n = NULL;
 
-    LIBENCLOUD_ERR_IF (docs.size() != 1);
-    mapping = docs.first().mapping();
+    // Note::YAML API functions may throw exceptions (against Qt standard)! 
+    // caught by Encloud::Application::notify()
+    std::stringstream stream(config.constData(), config.length());
+    YAML::Parser parser(stream);
 
-    LIBENCLOUD_ERR_IF (_decodeConfigVpn(mapping));
-    LIBENCLOUD_ERR_IF (_decodeConfigFallbackVpn(mapping));
+    LIBENCLOUD_ERR_IF (!parser.GetNextDocument(node));
+    LIBENCLOUD_ERR_IF (!node.size());
 
-    LIBENCLOUD_ERR_IF (mapping["VPN_CERTIFICATE"].isUndefined());
-    _caCert = QSslCertificate(mapping["VPN_CERTIFICATE"].toString().toAscii());
+
+    LIBENCLOUD_ERR_IF (_decodeConfigVpn(node));
+    LIBENCLOUD_ERR_IF (_decodeConfigFallbackVpn(node));
+
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_CERTIFICATE")) == NULL);
+    _caCert = QSslCertificate(_yamlNodeToStr(n).toLocal8Bit());
     LIBENCLOUD_ERR_IF (!_caCert.isValid());
 
-    LIBENCLOUD_ERR_IF (mapping["ACTIVATION_KEY"].isUndefined());
-    LIBENCLOUD_ERR_IF (mapping["ACTIVATION_KEY"].toString() != _getCode());
-
-    LIBENCLOUD_ERR_IF (
-            mapping["VPN_NAME"].isUndefined() ||
-            mapping["VPN_PASSWORD"].isUndefined());
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("ACTIVATION_KEY")) == NULL);
+    LIBENCLOUD_ERR_IF (_yamlNodeToStr(n) != _getCode());
 
     LIBENCLOUD_ERR_IF (_sbAuth.setType(Auth::UserpassType));
-    LIBENCLOUD_ERR_IF (_sbAuth.setUser(mapping["VPN_NAME"].toString()));
-    LIBENCLOUD_ERR_IF (_sbAuth.setPass(mapping["VPN_PASSWORD"].toString()));
+
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_NAME")) == NULL);
+    LIBENCLOUD_ERR_IF (_sbAuth.setUser(_yamlNodeToStr(n)));
+
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_PASSWORD")) == NULL);
+    LIBENCLOUD_ERR_IF (_sbAuth.setPass(_yamlNodeToStr(n)));
 
     emit authChanged(_sbAuth);
     
@@ -354,19 +375,21 @@ err:
     return ~0;
 }
 
-int RegMsg::_decodeConfigVpn (const QtYAML::Mapping &mapping)
+int RegMsg::_decodeConfigVpn (const YAML::Node &node)
 {
-    if (!mapping["VPN_PROTOCOL"].isUndefined())
-        LIBENCLOUD_ERR_IF (_vpnConfig.setRemoteProto(VpnConfig::protoFromStr(mapping["VPN_PROTOCOL"].toString())));
+    const YAML::Node *n = NULL;
 
-    if (!mapping["VPN_TYPE"].isUndefined())
-        LIBENCLOUD_ERR_IF (_vpnConfig.setDev(VpnConfig::devFromStr(mapping["VPN_TYPE"].toString())));
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_PROTOCOL")) == NULL);
+    LIBENCLOUD_ERR_IF (_vpnConfig.setRemoteProto(VpnConfig::protoFromStr(_yamlNodeToStr(n))));
 
-    if (!mapping["VPN_IP"].isUndefined())
-        LIBENCLOUD_ERR_IF (_vpnConfig.setRemote(mapping["VPN_IP"].toString()));
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_TYPE")) == NULL);
+    LIBENCLOUD_ERR_IF (_vpnConfig.setDev(VpnConfig::devFromStr(_yamlNodeToStr(n))));
 
-    if (!mapping["VPN_PORT"].isUndefined())
-        LIBENCLOUD_ERR_IF (_vpnConfig.setRemotePort(mapping["VPN_PORT"].toInt()));
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_IP")) == NULL);
+    LIBENCLOUD_ERR_IF (_vpnConfig.setRemote(_yamlNodeToStr(n)));
+
+    LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_PORT")) == NULL);
+    LIBENCLOUD_ERR_IF (_vpnConfig.setRemotePort(_yamlNodeToInt(n)));
 
     LIBENCLOUD_ERR_IF (!_vpnConfig.checkValid(false));
 
@@ -375,19 +398,21 @@ err:
     return ~0;
 }
 
-int RegMsg::_decodeConfigFallbackVpn (const QtYAML::Mapping &mapping)
+int RegMsg::_decodeConfigFallbackVpn (const YAML::Node &node)
 {
-    if (!mapping["FALLBACK_VPN_PROTOCOL"].isUndefined())
-        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemoteProto(VpnConfig::protoFromStr(mapping["FALLBACK_VPN_PROTOCOL"].toString())));
+    const YAML::Node *n = NULL;
 
-    if (!mapping["FALLBACK_VPN_TYPE"].isUndefined())
-        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setDev(VpnConfig::devFromStr(mapping["FALLBACK_VPN_TYPE"].toString())));
+    if ((n = node.FindValue("FALLBACK_VPN_PROTOCOL")))
+        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemoteProto(VpnConfig::protoFromStr(_yamlNodeToStr(n))));
 
-    if (!mapping["FALLBACK_VPN_IP"].isUndefined())
-        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemote(mapping["FALLBACK_VPN_IP"].toString()));
+    if ((n = node.FindValue("FALLBACK_VPN_TYPE")))
+        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setDev(VpnConfig::devFromStr(_yamlNodeToStr(n))));
 
-    if (!mapping["FALLBACK_VPN_PORT"].isUndefined())
-        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemotePort(mapping["FALLBACK_VPN_PORT"].toInt()));
+    if ((n = node.FindValue("FALLBACK_VPN_IP")))
+        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemote(_yamlNodeToStr(n)));
+
+    if ((n = node.FindValue("FALLBACK_VPN_PORT")))
+        LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemotePort(_yamlNodeToInt(n)));
 
     // Fallback configuration is optional
     //LIBENCLOUD_ERR_IF (!_fallbackVpnConfig.checkValid(false));
