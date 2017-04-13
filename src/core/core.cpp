@@ -183,6 +183,15 @@ int Core::attachServer (Server *server)
     // ip assignments from cloud module to server
     connect(_cloud, SIGNAL(ipAssigned(QString)), 
             obj, SLOT(vpnIpAssigned(QString)));
+    // from server to local objects
+    connect(obj, SIGNAL(configSupply(QVariant)),
+            _cfg, SLOT(receive(QVariant)));
+    connect(obj, SIGNAL(configSupply(QVariant)),
+            this, SLOT(_configReceived(QVariant)));
+    connect(obj, SIGNAL(authSupply(libencloud::Auth)), 
+            this, SLOT(_authSupplied(libencloud::Auth)));
+    connect(obj, SIGNAL(actionRequest(QString, libencloud::Params)), 
+            this, SLOT(_actionRequest(QString, libencloud::Params)));
 #endif
 
 #ifndef Q_OS_WINCE
@@ -258,10 +267,10 @@ int Core::attachServer (Server *server)
     // when auth is supplied, it is forwarded to all modules, while
     // authentication requests are reemitted in _authRequired as "need" signals
     // for handler
-    connect(obj, SIGNAL(authSupplied(Auth)), 
-           this, SLOT(_authSupplied(Auth)));
-    connect(obj, SIGNAL(actionRequest(QString, Params)), 
-            this, SLOT(_actionRequest(QString, Params)));
+    connect(obj, SIGNAL(authSupplied(libencloud::Auth)), 
+           this, SLOT(_authSupplied(libencloud::Auth)));
+    connect(obj, SIGNAL(actionRequest(QString, libencloud::Params)), 
+            this, SLOT(_actionRequest(QString, libencloud::Params)));
     connect(obj, SIGNAL(configSupplied(QVariant)),
             _cfg, SLOT(receive(QVariant)));
     connect(obj, SIGNAL(configSupplied(QVariant)),
@@ -434,7 +443,7 @@ void Core::_progressReceived (const Progress &p)
     emit progress(pt);
 }
 
-void Core::_authSupplied (const Auth &auth)
+void Core::_authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("[Core] " << auth.toString());
 
@@ -489,7 +498,7 @@ err:
     return;
 }
 
-void Core::_authRequired (Auth::Id id, QVariant params)
+void Core::_authRequired (libencloud::Auth::Id id, QVariant params)
 {
     switch (id)
     {
@@ -560,7 +569,7 @@ void Core::_logPortReceived (int port)
 }
 
 // This handler is triggered for all API receivers
-void Core::_actionRequest (const QString &action, const Params &params)
+void Core::_actionRequest (const QString &action, const libencloud::Params &params)
 {
     LIBENCLOUD_DBG ("action: " << action);
     
@@ -674,12 +683,12 @@ int Core::_initSetup ()
             this, SLOT(_errorReceived(libencloud::Error)));
 
     // authentication signal handling
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _setupObj, SIGNAL(authSupplied(Auth)));
-    connect(_setupObj, SIGNAL(authRequired(Auth::Id, QVariant)), 
-           this, SLOT(_authRequired(Auth::Id, QVariant)));
-    connect(_setupObj, SIGNAL(authChanged(Auth)),
-           this, SIGNAL(authSupplied(Auth)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+           _setupObj, SIGNAL(authSupplied(libencloud::Auth)));
+    connect(_setupObj, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)), 
+           this, SLOT(_authRequired(libencloud::Auth::Id, QVariant)));
+    connect(_setupObj, SIGNAL(authChanged(libencloud::Auth)),
+           this, SIGNAL(authSupplied(libencloud::Auth)));
 
     // progress signal handling
     connect(_setupObj, SIGNAL(progress(Progress)), 
@@ -725,10 +734,10 @@ int Core::_initCloud ()
             this, SLOT(_errorReceived(libencloud::Error)));
 
     // authentication signal handling
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _cloudObj, SIGNAL(authSupplied(Auth)));
-    connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
-           this, SLOT(_authRequired(Auth::Id)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+           _cloudObj, SIGNAL(authSupplied(libencloud::Auth)));
+    connect(_cloudObj, SIGNAL(authRequired(libencloud::Auth::Id)), 
+           this, SLOT(_authRequired(libencloud::Auth::Id)));
 
     // state changes forwarding for connecting/connected states
     connect(_cloudObj, SIGNAL(stateChanged(State)), 

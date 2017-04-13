@@ -21,7 +21,7 @@ CloudApi::~CloudApi ()
     LIBENCLOUD_TRACE;
 }
 
-void CloudApi::actionRequest (const QString &action, const Params &params)
+void CloudApi::actionRequest (const QString &action, const libencloud::Params &params)
 {
     QUrl url(getUrl());
 

@@ -20,12 +20,12 @@ RegSetup::RegSetup (Config *cfg)
             this, SLOT(_onError(libencloud::Error)));
     connect(&_regMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
-    connect(&_regMsg, SIGNAL(authRequired(Auth::Id, QVariant)),
-            this, SIGNAL(authRequired(Auth::Id, QVariant)));
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_regMsg, SLOT(authSupplied(Auth)));
-    connect(&_regMsg, SIGNAL(authChanged(Auth)),
-            this, SIGNAL(authChanged(Auth)));
+    connect(&_regMsg, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)),
+            this, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+            &_regMsg, SLOT(authSupplied(libencloud::Auth)));
+    connect(&_regMsg, SIGNAL(authChanged(libencloud::Auth)),
+            this, SIGNAL(authChanged(libencloud::Auth)));
 
     connect(_regMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_regMsgState, SIGNAL(entered()), &_regMsg, SLOT(process()));

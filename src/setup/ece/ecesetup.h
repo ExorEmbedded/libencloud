@@ -58,12 +58,12 @@ signals:
     // internal -> setup -> core
     //
     void need (const QString &what, const QVariant &params);
-    void authRequired (Auth::Id id, const QVariant &params);
+    void authRequired (libencloud::Auth::Id id, const QVariant &params);
 
     //
     // core -> setup -> internal
     //
-    void authSupplied (const Auth &auth);  
+    void authSupplied (const libencloud::Auth &auth);  
 
 #ifdef LIBENCLOUD_MODE_SECE
     void licenseForward (const QUuid &uuid);

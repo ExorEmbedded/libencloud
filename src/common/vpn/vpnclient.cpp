@@ -397,7 +397,7 @@ void VpnClient::stop (void)
 //
 // public slots
 //
-void VpnClient::authSupplied (const Auth &auth)
+void VpnClient::authSupplied (const libencloud::Auth &auth)
 {
     //LIBENCLOUD_ERR_IF (!auth.isValid());  // invalid objects used to perform reset
 

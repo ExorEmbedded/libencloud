@@ -45,6 +45,9 @@ public:
 
 signals:
     void portBound (int port);
+    void configSupply (const QVariant &config);
+    void authSupply (const libencloud::Auth &auth);
+    void actionRequest (const QString &action, const libencloud::Params &params);
 
 public slots:
     void vpnIpAssigned (const QString &ip);

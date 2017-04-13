@@ -20,20 +20,20 @@ QccSetup::QccSetup (Config *cfg)
             this, SLOT(_onError(libencloud::Error)));
     connect(&_setupMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(Auth::Id, QVariant)),
-            this, SIGNAL(authRequired(Auth::Id, QVariant)));
+    connect(&_setupMsg, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)),
+            this, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)));
     connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
             this, SIGNAL(serverConfigSupply(QVariant)));
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_setupMsg, SLOT(authSupplied(Auth)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+            &_setupMsg, SLOT(authSupplied(libencloud::Auth)));
 
     connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
     connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
 
     _initMsg(_closeMsg);
-    connect(this, SIGNAL(authSupplied(Auth)),
-            &_closeMsg, SLOT(authSupplied(Auth)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+            &_closeMsg, SLOT(authSupplied(libencloud::Auth)));
     connect(&_closeMsg, SIGNAL(processed()),
             this, SLOT(_onCloseProcessed()));
 }

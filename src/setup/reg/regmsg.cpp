@@ -117,7 +117,7 @@ err:
     return ~0;
 }
 
-void RegMsg::authSupplied (const Auth &auth)
+void RegMsg::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("url: " << auth.getUrl() << ", user: " << auth.getUser());
 

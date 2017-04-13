@@ -25,7 +25,7 @@ AuthApi::~AuthApi ()
 // public slots
 //
 
-void AuthApi::authSupply (const Auth &auth)
+void AuthApi::authSupply (const libencloud::Auth &auth)
 {
     QUrl url(Api::getUrl());
 

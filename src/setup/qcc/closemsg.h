@@ -24,7 +24,7 @@ signals:
 
 public slots:
     int process ();
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
 
 private slots:
     void _error (const libencloud::Error &error);
