@@ -133,6 +133,7 @@ int Server::start ()
     }
 
     LIBENCLOUD_ERR_IF (!_localServer->isListening());
+    LIBENCLOUD_ERR_IF (_autoconnect());
 
     _running = true;
 
@@ -166,6 +167,38 @@ err:
 //
 // private methods
 // 
+
+int Server::_autoconnect()
+{
+    QSettings appSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
+    QString appMode = appSettings.value("mode").toString();
+
+    LIBENCLOUD_LOG("Running mode: " << appMode);
+
+    if (appMode != "Agent")
+        return 0;
+
+    QVariantMap config;
+    QVariantMap configSetup;
+    configSetup["agent"] = "true";
+    config["setup"] = configSetup;
+
+    // Switchboard CA verification will not be supported initially
+    QVariantMap configSsl;
+    QVariantMap configSslInit;
+    configSslInit["verify_ca"] = false;
+    configSsl["init"] = configSslInit;
+    config["ssl"] = configSsl;
+
+    emit configSupply(config);
+    emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
+                    libencloud::Auth::NoneType,
+                    "https://tm:4446"));
+
+    emit actionRequest("start", libencloud::Params());
+
+    return 0;
+}
 
 void Server::_delete()
 {
