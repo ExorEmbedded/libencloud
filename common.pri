@@ -202,7 +202,7 @@ windows{
 !splitdeps {
     QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
     INCLUDEPATH += $${QTYAML_PATH}/include
-    LIBS += -L$${QTYAML_PATH}/src/release 
+    LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR 
 }
 LIBS += -lyaml-cpp
 

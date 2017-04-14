@@ -170,7 +170,17 @@ err:
 
 int Server::_autoconnect()
 {
+#ifdef Q_OS_MAC
+    // https://bugreports.qt.io/browse/QTBUG-21062
+    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
+    QSettings appSettings(QString("/Users/Shared/Library/Preferences/") + 
+            "com." + QString(LIBENCLOUD_ORG) + "." + QString(LIBENCLOUD_PRODUCT) + ".plist",
+            QSettings::NativeFormat);
+#else
     QSettings appSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
+#endif
+    LIBENCLOUD_LOG("App settings file: " << appSettings.fileName());
+
     QString appMode = appSettings.value("mode").toString();
 
     LIBENCLOUD_LOG("Running mode: " << appMode);
@@ -193,7 +203,7 @@ int Server::_autoconnect()
     emit configSupply(config);
     emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
                     libencloud::Auth::NoneType,
-                    "https://tm:4446"));
+                    "https://registry.endian.com"));
 
     emit actionRequest("start", libencloud::Params());
 

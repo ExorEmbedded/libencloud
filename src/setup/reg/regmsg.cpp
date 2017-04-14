@@ -319,7 +319,7 @@ int RegMsg::_decodeConfig (const QByteArray &config)
 
     // Note::YAML API functions may throw exceptions (against Qt standard)! 
     // caught by Encloud::Application::notify()
-    std::stringstream stream(config.constData(), config.length());
+    std::stringstream stream(std::string(config.constData(), config.length()));
     YAML::Parser parser(stream);
 
     LIBENCLOUD_ERR_IF (!parser.GetNextDocument(node));

@@ -33,7 +33,7 @@ contains(CONFIG, qjson) {
 # command to run upon 'make check'
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
 macx {
-    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$SRCBASEDIR/../yaml-cpp/src/release:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$SRCBASEDIR/../yaml-cpp/src/$$DESTDIR:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 } else {
     check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 }

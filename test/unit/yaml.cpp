@@ -34,12 +34,12 @@ void TestYaml::test ()
     YAML::Node doc;
     parser.GetNextDocument(doc);
 
+    const YAML::Node &doc2 = doc["tree"];
+    const YAML::Node &doc3 = doc2[1]["leaf"];
     std::string s;
+
     doc["foo"] >> s;
     TEST_EQUALS(QString::fromUtf8(s.c_str()), "bar");
-
-    const YAML::Node &doc2 = doc["tree"];
-
     TEST_EQUALS(doc2.size(), 2);
 
     doc2[0]["val"] >> s;
@@ -48,7 +48,6 @@ void TestYaml::test ()
     doc2[1]["val"] >> s;
     TEST_EQUALS(QString::fromUtf8(s.c_str()), "y");
 
-    const YAML::Node &doc3 = doc2[1]["leaf"];
     TEST_EQUALS(doc3.size(), 3);
 
     doc3[2]["val"] >> s;
