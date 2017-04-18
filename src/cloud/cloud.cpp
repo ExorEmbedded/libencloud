@@ -39,12 +39,12 @@ Cloud::Cloud (Config *cfg)
             this, SLOT(_vpnManagerErr(VpnManager::Error, QString)));
 
     // authentication forwarding to client, to and from manager
-    connect(_vpnManager, SIGNAL(authRequired(Auth::Id)), 
-            this, SIGNAL(authRequired(Auth::Id)));
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            _vpnClient, SLOT(authSupplied(Auth)));
-    connect(this, SIGNAL(authSupplied(Auth)), 
-            _vpnManager, SLOT(authSupplied(Auth)));
+    connect(_vpnManager, SIGNAL(authRequired(libencloud::Auth::Id)), 
+            this, SIGNAL(authRequired(libencloud::Auth::Id)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+            _vpnClient, SLOT(authSupplied(libencloud::Auth)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+            _vpnManager, SLOT(authSupplied(libencloud::Auth)));
 
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetry()));
 err:

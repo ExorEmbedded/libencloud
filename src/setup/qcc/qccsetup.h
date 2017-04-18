@@ -54,12 +54,13 @@ signals:
     // internal -> setup -> core
     //
     void need (const QString &what, const QVariant &params);
-    void authRequired (Auth::Id id, const QVariant &params);
+    void authRequired (libencloud::Auth::Id id, const QVariant &params);
+    void authChanged (const libencloud::Auth &auth);  
 
     //
     // core -> setup -> internal
     //
-    void authSupplied (const Auth &auth);  
+    void authSupplied (const libencloud::Auth &auth);  
 
     //
     // internals
@@ -95,9 +96,6 @@ private:
     QState _finalSt, *_finalState;
 
     CloseMsg _closeMsg;
-
-    // DEPRECATED in favour of closeMsg
-    //LoginMsg _loginMsg;
 
     bool _isError;
     Error _error;

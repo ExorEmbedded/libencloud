@@ -2,11 +2,11 @@
 #include <QTimer>
 #include <common/common.h>
 #include <common/config.h>
-#include <setup/qcc/qccsetup.h>
+#include <setup/reg/regsetup.h>
 
 namespace libencloud {
 
-QccSetup::QccSetup (Config *cfg)
+RegSetup::RegSetup (Config *cfg)
     : SetupInterface(cfg)
 {
     LIBENCLOUD_TRACE;
@@ -15,35 +15,28 @@ QccSetup::QccSetup (Config *cfg)
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
-    _initMsg(_setupMsg);
-    connect(&_setupMsg, SIGNAL(error(libencloud::Error)),
+    _initMsg(_regMsg);
+    connect(&_regMsg, SIGNAL(error(libencloud::Error)),
             this, SLOT(_onError(libencloud::Error)));
-    connect(&_setupMsg, SIGNAL(processed()),
+    connect(&_regMsg, SIGNAL(processed()),
             this, SLOT(_onProcessed()));
-    connect(&_setupMsg, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)),
+    connect(&_regMsg, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)),
             this, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)));
-    connect(&_setupMsg, SIGNAL(serverConfigSupply(QVariant)),
-            this, SIGNAL(serverConfigSupply(QVariant)));
     connect(this, SIGNAL(authSupplied(libencloud::Auth)),
-            &_setupMsg, SLOT(authSupplied(libencloud::Auth)));
+            &_regMsg, SLOT(authSupplied(libencloud::Auth)));
+    connect(&_regMsg, SIGNAL(authChanged(libencloud::Auth)),
+            this, SIGNAL(authChanged(libencloud::Auth)));
 
-    connect(_setupMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
-    connect(_setupMsgState, SIGNAL(entered()), &_setupMsg, SLOT(process()));
-    connect(_setupMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
-
-    _initMsg(_closeMsg);
-    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
-            &_closeMsg, SLOT(authSupplied(libencloud::Auth)));
-    connect(&_closeMsg, SIGNAL(processed()),
-            this, SLOT(_onCloseProcessed()));
+    connect(_regMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
+    connect(_regMsgState, SIGNAL(entered()), &_regMsg, SLOT(process()));
+    connect(_regMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
 }
 
-int QccSetup::start ()
+int RegSetup::start ()
 {
     LIBENCLOUD_TRACE;
 
     _initFsm();
-    _closeMsg.setNetworkAccessManager(getNetworkAccessManager());
 
     if (!m_setupEnabled)
     {
@@ -67,42 +60,38 @@ err:
     return ~0;
 }
 
-int QccSetup::stop (bool reset, bool close)
+int RegSetup::stop (bool reset, bool close)
 {
-    LIBENCLOUD_DBG("reset: " << reset << ", close: " << close);
+    LIBENCLOUD_UNUSED(close);
+
+    LIBENCLOUD_DBG("reset: " << reset);
 
     _retry.stop();
     _fsm.stop();
     _deinitFsm(reset);
 
-    if (!m_setupEnabled || (reset && !close))
-        emit stopped();
-    else if (m_setupEnabled && reset && close)
-        // triggers _onCloseProcessed() upon completion
-        LIBENCLOUD_ERR_IF (_closeMsg.process());  
+    emit stopped();
 
     return 0;
-err:
-    return ~0;
 }
 
-const VpnConfig *QccSetup::getVpnConfig () const
+const VpnConfig *RegSetup::getVpnConfig () const
 {
     if (m_setupEnabled)
-        return _setupMsg.getVpnConfig();
+        return _regMsg.getVpnConfig();
     else
         return &_vpnConfig;
 }
 
-const VpnConfig *QccSetup::getFallbackVpnConfig () const
+const VpnConfig *RegSetup::getFallbackVpnConfig () const
 {
     if (m_setupEnabled)
-        return _setupMsg.getFallbackVpnConfig();
+        return _regMsg.getFallbackVpnConfig();
     else
         return &_vpnFallbackConfig;
 }
 
-int QccSetup::getTotalSteps() const
+int RegSetup::getTotalSteps() const
 {
     return StateLast - StateFirst + 1;
 }
@@ -111,7 +100,7 @@ int QccSetup::getTotalSteps() const
 // private slots
 //
 
-void QccSetup::_stateEntered ()
+void RegSetup::_stateEntered ()
 {
     QState *state = qobject_cast<QState *>(sender());
     Progress p = _stateToProgress(state);
@@ -130,7 +119,7 @@ void QccSetup::_stateEntered ()
         emit completed();
 }
 
-void QccSetup::_stateExited ()
+void RegSetup::_stateExited ()
 {
     QState *state = qobject_cast<QState *>(sender());
     Progress p = _stateToProgress(state);
@@ -140,21 +129,14 @@ void QccSetup::_stateExited ()
     _isError = false;
 }
 
-void QccSetup::_onProcessed ()
+void RegSetup::_onProcessed ()
 {
     LIBENCLOUD_TRACE;
 
     emit completed();
 }
 
-void QccSetup::_onCloseProcessed ()
-{
-    LIBENCLOUD_TRACE;
-
-    emit stopped();
-}
-
-void QccSetup::_onErrorState ()
+void RegSetup::_onErrorState ()
 {
     QState *state = qobject_cast<QState *>(sender());
 
@@ -173,14 +155,14 @@ void QccSetup::_onErrorState ()
     }
 }
 
-void QccSetup::_onError (const libencloud::Error &err)
+void RegSetup::_onError (const libencloud::Error &err)
 {
     LIBENCLOUD_DBG(err.toString());
 
     emit error((_error = err));
 }
 
-void QccSetup::_onRetryTimeout ()
+void RegSetup::_onRetryTimeout ()
 {
     LIBENCLOUD_TRACE;
 
@@ -191,7 +173,7 @@ void QccSetup::_onRetryTimeout ()
 //
 // private methods
 //
-int QccSetup::_initFsm ()
+int RegSetup::_initFsm ()
 {
     m_setupEnabled = _cfg->config.setupEnabled;
 
@@ -200,25 +182,25 @@ int QccSetup::_initFsm ()
     _isError = false;
     _errorState = &_errorSt;
     if (m_setupEnabled)
-        _setupMsgState = &_setupMsgSt;
+        _regMsgState = &_regMsgSt;
     else
-        _setupMsgState = NULL;
+        _regMsgState = NULL;
     _finalState = &_finalSt;
 
     if (m_setupEnabled)
     {
-        _initMsg(_setupMsg);
-        _setupMsgState->addTransition(&_setupMsg, SIGNAL(error(libencloud::Error)), _errorState);
-        _setupMsgState->addTransition(&_setupMsg, SIGNAL(processed()), _finalState);
+        _initMsg(_regMsg);
+        _regMsgState->addTransition(&_regMsg, SIGNAL(error(libencloud::Error)), _errorState);
+        _regMsgState->addTransition(&_regMsg, SIGNAL(processed()), _finalState);
     }
 
     _fsm.addState(_errorState);
     if (m_setupEnabled)
-        _fsm.addState(_setupMsgState);
+        _fsm.addState(_regMsgState);
     _fsm.addState(_finalState);
 
     if (m_setupEnabled)
-        _fsm.setInitialState(_setupMsgState);
+        _fsm.setInitialState(_regMsgState);
     else
         _fsm.setInitialState(_finalState);
 
@@ -228,32 +210,32 @@ int QccSetup::_initFsm ()
 }
 
 // cached message data is cleared only if reset=true (default)
-int QccSetup::_deinitFsm (bool reset)
+int RegSetup::_deinitFsm (bool reset)
 {
     _fsm.removeState(_finalState);
     if (m_setupEnabled)
-        _fsm.removeState(_setupMsgState);
+        _fsm.removeState(_regMsgState);
     _fsm.removeState(_errorState);
 
     if (m_setupEnabled)
-        Q_FOREACH(QAbstractTransition *transition, _setupMsgState->transitions())
-            _setupMsgState->removeTransition(transition);
+        Q_FOREACH(QAbstractTransition *transition, _regMsgState->transitions())
+            _regMsgState->removeTransition(transition);
 
     if (reset)
-        _setupMsg.clear();
+        _regMsg.clear();
     _clear();
 
     return 0;
 }
 
-int QccSetup::_initMsg (MessageInterface &msg)
+int RegSetup::_initMsg (MessageInterface &msg)
 {
     msg.setConfig(_cfg);
 
     return 0;
 }
 
-Progress QccSetup::_stateToProgress (QState *state)
+Progress RegSetup::_stateToProgress (QState *state)
 {
     Progress p;
 
@@ -264,9 +246,9 @@ Progress QccSetup::_stateToProgress (QState *state)
         p.setStep(-1);
         p.setDesc("Setup Error State");
     } 
-    else if (state == _setupMsgState)
+    else if (state == _regMsgState)
     {
-        p.setStep(StateSetupMsg);
+        p.setStep(StateRegMsg);
         p.setDesc(tr("Retrieving Configuration from Switchboard"));
     }
     else if (state == _finalState)
@@ -284,7 +266,7 @@ Progress QccSetup::_stateToProgress (QState *state)
 
 // Clear all generated/temporary data (e.g. configuration downloaded form Switchboard),
 // without clearing user-configured profile data
-void QccSetup::_clear ()
+void RegSetup::_clear ()
 {
     _vpnConfig.clear();
     _vpnFallbackConfig.clear();

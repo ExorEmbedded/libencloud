@@ -109,7 +109,7 @@ err:
     return ~0;
 }
 
-void CloseMsg::authSupplied (const Auth &auth)
+void CloseMsg::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("user: " << auth.getUser());
 

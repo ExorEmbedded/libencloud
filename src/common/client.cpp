@@ -238,11 +238,7 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
     {
         switch (err.error())
         {
-            case QSslError::SelfSignedCertificate:
-            case QSslError::SelfSignedCertificateInChain:
-            case QSslError::UnableToGetLocalIssuerCertificate:
-            case QSslError::UnableToVerifyFirstCertificate:
-            case QSslError::HostNameMismatch:
+            default:
                 if (_verifyCA)
                 {
                     CLIENT_DBG("[Client] CRITICAL QSslError (" << (int) err.error() << "): " << err.errorString());
@@ -252,18 +248,6 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
                 else
                     ignoreErrors.append(err);
                 break;
-            /*
-            case QSslError::HostNameMismatch:  // hostname verification is critical to avoid MITM attacks [rfc6125]
-                CLIENT_DBG("[Client] IGNORING QSslError (" << (int) err.error() << "): " << err.errorString());
-                ignoreErrors.append(err);
-                break;
-            */
-            // else follow through/ignore
-            default:
-                EMIT_ERROR("QSslError (" + QString::number(err.error()) + "): " + err.errorString()); 
-                _sslError = true;
-                break;
-
 #if 0
             CLIENT_DBG("[Client] Peer Cert subj_CN=" << err.certificate().subjectInfo(QSslCertificate::CommonName) << \
                     " issuer_O=" << err.certificate().issuerInfo(QSslCertificate::Organization)); 
@@ -292,7 +276,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
     else
         extraMsg = json["error"].toString();
 
-    CLIENT_DBG("[Client] error: " << extraMsg);
+    CLIENT_DBG("[Client] error " << err << ": " << extraMsg);
 
     switch (err)
     {
@@ -307,6 +291,9 @@ void Client::_networkError (QNetworkReply::NetworkError err)
             if (_sslError)
                 break;
 
+        case QNetworkReply::ContentNotFoundError:
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerNotFound, extraMsg)));
+            break;
             // else follow through
         default:
             // url is too much detail for end user

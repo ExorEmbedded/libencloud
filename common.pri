@@ -14,9 +14,13 @@
 # 
 # Note: mode selection has implications on both behaviour and packaging!
 #
-#   modeqcc     Endian Connect App / Exor JMConnect mode
-#   modeece     Endian Cloud Enabler mode
-#   modesece    Software Endian Cloud Enabler mode
+#   modeqcc  a) Endian Connect App / Exor JMConnect mode client mode
+#            b) Agents in "fake connect mode" that authenticate via Status API (unregistered on EN)
+#                config.agent = false
+#            c) Agents which use autoregistration API based on activation code (registered on EN)
+#                config.agent = true
+#   modeece     Endian Cloud Enabler mode (SUSPENDED - deleteme?)
+#   modesece    Software Endian Cloud Enabler mode (SUSPENDED - deleteme?)
 #   modevpn     Only vpn manager with static ovpn file configuration
 #               Note: use this mode only if no setup is ever required
 #               (other modes now also support vpn-only mode via Config API)
@@ -71,7 +75,7 @@ DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
 # [ libencloud version ] 
 # *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.10.0
+VERSION = 0.11.0
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
 
@@ -195,6 +199,14 @@ windows{
 } else {
     LIBS += -lssl -lcrypto
 }
+
+# yaml
+!splitdeps {
+    QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
+    INCLUDEPATH += $${QTYAML_PATH}/include
+    LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR 
+}
+LIBS += -lyaml-cpp
 
 # libabout
 about {

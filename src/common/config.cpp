@@ -52,7 +52,7 @@ Config::~Config()
     LIBENCLOUD_DELETE(sysSettings);
 }
 
-QVariant Config::getVariant ()
+QVariantMap Config::getMap ()
 {
     return _json;
 }
@@ -90,19 +90,34 @@ int Config::loadFromFile ()
 {
     bool ok;
 
-    _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok);
-    if (!ok || _json.isNull())
+    _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok).toMap();
+    if (!ok || _json.isEmpty())
     {
         LIBENCLOUD_DBG("[Config] Failed parsing config file: " << filePath.absoluteFilePath());
         goto err;
     }
     _jsonOrig = _json;
 
-    LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+    LIBENCLOUD_ERR_IF (_parse(_json));
+    LIBENCLOUD_ERR_IF (_loadExt());
 
     return 0;
 err: 
     return ~0;
+}
+
+/* load other external data */
+int Config::_loadExt ()
+{
+    QString setupCode = getActivationCode();
+    if (!setupCode.isEmpty())
+    {
+        QVariantMap setup; 
+        setup["code"] = setupCode;
+        _json["setup"] = setup;
+    }
+
+    return 0;
 }
 
 //
@@ -120,12 +135,12 @@ void Config::receive (const QVariant &cfg)
     }
     else
     {
-        utils::variantMerge(_json, cfg);
+        utils::mapMerge(_json, cfg.toMap());
     }
 
     //LIBENCLOUD_DBG("[Config] new cfg: " << dump());
 
-    LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+    LIBENCLOUD_ERR_IF (_parse(_json));
 
 err:
     return;
@@ -198,10 +213,22 @@ int Config::_parse (const QVariantMap &jo)
                 "rsa bits must be a multiple of 512!");
     }
 
-    if (jo["setup"].toMap()["enabled"].isNull())
-        config.setupEnabled = true;
-    else  // plain VPN
-        config.setupEnabled = jo["setup"].toMap()["enabled"].toBool();
+    config.setupEnabled = true;
+    config.setupAgent = false;
+
+    if (!jo["setup"].isNull())
+    {
+        QVariantMap setup = jo["setup"].toMap();
+
+        if (!setup["enabled"].isNull())
+            config.setupEnabled = setup["enabled"].toBool();
+
+        if (!setup["agent"].isNull())
+            config.setupAgent = setup["agent"].toBool();
+
+        if (!setup["code"].isNull())
+            LIBENCLOUD_ERR_IF (setActivationCode(setup["code"].toString()));
+    }
 
     LIBENCLOUD_ERR_IF (_parseVpn(jo));
     LIBENCLOUD_ERR_IF (_parseLog(jo));

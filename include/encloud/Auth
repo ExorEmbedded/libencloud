@@ -31,7 +31,7 @@ public:
 
     typedef enum
     {
-        NoneType = -1,
+        NoneType = -1,  // used when only URL is required (e.g. Agent mode)
 
         //
         // (id == SwitchboardId)
@@ -46,7 +46,7 @@ public:
         //
         HttpProxyType = 10,
         SocksProxyType,
-        FirstType = UserpassType,
+        FirstType = NoneType,
         LastType = SocksProxyType
     }
     Type;
@@ -87,18 +87,23 @@ public:
 
     const QString &getUser () const;
     int setUser (const QString &user);
-    inline bool isUserValid (const QString &user) { return !(_type == UserpassType && user == ""); };
+    inline bool isUserValid (const QString &user) { return !(user == "" &&
+            (_type == UserpassType || _type == CertificateUserpassType)); };
 
     const QString &getPass () const;
     int setPass (const QString &pass);
-    inline bool isPassValid (const QString &pass) { return (pass != ""); };
+    inline bool isPassValid (const QString &pass) { return !(pass == "" &&
+            (_type == UserpassType || _type == CertificateUserpassType)); };
 
     const QString &getPath () const;
     int setPath (const QString &path);
-    inline bool isPathValid (const QString &path) { return !(_type == CertificateType && path == ""); };
+    inline bool isPathValid (const QString &path) { return !(path == "" &&
+            (_type == CertificateType || _type == CertificateUserpassType)); };
 
     const QString &getP12Pass () const;
-    int setP12Pass (const QString &pass);
+    int setP12Pass (const QString &p12Pass);
+    inline bool isP12PassValid (const QString &p12Pass) { return !(p12Pass == "" &&
+            (_type == CertificateType || _type == CertificateUserpassType)); };
 
 protected:
     bool _valid;

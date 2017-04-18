@@ -60,6 +60,10 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
 // unix: LOG_PREFIX
 LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package = "");
 
+// Agent mode
+LIBENCLOUD_DLLSPEC QString getActivationCode ();
+LIBENCLOUD_DLLSPEC int setActivationCode (const QString &code);
+
 } // namespace libencloud
 
 // global exported log level

@@ -36,8 +36,8 @@ signals:
     void ipAssigned (const QString &ip);
     void fallback (bool isFallback);
     void need (const QString &what, const QVariant &params);
-    void authRequired (Auth::Id id);
-    void authSupplied (const Auth &auth);
+    void authRequired (libencloud::Auth::Id id);
+    void authSupplied (const libencloud::Auth &auth);
 
 private slots:
     void _vpnStateChanged (VpnClient::State state);

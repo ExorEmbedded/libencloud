@@ -349,7 +349,7 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 // public slots
 //
 
-void VpnManager::authSupplied (const Auth &auth)
+void VpnManager::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("[VPNManager] type: " << auth.getStrType());
 

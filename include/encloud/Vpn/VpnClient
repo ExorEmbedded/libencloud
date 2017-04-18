@@ -72,7 +72,7 @@ signals:
     void sigError (VpnClient::Error err, QString msg = "");
 
 public slots:
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
 
 private slots:
     void processError (QProcess::ProcessError err);

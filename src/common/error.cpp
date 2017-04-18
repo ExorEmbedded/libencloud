@@ -175,6 +175,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Generic Server Error");
         case CodeServerLicenseInvalid:
             return QObject::tr("Server reported Invalid License");
+        case CodeServerNotFound:
+            return QObject::tr("Server reported content not found");
 
         // 3xx
         case CodeAuthFailed:
@@ -187,6 +189,8 @@ QString Error::_code2Desc (Code code)
         // 4xx
         case CodeProxyAuthFailed:
             return QObject::tr("Proxy Authentication Failure - please check credentials");
+        case CodeSetupFailure:
+            return QObject::tr("Configuration download failed - please check logs");
 
         // 5xx
         case CodeClientFailure:

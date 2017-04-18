@@ -10,6 +10,7 @@ namespace libencloud {
 //
 
 ConfigApi::ConfigApi ()
+    : _msgType(NoneType)
 {
     LIBENCLOUD_TRACE;
 
@@ -20,6 +21,20 @@ ConfigApi::ConfigApi ()
 ConfigApi::~ConfigApi ()
 {
     LIBENCLOUD_TRACE;
+}
+
+void ConfigApi::configRetrieve ()
+{
+    QUrl url(getUrl());
+
+    url.setPath(LIBENCLOUD_API_CONFIG_PATH);
+    _params.clear();
+
+    _msgType = ConfigRetrieveType;
+
+    LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString());
+
+    _client.run(url, _params, _headers, _config);
 }
 
 int ConfigApi::configSupply (const QVariant &config)
@@ -34,6 +49,8 @@ int ConfigApi::configSupply (const QVariant &config)
 	QString js = json::serialize(config, ok);
 	LIBENCLOUD_ERR_IF (!ok);
 
+    _msgType = ConfigSupplyType;
+
     LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString() << ", data: " << js);
 
     _client.post(url, _headers, js.toAscii(), _config);
@@ -47,14 +64,43 @@ void ConfigApi::_error (const libencloud::Error &err)
 {
     LIBENCLOUD_DBG("[ConfigApi] error: " << err.toString());
 
-    emit configSent(Api::ErrorRc);
+    switch (_msgType)
+    {
+        case NoneType:
+            break;
+        case ConfigRetrieveType:
+            emit configReceived(Api::ErrorRc, QVariant());
+            break;
+        case ConfigSupplyType:
+            emit configSent(Api::ErrorRc);
+            break;
+    }
 }
 
 void ConfigApi::_clientComplete (const QString &response)
 {
-    LIBENCLOUD_UNUSED(response);
+    switch (_msgType)
+    {
+        case NoneType:
+            break;
+        case ConfigRetrieveType:
+        {
+            bool ok;
+            QVariant jo = json::parse(response, ok);
+            LIBENCLOUD_ERR_IF (!ok);
+            if (!ok)
+                return;
 
-    emit configSent(Api::SuccessRc);
+            emit configReceived(Api::SuccessRc, jo);
+            break;
+        }
+        case ConfigSupplyType:
+            emit configSent(Api::SuccessRc);
+            break;
+    }
+
+err:
+    return;
 }
 
 } // namespace libencloud

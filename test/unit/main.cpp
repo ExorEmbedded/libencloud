@@ -8,6 +8,7 @@
 #include "proxy.h"
 #include "api.h"
 #include "json.h"
+#include "yaml.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,6 +49,9 @@ int main (int argc, char *argv[])
 
     TestJson jsonTest;
     QTest::qExec(&jsonTest, argc, argv);
+
+    TestYaml yamlTest;
+    QTest::qExec(&yamlTest, argc, argv);
 
     TEST_ZERO (test_crypto());
 

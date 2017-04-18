@@ -1,6 +1,7 @@
-#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_
-#define _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_
+#ifndef _LIBENCLOUD_PRIV_SETUP_QCC_REGMSG_H_
+#define _LIBENCLOUD_PRIV_SETUP_QCC_REGMSG_H_
 
+#include <yaml-cpp/yaml.h>
 #include <QString>
 #include <QVariant>
 #include <encloud/Auth>
@@ -8,19 +9,17 @@
 #include <encloud/Vpn/VpnConfig>
 #include <common/message.h>
 
-#define LIBENCLOUD_SETUP_QCC_CONFIG_URL        "/manage/status/status.access.config/"
-#define LIBENCLOUD_SETUP_QCC_DOMAINS_HDR        "Endian-Domains"
-#define LIBENCLOUD_SETUP_QCC_DOMAINS_SEPARATOR  ','
+#define LIBENCLOUD_SETUP_QCC_REG_URL        "/manage/access/registry"
 
 namespace libencloud {
 
-class SetupMsg : public QObject, public MessageInterface
+class RegMsg : public QObject, public MessageInterface
 {
     Q_OBJECT
     Q_INTERFACES (libencloud::MessageInterface)
 
 public:
-    SetupMsg();
+    RegMsg();
     int clear ();
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
@@ -28,7 +27,7 @@ public:
 signals:
     void error (const libencloud::Error &err);
     void authRequired (libencloud::Auth::Id id, const QVariant &params);
-    void serverConfigSupply (const QVariant &variant);
+    void authChanged (const libencloud::Auth &auth);
     void processed ();
 
 public slots:
@@ -40,21 +39,38 @@ private slots:
     void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers);
 
 private:
+    // message handling
     int _packRequest ();
     int _encodeRequest (QUrl &url, QUrl &params);
     int _decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers);
     int _unpackResponse ();
 
-    //request inputs
+    // internals
+    int _init ();
+    QString _getCode ();
+    QByteArray _getKey ();
+    QString _calcRegPath ();
+    QByteArray _decrypt (const QByteArray &enc);
+    QString _yamlNodeToStr (const YAML::Node *nodeP);
+    int _yamlNodeToInt (const YAML::Node *nodeP);
+    int _decodeConfig (const QByteArray &enc);
+    int _decodeConfigVpn (const YAML::Node &node);
+    int _decodeConfigFallbackVpn (const YAML::Node &node);
+
+    // request inputs
     Auth _sbAuth;
 
-    //response outputs
+    // response outputs
     VpnConfig _vpnConfig;
     VpnConfig _fallbackVpnConfig;
     QSslCertificate _caCert;
-    QVariantMap _serverConfig;
+
+    // internals
+    libencloud_crypto_t ec;
+    QString _code;
+    QByteArray _key;
 };
 
 } // namespace libencloud
 
-#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_SETUPMSG_H_ */
+#endif  /* _LIBENCLOUD_PRIV_SETUP_QCC_REGMSG_H_ */

@@ -11,7 +11,7 @@ private slots:
     void run ();
 
 private:
-    void testVariantMerge (const QString &to, const QString &from, const QString &sout);
+    void testMapMerge (const QString &to, const QString &from, const QString &sout);
 };
 
 #endif

@@ -29,12 +29,15 @@ public:
         CodeServerVerifyFailed =    201,
         CodeServerError =           202,
         CodeServerLicenseInvalid =  203,
+        CodeServerNotFound       =  204,
 
         CodeAuthFailed =            300,
         CodeAuthAlreadyConnected =  310,
         CodeAuthDomainRequired   =  320,
 
         CodeProxyAuthFailed =       400,
+
+        CodeSetupFailure =          450,
 
         CodeClientFailure =         500,
         CodeClientTimeout =         501,
@@ -43,7 +46,7 @@ public:
         // *NOTE* always update CodeLast to value above!!!
 
         CodeFirst =                 CodeSuccess,
-        CodeLast =                  CodeClientTimeout
+        CodeLast =                  CodeClientBadConfig
     } Code;
 
     // Default constructor (unhandled error)

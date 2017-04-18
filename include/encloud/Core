@@ -50,7 +50,7 @@ signals:
     void progress (const Progress &p);
     void fallback (bool isFallback);
     void need (const QString &what, const QVariant &params);
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
     void serverConfigSupply (const QVariant &variant);
     void actionRequest (const QString &action, const libencloud::Params &params);
 
@@ -63,13 +63,14 @@ private slots:
     void _setupStopped ();
     void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
+    void _configReceived (const QVariant &config);
     void _progressReceived (const Progress &p);
-    void _authSupplied (const Auth &auth);
-    void _authRequired (Auth::Id id, QVariant params = QVariant());
+    void _authSupplied (const libencloud::Auth &auth);
+    void _authRequired (libencloud::Auth::Id id, QVariant params = QVariant());
     void _clientPortReceived (int port);
     void _logPortReceived (int port);
     void _serverConfigReceived (const QVariant &variant);
-    void _actionRequest (const QString &action, const Params &params);
+    void _actionRequest (const QString &action, const libencloud::Params &params);
     void _clientDown ();
 
 private:

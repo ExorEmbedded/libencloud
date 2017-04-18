@@ -143,7 +143,7 @@ QVariant HttpHandler::getConfig () const
 {
     LIBENCLOUD_ERR_IF (g_libencloudCfg == NULL);
 
-    return QVariant(g_libencloudCfg->getVariant());
+    return QVariant(g_libencloudCfg->getMap());
 err:
     return QVariant();
 }

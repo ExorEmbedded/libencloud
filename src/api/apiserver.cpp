@@ -133,6 +133,7 @@ int Server::start ()
     }
 
     LIBENCLOUD_ERR_IF (!_localServer->isListening());
+    LIBENCLOUD_ERR_IF (_autoconnect());
 
     _running = true;
 
@@ -166,6 +167,48 @@ err:
 //
 // private methods
 // 
+
+int Server::_autoconnect()
+{
+#ifdef Q_OS_MAC
+    // https://bugreports.qt.io/browse/QTBUG-21062
+    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
+    QSettings appSettings(QString("/Users/Shared/Library/Preferences/") + 
+            "com." + QString(LIBENCLOUD_ORG) + "." + QString(LIBENCLOUD_PRODUCT) + ".plist",
+            QSettings::NativeFormat);
+#else
+    QSettings appSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
+#endif
+    LIBENCLOUD_LOG("App settings file: " << appSettings.fileName());
+
+    QString appMode = appSettings.value("mode").toString();
+
+    LIBENCLOUD_LOG("Running mode: " << appMode);
+
+    if (appMode != "Agent")
+        return 0;
+
+    QVariantMap config;
+    QVariantMap configSetup;
+    configSetup["agent"] = "true";
+    config["setup"] = configSetup;
+
+    // Switchboard CA verification will not be supported initially
+    QVariantMap configSsl;
+    QVariantMap configSslInit;
+    configSslInit["verify_ca"] = false;
+    configSsl["init"] = configSslInit;
+    config["ssl"] = configSsl;
+
+    emit configSupply(config);
+    emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
+                    libencloud::Auth::NoneType,
+                    "https://registry.endian.com"));
+
+    emit actionRequest("start", libencloud::Params());
+
+    return 0;
+}
 
 void Server::_delete()
 {
