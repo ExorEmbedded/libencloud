@@ -150,8 +150,6 @@ splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
-PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
-
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
@@ -236,18 +234,23 @@ INCLUDEPATH += $${SRCBASEDIR}/include
 INCLUDEPATH += $${SRCBASEDIR}/src
 DEPENDPATH += $${INCLUDEPATH}
 
+# 
 # install dirs
-windows {  # used only for dev - installer handles positioning on target
-           # and runtime paths are defined in src/common/defaults.h
-    INSTALLDIR = "$${PROGDIR}"
-    LIBDIR = "$${INSTALLDIR}/bin"
-    BINDIR = "$${INSTALLDIR}/bin"
-    CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"
-} else {  # used for dev and production
+# 
+unix {
     INSTALLDIR = /usr
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
-    CONFDIR = /etc/encloud
 }
 
+# overrides for Connect packaging
+CONNECT_DEFINES=$${SRCBASEDIR}/../connectapp/defines.pri
+exists($${CONNECT_DEFINES}): include($${CONNECT_DEFINES})
+
+# local overrides
+windows {
+    CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"
+} else {
+    CONFDIR = /etc/encloud
+}

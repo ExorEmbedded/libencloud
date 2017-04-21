@@ -87,7 +87,7 @@ void ConfigApi::_clientComplete (const QString &response)
         {
             bool ok;
             QVariant jo = json::parse(response, ok);
-            LIBENCLOUD_ERR_IF (!ok);
+            //LIBENCLOUD_ERR_IF (!ok);
             if (!ok)
                 return;
 
