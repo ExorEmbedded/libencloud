@@ -104,7 +104,7 @@ int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (!(_state == StateIdle || _state == StateError));
+    LIBENCLOUD_ERR_IF (_state == StateConnect || _state == StateCloud);
 
     // Connect Client starts immediately
     if (!_cfg->config.decongest)
