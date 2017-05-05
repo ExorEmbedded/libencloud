@@ -330,6 +330,7 @@ QString VpnManager::escape (const QString &s)
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
 {
     LIBENCLOUD_DBG("[VPNManager] Sending auth type: " << type << " user: " << user << " pass: <not shown>");
+    //LIBENCLOUD_DBG("[VPNManager] Sending pass: " << pass);
 
     if (this->socket == NULL)
         return;

@@ -166,8 +166,11 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--log" << "openvpnlog.log";
 #endif
 
+    // Don't force auth check - credentials may be provided via external auth-user-pass file
+    /*
     LIBENCLOUD_EMIT_ERR_IF (!sbAuth.isValid(),
             sigError(this->err = ConfigError));
+    */
     
     authType = sbAuth.getType();
 
