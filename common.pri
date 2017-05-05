@@ -75,7 +75,7 @@ DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
 # [ libencloud version ] 
 # *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.11.0
+VERSION = 0.12.0
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
 
