@@ -358,7 +358,8 @@ void Core::_setupStopped ()
     _cloud->stop();
 #endif
 
-    emit authSupplied(Auth());
+    emit authSupplied((_sbAuth = Auth(Auth::SwitchboardId)));
+    emit authSupplied((_proxyAuth = Auth(Auth::ProxyId)));
     emit stateChanged(StateIdle);
     emit progress(Progress());
 }
