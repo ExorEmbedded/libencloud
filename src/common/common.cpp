@@ -87,12 +87,14 @@ err:
 
 LIBENCLOUD_DLLSPEC int setActivationCode (const QString &code)
 {
+    QString path = getCommonAppDataDir() + "activation-code";
+
+    if (code == QString(utils::file2Data(QFileInfo(path))))
+        return 0;
+
     LIBENCLOUD_DBG("Writing to: " << getCommonAppDataDir() + "activation-code");
 
-    LIBENCLOUD_ERR_IF (utils::bytes2File(
-                code.toAscii(),
-                getCommonAppDataDir() + "activation-code",
-                true));
+    LIBENCLOUD_ERR_IF (utils::bytes2File(code.toAscii(), path, true));
 
     return 0;
 err:

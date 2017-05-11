@@ -226,7 +226,7 @@ int Config::_parse (const QVariantMap &jo)
         if (!setup["agent"].isNull())
             config.setupAgent = setup["agent"].toBool();
 
-        if (!setup["code"].isNull())
+        if (config.setupAgent && !setup["code"].isNull())
             LIBENCLOUD_ERR_IF (setActivationCode(setup["code"].toString()));
     }
 
