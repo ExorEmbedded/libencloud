@@ -315,6 +315,7 @@ void Client::_finished (QNetworkReply *reply)
     QList<QNetworkReply::RawHeaderPair> headerPairs = reply->rawHeaderPairs();
     QMap<QByteArray, QByteArray> headers;
     Connection *conn = _conns[reply];
+    LIBENCLOUD_RETURN_IF (conn == NULL, );
     conn->stop();
 
     // Possible error code remappings (if required because they should not
