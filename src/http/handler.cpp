@@ -29,6 +29,7 @@ const Error &HttpHandler::getCoreError () const     { return _coreError; }
 State HttpHandler::getCoreState () const            { return _coreState; }
 Progress HttpHandler::getCoreProgress () const      { return _coreProgress; }
 bool HttpHandler::getFallback () const              { return _isFallback; }
+const QVariantMap &HttpHandler::getLogin () const   { return _login; }
 const QVariantMap &HttpHandler::getNeed () const    { return _needs; }
 
 void HttpHandler::removeNeed (const QString &what)
@@ -195,6 +196,17 @@ err:
 // private slots
 //
 
+void HttpHandler::_authReceived (const libencloud::Auth &auth)
+{
+    if (!auth.isValid())
+        return;
+
+    LIBENCLOUD_DBG("[Http] login: " << auth.toString());
+
+    if (!auth.getUser().isEmpty())
+        _login["user"] = auth.getUser();
+}
+
 void HttpHandler::_coreErrorReceived (const libencloud::Error &err)
 {
     _coreError = err;
@@ -257,6 +269,7 @@ void HttpHandler::_clear()
     _coreProgress = Progress();
     _isFallback = false;
     _needs.clear();
+    _login.clear();
     _serverConfig.clear();
 
     // keep persistent data

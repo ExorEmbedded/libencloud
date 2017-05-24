@@ -249,6 +249,8 @@ int Core::attachServer (Server *server)
             obj, SLOT(_coreFallbackReceived(bool)));
     connect(this, SIGNAL(need(QString, QVariant)), 
             obj, SLOT(_needReceived(QString, QVariant)));
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+           obj, SLOT(_authReceived(libencloud::Auth)));
 
 #ifdef LIBENCLOUD_MODE_SECE
     connect(obj, SIGNAL(licenseSend(QUuid)), 

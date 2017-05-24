@@ -44,6 +44,7 @@ signals:
     void apiError (const libencloud::Error &err);
     void apiProgress (const libencloud::Progress &progress);
     void apiFallback (bool isFallback);
+    void apiLogin (const QVariant &login);
     void apiNeed (const QString &need, const QVariant &params);
 
     //
@@ -65,6 +66,7 @@ protected:
     int _parseError (const QVariant &v);
     int _parseProgress (const QVariant &v);
     int _parseFallback (const QVariant &v);
+    int _parseLogin (const QVariant &v);
     int _parseNeed (const QVariant &v);
 
     QTimer _pollTimer;
@@ -75,6 +77,7 @@ protected:
     Progress _progress;
     int _isFallback;  // tristate (-1 = null)
     QVariantMap _needs;
+    QVariantMap _login;
 };
 
 }  // namespace libencloud

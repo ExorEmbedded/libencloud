@@ -98,9 +98,6 @@ void ConfigApi::_clientComplete (const QString &response)
             emit configSent(Api::SuccessRc);
             break;
     }
-
-err:
-    return;
 }
 
 } // namespace libencloud
