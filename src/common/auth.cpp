@@ -173,6 +173,8 @@ const QString Auth::getStrType () const
     {
         case Auth::NoneType:
             return "none";
+        case Auth::UrlType:
+            return "url";
         case Auth::UserpassType:
             return "user-pass";
         case Auth::CertificateType:
@@ -192,6 +194,8 @@ int Auth::setStrType (const QString &type)
 {
     if (type == "" || type == "none")
         _type = Auth::NoneType;
+    else if (type == "url")
+        _type = Auth::UrlType;
     else if (type == "user-pass")
         _type = Auth::UserpassType;
     else if (type == "x509")

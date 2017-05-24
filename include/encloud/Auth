@@ -31,14 +31,15 @@ public:
 
     typedef enum
     {
-        NoneType = -1,  // used when only URL is required (e.g. Agent mode)
+        NoneType = -1,
 
         //
         // (id == SwitchboardId)
         //
-        UserpassType = 0,
+        UrlType = 0,                // only URL required (e.g. Agent mode)
+        UserpassType,
         CertificateType,
-        CertificateUserpassType,  // 2-factor
+        CertificateUserpassType,    // 2-factor
         CookieType,
         
         //
@@ -46,7 +47,7 @@ public:
         //
         HttpProxyType = 10,
         SocksProxyType,
-        FirstType = UserpassType,
+        FirstType = UrlType,
         LastType = SocksProxyType
     }
     Type;
@@ -84,7 +85,7 @@ public:
     int setUrl (const QString &url);
     // empty URL allowed (for plain VPN case where external configuration file is used)
     // url can be unspecified (e.g. file-based VPN configuration)
-    inline bool isUrlValid (const QString &url) { return (url.isEmpty() || QUrl(url).isValid()); };
+    inline bool isUrlValid (const QString &url) { return ((_type != UrlType && url.isEmpty()) || QUrl(url).isValid()); };
 
     const QString &getUser () const;
     int setUser (const QString &user);
