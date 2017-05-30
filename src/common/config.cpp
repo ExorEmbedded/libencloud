@@ -109,11 +109,12 @@ err:
 /* load other external data */
 int Config::_loadExt ()
 {
-    QString setupCode = getActivationCode();
+    QVariantMap setup; 
+    QString setupCode = getActivationCode(true);  // encrypted
+
     if (!setupCode.isEmpty())
     {
-        QVariantMap setup; 
-        setup["code"] = setupCode;
+        setup["code_enc"] = setupCode;
         _json["setup"] = setup;
     }
 
@@ -201,6 +202,7 @@ int Config::_parse (const QVariantMap &jo)
         config.csrTmplPath = _joinPaths(dataPrefix, \
                 jo["csr"].toMap()["tmpl"].toString());
 
+    LIBENCLOUD_ERR_IF (_parseRegistry(jo));
     LIBENCLOUD_ERR_IF (_parseSb(jo));
     LIBENCLOUD_ERR_IF (_parseSsl(jo, config.ssl));
 
@@ -226,8 +228,11 @@ int Config::_parse (const QVariantMap &jo)
         if (!setup["agent"].isNull())
             config.setupAgent = setup["agent"].toBool();
 
-        if (config.setupAgent && !setup["code"].isNull())
-            LIBENCLOUD_ERR_IF (setActivationCode(setup["code"].toString()));
+        if (config.setupAgent)
+        {
+            if (!setup["code_enc"].isNull())
+                LIBENCLOUD_ERR_IF (setActivationCode(setup["code_enc"].toString(), false).isEmpty());
+        }
     }
 
     LIBENCLOUD_ERR_IF (_parseVpn(jo));
@@ -248,6 +253,30 @@ int Config::_parsePaths (const QVariantMap &jo)
     }
 
     return 0;
+}
+
+int Config::_parseRegistry (const QVariantMap &jo)
+{
+    config.regUrl = QUrl(LIBENCLOUD_REG_URL);
+
+    if (jo["registry"].isValid())
+    {
+        QVariantMap jot = jo["registry"].toMap();
+
+        if (jot["url"].isValid())
+        {
+            QString s = jot["url"].toString();
+            if (QUrl(s).scheme().isEmpty())
+                s.prepend(QString(LIBENCLOUD_SCHEME_HTTPS) + "://");
+            config.regUrl = s;
+            LIBENCLOUD_ERR_MSG_IF (!config.regUrl.isValid(), 
+                    "Not a valid URL: " << s);
+        }
+    }
+
+    return 0;
+err:
+    return ~0;
 }
 
 int Config::_parseSb (const QVariantMap &jo)

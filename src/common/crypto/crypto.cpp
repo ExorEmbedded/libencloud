@@ -9,8 +9,8 @@
 #include <encloud/Common>
 #include <encloud/Crypto>
 #include <encloud/Utils>
-#include "common.h"
-#include "config.h"
+#include "../common.h"
+#include "../config.h"
 
 #undef __LIBENCLOUD_MSG
 #define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT

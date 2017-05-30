@@ -146,6 +146,8 @@ void RegSetup::_onErrorState ()
 
     switch (_error.getCode())
     {
+        case Error::CodeUnconfigured:
+            break;
         // keep on retrying
         default:
             _errorState->addTransition(this, SIGNAL(retry()), _previousState);

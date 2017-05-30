@@ -248,6 +248,8 @@ unix {
 CONNECT_DEFINES=$${SRCBASEDIR}/../connectapp/defines.pri
 exists($${CONNECT_DEFINES}): include($${CONNECT_DEFINES})
 
+DEFINES += QICC_SETTING_KEY=$$cat($${SETTINGKEYPATH})
+
 # local overrides
 windows {
     CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"

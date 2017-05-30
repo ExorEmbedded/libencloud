@@ -67,6 +67,7 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION " (" LIBENCLOUD_OS_STR ")"
 
 #define LIBENCLOUD_SCHEME_HTTPS         "https"
+#define LIBENCLOUD_REG_URL              LIBENCLOUD_SCHEME_HTTPS "://switchboard-registry/"
 #define LIBENCLOUD_SB_URL               LIBENCLOUD_SCHEME_HTTPS "://switchboard-host/"
 
 // timeout without exponential backoff

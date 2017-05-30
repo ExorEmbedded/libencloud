@@ -202,8 +202,8 @@ int Server::_autoconnect()
 
     emit configSupply(config);
     emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
-                    libencloud::Auth::NoneType,
-                    "https://registry.endian.com"));
+                    libencloud::Auth::UrlType,
+                    _cfg->config.regUrl.toString()));
 
     emit actionRequest("start", libencloud::Params());
 

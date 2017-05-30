@@ -83,6 +83,13 @@ int RegMsg::process ()
 
     LIBENCLOUD_DBG("[Setup] appdata dir: " << getCommonAppDataDir());
 
+    if (_sbAuth.getUrl().isEmpty())
+    {
+        LIBENCLOUD_DBG("No login info - doing nothing");
+        emit error(Error(Error::CodeUnconfigured));
+        return 0;
+    }
+
     if (!_sbAuth.isValid())
     {
         emit authRequired(Auth::SwitchboardId, QVariant());
@@ -233,7 +240,9 @@ QString RegMsg::_getCode ()
     if (!_code.isNull())
         return _code;
 
-    return (_code = getActivationCode());
+    _code = getActivationCode(false).toUpper();  // unencrypted
+
+    return _code;
 }
 
 // Calculate key = sha256(activation_code)

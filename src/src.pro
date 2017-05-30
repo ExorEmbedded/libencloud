@@ -62,9 +62,6 @@ SOURCES += common/error.cpp
 HEADERS += $${PUBINCLUDEDIR}/Info
 SOURCES += common/info.cpp
 
-HEADERS += $${PUBINCLUDEDIR}/Json
-SOURCES += common/json.cpp
-
 HEADERS += $${PUBINCLUDEDIR}/Logger
 SOURCES += common/logger.cpp
 
@@ -86,24 +83,30 @@ SOURCES += common/config.cpp
 HEADERS += common/message.h
 SOURCES += common/message.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/Json
+SOURCES += common/json/json.cpp
+
 # old GPL Json implementation (small: self-contained)
 contains(CONFIG, qtjson) {
-    HEADERS += common/qtjson.h
-    SOURCES += common/qtjson.cpp
-    SOURCES += common/json-qtjson.cpp
+    HEADERS += common/json/qtjson.h
+    SOURCES += common/json/qtjson.cpp
+    SOURCES += common/json/json-qtjson.cpp
 }
 
 # new/default LGPL Json implementation (larger: external package)
 contains(CONFIG, qjson) {
-    SOURCES += common/json-qjson.cpp
+    SOURCES += common/json/json-qjson.cpp
     LIBS += -lqjson
 }
 
 SOURCES += common/utils.cpp
 
+# crypto
 !wince {
-    SOURCES += common/crypto.cpp
+    SOURCES += common/crypto/crypto.cpp
 }
+HEADERS += $${PUBINCLUDEDIR}/simplecrypt/simplecrypt.h
+SOURCES += common/crypto/simplecrypt.cpp
 
 !nocloud {
     HEADERS += $${PUBINCLUDEDIR}/Vpn/Vpn*

@@ -18,27 +18,34 @@ public:
     typedef enum {
         CodeNull =                  -1,
 
+        // 0xx
         CodeSuccess =               0,
         CodeGeneric =               1,
         CodeSystemError =           2,
+        CodeUnconfigured =          3,
         CodeBadCredentials =        10,
 
+        // 1xx
         CodeServiceUnreach =        100,
 
+        // 2xx
         CodeServerUnreach =         200,
         CodeServerVerifyFailed =    201,
         CodeServerError =           202,
         CodeServerLicenseInvalid =  203,
         CodeServerNotFound       =  204,
 
+        // 3xx
         CodeAuthFailed =            300,
         CodeAuthAlreadyConnected =  310,
         CodeAuthDomainRequired   =  320,
 
+        // 4xx
         CodeProxyAuthFailed =       400,
 
         CodeSetupFailure =          450,
 
+        // 5xx
         CodeClientFailure =         500,
         CodeClientTimeout =         501,
         CodeClientBadConfig =       502,

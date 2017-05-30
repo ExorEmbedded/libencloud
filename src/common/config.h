@@ -43,7 +43,7 @@ typedef struct
     QFileInfo poiPath;
 #endif
     
-    QUrl sbUrl;
+    QUrl regUrl, sbUrl;
     int timeout;
     bool autoretry;
     bool decongest;
@@ -109,6 +109,7 @@ protected:
     int _loadExt ();
     int _parse (const QVariantMap &jo);
     int _parsePaths (const QVariantMap &jo);
+    int _parseRegistry (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
     int _parseSslInit (const QVariantMap &jo);
     int _parseSslOp (const QVariantMap &jo);

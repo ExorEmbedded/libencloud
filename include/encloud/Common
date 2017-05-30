@@ -61,8 +61,8 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
 LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package = "");
 
 // Agent mode
-LIBENCLOUD_DLLSPEC QString getActivationCode ();
-LIBENCLOUD_DLLSPEC int setActivationCode (const QString &code);
+LIBENCLOUD_DLLSPEC QString getActivationCode (bool encrypted = true);
+LIBENCLOUD_DLLSPEC QString setActivationCode (const QString &code, bool encrypt = true);
 
 } // namespace libencloud
 
