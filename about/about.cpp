@@ -28,15 +28,3 @@ LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudFullAppName(char* buffer, const ch
     strncat(buffer, pkgName, 120);
     return buffer;
 }
-
-LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudTapName(char* buffer, const char* productName)
-{
-    strncpy(buffer, LibEncloudOrganization, 120);
-#ifdef LIBENCLOUD_EXOR
-    strncat(buffer, productName, 120);
-#else  // ENDIAN, PANDA
-    // Tap name is plain ORG + "Connect"
-    strncat(buffer, "Connect", 120);
-#endif
-    return buffer;
-}

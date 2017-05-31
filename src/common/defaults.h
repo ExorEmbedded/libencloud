@@ -5,6 +5,9 @@
 
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
 
+// tap device - MUST match name defined in CheckTap
+#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_TAPNAME_SUFFIX
+
 #ifdef LIBENCLOUD_USE_ABOUT
 
 #include "../about/about.h"
@@ -19,11 +22,7 @@ static char libEncloudProductDirBuffer [256];
 static char libEncloudInstallDirBuffer [512];
 #define LIBENCLOUD_INSTALLDIR           LibEncloudInstallDir(libEncloudInstallDirBuffer, LIBENCLOUD_PRODUCT, LIBENCLOUD_APP)
 
-// tap device - MUST match name defined in CheckTap
-static char libEncloudTapNameBuffer [256];
-#define LIBENCLOUD_TAPNAME              LibEncloudTapName(libEncloudTapNameBuffer, LIBENCLOUD_PRODUCT)
-
-#else
+#else  // !LIBENCLOUD_USE_ABOUT
 
 #define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
 
@@ -32,9 +31,6 @@ static char libEncloudTapNameBuffer [256];
 
 // e.g Endian/ConnectApp/libencloud | Exor/JMConnect/libencloud
 #define LIBENCLOUD_INSTALLDIR           LIBENCLOUD_PRODUCTDIR "/" LIBENCLOUD_APP
-
-// tap device - MUST match name defined in CheckTap
-#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_PRODUCT
 
 #endif
 
