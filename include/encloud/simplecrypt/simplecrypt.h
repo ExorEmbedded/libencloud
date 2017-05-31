@@ -27,20 +27,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef SIMPLECRYPT_H
 #define SIMPLECRYPT_H
+
 #include <QString>
 #include <QVector>
 #include <QFlags>
-
-#ifdef WIN32
-#ifdef QICCDLL_EXPORTING
-#define QICC_EXPORT __declspec(dllexport)
-#else
-#define QICC_EXPORT __declspec(dllimport)
-#endif
-#else
-#define QICC_EXPORT
-#endif
-
+#include <encloud/Common>
 
 /**
   @short Simple encryption and decryption of strings and byte arrays
@@ -65,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   SimpleCrypt is prepared for the case that the encryption and decryption
   algorithm is changed in a later version, by prepending a version identifier to the cypertext.
   */
-class QICC_EXPORT SimpleCrypt
+class LIBENCLOUD_DLLSPEC SimpleCrypt
 {
 public:
     /**
