@@ -130,7 +130,7 @@ static char libEncloudInstallDirBuffer [512];
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
-#  ifdef LIBENCLOUD_ENDIAN
+#  ifdef QICC_ENDIAN
 #    define LIBENCLOUD_DATA_PREFIX      "/var/efw/encloud/"
 #  else
 #    define LIBENCLOUD_DATA_PREFIX      "/var/lib/encloud/"

@@ -21,7 +21,7 @@
 #endif
 
 // name of tap device
-#if defined LIBENCLOUD_EXOR
+#if defined QICC_EXOR
 #  define LIBENCLOUD_TAPNAME_SUFFIX     "HMIConnect"
 #else
 #  define LIBENCLOUD_TAPNAME_SUFFIX     "Connect"

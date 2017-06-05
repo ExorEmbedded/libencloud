@@ -85,9 +85,9 @@ DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 }
 
 endian {
-    DEFINES += LIBENCLOUD_ENDIAN
+    DEFINES += QICC_ENDIAN
 } else:exor {
-    DEFINES += LIBENCLOUD_EXOR
+    DEFINES += QICC_EXOR
 } else:panda {
 } else {
     error("an organization must be specified in CONFIG!")
