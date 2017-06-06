@@ -64,6 +64,9 @@ static char libEncloudInstallDirBuffer [512];
 
 #define LIBENCLOUD_SCHEME_HTTPS         "https"
 #define LIBENCLOUD_REG_URL              LIBENCLOUD_SCHEME_HTTPS "://switchboard-registry/"
+#define LIBENCLOUD_REG_CODE_FILE        "activation-code"
+#define LIBENCLOUD_REG_CODE_ENC_FILE    "activation-code_enc"
+#define LIBENCLOUD_REG_PROV_ENC_FILE    "provisioning_enc"
 #define LIBENCLOUD_SB_URL               LIBENCLOUD_SCHEME_HTTPS "://switchboard-host/"
 
 // timeout without exponential backoff
@@ -140,7 +143,6 @@ static char libEncloudInstallDirBuffer [512];
 #define LIBENCLOUD_CONF_FILE            LIBENCLOUD_APP ".json"
 #define LIBENCLOUD_SERIAL_FILE          "serial"
 #define LIBENCLOUD_POI_FILE             "poi"
-#define LIBENCLOUD_CSRTMPL_FILE         "csr-tmpl.json"
 #define LIBENCLOUD_AUTH_SB              "sb"
 #define LIBENCLOUD_AUTH_PROXY           "proxy"
 #define LIBENCLOUD_AUTH_NONE            "none"

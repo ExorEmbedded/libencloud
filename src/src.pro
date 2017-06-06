@@ -142,11 +142,6 @@ SOURCES += core/core.cpp
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/reg
     }
-    modeece | modesece {
-        HEADERS += $${_PRO_FILE_PWD_}/setup/ece/*.h
-        SOURCES += $${_PRO_FILE_PWD_}/setup/ece/*.cpp
-        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/ece
-    }
     modevpn {
         HEADERS += $${_PRO_FILE_PWD_}/setup/vpn/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/vpn/*.cpp

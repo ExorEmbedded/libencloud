@@ -81,8 +81,8 @@ LIBENCLOUD_DLLSPEC QString getActivationCode (bool encrypted)
     SimpleCrypt crypto(QICC_SETTING_KEY);
     QString s, e;
 
-    QFile activationCodeFile(getCommonAppDataDir() + "activation-code");
-    QFile activationCodeFileEnc(getCommonAppDataDir() + "activation-code.enc");
+    QFile activationCodeFile(getCommonAppDataDir() + LIBENCLOUD_REG_CODE_FILE);
+    QFile activationCodeFileEnc(getCommonAppDataDir() + LIBENCLOUD_REG_CODE_ENC_FILE);
 
     // temporary unencrypted file (can be used for configuration)
     if (activationCodeFile.open(QFile::ReadOnly))
@@ -115,7 +115,7 @@ LIBENCLOUD_DLLSPEC QString setActivationCode (const QString &code, bool encrypt)
 
     LIBENCLOUD_DBG("Setting activation code: " << code << ", encrypt: " << encrypt);
 
-    QString path = getCommonAppDataDir() + "activation-code.enc";
+    QString path = getCommonAppDataDir() + LIBENCLOUD_REG_CODE_ENC_FILE;
 
     if (code == QString(utils::file2Data(QFileInfo(path))))
         return code;

@@ -4,8 +4,6 @@ Encloud API v1
 ### Definitions
 
      QCC        Branded Connect App
-     ECE        Cloud Enabler device
-     SECE       Software Cloud Enabler device
 
 ### Types
 
@@ -81,7 +79,7 @@ e.g:
 
 ##### Setup API
 
-__POST <e_url>/api/v1/setup__ (QCC-only)
+__POST <e_url>/api/v1/setup__
 
 Definitions:
 
@@ -100,7 +98,7 @@ e.g.
 
     logPort=12345
 
-__GET <e_url>/api/v1/setup__ (QCC-only)
+__GET <e_url>/api/v1/setup__
 
 e.g
     

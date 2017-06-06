@@ -68,10 +68,6 @@ QString Config::dump ()
 
 #if defined(LIBENCLOUD_MODE_QCC)
     ts << "mode=QCC" << endl;
-#elif defined(LIBENCLOUD_MODE_ECE)
-    ts << "mode=ECE" << endl;
-#elif defined(LIBENCLOUD_MODE_SECE)
-    ts << "mode=SECE" << endl;
 #endif
     ts << "confPrefix=" << confPrefix << endl;
     ts << "sbinPrefix=" << sbinPrefix << endl;
@@ -165,14 +161,6 @@ int Config::_parse (const QVariantMap &jo)
     else
         config.bind = jo["bind"].toString();
 
-#ifdef LIBENCLOUD_MODE_ECE
-    if (jo["poi"].isNull())
-        config.poiPath = _joinPaths(dataPrefix, LIBENCLOUD_POI_FILE);
-    else
-        config.poiPath = _joinPaths(dataPrefix, \
-                jo["poi"].toString());
-#endif
-
     if (jo["timeout"].isNull())
         config.timeout = LIBENCLOUD_TIMEOUT;
     else
@@ -195,12 +183,6 @@ int Config::_parse (const QVariantMap &jo)
 #endif
     else
         config.decongest = jo["decongest"].toBool();
-
-    if (jo["csr"].toMap()["tmpl"].isNull())
-        config.csrTmplPath = _joinPaths(dataPrefix, LIBENCLOUD_CSRTMPL_FILE);
-    else
-        config.csrTmplPath = _joinPaths(dataPrefix, \
-                jo["csr"].toMap()["tmpl"].toString());
 
     LIBENCLOUD_ERR_IF (_parseRegistry(jo));
     LIBENCLOUD_ERR_IF (_parseSb(jo));
@@ -234,6 +216,7 @@ int Config::_parse (const QVariantMap &jo)
                 LIBENCLOUD_ERR_IF (setActivationCode(setup["code_enc"].toString(), false).isEmpty());
         }
     }
+    config.regProvisioningPath = _joinPaths(dataPrefix, LIBENCLOUD_REG_PROV_ENC_FILE);
 
     LIBENCLOUD_ERR_IF (_parseVpn(jo));
     LIBENCLOUD_ERR_IF (_parseLog(jo));

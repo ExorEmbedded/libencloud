@@ -131,6 +131,12 @@ void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
 	_send(MSG_TYPE_POST, url, headers, data, conf);
 }
 
+void Client::del (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
+        const QSslConfiguration &conf)
+{
+	_send(MSG_TYPE_DELETE, url, headers, "", conf);
+}
+
 int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const QByteArray &data)
 {
     Connection *conn = NULL;
@@ -148,7 +154,13 @@ int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
         EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
-                tr("Client falied creating POST request"));
+                tr("Client failed creating POST request"));
+    }
+    else if (msgType == MSG_TYPE_DELETE)
+    {
+        EMIT_ERROR_ERR_IF ((reply = _qnam->deleteResource(request)) == NULL,
+                tr("Client failed creating DELETE request"));
+
     } else {
         LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
     }

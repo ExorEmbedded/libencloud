@@ -51,6 +51,7 @@ int RegMsg::clear ()
     _caCert.clear();
     _code = QString();
     _key = QByteArray();
+    _provisioningEnc = QByteArray();
 
     return 0;
 }
@@ -69,6 +70,7 @@ const VpnConfig *RegMsg::getFallbackVpnConfig () const
 // public slots
 //
 
+// Try to download a new provisioning file from registry URL - if it doesn't exist use cached file
 int RegMsg::process ()
 {
     LIBENCLOUD_TRACE;
@@ -77,7 +79,6 @@ int RegMsg::process ()
     QUrl params;
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration sslconf;
-    QSslCertificate cert;
     
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
@@ -110,7 +111,6 @@ int RegMsg::process ()
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
     connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
             this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
@@ -143,11 +143,42 @@ void RegMsg::authSupplied (const libencloud::Auth &auth)
 // private slots
 // 
 
-void RegMsg::_error (const libencloud::Error &error)
+void RegMsg::_error (const libencloud::Error &err)
 {
-    LIBENCLOUD_UNUSED(error);
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, );
 
-    LIBENCLOUD_TRACE;
+    QFile caf(_cfg->config.sslOp.caPath.absoluteFilePath());
+    QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
+
+    LIBENCLOUD_DBG("err: " << err.toString());
+
+    if (err.getCode() != libencloud::Error::CodeServerNotFound ||
+            !pf.exists())
+    {
+        emit error(err);
+        return;
+    }
+
+    LIBENCLOUD_DBG("Reading cached provisioning file");
+
+    QByteArray config;
+    LIBENCLOUD_ERR_IF (!pf.open(QIODevice::ReadOnly));
+
+    config = _decrypt(pf.readAll());
+    pf.close();
+    LIBENCLOUD_ERR_IF (config.isEmpty());
+    LIBENCLOUD_ERR_IF (_decodeConfig(config));
+
+    // save the Operation CA certificate to file
+    LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
+    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
+    caf.close();
+
+    emit processed();  // success
+    return;
+
+err:
+    emit error(Error(Error::CodeSetupFailure));
 }
 
 void RegMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
@@ -157,7 +188,8 @@ void RegMsg::_clientComplete (const QString &response, const QMap<QByteArray, QB
     LIBENCLOUD_ERR_IF (_decodeResponse(response, headers));
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
-    emit processed();
+    // detached slot since _client is reused
+    QTimer::singleShot (0, this, SLOT(_completeSetup()));
     return;
 
 err:
@@ -197,6 +229,7 @@ int RegMsg::_decodeResponse (const QString &response, const QMap<QByteArray, QBy
     LIBENCLOUD_ERR_IF (config.isEmpty());
 
     LIBENCLOUD_ERR_IF (_decodeConfig(config));
+    _provisioningEnc = enc;
 
     return 0;
 err:
@@ -207,8 +240,13 @@ int RegMsg::_unpackResponse ()
 {
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
-    QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
-    QFile caf(cafn);
+    QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
+    QFile caf(_cfg->config.sslOp.caPath.absoluteFilePath());
+
+    // save encrypted provisioning file
+    LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
+    LIBENCLOUD_ERR_IF (pf.write(_provisioningEnc) == -1);
+    pf.close();
 
     // save the Operation CA certificate to file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
@@ -220,8 +258,36 @@ err:
     emit (error(Error(Error::CodeSystemError, tr("Failed writing Operation CA: ") +
                     caf.errorString())));
 
+    pf.close();
     caf.close();
     return ~0;
+}
+
+// Complete setup operation by deleting registry resource
+void RegMsg::_completeSetup ()
+{
+    QUrl url;
+    QUrl params;
+    QMap<QByteArray, QByteArray> headers;
+    QSslConfiguration sslconf;
+
+    // Switchboard is strict on this
+    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
+
+    url.setUrl(_sbAuth.getUrl());
+    url.setPath(QString(LIBENCLOUD_SETUP_QCC_REG_URL) + '/' + _calcRegPath());
+
+    LIBENCLOUD_DELETE_LATER(_client);
+    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
+
+    _client->setVerifyCA(false);
+    _client->del(url, headers, sslconf);
+
+    emit processed();
+    return;
+err:
+    LIBENCLOUD_DELETE_LATER(_client);
+    emit error(Error(Error::CodeSetupFailure));
 }
 
 int RegMsg::_init ()
@@ -334,7 +400,6 @@ int RegMsg::_decodeConfig (const QByteArray &config)
     LIBENCLOUD_ERR_IF (!parser.GetNextDocument(node));
     LIBENCLOUD_ERR_IF (!node.size());
 
-
     LIBENCLOUD_ERR_IF (_decodeConfigVpn(node));
     LIBENCLOUD_ERR_IF (_decodeConfigFallbackVpn(node));
 
@@ -423,8 +488,8 @@ int RegMsg::_decodeConfigFallbackVpn (const YAML::Node &node)
     if ((n = node.FindValue("FALLBACK_VPN_PORT")))
         LIBENCLOUD_ERR_IF (_fallbackVpnConfig.setRemotePort(_yamlNodeToInt(n)));
 
-    // Fallback configuration is optional
-    //LIBENCLOUD_ERR_IF (!_fallbackVpnConfig.checkValid(false));
+    // Fallback configuration is optional - don't check, but still set validity 
+    _fallbackVpnConfig.checkValid(false);
 
     return 0;
 err:

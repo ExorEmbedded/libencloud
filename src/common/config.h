@@ -39,15 +39,11 @@ typedef struct
                         // false: we use absolute paths constructed from data prefix
     QString bind;
 
-#ifdef LIBENCLOUD_MODE_ECE
-    QFileInfo poiPath;
-#endif
     
     QUrl regUrl, sbUrl;
     int timeout;
     bool autoretry;
     bool decongest;
-    QFileInfo csrTmplPath;
 
     libencloud_config_ssl_t ssl;
     libencloud_config_ssl_t sslInit;
@@ -57,6 +53,7 @@ typedef struct
 
     bool setupEnabled;
     bool setupAgent;
+    QFileInfo regProvisioningPath;
 
     QFileInfo vpnExePath;
     QFileInfo vpnConfPath;

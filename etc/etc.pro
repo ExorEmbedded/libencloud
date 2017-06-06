@@ -3,7 +3,6 @@ include(../common.pri)
 TEMPLATE = subdirs
 
 modeqcc: CONFFILE = libencloud-qcc.json
-modeece|modesece: CONFFILE = libencloud-ece.json
 
 win32 {
     DDIR = $${CONFDIR}

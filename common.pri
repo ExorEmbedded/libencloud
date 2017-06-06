@@ -19,8 +19,6 @@
 #                config.agent = false
 #            c) Agents which use autoregistration API based on activation code (registered on EN)
 #                config.agent = true
-#   modeece     Endian Cloud Enabler mode (SUSPENDED - deleteme?)
-#   modesece    Software Endian Cloud Enabler mode (SUSPENDED - deleteme?)
 #   modevpn     Only vpn manager with static ovpn file configuration
 #               Note: use this mode only if no setup is ever required
 #               (other modes now also support vpn-only mode via Config API)
@@ -135,14 +133,10 @@ Debug:DESTDIR = debug
 
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
-} else:modeece {
-    DEFINES += LIBENCLOUD_MODE_ECE
-} else:modesece {
-    DEFINES += LIBENCLOUD_MODE_SECE
 } else:modevpn {
     DEFINES += LIBENCLOUD_MODE_VPN
 } else {
-    error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
+    error("a mode must be defined (CONFIG += modeqcc|modevpn)!")
 }
 DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
 

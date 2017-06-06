@@ -37,6 +37,7 @@ public slots:
 private slots:
     void _error (const libencloud::Error &error);
     void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers);
+    void _completeSetup ();
 
 private:
     // message handling
@@ -69,6 +70,7 @@ private:
     libencloud_crypto_t ec;
     QString _code;
     QByteArray _key;
+    QByteArray _provisioningEnc;
 };
 
 } // namespace libencloud

@@ -17,19 +17,11 @@
 #include <setup/qcc/qccsetup.h>
 #include <setup/reg/regsetup.h>
 #endif
-#if defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
-#include <setup/ece/ecesetup.h>
-#endif
 #ifdef LIBENCLOUD_MODE_VPN
 #include <setup/vpn/vpnsetup.h>
 #endif
 #include <cloud/cloud.h>
 
-
-#ifndef Q_OS_WINCE
-/* Subject name settings from JSON CSR template */
-static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
-#endif
 
 namespace libencloud {
 
@@ -104,7 +96,7 @@ int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (_state == StateConnect || _state == StateCloud);
+    LIBENCLOUD_RETURN_IF (_state == StateConnect || _state == StateCloud, ~0);
 
     // Connect Client starts immediately
     if (!_cfg->config.decongest)
@@ -113,20 +105,16 @@ int Core::start ()
         return 0;
     }
 
-    // for ECE and SECE startup is automated so we introduce a random pause of
-    // 0-5 secs to avoid server congestion due to excessive simultaneous connections
-    {
-        int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
+    // introduce a random pause of 0-5 secs to avoid server congestion due to
+    // excessive simultaneous connections
+    int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
 
-        LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
-                .arg(QString::number(msecs)));
+    LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
+            .arg(QString::number(msecs)));
 
-        QTimer::singleShot(msecs, this, SLOT(_start()));
-    }
+    QTimer::singleShot(msecs, this, SLOT(_start()));
 
     return 0;
-err:
-    return ~0;
 }
 
 void Core::_start ()
@@ -202,38 +190,6 @@ int Core::attachServer (Server *server)
     LIBENCLOUD_ERR_IF (handler == NULL);
 
     //
-    // handler setup
-    // 
-
-#ifdef LIBENCLOUD_MODE_ECE
-    if (_cfg->config.poiPath.exists())
-    {
-        LIBENCLOUD_DBG("Reading PoI from file: " <<
-                _cfg->config.poiPath.absoluteFilePath());
-
-        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
-    }
-    else if (_cfg->config.sslInit.certPath.exists())
-    {
-        LIBENCLOUD_DBG("Reading PoI from cert: " <<
-                _cfg->config.sslInit.certPath.absoluteFilePath());
-
-        QList<QSslCertificate> initCerts(QSslCertificate::fromPath(
-                    _cfg->config.sslInit.certPath.absoluteFilePath()));
-        QSslCertificate initCert = initCerts.first();
-        QString poiStr;
-
-        LIBENCLOUD_ERR_IF (initCerts.isEmpty());
-        LIBENCLOUD_ERR_IF (initCert.isNull());
-
-        poiStr = initCert.subjectInfo(QSslCertificate::CommonName);
-
-        LIBENCLOUD_DBG("PoI: " << poiStr);
-        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(poiStr)));
-    }
-#endif
-
-    //
     // handler connections
     // 
 
@@ -251,11 +207,6 @@ int Core::attachServer (Server *server)
             obj, SLOT(_needReceived(QString, QVariant)));
     connect(this, SIGNAL(authSupplied(libencloud::Auth)),
            obj, SLOT(_authReceived(libencloud::Auth)));
-
-#ifdef LIBENCLOUD_MODE_SECE
-    connect(obj, SIGNAL(licenseSend(QUuid)), 
-            _setupObj, SIGNAL(licenseForward(QUuid)));
-#endif
 
 #ifdef LIBENCLOUD_MODE_QCC
     connect(obj, SIGNAL(clientPortSend(int)), 
@@ -392,7 +343,7 @@ void Core::_errorReceived (const libencloud::Error &err)
        // critical errors
        default:
            // QCC stops progress upon critical errors for user intervention
-           // while ECE and SECE keep on retrying automatically (in internal modules)
+           // while devices keep on retrying automatically (in internal modules)
            if (!_cfg->config.autoretry)
                stop();
            break;
@@ -651,7 +602,6 @@ int Core::_initCrypto ()
 
 #ifndef Q_OS_WINCE
     libencloud_crypto_init(&_cfg->crypto);
-    libencloud_crypto_set_name_cb(&_cfg->crypto, &_libencloud_context_name_cb, this);
 #endif
 
     return 0;
@@ -670,8 +620,6 @@ int Core::_initSetup ()
         _setup = new RegSetup(_cfg);  // agent mode
     else
         _setup = new QccSetup(_cfg);  // app mode (default)
-#elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
-    _setup = new EceSetup(_cfg);
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif
@@ -854,67 +802,3 @@ QString Core::_stateStr (QState *state)
 }
 
 } // namespace libencloud
-
-//
-// static methods
-// 
-
-#ifndef Q_OS_WINCE
-/* Subject name settings from JSON CSR template */
-static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
-{
-#undef __LIBENCLOUD_MSG
-#define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
-
-    LIBENCLOUD_RETURN_IF (n == NULL, ~0);
-    LIBENCLOUD_RETURN_IF (arg == NULL, ~0);
-
-    QVariant json;
-    QVariantMap map;
-    libencloud::Core *core = (libencloud::Core *) arg;
-    bool ok;
-
-    json = libencloud::json::parseFromFile(core->getConfig()->
-            config.csrTmplPath.absoluteFilePath(), ok);
-    LIBENCLOUD_ERR_IF (!ok);
-
-    map = json.toMap()["DN"].toMap();
-
-    // parse DN fields
-    for(QVariantMap::const_iterator iter = map.begin(); 
-            iter != map.end(); ++iter)
-    {
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, 
-                    qPrintable(iter.key()), MBSTRING_UTF8,
-                    (const unsigned char *)
-                    iter.value().toString().toUtf8().data(),
-                    -1, -1, 0));
-    }
-
-    // if CN is provided in template use it, otherwise fall back to hwinfo
-    // (SECE) or serial (LIBENCLOUD)
-    if (map["CN"].isNull())
-    {
-#if defined(LIBENCLOUD_MODE_SECE)
-        // SECE: CN based on hw_info
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8,
-                (const unsigned char *)
-                libencloud::utils::getHwInfo().toUtf8().data(),
-                -1, -1, 0));
-#else
-        // now CN for ECE should be part of template and will use (unique)
-        // label given by user!
-#if 0
-        // LIBENCLOUD: CN based on serial
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
-                (const unsigned char *) core->getSerial(), -1, -1, 0));
-#endif
-
-#endif
-    }
-
-    return 0;
-err:
-    return ~0;
-}
-#endif
