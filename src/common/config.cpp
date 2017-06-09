@@ -184,6 +184,11 @@ int Config::_parse (const QVariantMap &jo)
     else
         config.decongest = jo["decongest"].toBool();
 
+    if (jo["compat"].isNull())
+        config.compat = false;
+    else
+        config.compat = jo["compat"].toBool();
+
     LIBENCLOUD_ERR_IF (_parseRegistry(jo));
     LIBENCLOUD_ERR_IF (_parseSb(jo));
     LIBENCLOUD_ERR_IF (_parseSsl(jo, config.ssl));

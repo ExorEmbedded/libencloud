@@ -44,6 +44,7 @@ typedef struct
     int timeout;
     bool autoretry;
     bool decongest;
+    bool compat;
 
     libencloud_config_ssl_t ssl;
     libencloud_config_ssl_t sslInit;

@@ -28,6 +28,7 @@ strict syntax with commas and brackets):
       "decongest" : true,   # whether to apply a random wait to avoid congenstion (default=false for QCC, true for ECE)
       "bind" : "all",       # bind options (default = only localhost and tap, "all" for all interfaces)
       "is_profile" : true,  # whether we are using a connection profile - jump profile dir for config (default = false)
+      "compat" : true,      # VPN client compatibility mode [CONNECT-403]
 
       # [Server Configuration]
       "sb" : {

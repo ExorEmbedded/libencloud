@@ -74,7 +74,6 @@ private slots:
     void _clientDown ();
 
 private:
-    int _initConfig ();
     int _initCrypto ();
     int _initSetup ();
     int _initCloud ();

@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStringList>
+#include <QTimer>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -63,6 +64,11 @@ public:
 protected slots:
     void finishedReadRoutes (int exitCode, QProcess::ExitStatus exitStatus);
 
+#ifdef Q_OS_WIN
+    void finishedAddRoute (int exitCode, QProcess::ExitStatus exitStatus);
+    void renewLease ();
+#endif
+
 protected:
     QString padIp4 (const QString &ip);
     void readRoutes (Operation op, bool sync = false);
@@ -80,6 +86,10 @@ protected:
     QStringList _connectedEndpoints;
     QStringList _previousEndpoints;
     Operation _routesOperation;
+
+#ifdef Q_OS_WIN
+    QTimer _routeWATimer;
+#endif
 };
 
 }  // namespace libencloud

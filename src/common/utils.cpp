@@ -1,3 +1,7 @@
+#include <QtGlobal>
+#ifdef Q_OS_WIN
+# include "windows.h"
+#endif
 #include <encloud/Utils>
 #ifndef Q_OS_WINCE
 #include <encloud/Crypto>
@@ -277,6 +281,63 @@ LIBENCLOUD_DLLSPEC bool validHost (const QString &s)
                 "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$")
         .indexIn(s) == 0);
 }
+
+#ifdef Q_OS_WIN 
+/*
+ * OSVERSIONINFO sample values      major       minor
+ *
+ *  Windows 2000                    5           0
+ *  Windows XP                      5           1
+ *  Windows XP x64                  5           2
+ *  Windows Vista                   6           0
+ *  Windows 7                       6           1
+ *  Windows 8.1                     6           3
+ *  Windows 10                     10           0
+ *
+ * Notes: 
+ *  - applications not manifested for Windows 8.1 or 10 will return the Windows 8
+ *  default value (6.2)
+ *  - GetVersionEx() is deprecated - for other needs refer to "Version Helper
+ *  APIs"
+ */
+LIBENCLOUD_DLLSPEC int winVersion (int *major, int *minor)
+{
+    OSVERSIONINFO osvi;
+
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    if (!GetVersionEx(&osvi))
+        return ~0;
+
+    if (major)
+        *major = osvi.dwMajorVersion;
+
+    if (minor)
+        *minor = osvi.dwMinorVersion;
+
+    //LIBENCLOUD_DBG("major: " << *major << ", minor: " << *minor);
+
+    return 0;
+}
+
+LIBENCLOUD_DLLSPEC bool winVersionGe (int major, int minor)
+{
+    int maj;
+    int min;
+
+    if (winVersion(&maj, &min))
+        return false;
+
+    if (maj > major)
+        return true;
+
+    else if (maj == major && min >= minor)
+        return true;
+
+    return false;
+}
+#endif  // Q_OS_WIN
 
 } // namespace utils
 } // namespace libencloud

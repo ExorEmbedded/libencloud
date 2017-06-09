@@ -53,7 +53,6 @@ Core::Core (Mode mode)
             << " mode: " << QString::number(_mode);
 
     LIBENCLOUD_ERR_IF (_init());
-    LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
     // Setup and cloud initally use defaults
@@ -578,23 +577,6 @@ void Core::_clientDown ()
 // private methods
 // 
 
-int Core::_initConfig ()
-{
-    LIBENCLOUD_TRACE;
-
-    _cfg = new Config();
-    LIBENCLOUD_ERR_IF (_cfg == NULL);
-
-    LIBENCLOUD_ERR_IF (_cfg->loadFromFile());
-
-    g_libencloudCfg = _cfg;
-    LIBENCLOUD_DBG(g_libencloudCfg->dump());
-
-    return 0;
-err:
-    return ~0;
-}
-
 int Core::_initCrypto ()
 {
     // initialize Qt's PRNG
@@ -778,6 +760,14 @@ int Core::_initFsm ()
 // Init local objects
 int Core::_init ()
 {
+    _cfg = new Config();
+    LIBENCLOUD_ERR_IF (_cfg == NULL);
+
+    LIBENCLOUD_ERR_IF (_cfg->loadFromFile());
+
+    g_libencloudCfg = _cfg;
+    LIBENCLOUD_DBG(g_libencloudCfg->dump());
+
     connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
 
     _qnam = new QNetworkAccessManager;

@@ -38,6 +38,11 @@ LIBENCLOUD_DLLSPEC void mapMerge (QVariantMap &to, const QVariantMap &from);
 LIBENCLOUD_DLLSPEC bool validIp (const QString &s);
 LIBENCLOUD_DLLSPEC bool validHost (const QString &s);
 
+#ifdef Q_OS_WIN 
+LIBENCLOUD_DLLSPEC int winVersion (int *major, int *minor);
+LIBENCLOUD_DLLSPEC bool winVersionGe (int major, int minor);
+#endif
+
 } // namespace utils
 } // namespace libencloud
 
