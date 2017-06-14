@@ -137,10 +137,13 @@ SOURCES += core/core.cpp
     modeqcc {
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
-        HEADERS += $${_PRO_FILE_PWD_}/setup/reg/*.h
-        SOURCES += $${_PRO_FILE_PWD_}/setup/reg/*.cpp
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
-        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/reg
+        # Agent
+        !splitdeps {
+            HEADERS += $${_PRO_FILE_PWD_}/setup/reg/*.h
+            SOURCES += $${_PRO_FILE_PWD_}/setup/reg/*.cpp
+            DEPENDPATH += $${_PRO_FILE_PWD_}/setup/reg
+        }
     }
     modevpn {
         HEADERS += $${_PRO_FILE_PWD_}/setup/vpn/*.h

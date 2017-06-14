@@ -14,8 +14,10 @@
 #include <encloud/Api/CommonApi>
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
-#include <setup/qcc/qccsetup.h>
-#include <setup/reg/regsetup.h>
+#  include <setup/qcc/qccsetup.h>
+#  ifndef LIBENCLOUD_SPLITDEPS
+#    include <setup/reg/regsetup.h>
+#  endif
 #endif
 #ifdef LIBENCLOUD_MODE_VPN
 #include <setup/vpn/vpnsetup.h>
@@ -598,9 +600,12 @@ int Core::_initSetup ()
 
 #if defined(LIBENCLOUD_MODE_QCC)
     LIBENCLOUD_DBG("[Core] setupAgent: " << _cfg->config.setupAgent);
+
+#  if !defined(LIBENCLOUD_SPLITDEPS)
     if (_cfg->config.setupAgent)
         _setup = new RegSetup(_cfg);  // agent mode
     else
+#  endif
         _setup = new QccSetup(_cfg);  // app mode (default)
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);

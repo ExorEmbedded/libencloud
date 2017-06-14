@@ -196,9 +196,8 @@ windows{
 !splitdeps {
     QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
     INCLUDEPATH += $${QTYAML_PATH}/include
-    LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR 
+    LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR -lyaml-cpp
 }
-LIBS += -lyaml-cpp
 
 # libabout
 about {
@@ -242,7 +241,13 @@ unix {
 CONNECT_DEFINES=$${SRCBASEDIR}/../connectapp/defines.pri
 exists($${CONNECT_DEFINES}): include($${CONNECT_DEFINES})
 
-DEFINES += QICC_SETTING_KEY=$$cat($${SETTINGKEYPATH})
+!exists($${SETTINGKEYPATH}) { 
+    # dummy in case key is unused (e.g. device)
+    SETTINGKEY="0xdeadbeef"  
+} else {
+    SETTINGKEY=$$cat($${SETTINGKEYPATH})
+}
+DEFINES += QICC_SETTING_KEY=$$SETTINGKEY
 
 # local overrides
 windows {

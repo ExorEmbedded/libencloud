@@ -105,6 +105,7 @@ err:
 /* load other external data */
 int Config::_loadExt ()
 {
+#ifndef LIBENCLOUD_SPLITDEPS  // not agent
     QVariantMap setup; 
     QString setupCode = getActivationCode(true);  // encrypted
 
@@ -113,6 +114,7 @@ int Config::_loadExt ()
         setup["code_enc"] = setupCode;
         _json["setup"] = setup;
     }
+#endif
 
     return 0;
 }
