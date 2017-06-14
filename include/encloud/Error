@@ -24,6 +24,7 @@ public:
         CodeSystemError =           2,
         CodeUnconfigured =          3,
         CodeBadCredentials =        10,
+        CodeRequestTimeout =        20,
 
         // 1xx
         CodeServiceUnreach =        100,

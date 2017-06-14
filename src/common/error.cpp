@@ -163,6 +163,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Configuration missing");
         case CodeBadCredentials:
             return QObject::tr("Please check credentials");
+        case CodeRequestTimeout:
+            return QObject::tr("Request timed out");
 
         // 1xx
         case CodeServiceUnreach:
