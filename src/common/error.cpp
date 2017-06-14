@@ -161,6 +161,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("System Error - please check resource status");
         case CodeBadCredentials:
             return QObject::tr("Please check credentials");
+        case CodeRequestTimeout:
+            return QObject::tr("Request timed out");
 
         // 1xx
         case CodeServiceUnreach:
