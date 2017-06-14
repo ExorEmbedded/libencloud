@@ -389,7 +389,7 @@ void Connection::_timeout ()
         _client->_sendRequest(msgType, request, data);
     }
     else
-        LIBENCLOUD_EMIT(error(Error(Error::CodeClientTimeout)));
+        LIBENCLOUD_EMIT(error(Error(Error::CodeRequestTimeout)));
 
     deleteLater();
 }
