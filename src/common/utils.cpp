@@ -194,6 +194,13 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
                         );
 }
 
+LIBENCLOUD_DLLSPEC int executeSync (QString cmd)
+{
+    LIBENCLOUD_DBG("[Utils] Exec sync: "  << qPrintable(cmd));
+
+    return QProcess::execute(cmd);
+}
+
 LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
 {
     QProcess p;

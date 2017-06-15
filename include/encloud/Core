@@ -57,6 +57,9 @@ signals:
 private slots:
     void _start ();
     void _stateChanged (State state);
+    void _vpnIpAssigned (const QString &ip);
+    void _up ();
+    void _down ();
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
@@ -84,6 +87,7 @@ private:
     QString _stateStr (QState *state);
 
     bool _isValid;
+    bool _fwEnabled;
     Mode _mode;
     State _state;
 
@@ -107,8 +111,10 @@ private:
     QNetworkAccessManager *_qnam;
     NetworkManager *_networkManager;
     libencloud::ProxyFactory *_proxyFactory;
+
     Auth _sbAuth;
     Auth _proxyAuth;
+    QString _vpnIp;
 };
 
 }  // namespace libencloud

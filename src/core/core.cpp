@@ -33,6 +33,7 @@ namespace libencloud {
 
 Core::Core (Mode mode)
     : _isValid(false)
+    , _fwEnabled(false)
     , _mode(mode)
     , _state(StateIdle)
     , _setup(NULL)
@@ -171,6 +172,8 @@ int Core::attachServer (Server *server)
 #ifndef LIBENCLOUD_DISABLE_CLOUD
     // ip assignments from cloud module to server
     connect(_cloud, SIGNAL(ipAssigned(QString)), 
+            this, SLOT(_vpnIpAssigned(QString)));
+    connect(_cloud, SIGNAL(ipAssigned(QString)), 
             obj, SLOT(vpnIpAssigned(QString)));
     // from server to local objects
     connect(obj, SIGNAL(configSupply(QVariant)),
@@ -250,6 +253,51 @@ void Core::_stateChanged (State state)
             stateToString(state) << ")");
 
     _state = state;
+
+    switch (_state)
+    {
+        case StateIdle:
+        case StateError:
+            _down();
+            break;
+        case StateCloud:
+            _up();
+            break;
+    }
+}
+
+void Core::_vpnIpAssigned (const QString &ip)
+{
+    _vpnIp = ip;
+}
+
+void Core::_up()
+{
+    LIBENCLOUD_TRACE;
+
+    if (_cfg->config.setupAgent)
+    {
+        if (utils::executeSync(QString("netsh advfirewall firewall add rule name=\"QCC ICMP\" protocol=icmpv4:8,any dir=in action=allow localip=%1").arg(_vpnIp)))
+            // Windows XP back-compatibility
+            LIBENCLOUD_ERR_IF (utils::executeSync(QString("netsh firewall set icmpsetting type=8 interface=%1 mode=enable").arg(LIBENCLOUD_TAPNAME)));
+        _fwEnabled = true;
+    }
+    else
+        _fwEnabled = false;
+err:
+    return;
+}
+
+void Core::_down()
+{
+    LIBENCLOUD_TRACE;
+
+    if (_fwEnabled)
+        if (utils::executeSync("netsh advfirewall firewall delete rule name=\"QCC ICMP\""))
+            // Windows XP back-compatibility
+            LIBENCLOUD_ERR_IF (utils::executeSync(QString("netsh firewall set icmpsetting type=8 interface=%1 mode=disable").arg(LIBENCLOUD_TAPNAME)));
+err:
+    return;
 }
 
 void Core::_stateEntered ()

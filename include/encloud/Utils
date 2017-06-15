@@ -30,6 +30,7 @@ LIBENCLOUD_DLLSPEC QString base642Url (const QString &b64);
 
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s);
 
+LIBENCLOUD_DLLSPEC int executeSync (QString cmd);
 LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out,
         bool wait = true, bool debug = true);
 
