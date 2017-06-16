@@ -193,12 +193,13 @@ int Server::_autoconnect()
     configSetup["agent"] = "true";
     config["setup"] = configSetup;
 
-    // Switchboard CA verification will not be supported initially
+#ifdef QICC_BRANDS_DISABLE_VERIFYCA
     QVariantMap configSsl;
     QVariantMap configSslInit;
     configSslInit["verify_ca"] = false;
     configSsl["init"] = configSslInit;
     config["ssl"] = configSsl;
+#endif
 
     emit configSupply(config);
     emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
