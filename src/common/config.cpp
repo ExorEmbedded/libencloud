@@ -396,6 +396,7 @@ int Config::_parseVpn (const QVariantMap &jo)
     config.vpnMgmtPeriod = LIBENCLOUD_VPN_MGMT_PERIOD;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
     config.vpnArgs = "";
+    config.vpnFw = true;
 
     if (jo["vpn"].isNull())
         return 0;
@@ -422,6 +423,9 @@ int Config::_parseVpn (const QVariantMap &jo)
 
     if (jot["args"].isValid())
         config.vpnArgs = jot["args"].toString();
+
+    if (jot["fw"].isValid())
+        config.vpnFw = jot["fw"].toBool();
 
     return 0;
 }

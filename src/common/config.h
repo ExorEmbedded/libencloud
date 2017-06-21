@@ -63,6 +63,7 @@ typedef struct
     int vpnMgmtPeriod;
     int vpnVerbosity;
     QString vpnArgs;
+    bool vpnFw;
 
     int logLevel;
     QString logTo;

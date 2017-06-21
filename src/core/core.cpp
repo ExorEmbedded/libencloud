@@ -275,7 +275,7 @@ void Core::_up()
 {
     LIBENCLOUD_TRACE;
 
-    if (_cfg->config.setupAgent)
+    if (_cfg->config.setupAgent && _cfg->config.vpnFw)
     {
         if (utils::executeSync(QString("netsh advfirewall firewall add rule name=\"QCC ICMP\" protocol=icmpv4:8,any dir=in action=allow localip=%1").arg(_vpnIp)))
             // Windows XP back-compatibility
