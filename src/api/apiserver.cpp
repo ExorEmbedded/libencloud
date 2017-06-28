@@ -133,7 +133,9 @@ int Server::start ()
     }
 
     LIBENCLOUD_ERR_IF (!_localServer->isListening());
-    LIBENCLOUD_ERR_IF (_autoconnect());
+
+    if (_mode == EncloudMode)
+        LIBENCLOUD_ERR_IF (_autoconnect());
 
     _running = true;
 
