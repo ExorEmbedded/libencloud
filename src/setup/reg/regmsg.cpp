@@ -44,6 +44,7 @@ int RegMsg::clear ()
     _caCert.clear();
     _key = QByteArray();
     _provisioningEnc = QByteArray();
+    _regUrl = QUrl();
     _redirectUrl = QUrl();
 
     return 0;
@@ -68,8 +69,6 @@ int RegMsg::process ()
 {
     LIBENCLOUD_TRACE;
 
-    QUrl url;
-    
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
     LIBENCLOUD_DBG("[Setup] appdata dir: " << getCommonAppDataDir());
@@ -87,8 +86,8 @@ int RegMsg::process ()
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
-    url.setUrl(_sbAuth.getUrl());
-    url.setPath(QString(LIBENCLOUD_SETUP_QCC_REG_URL) + '/' + _calcRegPath());
+    _regUrl.setUrl(_sbAuth.getUrl());
+    _regUrl.setPath(QString(LIBENCLOUD_SETUP_QCC_REG_URL) + '/' + _calcRegPath());
 
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
@@ -97,10 +96,10 @@ int RegMsg::process ()
     connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
             this, SLOT(_gotRedirect(QString, QMap<QByteArray, QByteArray>)));
 
-    LIBENCLOUD_NOTICE("[Setup] Requesting redirect from URL: " << url.toString());
+    LIBENCLOUD_NOTICE("[Setup] Requesting redirect from URL: " << _regUrl.toString());
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
-    _client->run(url, _params, _headers, _sslconf);
+    _client->run(_regUrl, _params, _headers, _sslconf);
 
     return 0;
 err:
@@ -168,6 +167,8 @@ err:
 // Step 1: get redirect URL
 void RegMsg::_gotRedirect (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
+    LIBENCLOUD_UNUSED(headers);
+
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (_decodeRedirect(response));
@@ -183,13 +184,15 @@ err:
 // Step 2: download config
 void RegMsg::_gotConfig (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
+    LIBENCLOUD_UNUSED(headers);
+
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (_decodeConfig(response));
     LIBENCLOUD_ERR_IF (_unpackConfig());
 
     // detached slot since _client is reused
-    QTimer::singleShot (0, this, SLOT(_completeSetup()));
+    QTimer::singleShot (0, this, SLOT(_delConfig()));
     return;
 
 err:
@@ -303,31 +306,21 @@ err:
     return ~0;
 }
 
-// Complete setup operation by deleting registry resource
+// Complete setup operation by deleting registry resources
 void RegMsg::_completeSetup ()
 {
-    QUrl url;
-
-//#define LIBENCLOUD_SETUP_REG_NO_DEL
-#ifdef LIBENCLOUD_SETUP_REG_NO_DEL
-    goto done;
-#endif
-
     LIBENCLOUD_DELETE_LATER(_client);
-    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
+    LIBENCLOUD_RETURN_IF ((_client = new Client) == NULL, );
 
-    LIBENCLOUD_NOTICE("[Setup] Requesting URL deletion: " << _redirectUrl.toString());
+    LIBENCLOUD_NOTICE("[Setup] Requesting deletion of URLs: " << 
+            _redirectUrl.toString() << ", " << _regUrl.toString());
 
     // registry Switchboard has been verified - so we also trust redirects
     _client->setVerifyCA(false);
     _client->del(_redirectUrl, _headers, _sslconf);
+    _client->del(_regUrl, _headers, _sslconf);
 
-done:
     emit processed();
-    return;
-err:
-    LIBENCLOUD_DELETE_LATER(_client);
-    emit error(Error(Error::CodeSetupFailure));
 }
 
 int RegMsg::_init ()

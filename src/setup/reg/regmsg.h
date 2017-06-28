@@ -73,6 +73,7 @@ private:
     libencloud_crypto_t ec;
     QByteArray _key;
     QByteArray _provisioningEnc;
+    QUrl _regUrl;
     QUrl _redirectUrl;
 };
 
