@@ -1,4 +1,5 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
+#include <QRegExp>
 #include <QVariantMap>
 #include <encloud/Utils>
 #include <common/common.h>
@@ -12,25 +13,17 @@
 #define EMIT_ERROR_ERR_IF(cond) \
     LIBENCLOUD_EMIT_ERR_IF(cond, error(Error(Error::CodeGeneric)))
 
+#define LIBENCLOUD_SETUP_REGMSG_HDR    "-----\\s*(?:BEGIN|END) ENCRYPTED PROVISONING\\s*-----"
+
 namespace libencloud {
 
 //
 // public methods
 //
 
-/*
-Handle Autoregistration via Switchboard API
-
-# Shell-based proof of concept
-HOST="connect.endian.com"
-ACTIVATION_CODE="XXXX-XXXX-XXXX"
-KEY=$(echo -n $ACTIVATION_CODE | openssl dgst -sha256 -binary)
-KEY_HEX=$(echo -n $KEY | od -A n -v -t x1 | tr -d ' \n')
-URL=https://$HOST/manage/access/registry/$(echo -n $KEY | openssl base64 | sed 's/\//_/g' | sed 's/=$//g')
-curl -A 'Endian 4i Connect' -k $URL | sed 's/-----\(.*\)ENCRYPTED PROVISONING -----//g' | \
-    base64 --decode | openssl enc -d -aes-256-cfb8 -K $KEY_HEX -iv 0 | tail -c +49 # 16(salt)+32(csum)+1
-*/
-
+/** 
+ * Handle Autoregistration via Switchboard API
+ */
 RegMsg::RegMsg ()
     : MessageInterface()
 {
@@ -49,9 +42,9 @@ int RegMsg::clear ()
     _vpnConfig.clear();
     _fallbackVpnConfig.clear();
     _caCert.clear();
-    _code = QString();
     _key = QByteArray();
     _provisioningEnc = QByteArray();
+    _redirectUrl = QUrl();
 
     return 0;
 }
@@ -76,15 +69,12 @@ int RegMsg::process ()
     LIBENCLOUD_TRACE;
 
     QUrl url;
-    QUrl params;
-    QMap<QByteArray, QByteArray> headers;
-    QSslConfiguration sslconf;
     
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
     LIBENCLOUD_DBG("[Setup] appdata dir: " << getCommonAppDataDir());
 
-    if (_sbAuth.getUrl().isEmpty())
+    if (_sbAuth.getUrl().isEmpty() || _getCode().isEmpty())
     {
         LIBENCLOUD_DBG("No login info - doing nothing");
         emit error(Error(Error::CodeUnconfigured));
@@ -97,26 +87,20 @@ int RegMsg::process ()
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
-    // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
-
-    LIBENCLOUD_DBG("[Setup] User Agent: " << headers["User-Agent"]);
-
     url.setUrl(_sbAuth.getUrl());
     url.setPath(QString(LIBENCLOUD_SETUP_QCC_REG_URL) + '/' + _calcRegPath());
-
-    LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
 
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
-    // setup signals from client
     connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
     connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
-            this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
+            this, SLOT(_gotRedirect(QString, QMap<QByteArray, QByteArray>)));
+
+    LIBENCLOUD_NOTICE("[Setup] Requesting redirect from URL: " << url.toString());
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
-    _client->run(url, params, headers, sslconf);
+    _client->run(url, _params, _headers, _sslconf);
 
     return 0;
 err:
@@ -164,7 +148,7 @@ void RegMsg::_error (const libencloud::Error &err)
     QByteArray config;
     LIBENCLOUD_ERR_IF (!pf.open(QIODevice::ReadOnly));
 
-    config = _decrypt(pf.readAll());
+    config = _decrypt(_hash(_getCode()), pf.readAll());
     pf.close();
     LIBENCLOUD_ERR_IF (config.isEmpty());
     LIBENCLOUD_ERR_IF (_decodeConfig(config));
@@ -181,12 +165,28 @@ err:
     emit error(Error(Error::CodeSetupFailure));
 }
 
-void RegMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
+// Step 1: get redirect URL
+void RegMsg::_gotRedirect (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (_decodeResponse(response, headers));
-    LIBENCLOUD_ERR_IF (_unpackResponse());
+    LIBENCLOUD_ERR_IF (_decodeRedirect(response));
+
+    // detached slot since _client is reused
+    QTimer::singleShot (0, this, SLOT(_processRedirect()));
+
+    return;
+err:
+    emit error(Error(Error::CodeSetupFailure));
+}
+
+// Step 2: download config
+void RegMsg::_gotConfig (const QString &response, const QMap<QByteArray, QByteArray> &headers)
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (_decodeConfig(response));
+    LIBENCLOUD_ERR_IF (_unpackConfig());
 
     // detached slot since _client is reused
     QTimer::singleShot (0, this, SLOT(_completeSetup()));
@@ -200,24 +200,53 @@ err:
 // private methods
 // 
 
-int RegMsg::_packRequest ()
+int RegMsg::_decodeRedirect (const QString &response)
 {
+    QRegExp headerRx(LIBENCLOUD_SETUP_REGMSG_HDR);
+    QRegExp redirRx("REDIRECT: (.*)");
+
+    QString s(response);
+    s.remove(headerRx);
+
+    QByteArray enc = QByteArray::fromBase64(s.toAscii());
+    QByteArray redirect;
+
+    redirect = _decrypt(_hash(_getCode()), enc);
+    LIBENCLOUD_ERR_IF (redirect.isEmpty());
+
+    LIBENCLOUD_ERR_IF (redirRx.indexIn(redirect) == -1);
+    _redirectUrl = QUrl(redirRx.cap(1).trimmed());
+    LIBENCLOUD_ERR_IF (!_redirectUrl.isValid());
+
     return 0;
+err:
+    return ~0;
 }
 
-int RegMsg::_encodeRequest (QUrl &url, QUrl &params)
+void RegMsg::_processRedirect ()
 {
-    LIBENCLOUD_UNUSED(url);
-    LIBENCLOUD_UNUSED(params);
+    LIBENCLOUD_DELETE_LATER(_client);
+    EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
-    return 0;
+    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+            this, SLOT(_gotConfig(QString, QMap<QByteArray, QByteArray>)));
+
+    LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << _redirectUrl.toString());
+
+    // registry Switchboard has been verified - so we also trust redirects
+    _client->setVerifyCA(false);
+    _client->run(_redirectUrl, _params, _headers, _sslconf);
+
+    return;
+err:
+    LIBENCLOUD_DELETE_LATER(_client);
+    return;
 }
 
-int RegMsg::_decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers)
+int RegMsg::_decodeConfig (const QString &response)
 {
-    LIBENCLOUD_UNUSED(headers);
-
-    QRegExp headerRx("-----\\s*(?:BEGIN|END) ENCRYPTED PROVISONING\\s*-----");
+    QRegExp headerRx(LIBENCLOUD_SETUP_REGMSG_HDR);
 
     QString s(response);
     s.remove(headerRx);
@@ -225,18 +254,29 @@ int RegMsg::_decodeResponse (const QString &response, const QMap<QByteArray, QBy
     QByteArray enc = QByteArray::fromBase64(s.toAscii());
     QByteArray config;
 
-    config = _decrypt(enc);
+    config = _decrypt(_hash(_getCode()), enc);
     LIBENCLOUD_ERR_IF (config.isEmpty());
 
     LIBENCLOUD_ERR_IF (_decodeConfig(config));
     _provisioningEnc = enc;
+
+//#define LIBENCLOUD_SETUP_REG_DEBUG
+#ifdef LIBENCLOUD_SETUP_REG_DEBUG
+{
+    // save UN-encrypted provisioning file
+    QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath() + ".dbg");
+    LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
+    LIBENCLOUD_ERR_IF (pf.write(config) == -1);
+    pf.close();
+}
+#endif
 
     return 0;
 err:
     return ~0;
 }
 
-int RegMsg::_unpackResponse ()
+int RegMsg::_unpackConfig ()
 {
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
@@ -267,22 +307,22 @@ err:
 void RegMsg::_completeSetup ()
 {
     QUrl url;
-    QUrl params;
-    QMap<QByteArray, QByteArray> headers;
-    QSslConfiguration sslconf;
 
-    // Switchboard is strict on this
-    headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
-
-    url.setUrl(_sbAuth.getUrl());
-    url.setPath(QString(LIBENCLOUD_SETUP_QCC_REG_URL) + '/' + _calcRegPath());
+//#define LIBENCLOUD_SETUP_REG_NO_DEL
+#ifdef LIBENCLOUD_SETUP_REG_NO_DEL
+    goto done;
+#endif
 
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
-    _client->setVerifyCA(false);
-    _client->del(url, headers, sslconf);
+    LIBENCLOUD_NOTICE("[Setup] Requesting URL deletion: " << _redirectUrl.toString());
 
+    // registry Switchboard has been verified - so we also trust redirects
+    _client->setVerifyCA(false);
+    _client->del(_redirectUrl, _headers, _sslconf);
+
+done:
     emit processed();
     return;
 err:
@@ -301,46 +341,51 @@ err:
     return ~0;
 }
 
-QString RegMsg::_getCode ()
+QByteArray RegMsg::_getCode ()
 {
-    if (!_code.isNull())
-        return _code;
-
-    _code = getActivationCode(false).toUpper();  // unencrypted
-
-    return _code;
+    return getActivationCode(false).toUpper().toAscii();  // unencrypted
 }
 
-// Calculate key = sha256(activation_code)
-QByteArray RegMsg::_getKey ()
+// Calculate sha256 checksum
+QByteArray RegMsg::_hash (const QByteArray &ba)
 {
-    if (!_key.isNull())
-        return _key;
-
     unsigned char md[LIBENCLOUD_CRYPTO_MAX_MD_SZ];
     unsigned int md_sz;
-    QString code = _getCode();
 
-    LIBENCLOUD_ERR_IF (libencloud_crypto_digest(&ec, (unsigned char *) code.toAscii().data(), code.toAscii().size(),
+    LIBENCLOUD_ERR_IF (libencloud_crypto_digest(&ec, (unsigned char *) ba.data(), ba.size(),
         md, &md_sz));
 
-    return (_key = QByteArray((const char *)md, md_sz));
+    return QByteArray((const char *)md, md_sz);
 err:
     return QByteArray();
 }
 
-QString RegMsg::_calcRegPath ()
+// Registry path is based on hash(hash(AC))
+QByteArray RegMsg::_calcRegPath ()
 {
-    QByteArray key = _getKey();
+    QByteArray h = _hash(_calcConfigPath());
 
-    LIBENCLOUD_ERR_IF (key.isEmpty());
+    LIBENCLOUD_ERR_IF (h.isEmpty());
 
-    return utils::base642Url(key.toBase64());
+    return utils::base642Url(h.toBase64());
 err:
-    return QString();
+    return QByteArray();
+
 }
 
-QByteArray RegMsg::_decrypt (const QByteArray &enc)
+// Config path is based on hash(AC)
+QByteArray RegMsg::_calcConfigPath ()
+{
+    QByteArray h = _hash(_getCode());
+
+    LIBENCLOUD_ERR_IF (h.isEmpty());
+
+    return utils::base642Url(h.toBase64());
+err:
+    return QByteArray();
+}
+
+QByteArray RegMsg::_decrypt (const QByteArray &key, const QByteArray &enc)
 {
     enum {
         SALT_SZ = 16,
@@ -348,7 +393,6 @@ QByteArray RegMsg::_decrypt (const QByteArray &enc)
         HDR_SZ = SALT_SZ + CSUM_SZ,
         PTEXT_SZ = 4096
     };
-    QByteArray key = _getKey();
     unsigned char iv[SALT_SZ];
     unsigned char ptext[PTEXT_SZ];
     long ptext_sz;
@@ -391,6 +435,7 @@ int RegMsg::_decodeConfig (const QByteArray &config)
 
     YAML::Node node;
     const YAML::Node *n = NULL;
+    QUrl sbUrl(_redirectUrl);
 
     // Note::YAML API functions may throw exceptions (against Qt standard)! 
     // caught by Encloud::Application::notify()
@@ -417,6 +462,10 @@ int RegMsg::_decodeConfig (const QByteArray &config)
 
     LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_PASSWORD")) == NULL);
     LIBENCLOUD_ERR_IF (_sbAuth.setPass(_yamlNodeToStr(n)));
+
+    // grab actual Switchboard host spec from redirect URL
+    sbUrl.setPath("");
+    _sbAuth.setUrl(sbUrl.toString());
 
     emit authChanged(_sbAuth);
     

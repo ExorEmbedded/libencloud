@@ -174,9 +174,9 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
 // Decode string s using the URL- and filesystem-safe alphabet, which
 // substitutes - instead of + and _ instead of / in the standard Base64
 // alphabet.
-LIBENCLOUD_DLLSPEC QString base642Url (const QString &s)
+LIBENCLOUD_DLLSPEC QByteArray base642Url (const QByteArray &b64)
 {
-    return QString(s).
+    return QByteArray(b64).
               replace("+", "-").
               replace("/", "_").
               replace("=", "");

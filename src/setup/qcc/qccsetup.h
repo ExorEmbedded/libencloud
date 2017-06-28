@@ -7,7 +7,7 @@
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/qcc/setupmsg.h>
-#include <setup/qcc/closemsg.h>
+#include <setup/common/closemsg.h>
 
 namespace libencloud {
 

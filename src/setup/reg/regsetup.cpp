@@ -30,6 +30,14 @@ RegSetup::RegSetup (Config *cfg)
     connect(_regMsgState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_regMsgState, SIGNAL(entered()), &_regMsg, SLOT(process()));
     connect(_regMsgState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    
+    _initMsg(_closeMsg);
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+            &_closeMsg, SLOT(authSupplied(libencloud::Auth)));
+    connect(&_regMsg, SIGNAL(authChanged(libencloud::Auth)),
+            &_closeMsg, SLOT(authSupplied(libencloud::Auth)));
+    connect(&_closeMsg, SIGNAL(processed()),
+            this, SLOT(_onCloseProcessed()));
 }
 
 int RegSetup::start ()
@@ -37,6 +45,7 @@ int RegSetup::start ()
     LIBENCLOUD_TRACE;
 
     _initFsm();
+    _closeMsg.setNetworkAccessManager(getNetworkAccessManager());
 
     if (!m_setupEnabled)
     {
@@ -62,17 +71,21 @@ err:
 
 int RegSetup::stop (bool reset, bool close)
 {
-    LIBENCLOUD_UNUSED(close);
-
-    LIBENCLOUD_DBG("reset: " << reset);
+    LIBENCLOUD_DBG("reset: " << reset << ", close: " << close);
 
     _retry.stop();
     _fsm.stop();
     _deinitFsm(reset);
 
-    emit stopped();
+    if (!m_setupEnabled || (reset && !close))
+        emit stopped();
+    else if (m_setupEnabled && reset && close)
+        // triggers _onCloseProcessed() upon completion
+        LIBENCLOUD_ERR_IF (_closeMsg.process());  
 
     return 0;
+err:
+    return ~0;
 }
 
 const VpnConfig *RegSetup::getVpnConfig () const
@@ -134,6 +147,13 @@ void RegSetup::_onProcessed ()
     LIBENCLOUD_TRACE;
 
     emit completed();
+}
+
+void RegSetup::_onCloseProcessed ()
+{
+    LIBENCLOUD_TRACE;
+
+    emit stopped();
 }
 
 void RegSetup::_onErrorState ()

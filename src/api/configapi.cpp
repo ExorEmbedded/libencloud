@@ -79,6 +79,9 @@ void ConfigApi::_error (const libencloud::Error &err)
 
 void ConfigApi::_clientComplete (const QString &response)
 {
+    if (response.isEmpty())
+        return;
+
     switch (_msgType)
     {
         case NoneType:
@@ -87,7 +90,7 @@ void ConfigApi::_clientComplete (const QString &response)
         {
             bool ok;
             QVariant jo = json::parse(response, ok);
-            //LIBENCLOUD_ERR_IF (!ok);
+            LIBENCLOUD_ERR_IF (!ok);
             if (!ok)
                 return;
 
@@ -98,6 +101,8 @@ void ConfigApi::_clientComplete (const QString &response)
             emit configSent(Api::SuccessRc);
             break;
     }
+err:
+    return;
 }
 
 } // namespace libencloud

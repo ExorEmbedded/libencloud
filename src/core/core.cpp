@@ -36,6 +36,7 @@ Core::Core (Mode mode)
     , _fwEnabled(false)
     , _mode(mode)
     , _state(StateIdle)
+    , _prevState(StateIdle)
     , _setup(NULL)
     , _setupObj(NULL)
     , _cloud(NULL)
@@ -258,12 +259,15 @@ void Core::_stateChanged (State state)
     {
         case StateIdle:
         case StateError:
-            _down();
+            if (_prevState == StateCloud)
+                _down();
             break;
         case StateCloud:
             _up();
             break;
     }
+
+    _prevState = state;
 }
 
 void Core::_vpnIpAssigned (const QString &ip)

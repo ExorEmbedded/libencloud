@@ -90,6 +90,7 @@ private:
     bool _fwEnabled;
     Mode _mode;
     State _state;
+    State _prevState;
 
     Config *_cfg;
     SetupInterface *_setup;

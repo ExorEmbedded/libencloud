@@ -7,6 +7,7 @@
 #include <common/message.h>
 #include <setup/setup.h>
 #include <setup/reg/regmsg.h>
+#include <setup/common/closemsg.h>
 
 namespace libencloud {
 
@@ -70,6 +71,7 @@ private slots:
     void _stateEntered ();
     void _stateExited ();
     void _onProcessed ();
+    void _onCloseProcessed ();
     void _onErrorState ();
     void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
@@ -92,6 +94,8 @@ private:
     RegMsg _regMsg;
     QState _regMsgSt, *_regMsgState;
     QState _finalSt, *_finalState;
+
+    CloseMsg _closeMsg;
 
     bool _isError;
     Error _error;

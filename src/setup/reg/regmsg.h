@@ -36,24 +36,27 @@ public slots:
 
 private slots:
     void _error (const libencloud::Error &error);
-    void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers);
+    void _gotRedirect (const QString &response, const QMap<QByteArray, QByteArray> &headers);
+    void _processRedirect ();
+    void _gotConfig (const QString &response, const QMap<QByteArray, QByteArray> &headers);
     void _completeSetup ();
 
 private:
     // message handling
-    int _packRequest ();
-    int _encodeRequest (QUrl &url, QUrl &params);
-    int _decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers);
-    int _unpackResponse ();
+    int _decodeRedirect (const QString &response);
+    int _decodeConfig (const QString &response);
+    int _unpackConfig ();
 
     // internals
     int _init ();
-    QString _getCode ();
-    QByteArray _getKey ();
-    QString _calcRegPath ();
-    QByteArray _decrypt (const QByteArray &enc);
+    QByteArray _getCode ();
+    QByteArray _hash (const QByteArray &in);
+    QByteArray _calcRegPath ();
+    QByteArray _calcConfigPath ();
+    QByteArray _decrypt (const QByteArray &key, const QByteArray &enc);
     QString _yamlNodeToStr (const YAML::Node *nodeP);
     int _yamlNodeToInt (const YAML::Node *nodeP);
+    int _decodeRedirect (const QByteArray &enc);
     int _decodeConfig (const QByteArray &enc);
     int _decodeConfigVpn (const YAML::Node &node);
     int _decodeConfigFallbackVpn (const YAML::Node &node);
@@ -68,9 +71,9 @@ private:
 
     // internals
     libencloud_crypto_t ec;
-    QString _code;
     QByteArray _key;
     QByteArray _provisioningEnc;
+    QUrl _redirectUrl;
 };
 
 } // namespace libencloud
