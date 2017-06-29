@@ -53,6 +53,7 @@ private:
     QByteArray _hash (const QByteArray &in);
     QByteArray _calcRegPath ();
     QByteArray _calcConfigPath ();
+    QByteArray _encrypt (const QByteArray &key, const QByteArray &text);
     QByteArray _decrypt (const QByteArray &key, const QByteArray &enc);
     QString _yamlNodeToStr (const YAML::Node *nodeP);
     int _yamlNodeToInt (const YAML::Node *nodeP);
@@ -72,7 +73,7 @@ private:
     // internals
     libencloud_crypto_t ec;
     QByteArray _key;
-    QByteArray _provisioningEnc;
+    QByteArray _provisioning;
     QUrl _regUrl;
     QUrl _redirectUrl;
 };

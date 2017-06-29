@@ -43,7 +43,7 @@ int RegMsg::clear ()
     _fallbackVpnConfig.clear();
     _caCert.clear();
     _key = QByteArray();
-    _provisioningEnc = QByteArray();
+    _provisioning = QByteArray();
     _regUrl = QUrl();
     _redirectUrl = QUrl();
 
@@ -192,7 +192,8 @@ void RegMsg::_gotConfig (const QString &response, const QMap<QByteArray, QByteAr
     LIBENCLOUD_ERR_IF (_unpackConfig());
 
     // detached slot since _client is reused
-    QTimer::singleShot (0, this, SLOT(_delConfig()));
+    QTimer::singleShot (0, this, SLOT(_completeSetup()));
+
     return;
 
 err:
@@ -253,15 +254,20 @@ int RegMsg::_decodeConfig (const QString &response)
 
     QString s(response);
     s.remove(headerRx);
+    QUrl sbUrl(_redirectUrl);
 
     QByteArray enc = QByteArray::fromBase64(s.toAscii());
-    QByteArray config;
 
-    config = _decrypt(_hash(_getCode()), enc);
-    LIBENCLOUD_ERR_IF (config.isEmpty());
+    _provisioning = _decrypt(_hash(_getCode()), enc);
+    LIBENCLOUD_ERR_IF (_provisioning.isEmpty());
 
-    LIBENCLOUD_ERR_IF (_decodeConfig(config));
-    _provisioningEnc = enc;
+    //
+    // append local bits
+    //
+    sbUrl.setPath("");
+    _provisioning += "\nQCC_SWITCHBOARD_URL: " + sbUrl.toString();
+
+    LIBENCLOUD_ERR_IF (_decodeConfig(_provisioning));
 
 //#define LIBENCLOUD_SETUP_REG_DEBUG
 #ifdef LIBENCLOUD_SETUP_REG_DEBUG
@@ -269,7 +275,7 @@ int RegMsg::_decodeConfig (const QString &response)
     // save UN-encrypted provisioning file
     QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath() + ".dbg");
     LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (pf.write(config) == -1);
+    LIBENCLOUD_ERR_IF (pf.write(_provisioning) == -1);
     pf.close();
 }
 #endif
@@ -281,6 +287,8 @@ err:
 
 int RegMsg::_unpackConfig ()
 {
+    QByteArray provisioningEnc;
+
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
     QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
@@ -288,7 +296,8 @@ int RegMsg::_unpackConfig ()
 
     // save encrypted provisioning file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (pf.write(_provisioningEnc) == -1);
+    provisioningEnc = _encrypt(_hash(_getCode()), _provisioning);
+    LIBENCLOUD_ERR_IF (pf.write(provisioningEnc) == -1);
     pf.close();
 
     // save the Operation CA certificate to file
@@ -310,7 +319,7 @@ err:
 void RegMsg::_completeSetup ()
 {
     LIBENCLOUD_DELETE_LATER(_client);
-    LIBENCLOUD_RETURN_IF ((_client = new Client) == NULL, );
+    LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
 
     LIBENCLOUD_NOTICE("[Setup] Requesting deletion of URLs: " << 
             _redirectUrl.toString() << ", " << _regUrl.toString());
@@ -320,6 +329,8 @@ void RegMsg::_completeSetup ()
     _client->del(_redirectUrl, _headers, _sslconf);
     _client->del(_regUrl, _headers, _sslconf);
 
+err:
+    // non-critical failures - setup complete
     emit processed();
 }
 
@@ -378,13 +389,43 @@ err:
     return QByteArray();
 }
 
+QByteArray RegMsg::_encrypt (const QByteArray &key, const QByteArray &text)
+{
+    enum {
+        SALT_SZ = 16,
+        CSUM_SZ = 32,
+        HDR_SZ = SALT_SZ + CSUM_SZ,
+        CTEXT_SZ = 8192
+    };
+    unsigned char hdr[HDR_SZ];
+    unsigned char iv[SALT_SZ];
+    unsigned char ctext[CTEXT_SZ];
+    long ctext_sz;
+
+    memset(iv, 0, sizeof(iv));
+    memset(hdr, 0, sizeof(hdr));
+
+    // prepend key as checksum 
+    memcpy(&hdr[SALT_SZ], key.data(), CSUM_SZ);
+
+    QByteArray ptext((const char *) hdr, sizeof(hdr));
+    ptext += text;
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_enc (&ec, (unsigned char *) ptext.data(), ptext.size(), 
+                (unsigned char *) key.data(), iv, ctext, &ctext_sz));
+
+    return QByteArray((const char *) ctext, ctext_sz);
+err:
+    return QByteArray();
+}
+
 QByteArray RegMsg::_decrypt (const QByteArray &key, const QByteArray &enc)
 {
     enum {
         SALT_SZ = 16,
         CSUM_SZ = 32,
         HDR_SZ = SALT_SZ + CSUM_SZ,
-        PTEXT_SZ = 4096
+        PTEXT_SZ = 8192
     };
     unsigned char iv[SALT_SZ];
     unsigned char ptext[PTEXT_SZ];
@@ -396,10 +437,10 @@ QByteArray RegMsg::_decrypt (const QByteArray &key, const QByteArray &enc)
                 (unsigned char *) key.data(), iv, ptext, &ptext_sz));
     LIBENCLOUD_ERR_IF (ptext_sz < HDR_SZ);
 
-    // verify checksum
+    // verify key as checksum
     LIBENCLOUD_ERR_IF (key != QByteArray((const char *)&ptext[SALT_SZ], CSUM_SZ));
 
-    return QByteArray((const char *)&ptext[HDR_SZ], (ptext_sz - HDR_SZ));
+    return QByteArray((const char *) &ptext[HDR_SZ], (ptext_sz - HDR_SZ));
 err:
     return QByteArray();
 }
@@ -428,6 +469,8 @@ int RegMsg::_decodeConfig (const QByteArray &config)
 
     YAML::Node node;
     const YAML::Node *n = NULL;
+
+    // grab actual Switchboard host spec from redirect URL
     QUrl sbUrl(_redirectUrl);
 
     // Note::YAML API functions may throw exceptions (against Qt standard)! 
@@ -438,6 +481,9 @@ int RegMsg::_decodeConfig (const QByteArray &config)
     LIBENCLOUD_ERR_IF (!parser.GetNextDocument(node));
     LIBENCLOUD_ERR_IF (!node.size());
 
+    //
+    // parse Switchboard info
+    //
     LIBENCLOUD_ERR_IF (_decodeConfigVpn(node));
     LIBENCLOUD_ERR_IF (_decodeConfigFallbackVpn(node));
 
@@ -456,7 +502,15 @@ int RegMsg::_decodeConfig (const QByteArray &config)
     LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_PASSWORD")) == NULL);
     LIBENCLOUD_ERR_IF (_sbAuth.setPass(_yamlNodeToStr(n)));
 
-    // grab actual Switchboard host spec from redirect URL
+    //
+    // local additions
+    //
+
+    // redirect URL will be undefined if provisioning has been cached =>
+    // grab it from config
+    if ((n = node.FindValue("QCC_SWITCHBOARD_URL")) != NULL)
+        sbUrl = QUrl(_yamlNodeToStr(n));
+
     sbUrl.setPath("");
     _sbAuth.setUrl(sbUrl.toString());
 
