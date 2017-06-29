@@ -44,8 +44,8 @@ signals:
 
 protected slots:
 
-    void _error (const libencloud::Error &err);
-    void _clientComplete (const QString &response);
+    void _error (const libencloud::Error &err, const QVariant &userData);
+    void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers, const QVariant &userData);
 
 protected:
 

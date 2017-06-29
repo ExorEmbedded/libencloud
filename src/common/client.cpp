@@ -3,8 +3,8 @@
 #include <common/common.h>
 #include <common/config.h>
 
-#define EMIT_ERROR(msg) LIBENCLOUD_EMIT(error(Error(msg)))
-#define EMIT_ERROR_ERR_IF(cond, msg) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error(msg)))
+#define EMIT_ERROR(msg, userData) LIBENCLOUD_EMIT(error(Error(msg), userData))
+#define EMIT_ERROR_ERR_IF(cond, msg, userData) LIBENCLOUD_EMIT_ERR_IF(cond, error(Error(msg), userData))
 
 // Allow debug deactivation via API
 #define CLIENT_DBG(msg) do { \
@@ -114,30 +114,30 @@ err:
 }
 
 void Client::run (const QUrl &url, const QUrl &params,
-		const QMap<QByteArray, QByteArray> &headers, const QSslConfiguration &conf)
+		const QMap<QByteArray, QByteArray> &headers, const QSslConfiguration &conf, const QVariant &userData)
 {
-	_send(MSG_TYPE_NONE, url, headers, params.encodedQuery(), conf);
+	_send(MSG_TYPE_NONE, url, headers, params.encodedQuery(), conf, userData);
 }
 
 void Client::get (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-        const QSslConfiguration &conf)
+        const QSslConfiguration &conf, const QVariant &userData)
 {
-	_send(MSG_TYPE_GET, url, headers, "", conf);
+	_send(MSG_TYPE_GET, url, headers, "", conf, userData);
 }
 
 void Client::post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-        const QByteArray &data, const QSslConfiguration &conf)
+        const QByteArray &data, const QSslConfiguration &conf, const QVariant &userData)
 {
-	_send(MSG_TYPE_POST, url, headers, data, conf);
+	_send(MSG_TYPE_POST, url, headers, data, conf, userData);
 }
 
 void Client::del (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-        const QSslConfiguration &conf)
+        const QSslConfiguration &conf, const QVariant &userData)
 {
-	_send(MSG_TYPE_DELETE, url, headers, "", conf);
+	_send(MSG_TYPE_DELETE, url, headers, "", conf, userData);
 }
 
-int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const QByteArray &data)
+int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const QByteArray &data, const QVariant &userData)
 {
     Connection *conn = NULL;
     QNetworkReply *reply = NULL;
@@ -148,18 +148,18 @@ int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const
             (msgType == MSG_TYPE_NONE && data.isEmpty()))
     {
         EMIT_ERROR_ERR_IF ((reply = _qnam->get(request)) == NULL,
-                tr("Client failed creating GET request"));
+                tr("Client failed creating GET request"), userData);
     }
     else if ((msgType == MSG_TYPE_POST) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
     {
         EMIT_ERROR_ERR_IF ((reply = _qnam->post(request, data)) == NULL,
-                tr("Client failed creating POST request"));
+                tr("Client failed creating POST request"), userData);
     }
     else if (msgType == MSG_TYPE_DELETE)
     {
         EMIT_ERROR_ERR_IF ((reply = _qnam->deleteResource(request)) == NULL,
-                tr("Client failed creating DELETE request"));
+                tr("Client failed creating DELETE request"), userData);
 
     } else {
         LIBENCLOUD_ERR ("bad msgType: " << QString::number(msgType));
@@ -171,12 +171,14 @@ int Client::_sendRequest (MsgType msgType, const QNetworkRequest &request, const
     conn = new Connection(this, reply, _timeout, _timeoutRetry);
     LIBENCLOUD_ERR_IF (conn == NULL);
 
-    connect(conn, SIGNAL(error(libencloud::Error)), 
-            this, SIGNAL(error(libencloud::Error)));
+    connect(conn, SIGNAL(error(libencloud::Error, QVariant)), 
+            this, SIGNAL(error(libencloud::Error, QVariant)));
 
     conn->msgType = msgType;
     conn->request = request;
     conn->data = data;
+    conn->userData = userData;
+    _userData = userData;
 
     _conns[reply] = conn;
     return 0;
@@ -186,7 +188,7 @@ err:
 }
 
 void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-		const QByteArray &data, const QSslConfiguration &conf)
+		const QByteArray &data, const QSslConfiguration &conf, const QVariant &userData)
 {
     CLIENT_DBG("[Client] id: " << QString::number(++_id) << " to: " << url.toString());
     //CLIENT_DBG(" ### >>>>> ### " << data);
@@ -226,7 +228,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     for (QMap<QByteArray, QByteArray>::const_iterator mi = headers.begin(); mi != headers.end(); mi++)
         request.setRawHeader(mi.key(), mi.value());
 
-    _sendRequest(msgType, request, data);
+    _sendRequest(msgType, request, data, userData);
 }
 
 //
@@ -238,23 +240,28 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
     LIBENCLOUD_UNUSED(authenticator); 
     LIBENCLOUD_UNUSED(proxy);
 
-    EMIT_ERROR(tr("Proxy Authentication Required"));
+    EMIT_ERROR(tr("Proxy Authentication Required"), _userData);
 }
 
+// XXX get userdata from reply
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
 {
 #ifndef Q_OS_WINCE
+    Connection *conn = _conns[reply];
+    LIBENCLOUD_RETURN_IF (conn == NULL, );
+
     QList<QSslError> ignoreErrors;
 
     foreach (QSslError err, errors)
     {
         switch (err.error())
         {
+            case 0:
             default:
                 if (_verifyCA)
                 {
                     CLIENT_DBG("[Client] CRITICAL QSslError (" << (int) err.error() << "): " << err.errorString());
-                    LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed)));
+                    LIBENCLOUD_EMIT(error(Error(Error::CodeServerVerifyFailed), conn->userData));
                     _sslError = true;
                 }
                 else
@@ -274,6 +281,9 @@ void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors)
 void Client::_networkError (QNetworkReply::NetworkError err)
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *> (sender());
+    LIBENCLOUD_RETURN_IF (reply == NULL, );
+    Connection *conn = _conns[reply];
+    LIBENCLOUD_RETURN_IF (conn == NULL, );
     QString extraMsg;
     QVariantMap json;
     bool ok;
@@ -294,7 +304,7 @@ void Client::_networkError (QNetworkReply::NetworkError err)
     {
         case QNetworkReply::UnknownContentError:
         case QNetworkReply::ProtocolFailure:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerError, extraMsg)));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerError, extraMsg), conn->userData));
             break;
 
         case QNetworkReply::SslHandshakeFailedError:
@@ -304,13 +314,11 @@ void Client::_networkError (QNetworkReply::NetworkError err)
                 break;
 
         case QNetworkReply::ContentNotFoundError:
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerNotFound, extraMsg)));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerNotFound, extraMsg), conn->userData));
             break;
             // else follow through
         default:
-            // url is too much detail for end user
-            //LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg + ", url: " + reply->url().toString())));
-            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg)));
+            LIBENCLOUD_EMIT(error(Error(Error::CodeServerUnreach, extraMsg), conn->userData));
             break;
     }
 }
@@ -349,7 +357,7 @@ void Client::_finished (QNetworkReply *reply)
     foreach (QNetworkReply::RawHeaderPair header, headerPairs)
         headers[header.first] = header.second;
 
-    emit complete(_response, headers);
+    emit complete(_response, headers, conn->userData);
 
 err:
     disconnect(reply, NULL, NULL, NULL);
@@ -399,16 +407,18 @@ void Connection::stop ()
 
 void Connection::_timeout ()
 {
+    QVariant userData;
+
     if (_reply)
         _client->_conns.remove(_reply);
 
     if (_timeoutRetry)
     {
         LIBENCLOUD_DBG("[Client] retrying last request");
-        _client->_sendRequest(msgType, request, data);
+        _client->_sendRequest(msgType, request, data, userData);
     }
     else
-        LIBENCLOUD_EMIT(error(Error(Error::CodeRequestTimeout)));
+        LIBENCLOUD_EMIT(error(Error(Error::CodeRequestTimeout), userData));
 
     deleteLater();
 }

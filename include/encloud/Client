@@ -42,7 +42,7 @@ public:
     void stop ();
 
 signals:
-    void error (const libencloud::Error &err);
+    void error (const libencloud::Error &err, const QVariant &userData);
 
 protected slots:
     void _timeout ();
@@ -51,6 +51,7 @@ protected:
     MsgType msgType;
     QNetworkRequest request;
     QByteArray data;
+    QVariant userData;
 
 private:
     Client *_client;
@@ -80,28 +81,28 @@ public:
 
 	// GET if no params are provided, otherwise POST them (form)
     void run (const QUrl &url, const QUrl &params, const QMap<QByteArray, QByteArray> &headers,
-            const QSslConfiguration &conf);
+            const QSslConfiguration &conf, const QVariant &userData = QVariant());
 
 	// GET
     void get (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-			const QSslConfiguration &conf);
+			const QSslConfiguration &conf, const QVariant &userData = QVariant());
 
 	// POST generic data
     void post (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-			const QByteArray &data, const QSslConfiguration &conf);
+			const QByteArray &data, const QSslConfiguration &conf, const QVariant &userData = QVariant());
 
 	// DELETE
     void del (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-			const QSslConfiguration &conf);
+			const QSslConfiguration &conf, const QVariant &userData = QVariant());
 
 signals:
-    void error (const libencloud::Error &err);
-    void complete (const QString &body, const QMap<QByteArray, QByteArray> &headers);
+    void error (const libencloud::Error &err, const QVariant &userData);
+    void complete (const QString &body, const QMap<QByteArray, QByteArray> &headers, const QVariant &userData);
 
 protected slots:
-    int _sendRequest(MsgType msgType, const QNetworkRequest &request, const QByteArray &data);
+    int _sendRequest(MsgType msgType, const QNetworkRequest &request, const QByteArray &data, const QVariant &userData);
     void _send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
-			const QByteArray &data, const QSslConfiguration &conf);
+			const QByteArray &data, const QSslConfiguration &conf, const QVariant &userData);
     void _proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenticator *authenticator);
     void _sslErrors (QNetworkReply *reply, const QList<QSslError> &errors);
     void _networkError (QNetworkReply::NetworkError err);
@@ -120,6 +121,7 @@ protected:
     int _timeout;
     bool _timeoutRetry;
     bool _sslError;
+    QVariant _userData;
 };
 
 } // namespace libencloud

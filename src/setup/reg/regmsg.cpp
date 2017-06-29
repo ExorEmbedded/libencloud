@@ -92,8 +92,8 @@ int RegMsg::process ()
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_gotRedirect(QString, QMap<QByteArray, QByteArray>)));
 
     LIBENCLOUD_NOTICE("[Setup] Requesting redirect from URL: " << _regUrl.toString());
@@ -231,8 +231,8 @@ void RegMsg::_processRedirect ()
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_gotConfig(QString, QMap<QByteArray, QByteArray>)));
 
     LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << _redirectUrl.toString());

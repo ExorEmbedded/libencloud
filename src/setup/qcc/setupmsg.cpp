@@ -95,9 +95,9 @@ int SetupMsg::process ()
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SIGNAL(error(libencloud::Error)));
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);

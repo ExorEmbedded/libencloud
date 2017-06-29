@@ -10,12 +10,13 @@ namespace libencloud {
 //
 
 ConfigApi::ConfigApi ()
-    : _msgType(NoneType)
 {
     LIBENCLOUD_TRACE;
 
-    connect(&_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)), this, SLOT(_clientComplete(QString)));
+    connect(&_client, SIGNAL(error(libencloud::Error, QVariant)),
+            this, SLOT(_error(libencloud::Error, QVariant)));
+    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
+            this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>, QVariant)));
 }
 
 ConfigApi::~ConfigApi ()
@@ -30,11 +31,9 @@ void ConfigApi::configRetrieve ()
     url.setPath(LIBENCLOUD_API_CONFIG_PATH);
     _params.clear();
 
-    _msgType = ConfigRetrieveType;
-
     LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString());
 
-    _client.run(url, _params, _headers, _config);
+    _client.run(url, _params, _headers, _config, ConfigRetrieveType);
 }
 
 int ConfigApi::configSupply (const QVariant &config)
@@ -49,22 +48,22 @@ int ConfigApi::configSupply (const QVariant &config)
 	QString js = json::serialize(config, ok);
 	LIBENCLOUD_ERR_IF (!ok);
 
-    _msgType = ConfigSupplyType;
-
     LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString() << ", data: " << js);
 
-    _client.post(url, _headers, js.toAscii(), _config);
+    _client.post(url, _headers, js.toAscii(), _config, ConfigSupplyType);
 
 	return 0;
 err:
 	return ~0;
 }
 
-void ConfigApi::_error (const libencloud::Error &err)
+void ConfigApi::_error (const libencloud::Error &err, const QVariant &userData)
 {
     LIBENCLOUD_DBG("[ConfigApi] error: " << err.toString());
 
-    switch (_msgType)
+    MsgType msgType = (MsgType) userData.toInt();
+
+    switch (msgType)
     {
         case NoneType:
             break;
@@ -77,12 +76,13 @@ void ConfigApi::_error (const libencloud::Error &err)
     }
 }
 
-void ConfigApi::_clientComplete (const QString &response)
+void ConfigApi::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers, const QVariant &userData)
 {
-    if (response.isEmpty())
-        return;
+    LIBENCLOUD_UNUSED(headers);
 
-    switch (_msgType)
+    MsgType msgType = (MsgType) userData.toInt();
+
+    switch (msgType)
     {
         case NoneType:
             break;
@@ -91,8 +91,6 @@ void ConfigApi::_clientComplete (const QString &response)
             bool ok;
             QVariant jo = json::parse(response, ok);
             LIBENCLOUD_ERR_IF (!ok);
-            if (!ok)
-                return;
 
             emit configReceived(Api::SuccessRc, jo);
             break;

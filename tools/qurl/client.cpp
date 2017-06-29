@@ -7,9 +7,9 @@ namespace qurl {
 Client::Client ()
     : m_error(false)
 {
-    connect(&m_client, SIGNAL(error(libencloud::Error)),
+    connect(&m_client, SIGNAL(error(libencloud::Error, QVariant)),
             this, SLOT(clientError(libencloud::Error)));
-    connect(&m_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(&m_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(clientComplete(QString)));
 }
 
