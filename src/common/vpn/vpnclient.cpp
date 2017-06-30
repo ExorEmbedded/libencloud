@@ -313,7 +313,7 @@ void VpnClient::start (bool fallback)
     args = getArgs(configPath);
     if (args.empty())
     {
-        LIBENCLOUD_DBG("[VPNClient] error: invalid arguments: " << configPath);
+        LIBENCLOUD_DBG("[VPNClient] error: invalid arguments - path : " << configPath);
         return;
     }
 

@@ -227,9 +227,13 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
 
     if (!json["fallback_openvpn_conf"].isNull())
     {
-        _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString());
-        LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
-                error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
+        QString fbConfig = json["fallback_openvpn_conf"].toString();
+        if (!fbConfig.isEmpty())
+        {
+            _fallbackVpnConfig = VpnConfig(fbConfig);
+            LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
+                    error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
+        }
     }
 
     // and CA certificate
