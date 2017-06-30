@@ -258,6 +258,7 @@ void VpnManager::parseLineState (QByteArray line)
     QList<QByteArray> words;
     QByteArray state;
     QByteArray desc;
+    VpnClient::State prevState = this->client->state();
 
     words = line.split(',');
     LIBENCLOUD_ERR_MSG_IF (words.size() < 2, line);
@@ -313,6 +314,14 @@ void VpnManager::parseLineState (QByteArray line)
     else if (qstrcmp(state, "EXITING") == 0)
     {
         this->client->setState(VpnClient::StateExiting);
+    }
+
+    // restart timeout timer upon state changes
+    if (this->client->state() != VpnClient::StateConnected &&
+            this->client->state() != prevState)
+    {
+        if (cfg->config.timeout)  // 0 = no timeout
+            this->connTimer.start(cfg->config.timeout * 1000);
     }
 
 err:
