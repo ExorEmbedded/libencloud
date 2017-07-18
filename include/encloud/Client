@@ -38,6 +38,8 @@ public:
     Connection (Client *client, QNetworkReply *reply, int timeout, bool timeoutRetry);
     ~Connection ();
 
+    void stop ();
+
 signals:
     void error (const libencloud::Error &err);
 

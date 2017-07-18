@@ -258,6 +258,7 @@ void VpnManager::parseLineState (QByteArray line)
     QList<QByteArray> words;
     QByteArray state;
     QByteArray desc;
+    VpnClient::State prevState = this->client->state();
 
     words = line.split(',');
     LIBENCLOUD_ERR_MSG_IF (words.size() < 2, line);
@@ -315,8 +316,24 @@ void VpnManager::parseLineState (QByteArray line)
         this->client->setState(VpnClient::StateExiting);
     }
 
+    // restart timeout timer upon state changes
+    if (this->client->state() != VpnClient::StateConnected &&
+            this->client->state() != prevState)
+    {
+        if (cfg->config.timeout)  // 0 = no timeout
+            this->connTimer.start(cfg->config.timeout * 1000);
+    }
+
 err:
     return;
+}
+
+QString VpnManager::escape (const QString &s)
+{
+    QString s2(s);
+
+    return s2.replace("\\", "\\\\")
+             .replace("\"", "\\\"");
 }
 
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
@@ -328,17 +345,11 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
     QTextStream ts(this->socket);
 
-    QString escapedUser = user;
-    escapedUser.replace("\"", "\\\"");
-
-    QString escapedPass = pass;
-    escapedPass.replace("\"", "\\\"");
-
     if (user != "")
-        ts << "username \"" << type << "\" \"" << escapedUser << "\"\r\n";
+        ts << "username \"" << type << "\" \"" << escape(user) << "\"\r\n";
 
     if (pass != "")
-        ts << "password \"" << type << "\" \"" << escapedPass << "\"\r\n";
+        ts << "password \"" << type << "\" \"" << escape(pass) << "\"\r\n";
 
     this->socket->flush();
 }

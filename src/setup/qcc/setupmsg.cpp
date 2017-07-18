@@ -75,9 +75,6 @@ int SetupMsg::process ()
         LIBENCLOUD_EMIT_ERR (error(Error(tr("Switchboard login required"))));
     }
 
-    // client already destroyed via deleteLater()
-    //LIBENCLOUD_DELETE (_client);
-
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
 
@@ -94,6 +91,7 @@ int SetupMsg::process ()
 
     LIBENCLOUD_NOTICE("[Setup] Requesting configuration from URL: " << url.toString());
 
+    LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
@@ -107,7 +105,7 @@ int SetupMsg::process ()
 
     return 0;
 err:
-    LIBENCLOUD_DELETE(_client);
+    LIBENCLOUD_DELETE_LATER(_client);
     return ~0;
 }
 
@@ -135,8 +133,6 @@ void SetupMsg::_error (const libencloud::Error &error)
     LIBENCLOUD_UNUSED(error);
 
     LIBENCLOUD_TRACE;
-
-    sender()->deleteLater();
 }
 
 void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
@@ -147,9 +143,7 @@ void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, 
     LIBENCLOUD_ERR_IF (_unpackResponse());
 
     emit processed();
-
 err:
-    sender()->deleteLater();
     return;
 }
 
@@ -233,9 +227,13 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
 
     if (!json["fallback_openvpn_conf"].isNull())
     {
-        _fallbackVpnConfig = VpnConfig(json["fallback_openvpn_conf"].toString());
-        LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
-                error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
+        QString fbConfig = json["fallback_openvpn_conf"].toString();
+        if (!fbConfig.isEmpty())
+        {
+            _fallbackVpnConfig = VpnConfig(fbConfig);
+            LIBENCLOUD_EMIT_ERR_IF (!_fallbackVpnConfig.isValid(),
+                    error(Error(tr("Fallback VPN Configuration from Switchboard not valid"))));
+        }
     }
 
     // and CA certificate

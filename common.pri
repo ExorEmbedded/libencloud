@@ -105,8 +105,10 @@ debug:unix {
     QMAKE_CXXFLAGS += -g 
 }
 
-# Suffix for libraries compiled with debug symbols
+# Platform-specific macros and suffixes
 win32 {
+    DEFINES += _CRT_SECURE_NO_WARNINGS
+    DEFINES += _LIBENCLOUD_LIB_  # for dll exports
     CONFIG(debug,debug|release) {
         DBG_SUFFIX = d
     }
@@ -152,17 +154,6 @@ noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
 
 about       { DEFINES += LIBENCLOUD_USE_ABOUT }
 
-# Platform-specific config and macros
-win32 {
-    CONFIG += qtjson  # GPL/self-contained
-    DEFINES += _CRT_SECURE_NO_WARNINGS
-    DEFINES += _LIBENCLOUD_LIB_  # for dll exports
-} else {
-#   This is OK on Ubuntu but TODO on Yocto
-#   CONFIG += qjson   # LGPL/external
-    CONFIG += qtjson  # GPL/self-contained
-}
-
 exists(".git") {
     REVISION=$$system(git rev-parse --short HEAD)
     DEFINES += LIBENCLOUD_REVISION=\\\"$${REVISION}\\\"
@@ -174,6 +165,17 @@ DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
+
+# json
+exor { # app is proprietary
+    win32 {
+        CONFIG += qtjson  # GPL/self-contained - TODO!
+    } else {
+        CONFIG += qjson   # LGPL/external
+    }
+} else {
+    CONFIG += qtjson  # GPL/self-contained
+}
 
 # openssl
 OPENSSLPATH = $${OPENSSL_INSTALLPATH}

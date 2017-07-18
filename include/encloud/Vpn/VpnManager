@@ -79,6 +79,7 @@ private slots:
     void socketError (QAbstractSocket::SocketError err);
 
 private:
+    QString escape (const QString &s);
     void parseLine (QByteArray line);
     void parseLinePass (QByteArray rest);
     void parseLineState (QByteArray line);

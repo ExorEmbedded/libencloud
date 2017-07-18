@@ -66,10 +66,7 @@ int CloseMsg::process ()
 
     LIBENCLOUD_DBG("[Setup] CA path: " << _cfg->config.sslInit.caPath.absoluteFilePath());
 
-    LIBENCLOUD_ERR_IF (!_sbAuth.isValid());
-
-    // client already destroyed via deleteLater()
-    //LIBENCLOUD_DELETE_LATER (_client);
+    LIBENCLOUD_RETURN_IF (!_sbAuth.isValid(), ~0);
 
     // Switchboard is strict on this
     headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
@@ -144,7 +141,7 @@ void CloseMsg::_error (const libencloud::Error &error)
     emit processed();
 
     _sbAuth = Auth();
-    sender()->deleteLater();
+    LIBENCLOUD_DELETE_LATER (_client);
 }
 
 void CloseMsg::_clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers)
@@ -157,8 +154,7 @@ void CloseMsg::_clientComplete (const QString &response, const QMap<QByteArray, 
 
 err:
     _sbAuth = Auth();
-    sender()->deleteLater();
-    return;
+    LIBENCLOUD_DELETE_LATER (_client);
 }
 
 //

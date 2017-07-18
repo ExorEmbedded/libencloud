@@ -38,6 +38,9 @@ VpnConfig::VpnConfig (const QString &s)
 {
     LIBENCLOUD_TRACE;
 
+    if (s.isEmpty())
+        return;
+
     clear();
 
     LIBENCLOUD_ERR_IF (fromString(s, false));  // no parsing

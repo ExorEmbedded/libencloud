@@ -38,8 +38,6 @@ int LoginMsg::process ()
 
     EMIT_ERROR_ERR_IF (_cfg == NULL);
 
-    // client already destroyed via deleteLater()
-    //LIBENCLOUD_DELETE (_client);
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
 
     // Switchboard is strict on this
@@ -71,7 +69,7 @@ int LoginMsg::process ()
 
     return 0;
 err:
-    LIBENCLOUD_DELETE(_client);
+    LIBENCLOUD_DELETE_LATER(_client);
     return ~0;
 }
 
@@ -103,8 +101,8 @@ void LoginMsg::_clientComplete (const QString &response)
     emit processed();
 
 err:
-    sender()->deleteLater();
-    return;
+    LIBENCLOUD_DELETE_LATER (_client);
+    return;    
 }
 
 //
@@ -130,7 +128,6 @@ int LoginMsg::_decodeResponse (const QString &response)
     QVariantMap map;
     bool ok;
 
-// XXX
     LIBENCLOUD_DBG("response: " << response);
 
     json = json::parse(response, ok).toMap();
