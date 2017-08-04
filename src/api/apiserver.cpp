@@ -2,6 +2,7 @@
 #include <encloud/Common>
 #include <encloud/Http/HttpServer>
 #include <encloud/Server>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -172,15 +173,8 @@ err:
 
 int Server::_autoconnect()
 {
-#ifdef Q_OS_MAC
-    // https://bugreports.qt.io/browse/QTBUG-21062
-    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
-    QSettings appSettings(QString("/Users/Shared/Library/Preferences/") + 
-            "com." + QString(LIBENCLOUD_ORG) + "." + QString(LIBENCLOUD_PRODUCT) + ".plist",
-            QSettings::NativeFormat);
-#else
-    QSettings appSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
-#endif
+    LIBENCLOUD_SYS_SETTINGS_DECL(appSettings, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
+
     LIBENCLOUD_LOG("App settings file: " << appSettings.fileName());
 
     QString appMode = appSettings.value("mode").toString();

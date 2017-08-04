@@ -24,7 +24,11 @@ static char libEncloudInstallDirBuffer [512];
 
 #else  // !LIBENCLOUD_USE_ABOUT
 
-#define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
+#ifdef QICC_XBRAND
+#  define LIBENCLOUD_APP_FULL             LIBENCLOUD_PKGNAME
+#else
+#  define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
+#endif
 
 // e.g Endian/ConnectApp, Exor/JMConnect
 #define LIBENCLOUD_PRODUCTDIR           LIBENCLOUD_ORG "/" LIBENCLOUD_PRODUCT

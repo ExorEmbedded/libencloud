@@ -8,7 +8,11 @@ echo "Generating brand-specific OpenVPN scripts for OSX"
 ROUTE_UP_SCRIPT="openvpn-route-up.sh"
 
 # Setup env for paths
-APPDIR="/Applications/${PACKAGE_ORG}/${PACKAGE_NAME}.app"
+if [ "${PACKAGE_XBRAND}" = "true" ]; then
+    APPDIR="/Applications/${PACKAGE_NAME}.app"
+else
+    APPDIR="/Applications/${PACKAGE_ORG}/${PACKAGE_NAME}.app"
+fi
 BINDIR="${APPDIR}/Contents/MacOS"
 
 cat << EOF > ${ROUTE_UP_SCRIPT}

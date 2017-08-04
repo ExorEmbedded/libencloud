@@ -36,10 +36,10 @@ Config::Config ()
 
     // data are package-specific on win
 
-    settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    settings = new LIBENCLOUD_USER_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (settings == NULL);
 
-    sysSettings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    sysSettings = new LIBENCLOUD_SYS_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (sysSettings == NULL);
 
 err:

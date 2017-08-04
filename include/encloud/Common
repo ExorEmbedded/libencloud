@@ -21,10 +21,14 @@
 #endif
 
 // name of tap device
-#if defined QICC_EXOR
-#  define LIBENCLOUD_TAPNAME_SUFFIX     "HMIConnect"
+#ifdef QICC_XBRAND
+#  ifdef QICC_PKGNAME
+#    define LIBENCLOUD_TAPNAME_SUFFIX     QICC_PKGNAME_STRIP
+#  else
+#    define LIBENCLOUD_TAPNAME_SUFFIX     LIBENCLOUD_PRODUCT
+#  endif
 #else
-#  define LIBENCLOUD_TAPNAME_SUFFIX     "Connect"
+#  define LIBENCLOUD_TAPNAME_SUFFIX       "Connect"     # org prepended
 #endif
 
 #define LIBENCLOUD_LOCALHOST    "127.0.0.1"

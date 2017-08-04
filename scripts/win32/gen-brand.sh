@@ -5,6 +5,12 @@
 
 echo "Generating brand-specific OpenVPN scripts for Windows"
 
+if [ "${PACKAGE_XBRAND}" = "true" ]; then
+    ORG=""
+else
+    ORG="${PACKAGE_ORG}"
+fi
+
 cat << EOF > openvpn-route-up.bat
 
 ::
@@ -29,7 +35,7 @@ if "%ROUTE_VPN_GATEWAY%" == "" (
 ::
 set SOFTWARE32_KEY=HKEY_LOCAL_MACHINE\SOFTWARE
 set SOFTWARE64_KEY=HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node
-set LIBENCLOUD64_KEY=%SOFTWARE64_KEY%\\${PACKAGE_ORG}\libencloud
+set LIBENCLOUD64_KEY=%SOFTWARE64_KEY%\\${ORG}\libencloud
 REG QUERY %LIBENCLOUD64_KEY% >nul
 if %errorlevel% == 0 (
     set PLATFORM=64
@@ -46,7 +52,7 @@ if %PLATFORM% == 64 (
 )
 
 set PROGRAMFILES_KEY=%SOFTWARE_KEY%\Microsoft\Windows\CurrentVersion
-set LIBENCLOUD_KEY=%SOFTWARE_KEY%\\${PACKAGE_ORG}\libencloud
+set LIBENCLOUD_KEY=%SOFTWARE_KEY%\\${ORG}\libencloud
 set TMP_FILE=openvpn-route-up.bat.tmp
 
 ::
@@ -90,7 +96,7 @@ if "%PROGRAMFILES_DIR%" == "" (
 )
 call :log ProgramFilesDir: %PROGRAMFILES_DIR%
 
-set APPBIN_DIR="%PROGRAMFILES_DIR%\\${PACKAGE_ORG}\\${PACKAGE_PROD_STRIP}\bin"
+set APPBIN_DIR="%PROGRAMFILES_DIR%\\${ORG}\\${PACKAGE_PROD_STRIP}\bin"
 
 ::
 :: Set gateway in Encloud Service

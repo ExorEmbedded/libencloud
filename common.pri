@@ -2,8 +2,6 @@
 #    
 # [ General ]
 #
-#   endian      Endian build
-#   exor        Exor build
 #   debug       compile libraries with debugging symbols
 #   nodll       build a static library
 #   splitdeps   Dependencies are split into different parts of the system
@@ -31,7 +29,12 @@
 #   nogui       totally disable Qt Gui modally (also in tests)
 #   notest      don't build tests
 #
-# [ About definitions ]
+# [ Branding Options ]
+#
+#   endian      Endian build
+#   exor        Exor build
+#   panda       Panda build
+#   xbrand      light branding - build a brandless App without references to
 #   about       use brand info from about dll, instead of using default for major brand (exor/endian)
 
 contains(DEFINES, WINCE) {
@@ -138,7 +141,7 @@ modeqcc {
 } else {
     error("a mode must be defined (CONFIG += modeqcc|modevpn)!")
 }
-DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
+DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_STRIP}\\\"
 
 splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
@@ -157,7 +160,12 @@ exists(".git") {
     DEFINES += LIBENCLOUD_REVISION=\\\"$$cat(.revision)\\\"
 }
 DEFINES += LIBENCLOUD_PKGNAME=\\\"$${PKGNAME}\\\"
-DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
+
+xbrand {
+    DEFINES += LIBENCLOUD_ORG=\\\"\\\"
+} else {
+    DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
+}
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
