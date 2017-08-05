@@ -304,9 +304,7 @@ LIBENCLOUD_DLLSPEC QString sysSWPath (const QString &org, const QString &app)
 #endif
 
 #ifdef Q_OS_MAC
-    // https://bugreports.qt.io/browse/QTBUG-21062
-    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
-    QString path = "/Users/Shared/Library/Preferences/com";
+    QString path = "/Library/Preferences/com";
     if (!org.isEmpty())
         path += "." + org;
     path += "." + app + ".plist";
