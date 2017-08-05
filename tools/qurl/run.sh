@@ -1,2 +1,2 @@
 #!/bin/bash
-DYLD_LIBRARY_PATH=`pwd`/src/:`pwd`/about ./tools/qurl/qurl "$@"
+DYLD_LIBRARY_PATH=`pwd`/src/ ./tools/qurl/qurl "$@"

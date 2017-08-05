@@ -1,3 +1,5 @@
+/** __DEPRECATED__ by light branding */
+
 #include "about.h"
 
 #include <QDebug>

@@ -35,7 +35,6 @@
 #   exor        Exor build
 #   panda       Panda build
 #   xbrand      light branding - build a brandless App without references to
-#   about       use brand info from about dll, instead of using default for major brand (exor/endian)
 
 contains(DEFINES, WINCE) {
     CONFIG += wince
@@ -151,8 +150,6 @@ nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
 
-about       { DEFINES += LIBENCLOUD_USE_ABOUT }
-
 exists(".git") {
     REVISION=$$system(git rev-parse --short HEAD)
     DEFINES += LIBENCLOUD_REVISION=\\\"$${REVISION}\\\"
@@ -205,15 +202,6 @@ windows{
     QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
     INCLUDEPATH += $${QTYAML_PATH}/include
     LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR -lyaml-cpp
-}
-
-# libabout
-about {
-    win32 {
-        ABOUT_LIBS += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
-    } unix {
-        ABOUT_LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
-    }
 }
 
 # for SHGetFolderPath()

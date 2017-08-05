@@ -11,7 +11,6 @@ win32 {
         TARGET_EXT = .dll
     } else {
         CONFIG += staticlib
-        DEFINES += LIBENCLOUDABOUT_DLLSPEC=
     }
 
     TARGET = encloud$${DBG_SUFFIX}
@@ -196,11 +195,6 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += $${_PRO_FILE_PWD_}/http/*.h
 SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
 DEPENDPATH += $${_PRO_FILE_PWD_}/http
-
-# other libs
-about {
-    LIBS += $${ABOUT_LIBS}
-}
 
 # installation
 target.path = $$LIBDIR

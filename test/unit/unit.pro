@@ -21,9 +21,6 @@ DEPENDPATH += $$SRCBASEDIR/src/
 # libencloud
 LIBS += -L$$SRCBASEDIR/src/$$DESTDIR
 LIBS += -lencloud$$DBG_SUFFIX
-about {
-    LIBS += $${ABOUT_LIBS}
-}
 
 # json - external linkage only for QJson
 contains(CONFIG, qjson) {
@@ -33,9 +30,9 @@ contains(CONFIG, qjson) {
 # command to run upon 'make check'
 # LIBENCLOUD_WRAP environment variable can be set to "gdb", "valgrind", etc
 macx {
-    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$SRCBASEDIR/../yaml-cpp/src/$$DESTDIR:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+    check.commands = DYLD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/../yaml-cpp/src/$$DESTDIR:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 } else {
-    check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$SRCBASEDIR/about:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
+    check.commands = LD_LIBRARY_PATH=:$$SRCBASEDIR/src:$$LIBDIR $$(LIBENCLOUD_WRAP) ./$$TARGET
 }
 
 target.path = $${BINDIR}
@@ -49,15 +46,12 @@ unix:!macx {
 
 nodll {
     DEFINES += LIBENCLOUD_DLLSPEC=
-    DEFINES += LIBENCLOUDABOUT_DLLSPEC=
     # for SHGetFolderPath()
     win32 {
         !wince {
             LIBS += -lshfolder
         }
     }
-
-    PRE_TARGETDEPS  += $$OUT_PWD/../../about/$$DESTDIR/about$${DBG_SUFFIX}.lib
 
     LIBS += $$PRE_TARGETDEPS
 }
