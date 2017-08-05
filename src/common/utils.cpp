@@ -289,6 +289,73 @@ LIBENCLOUD_DLLSPEC bool validHost (const QString &s)
         .indexIn(s) == 0);
 }
 
+// Get HKLM Software key according to 32/64 platform
+LIBENCLOUD_DLLSPEC QString sysSWPath (const QString &org, const QString &app)
+{
+    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
+
+#ifdef Q_OS_WIN
+    QString path = "HKEY_LOCAL_MACHINE\\Software";
+    if (win64Sys())
+        path += "\\WOW6432node";
+    if (!org.isEmpty())
+        path += "\\" + org;
+    path += "\\" + app;
+#endif
+
+#ifdef Q_OS_MAC
+    // https://bugreports.qt.io/browse/QTBUG-21062
+    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
+    QString path = "/Users/Shared/Library/Preferences/com";
+    if (!org.isEmpty())
+        path += "." + org;
+    path += "." + app + ".plist";
+#endif
+
+#ifdef Q_OS_LINUX
+    QString path = "/etc/xdg";
+    if (!org.isEmpty())
+        path += "/" + org;
+    path += "/" + app + ".conf"; 
+#endif
+
+    return path;
+}
+
+LIBENCLOUD_DLLSPEC QString userSWPath (const QString &org, const QString &app)
+{
+    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
+
+#ifdef Q_OS_WIN
+    QString path = "HKEY_CURRENT_USER\\Software";
+    if (!org.isEmpty())
+        path += "\\" + org;
+    path += "\\" + app;
+#else
+
+    // Avoid QtGui dependency by not using storageLocation()
+    //QString path = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+    QString path = QDir::homePath();
+# ifdef Q_OS_MAC
+    path += "/Library/Preferences/com";
+    if (!org.isEmpty())
+        path += "." + org;
+    path += "." + app + ".plist";
+# endif
+
+# ifdef Q_OS_LINUX
+    path += "/.config";
+    if (!org.isEmpty())
+        path += "/" + org;
+    path += "/" + app + ".conf"; 
+# endif
+
+#endif
+
+    return path;
+}
+
+
 #ifdef Q_OS_WIN 
 /*
  * OSVERSIONINFO sample values      major       minor
@@ -362,69 +429,6 @@ LIBENCLOUD_DLLSPEC bool win64Sys ()
 
 err:
     return false;
-}
-
-// Get HKLM Software key according to 32/64 platform
-LIBENCLOUD_DLLSPEC QString sysSWPath (const QString &org, const QString &app)
-{
-    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
-
-#ifdef Q_OS_WIN
-    QString path = "HKEY_LOCAL_MACHINE\\Software";
-    if (win64Sys())
-        path += "\\WOW6432node";
-    if (!org.isEmpty())
-        path += "\\" + org;
-    path += "\\" + app;
-#endif
-
-#ifdef Q_OS_MAC
-    // https://bugreports.qt.io/browse/QTBUG-21062
-    // QSetting doesn't work properly with SystemScope in Mac OS X Lion
-    QString path = "/Users/Shared/Library/Preferences/com";
-    if (!org.isEmpty())
-        path += "." + org;
-    path += "." + app + ".plist";
-#endif
-
-#ifdef Q_OS_LINUX
-    QString path = "/etc/xdg";
-    if (!org.isEmpty())
-        path += "/" + org;
-    path += "/" + app + ".conf"; 
-#endif
-
-    return path;
-}
-
-LIBENCLOUD_DLLSPEC QString userSWPath (const QString &org, const QString &app)
-{
-    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
-
-#ifdef Q_OS_WIN
-    QString path = "HKEY_CURRENT_USER\\Software";
-    if (!org.isEmpty())
-        path += "\\" + org;
-    path += "\\" + app;
-#endif
-
-#ifdef Q_OS_MAC
-    QString path = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
-    path += "/Library/Preferences/com";
-    if (!org.isEmpty())
-        path += "." + org;
-    path += "." + app + ".plist";
-#endif
-
-#ifdef Q_OS_LINUX
-    QString path = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
-    path += "/.config";
-    if (!org.isEmpty())
-        path += "/" + org;
-    path += "/" + app + ".conf"; 
-#endif
-
-    return path;
 }
 
 #endif  // Q_OS_WIN

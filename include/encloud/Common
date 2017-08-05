@@ -28,7 +28,7 @@
 #    define LIBENCLOUD_TAPNAME_SUFFIX     LIBENCLOUD_PRODUCT
 #  endif
 #else
-#  define LIBENCLOUD_TAPNAME_SUFFIX       "Connect"     # org prepended
+#  define LIBENCLOUD_TAPNAME_SUFFIX       "Connect"    // org prepended
 #endif
 
 #define LIBENCLOUD_LOCALHOST    "127.0.0.1"
