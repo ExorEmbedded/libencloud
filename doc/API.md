@@ -103,8 +103,8 @@ __GET <e_url>/api/v1/setup__
 e.g
     
     '{
-        "time" : 1396014836.523807,        # When the config data was received
         "server" : {
+            "time" : 1396014836.523807,
             "uuid" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
             "openvpn_internal_ip" : "192.168.150.1",
             "fallback_openvpn_internal_ip" : "192.168.151.1"
