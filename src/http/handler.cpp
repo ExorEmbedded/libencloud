@@ -196,9 +196,10 @@ err:
 // private slots
 //
 
+// Used to display Switchboard connected user
 void HttpHandler::_authReceived (const libencloud::Auth &auth)
 {
-    if (!auth.isValid())
+    if (!auth.isValid() || auth.getId() != libencloud::Auth::SwitchboardId)
         return;
 
     LIBENCLOUD_DBG("[Http] login: " << auth.toString());
