@@ -1,0 +1,11 @@
+#ifndef _LIBENCLOUD_SETTINGS_H_
+#define _LIBENCLOUD_SETTINGS_H_
+
+#define LIBENCLOUD_SETTINGS_PROXYENABLED        "proxyEnabled"
+#define LIBENCLOUD_SETTINGS_PROXYSERVER         "proxyServer"
+#define LIBENCLOUD_SETTINGS_PROXYPORT           "proxyPort"
+#define LIBENCLOUD_SETTINGS_PROXYAUTHENABLED    "proxyAuthEnabled"
+#define LIBENCLOUD_SETTINGS_PROXYUSER           "proxyUser"
+#define LIBENCLOUD_SETTINGS_PROXYPASS           "proxyPass"
+
+#endif /* _LIBENCLOUD_SETTINGS_H_ */ 

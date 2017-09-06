@@ -85,7 +85,6 @@ public:
 
     /* Configuration objects are publicly accessible */
     libencloud_config_t config;
-    QSettings *settings;
     QSettings *sysSettings;
 #ifndef Q_OS_WINCE
     libencloud_crypto_t crypto;

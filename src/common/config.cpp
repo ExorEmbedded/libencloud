@@ -10,8 +10,7 @@ namespace libencloud {
 
 /* Set defaults from defaults.h definitions */
 Config::Config ()
-    : settings(NULL)
-    , sysSettings(NULL)
+    : sysSettings(NULL)
 {
     QString sep = "/";
 
@@ -36,9 +35,6 @@ Config::Config ()
 
     // data are package-specific on win
 
-    settings = new LIBENCLOUD_USER_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
-    LIBENCLOUD_ERR_IF (settings == NULL);
-
     sysSettings = new LIBENCLOUD_SYS_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (sysSettings == NULL);
 
@@ -48,7 +44,6 @@ err:
 
 Config::~Config()
 {
-    LIBENCLOUD_DELETE(settings);
     LIBENCLOUD_DELETE(sysSettings);
 }
 
@@ -73,7 +68,6 @@ QString Config::dump ()
     ts << "sbinPrefix=" << sbinPrefix << endl;
     ts << "dataPrefix=" << dataPrefix << endl;
     ts << "logPrefix=" << logPrefix << endl;
-    ts << "settings=" << settings->fileName() << endl;
     ts << "sysSettings=" << sysSettings->fileName() << endl;
 
     ts << libencloud::json::serialize(_json, ok);

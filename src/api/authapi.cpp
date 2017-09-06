@@ -30,7 +30,7 @@ AuthApi::~AuthApi ()
 void AuthApi::authSupply (const libencloud::Auth &auth)
 {
     // API ignores authentication resets => use 'stop' method api instead which also resets credentials
-    if (Auth(auth).validate())
+    if (Auth(auth).validate() && auth.getId() == Auth::SwitchboardId)
         return;
 
     QUrl url(Api::getUrl());

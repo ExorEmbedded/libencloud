@@ -10,8 +10,10 @@
 #include <encloud/Logger>
 #include <encloud/Progress>
 #include <encloud/Proxy>
+#include <encloud/Settings>
 #include <encloud/Utils>
 #include <encloud/Api/CommonApi>
+#include <encloud/simplecrypt/simplecrypt.h>
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
 #  include <setup/qcc/qccsetup.h>
@@ -70,6 +72,7 @@ Core::Core (Mode mode)
 
     LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
+    _loadProxy();
 
     _isValid = true;
 
@@ -265,6 +268,8 @@ void Core::_stateChanged (State state)
         case StateCloud:
             _up();
             break;
+        default:
+            break;
     }
 
     _prevState = state;
@@ -279,6 +284,7 @@ void Core::_up()
 {
     LIBENCLOUD_TRACE;
 
+#ifdef Q_OS_WIN
     if (_cfg->config.setupAgent && _cfg->config.vpnFw)
     {
         if (utils::executeSync(QString("netsh advfirewall firewall add rule name=\"QCC ICMP\" protocol=icmpv4:8,any dir=in action=allow localip=%1").arg(_vpnIp)))
@@ -290,18 +296,21 @@ void Core::_up()
         _fwEnabled = false;
 err:
     return;
+#endif
 }
 
 void Core::_down()
 {
     LIBENCLOUD_TRACE;
 
+#ifdef Q_OS_WIN
     if (_fwEnabled)
         if (utils::executeSync("netsh advfirewall firewall delete rule name=\"QCC ICMP\""))
             // Windows XP back-compatibility
             LIBENCLOUD_ERR_IF (utils::executeSync(QString("netsh firewall set icmpsetting type=8 interface=%1 mode=disable").arg(LIBENCLOUD_TAPNAME)));
 err:
     return;
+#endif
 }
 
 void Core::_stateEntered ()
@@ -365,7 +374,7 @@ void Core::_setupStopped ()
 #endif
 
     emit authSupplied((_sbAuth = Auth(Auth::SwitchboardId)));
-    emit authSupplied((_proxyAuth = Auth(Auth::ProxyId)));
+    //emit authSupplied((_proxyAuth = Auth(Auth::ProxyId)));  // persists until explicitly reset
     emit stateChanged(StateIdle);
     emit progress(Progress());
 }
@@ -467,29 +476,7 @@ void Core::_authSupplied (const libencloud::Auth &auth)
             break;
         case Auth::ProxyId:
         {
-            QUrl url(auth.getUrl());
-
-            QNetworkProxy proxy(
-                Auth::typeToQt(auth.getType()),
-                url.host(),
-                url.port(),
-                auth.getUser(),
-                auth.getPass()
-                );
-
-            _proxyFactory = new libencloud::ProxyFactory;
-            LIBENCLOUD_ERR_IF (_proxyFactory == NULL);
-
-            _proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
-                    QNetworkProxy::NoProxy : proxy);
-            if (_sbAuth.getUrl() != "")
-                _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
-
-            LIBENCLOUD_DBG("[Core] Setting application proxy factory");
-
-            // lib takes ownership of our proxy factory
-            QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
-
+            _saveProxy(auth);
             _proxyAuth = auth;
             break;
         }
@@ -499,9 +486,6 @@ void Core::_authSupplied (const libencloud::Auth &auth)
 
     emit authSupplied(auth);
 
-    return;
-err:
-    LIBENCLOUD_DELETE(_proxyFactory);
     return;
 }
 
@@ -846,6 +830,108 @@ QString Core::_stateStr (QState *state)
         return tr("Running Cloud Enabler");
     else
         return "";
+}
+
+void Core::_setProxy (const libencloud::Auth &auth)
+{
+    if (auth.getId() != Auth::ProxyId)
+    {
+        LIBENCLOUD_ERR("Invalid proxy auth!");
+        return;
+    }
+    LIBENCLOUD_TRACE;
+
+    QUrl url(auth.getUrl());
+
+    QNetworkProxy proxy(
+        Auth::typeToQt(auth.getType()),
+        url.host(),
+        url.port(),
+        auth.getUser(),
+        auth.getPass()
+        );
+
+    _proxyFactory = new libencloud::ProxyFactory;
+    LIBENCLOUD_RETURN_IF (_proxyFactory == NULL, );
+
+    LIBENCLOUD_DBG("[Core] Setting application proxy factory");
+
+    _proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
+            QNetworkProxy::NoProxy : proxy);
+    if (_sbAuth.getUrl() != "")
+        _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
+
+    // lib takes ownership of our proxy factory
+    QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
+}
+
+void Core::_saveProxy (const libencloud::Auth &auth)
+{
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, );
+
+    QUrl url(auth.getUrl());
+
+    _setProxy(auth);
+
+    if (auth.getType() == Auth::NoneType)
+    {
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYENABLED, false);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYSERVER);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPORT);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYUSER);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPASS);
+    }
+    else
+    {
+        SimpleCrypt crypto(QICC_SETTING_KEY);
+
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYENABLED, true);
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYSERVER, url.host());
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYPORT, url.port());
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED, !auth.getUser().isEmpty());
+        if (auth.getUser().isEmpty())
+        {
+            _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYUSER);
+            _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPASS);
+        }
+        else
+        {
+            _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYUSER, auth.getUser());
+            _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYPASS, crypto.encryptToString(auth.getPass()));
+        }
+    }
+    _cfg->sysSettings->sync();
+}
+
+void Core::_loadProxy ()
+{
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, );
+
+    if (!_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYENABLED).toBool())
+    {
+        LIBENCLOUD_DBG("[Core] Proxy disabled");
+        return;
+    }
+
+    libencloud::Auth auth;
+    SimpleCrypt crypto(QICC_SETTING_KEY);
+
+    auth.setId(Auth::ProxyId);
+    auth.setType(Auth::typeFromQt(QNetworkProxy::HttpProxy));
+    auth.setUrl("http://" + _cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYSERVER).toString() +
+            ':' + _cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYPORT).toString()); 
+
+    if (_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED).toBool())
+        auth.setUser(_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYUSER).toString());
+        auth.setPass(crypto.decryptToString(_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYPASS).toString()));
+
+    LIBENCLOUD_RETURN_IF (auth.validate(), );
+
+    _setProxy(auth);
+
+    emit authSupplied((_proxyAuth = auth));
 }
 
 } // namespace libencloud

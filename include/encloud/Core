@@ -84,6 +84,9 @@ private:
     int _initFsm ();
     int _init ();
     int _startCloud ();
+    void _setProxy (const Auth &auth);
+    void _saveProxy (const Auth &auth);
+    void _loadProxy ();
     QString _stateStr (QState *state);
 
     bool _isValid;
