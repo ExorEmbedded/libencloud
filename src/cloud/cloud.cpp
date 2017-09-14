@@ -46,6 +46,7 @@ Cloud::Cloud (Config *cfg)
     connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
             _vpnManager, SLOT(authSupplied(libencloud::Auth)));
 
+    _retry.setBackoff(2);
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetry()));
 err:
     return;
@@ -70,11 +71,13 @@ int Cloud::start (bool fallback)
 	return 0;
 }
 
-int Cloud::stop () 
+int Cloud::stop (bool retry) 
 {
     LIBENCLOUD_TRACE;
 
-    _retry.stop();
+    if (!retry)
+        _retry.stop();
+
     _vpnManager->detach();
     _vpnClient->stop();
 
@@ -172,12 +175,15 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
                 msg += "\n\n" + errMsg;
 
             emit error(Error(Error::CodeClientFailure, msg));
+            _restart();
             break;
     }
 }
 
 void Cloud::_onRetry ()
 {
+    LIBENCLOUD_TRACE;
+
     _vpnClient->start(_isFallback);
 }
 
@@ -192,12 +198,12 @@ void Cloud::_restart (bool fallback, bool force)
 
     _isFallback = fallback;
 
-    if (_cfg->config.autoretry)
+    if (_cfg->config.autoretry || _cfg->config.setupAgent)
         force = true;
 
     if (force)
     {
-        stop();
+        stop(true);
         _retry.start();
     }
     

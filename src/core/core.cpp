@@ -405,8 +405,8 @@ void Core::_errorReceived (const libencloud::Error &err)
        // critical errors
        default:
            // QCC stops progress upon critical errors for user intervention
-           // while devices keep on retrying automatically (in internal modules)
-           if (!_cfg->config.autoretry)
+           // while devices/agent keep on retrying automatically (in internal modules)
+           if (!_cfg->config.autoretry && !_cfg->config.setupAgent)
                stop();
            break;
     }

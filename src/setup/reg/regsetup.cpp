@@ -12,7 +12,10 @@ RegSetup::RegSetup (Config *cfg)
     LIBENCLOUD_TRACE;
 
     _initFsm();
+
+    _retry.setBackoff(2);
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
+
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
     _initMsg(_regMsg);
@@ -171,8 +174,7 @@ void RegSetup::_onErrorState ()
         // keep on retrying
         default:
             _errorState->addTransition(this, SIGNAL(retry()), _previousState);
-            if (_cfg->config.autoretry)
-                _retry.start();
+            _retry.start();
             break;
     }
 }
@@ -188,8 +190,7 @@ void RegSetup::_onRetryTimeout ()
 {
     LIBENCLOUD_TRACE;
 
-    if (_cfg->config.autoretry)
-        emit retry();
+    emit retry();
 }
 
 //

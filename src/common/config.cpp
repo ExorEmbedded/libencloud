@@ -164,6 +164,7 @@ int Config::_parse (const QVariantMap &jo)
 
     if (jo["autoretry"].isNull())
 #if defined(LIBENCLOUD_MODE_QCC)
+        // Note: autoretry assumed always true in QCC agent mode
         config.autoretry = false;
 #else
         config.autoretry = true;

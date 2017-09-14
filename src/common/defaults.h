@@ -55,9 +55,6 @@
 #define LIBENCLOUD_REG_PROV_ENC_FILE    "provisioning_enc"
 #define LIBENCLOUD_SB_URL               LIBENCLOUD_SCHEME_HTTPS "://switchboard-host/"
 
-// timeout without exponential backoff
-#define LIBENCLOUD_RETRY_TIMEOUT        5
-
 // time for single requests
 #define LIBENCLOUD_CLIENT_TIMEOUT       30
 

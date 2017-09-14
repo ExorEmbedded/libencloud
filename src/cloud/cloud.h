@@ -25,7 +25,7 @@ public:
     inline void setSetup (SetupInterface *setup)        { _setup = setup; };
 
     int start (bool fallback = false);
-    int stop ();
+    int stop (bool retry = false);
 
     int getTotalSteps() const;
 

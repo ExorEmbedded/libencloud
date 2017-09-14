@@ -12,7 +12,10 @@ QccSetup::QccSetup (Config *cfg)
     LIBENCLOUD_TRACE;
 
     _initFsm();
+
+    _retry.setBackoff(2);
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
+
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
 
     _initMsg(_setupMsg);
