@@ -25,6 +25,8 @@ public:
         CodeUnconfigured =          3,
         CodeBadCredentials =        10,
         CodeRequestTimeout =        20,
+        CodeBadActivation =         50,
+        CodeUnregActivation =       51,
 
         // 1xx
         CodeServiceUnreach =        100,

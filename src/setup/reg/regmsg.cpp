@@ -135,12 +135,8 @@ void RegMsg::_error (const libencloud::Error &err)
 
     LIBENCLOUD_DBG("err: " << err.toString());
 
-    if (err.getCode() != libencloud::Error::CodeServerNotFound ||
-            !pf.exists())
-    {
-        emit error(err);
-        return;
-    }
+    LIBENCLOUD_EMIT_RETURN_IF (err.getCode() != libencloud::Error::CodeServerNotFound, error(err), );
+    LIBENCLOUD_EMIT_RETURN_IF (!pf.exists(), error(Error(Error::CodeUnregActivation)), );
 
     LIBENCLOUD_DBG("Reading cached provisioning file");
 
@@ -149,7 +145,7 @@ void RegMsg::_error (const libencloud::Error &err)
 
     config = _decrypt(_hash(_getCode()), pf.readAll());
     pf.close();
-    LIBENCLOUD_ERR_IF (config.isEmpty());
+    LIBENCLOUD_EMIT_RETURN_IF (config.isEmpty(), error(Error(Error::CodeBadActivation)), );  
     LIBENCLOUD_ERR_IF (_decodeConfig(config));
 
     // save the Operation CA certificate to file

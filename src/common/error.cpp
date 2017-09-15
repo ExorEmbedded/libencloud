@@ -165,6 +165,10 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Please check credentials");
         case CodeRequestTimeout:
             return QObject::tr("Request timed out");
+        case CodeBadActivation:
+            return QObject::tr("Invalid activation code");
+        case CodeUnregActivation:
+            return QObject::tr("Activation code not registered");
 
         // 1xx
         case CodeServiceUnreach:

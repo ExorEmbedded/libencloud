@@ -169,6 +169,8 @@ void RegSetup::_onErrorState ()
 
     switch (_error.getCode())
     {
+        // critical errors that require user intervention
+        case Error::CodeBadActivation:
         case Error::CodeUnconfigured:
             break;
         // keep on retrying
