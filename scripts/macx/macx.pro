@@ -2,6 +2,8 @@ include(../../common.pri)
 
 TEMPLATE = subdirs
 
+QMAKE_STRIP =
+
 scripts.path = $${BINDIR}
 scripts.files += nuts
 scripts.files += fix-routes-osx.sh
