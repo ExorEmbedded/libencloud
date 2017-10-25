@@ -310,7 +310,6 @@ err:
 int VpnConfig::toFile (const QString &path) const
 {
     QString s;
-    QFile configFile(path);
 
     QTextStream out(&s);
 
@@ -363,13 +362,10 @@ int VpnConfig::toFile (const QString &path) const
         }
     }
 
-    LIBENCLOUD_ERR_IF (!configFile.open(QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (configFile.write(s.toAscii()) < 0);
-    configFile.close();
+    LIBENCLOUD_ERR_IF (!utils::bytes2File(s.toAscii(), path));
 
     return 0;
 err:
-    configFile.close();
     return ~0;
 }
 
