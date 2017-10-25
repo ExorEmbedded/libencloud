@@ -1,6 +1,7 @@
 #define LIBENCLOUD_DISABLE_TRACE  // disable heave tracing
 #include <QRegExp>
 #include <QVariantMap>
+#include <encloud/Crypto>
 #include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
@@ -143,7 +144,7 @@ void RegMsg::_error (const libencloud::Error &err)
     QByteArray config;
     LIBENCLOUD_ERR_IF (!pf.open(QIODevice::ReadOnly));
 
-    config = _decrypt(_hash(_getCode()), pf.readAll());
+    config = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), pf.readAll());
     pf.close();
     LIBENCLOUD_EMIT_RETURN_IF (config.isEmpty(), error(Error(Error::CodeBadActivation)), );  
     LIBENCLOUD_ERR_IF (_decodeConfig(config));
@@ -211,7 +212,7 @@ int RegMsg::_decodeRedirect (const QString &response)
     QByteArray enc = QByteArray::fromBase64(s.toAscii());
     QByteArray redirect;
 
-    redirect = _decrypt(_hash(_getCode()), enc);
+    redirect = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), enc);
     LIBENCLOUD_ERR_IF (redirect.isEmpty());
 
     LIBENCLOUD_ERR_IF (redirRx.indexIn(redirect) == -1);
@@ -254,7 +255,7 @@ int RegMsg::_decodeConfig (const QString &response)
 
     QByteArray enc = QByteArray::fromBase64(s.toAscii());
 
-    _provisioning = _decrypt(_hash(_getCode()), enc);
+    _provisioning = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), enc);
     LIBENCLOUD_ERR_IF (_provisioning.isEmpty());
 
     //
@@ -292,7 +293,7 @@ int RegMsg::_unpackConfig ()
 
     // save encrypted provisioning file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
-    provisioningEnc = _encrypt(_hash(_getCode()), _provisioning);
+    provisioningEnc = crypto::encrypt(&_ec, crypto::hash(&_ec, _getCode()), _provisioning);
     LIBENCLOUD_ERR_IF (pf.write(provisioningEnc) == -1);
     pf.close();
 
@@ -332,9 +333,9 @@ err:
 
 int RegMsg::_init ()
 {
-    LIBENCLOUD_ERR_IF (libencloud_crypto_init(&ec));
-    LIBENCLOUD_ERR_IF (libencloud_crypto_set_cipher(&ec, libencloud::crypto::Aes256Cfb8Cipher));
-    LIBENCLOUD_ERR_IF (libencloud_crypto_set_digest(&ec, libencloud::crypto::Sha256Digest));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_init(&_ec));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_set_cipher(&_ec, crypto::Aes256Cfb8Cipher));
+    LIBENCLOUD_ERR_IF (libencloud_crypto_set_digest(&_ec, crypto::Sha256Digest));
 
     return 0;
 err:
@@ -346,24 +347,10 @@ QByteArray RegMsg::_getCode ()
     return getActivationCode(false).toUpper().toAscii();  // unencrypted
 }
 
-// Calculate sha256 checksum
-QByteArray RegMsg::_hash (const QByteArray &ba)
-{
-    unsigned char md[LIBENCLOUD_CRYPTO_MAX_MD_SZ];
-    unsigned int md_sz;
-
-    LIBENCLOUD_ERR_IF (libencloud_crypto_digest(&ec, (unsigned char *) ba.data(), ba.size(),
-        md, &md_sz));
-
-    return QByteArray((const char *)md, md_sz);
-err:
-    return QByteArray();
-}
-
 // Registry path is based on hash(hash(AC))
 QByteArray RegMsg::_calcRegPath ()
 {
-    QByteArray h = _hash(_calcConfigPath());
+    QByteArray h = crypto::hash(&_ec, _calcConfigPath());
 
     LIBENCLOUD_ERR_IF (h.isEmpty());
 
@@ -376,67 +363,11 @@ err:
 // Config path is based on hash(AC)
 QByteArray RegMsg::_calcConfigPath ()
 {
-    QByteArray h = _hash(_getCode());
+    QByteArray h = crypto::hash(&_ec, _getCode());
 
     LIBENCLOUD_ERR_IF (h.isEmpty());
 
     return utils::base642Url(h.toBase64());
-err:
-    return QByteArray();
-}
-
-QByteArray RegMsg::_encrypt (const QByteArray &key, const QByteArray &text)
-{
-    enum {
-        SALT_SZ = 16,
-        CSUM_SZ = 32,
-        HDR_SZ = SALT_SZ + CSUM_SZ,
-        CTEXT_SZ = 8192
-    };
-    unsigned char hdr[HDR_SZ];
-    unsigned char iv[SALT_SZ];
-    unsigned char ctext[CTEXT_SZ];
-    long ctext_sz;
-
-    memset(iv, 0, sizeof(iv));
-    memset(hdr, 0, sizeof(hdr));
-
-    // prepend key as checksum 
-    memcpy(&hdr[SALT_SZ], key.data(), CSUM_SZ);
-
-    QByteArray ptext((const char *) hdr, sizeof(hdr));
-    ptext += text;
-
-    LIBENCLOUD_ERR_IF (libencloud_crypto_enc (&ec, (unsigned char *) ptext.data(), ptext.size(), 
-                (unsigned char *) key.data(), iv, ctext, &ctext_sz));
-
-    return QByteArray((const char *) ctext, ctext_sz);
-err:
-    return QByteArray();
-}
-
-QByteArray RegMsg::_decrypt (const QByteArray &key, const QByteArray &enc)
-{
-    enum {
-        SALT_SZ = 16,
-        CSUM_SZ = 32,
-        HDR_SZ = SALT_SZ + CSUM_SZ,
-        PTEXT_SZ = 8192
-    };
-    unsigned char iv[SALT_SZ];
-    unsigned char ptext[PTEXT_SZ];
-    long ptext_sz;
-
-    memset(iv, 0, sizeof(iv));
-
-    LIBENCLOUD_ERR_IF (libencloud_crypto_dec (&ec, (unsigned char *) enc.data(), enc.size(), 
-                (unsigned char *) key.data(), iv, ptext, &ptext_sz));
-    LIBENCLOUD_ERR_IF (ptext_sz < HDR_SZ);
-
-    // verify key as checksum
-    LIBENCLOUD_ERR_IF (key != QByteArray((const char *)&ptext[SALT_SZ], CSUM_SZ));
-
-    return QByteArray((const char *) &ptext[HDR_SZ], (ptext_sz - HDR_SZ));
 err:
     return QByteArray();
 }

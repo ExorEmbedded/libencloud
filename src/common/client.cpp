@@ -198,11 +198,17 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
 #ifndef Q_OS_WINCE
     if (url.scheme() == LIBENCLOUD_SCHEME_HTTPS)
     {
-        QSslConfiguration sslConf(conf);
+        static QSslConfiguration sslConf(conf);
 
-        if (sslConf.caCertificates().count() == 0)
+        if (sslConf.isNull())
         {
-            sslConf.setCaCertificates(QSslConfiguration::defaultConfiguration().caCertificates());
+            QList<QSslCertificate> caCerts = QSslConfiguration::defaultConfiguration().caCertificates();
+            if (caCerts.empty() && g_libencloudCfg)
+            {
+                LIBENCLOUD_DBG("[Client] Could not load system CA certificates - using packaged bundle");
+                caCerts = QSslCertificate::fromPath(g_libencloudCfg->confPrefix + "/ca-certificates.crt");
+            }
+            sslConf.setCaCertificates(caCerts);
             LIBENCLOUD_DBG(QString("[Client] Loaded %1 System CA Certificates").arg(sslConf.caCertificates().count()))
         }
 
@@ -243,7 +249,6 @@ void Client::_proxyAuthenticationRequired (const QNetworkProxy &proxy, QAuthenti
     EMIT_ERROR(tr("Proxy Authentication Required"), _userData);
 }
 
-// XXX get userdata from reply
 void Client::_sslErrors (QNetworkReply *reply, const QList<QSslError> &errors) 
 {
 #ifndef Q_OS_WINCE

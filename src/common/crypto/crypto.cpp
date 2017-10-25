@@ -24,6 +24,79 @@
 namespace libencloud {
 namespace crypto {
 
+QByteArray encrypt (libencloud_crypto_t *ec, const QByteArray &key, const QByteArray &text)
+{
+    enum {
+        SALT_SZ = 16,
+        CSUM_SZ = 32,
+        HDR_SZ = SALT_SZ + CSUM_SZ,
+        CTEXT_SZ = 8192
+    };
+    unsigned char hdr[HDR_SZ];
+    unsigned char iv[SALT_SZ];
+    unsigned char ctext[CTEXT_SZ];
+    long ctext_sz;
+
+    LIBENCLOUD_RETURN_IF (key.isEmpty() || text.isEmpty(), QByteArray());
+
+    memset(iv, 0, sizeof(iv));
+    memset(hdr, 0, sizeof(hdr));
+
+    // prepend key as checksum 
+    memcpy(&hdr[SALT_SZ], key.data(), CSUM_SZ);
+
+    QByteArray ptext((const char *) hdr, sizeof(hdr));
+    ptext += text;
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_enc (ec, (unsigned char *) ptext.data(), ptext.size(), 
+                (unsigned char *) key.data(), iv, ctext, &ctext_sz));
+
+    return QByteArray((const char *) ctext, ctext_sz);
+err:
+    return QByteArray();
+}
+
+QByteArray decrypt (libencloud_crypto_t *ec, const QByteArray &key, const QByteArray &enc)
+{
+    enum {
+        SALT_SZ = 16,
+        CSUM_SZ = 32,
+        HDR_SZ = SALT_SZ + CSUM_SZ,
+        PTEXT_SZ = 8192
+    };
+    unsigned char iv[SALT_SZ];
+    unsigned char ptext[PTEXT_SZ];
+    long ptext_sz;
+
+    LIBENCLOUD_RETURN_IF (key.isEmpty() || enc.isEmpty(), QByteArray());
+
+    memset(iv, 0, sizeof(iv));
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_dec (ec, (unsigned char *) enc.data(), enc.size(), 
+                (unsigned char *) key.data(), iv, ptext, &ptext_sz));
+    LIBENCLOUD_ERR_IF (ptext_sz < HDR_SZ);
+
+    // verify key as checksum
+    LIBENCLOUD_ERR_IF (key != QByteArray((const char *)&ptext[SALT_SZ], CSUM_SZ));
+
+    return QByteArray((const char *) &ptext[HDR_SZ], (ptext_sz - HDR_SZ));
+err:
+    return QByteArray();
+}
+
+QByteArray hash (libencloud_crypto_t *ec, const QByteArray &ba)
+{
+    unsigned char md[LIBENCLOUD_CRYPTO_MAX_MD_SZ];
+    unsigned int md_sz;
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_digest(ec, (unsigned char *) ba.data(), ba.size(),
+        md, &md_sz));
+
+    return QByteArray((const char *)md, md_sz);
+err:
+    return QByteArray();
+}
+
 // Set request based on auth
 int requestFromAuth (const Auth &auth, QMap<QByteArray,
         QByteArray> &headers, QNetworkRequest &request)

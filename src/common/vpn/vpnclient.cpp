@@ -256,7 +256,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     args << "--verb" << QString::number(_cfg->config.vpnVerbosity);
 
-    foreach (QString arg, _cfg->config.vpnArgs.split(QRegExp("\\s+")))
+    foreach (QString arg, _cfg->config.vpnArgs.split(QRegExp("\\s+"), QString::SkipEmptyParts))
         args << arg;
 
     //

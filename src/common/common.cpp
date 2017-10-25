@@ -104,8 +104,12 @@ LIBENCLOUD_DLLSPEC QString getActivationCode (bool encrypted)
     LIBENCLOUD_ERR_IF (e.isEmpty());
 
     return (encrypted ? e : crypto.decryptToString(e));
-
 err:
+    if (activationCodeFileEnc.error()) {
+        LIBENCLOUD_DBG("Error reading encrypted AC file: " << activationCodeFileEnc.errorString());
+    } else if (activationCodeFile.error()) {
+        LIBENCLOUD_DBG("Error reading AC file: " << activationCodeFile.errorString());
+    }
     return QString();
 }
 

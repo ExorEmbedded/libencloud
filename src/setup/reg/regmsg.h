@@ -50,11 +50,8 @@ private:
     // internals
     int _init ();
     QByteArray _getCode ();
-    QByteArray _hash (const QByteArray &in);
     QByteArray _calcRegPath ();
     QByteArray _calcConfigPath ();
-    QByteArray _encrypt (const QByteArray &key, const QByteArray &text);
-    QByteArray _decrypt (const QByteArray &key, const QByteArray &enc);
     QString _yamlNodeToStr (const YAML::Node *nodeP);
     int _yamlNodeToInt (const YAML::Node *nodeP);
     int _decodeRedirect (const QByteArray &enc);
@@ -71,7 +68,7 @@ private:
     QSslCertificate _caCert;
 
     // internals
-    libencloud_crypto_t ec;
+    libencloud_crypto_t _ec;
     QByteArray _key;
     QByteArray _provisioning;
     QUrl _regUrl;

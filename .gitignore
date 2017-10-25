@@ -29,6 +29,7 @@ release/
 /test/unit/unit
 /test/unit-sec/unit-sec
 /tools/qurl/qurl
+/tools/dbgagent/dbgagent
 
 src/common/qcc_version.h
 
