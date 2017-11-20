@@ -95,9 +95,9 @@ int SetupMsg::process ()
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
 
     // setup signals from client
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SIGNAL(error(libencloud::Error)));
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SIGNAL(error(libencloud::Error)));
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
@@ -109,7 +109,7 @@ err:
     return ~0;
 }
 
-void SetupMsg::authSupplied (const Auth &auth)
+void SetupMsg::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("user: " << auth.getUser());
 
@@ -167,7 +167,6 @@ int SetupMsg::_encodeRequest (QUrl &url, QUrl &params)
 int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, QByteArray> &headers)
 {
     QVariantMap json;
-    QVariantMap map;
     bool ok;
 
     json = json::parse(response, ok).toMap();
@@ -241,15 +240,8 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
     LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
-    // remapping to Encloud configuration
-    _serverConfig["time"] = json["time"];
-
-    map["uuid"] = json["uuid"];
-    map["openvpn_internal_ip"] = json["openvpn_internal_ip"];
-    if (!json["fallback_openvpn_internal_ip"].isNull())
-        map["fallback_openvpn_internal_ip"] = json["fallback_openvpn_internal_ip"];
-    map["available_pages"] = json["available_pages"];
-    _serverConfig["server"] = map;
+    // copy all fields from Switchboard
+    _serverConfig["server"] = json;
 
     emit (serverConfigSupply(_serverConfig));
 

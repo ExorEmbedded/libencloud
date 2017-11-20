@@ -133,6 +133,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     QString configPath;
     QString caCertPath;
     VpnConfig config;
+    Auth::Type authType;
 
     // we no longer log to file - messages are logged to encloud and forwarded to client
     //args << "--log" << _cfg->logPrefix + LIBENCLOUD_VPN_LOG_FILE;
@@ -165,36 +166,39 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     args << "--log" << "openvpnlog.log";
 #endif
 
-    if (sbAuth.isValid())
+    // Don't force auth check - credentials may be provided via external auth-user-pass file
+    /*
+    LIBENCLOUD_EMIT_ERR_IF (!sbAuth.isValid(),
+            sigError(this->err = ConfigError));
+    */
+    
+    authType = sbAuth.getType();
+
+    if (authType == Auth::UserpassType || authType == Auth::CertificateUserpassType)
     {
-        Auth::Type authType = sbAuth.getType();
-
-        if (authType == Auth::UserpassType || authType == Auth::CertificateUserpassType)
-        {
-            args << "--auth-user-pass";
-            args << "--auth-nocache";
-        }
-
-        if (authType == Auth::CertificateType || authType == Auth::CertificateUserpassType)
-        {
-            if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
-            {
-                args << "--cert" << _cfg->config.sslOp.certPath.filePath();
-                args << "--key" << _cfg->config.sslOp.keyPath.filePath();
-            }
-            else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
-            {
-                args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
-            }
-        }
-        /*
-        if (authType == Auth::NoneType)
-        {
-            // we assume that authentication is file-based
-            // e.g. PKCS12 specified directly in OpenVPN configuration
-        }
-        */
+        args << "--auth-user-pass";
+        args << "--auth-nocache";
     }
+
+    if (authType == Auth::CertificateType || authType == Auth::CertificateUserpassType)
+    {
+        if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_CERTKEY)
+        {
+            args << "--cert" << _cfg->config.sslOp.certPath.filePath();
+            args << "--key" << _cfg->config.sslOp.keyPath.filePath();
+        }
+        else if (_cfg->config.sslOp.authFormat == LIBENCLOUD_AUTH_PKCS12)
+        {
+            args << "--pkcs12" << _cfg->config.sslOp.p12Path.filePath();
+        }
+    }
+    /*
+    if (authType == Auth::NoneType)
+    {
+        // we assume that authentication is file-based
+        // e.g. PKCS12 specified directly in OpenVPN configuration
+    }
+    */
 
     if (proxyAuth.isValid())
     {
@@ -252,7 +256,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 
     args << "--verb" << QString::number(_cfg->config.vpnVerbosity);
 
-    foreach (QString arg, _cfg->config.vpnArgs.split(QRegExp("\\s+")))
+    foreach (QString arg, _cfg->config.vpnArgs.split(QRegExp("\\s+"), QString::SkipEmptyParts))
         args << arg;
 
     //
@@ -396,7 +400,7 @@ void VpnClient::stop (void)
 //
 // public slots
 //
-void VpnClient::authSupplied (const Auth &auth)
+void VpnClient::authSupplied (const libencloud::Auth &auth)
 {
     //LIBENCLOUD_ERR_IF (!auth.isValid());  // invalid objects used to perform reset
 

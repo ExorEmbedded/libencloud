@@ -39,15 +39,12 @@ typedef struct
                         // false: we use absolute paths constructed from data prefix
     QString bind;
 
-#ifdef LIBENCLOUD_MODE_ECE
-    QFileInfo poiPath;
-#endif
     
-    QUrl sbUrl;
+    QUrl regUrl, sbUrl;
     int timeout;
     bool autoretry;
     bool decongest;
-    QFileInfo csrTmplPath;
+    bool compat;
 
     libencloud_config_ssl_t ssl;
     libencloud_config_ssl_t sslInit;
@@ -56,6 +53,8 @@ typedef struct
     int rsaBits;
 
     bool setupEnabled;
+    bool setupAgent;
+    QFileInfo regProvisioningPath;
 
     QFileInfo vpnExePath;
     QFileInfo vpnConfPath;
@@ -64,6 +63,7 @@ typedef struct
     int vpnMgmtPeriod;
     int vpnVerbosity;
     QString vpnArgs;
+    bool vpnFw;
 
     int logLevel;
     QString logTo;
@@ -80,12 +80,11 @@ public:
 
     /* Configuration loading and debugging */
     int loadFromFile ();
-    QVariant getVariant ();
+    QVariantMap getMap ();
     QString dump ();
 
     /* Configuration objects are publicly accessible */
     libencloud_config_t config;
-    QSettings *settings;
     QSettings *sysSettings;
 #ifndef Q_OS_WINCE
     libencloud_crypto_t crypto;
@@ -105,8 +104,10 @@ protected slots:
     void receive (const QVariant &cfg); 
 
 protected:
+    int _loadExt ();
     int _parse (const QVariantMap &jo);
     int _parsePaths (const QVariantMap &jo);
+    int _parseRegistry (const QVariantMap &jo);
     int _parseSb (const QVariantMap &jo);
     int _parseSslInit (const QVariantMap &jo);
     int _parseSslOp (const QVariantMap &jo);
@@ -115,8 +116,8 @@ protected:
     int _parseLog (const QVariantMap &jo);
     QString _joinPaths (const QString &prefix, const QString &path, bool keepRelative = false);
 
-    QVariant _json;
-    QVariant _jsonOrig;
+    QVariantMap _json;
+    QVariantMap _jsonOrig;
 };
 
 } // namespace libencloud

@@ -13,6 +13,8 @@ MessageInterface::MessageInterface()
     : _cfg(NULL)
     , _client(NULL)
 {
+    // Switchboard is strict on this
+    _headers["User-Agent"] = LIBENCLOUD_USERAGENT_QCC;
 }
 
 

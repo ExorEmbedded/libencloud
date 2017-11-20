@@ -1,6 +1,10 @@
 {
+  "registry" : {
+    "url" : "https://registry.endian.com/"
+  },
+
   "sb" : {
-    "url" : "https://switchboard-host/"
+    "url" : "https://connect.endian.com/"
   },
 
   "ssl" : {

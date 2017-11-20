@@ -5,38 +5,20 @@
 
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
 
-#ifdef LIBENCLOUD_USE_ABOUT
-
-#include "../about/about.h"
-
-#define LIBENCLOUD_APP_FULL             LibEncloudFullAppName( LIBENCLOUD_PKGNAME )
-
-// e.g Endian/ConnectApp, Exor/JMConnect
-static char libEncloudProductDirBuffer [256];
-#define LIBENCLOUD_PRODUCTDIR           LibEncloudProductDir(libEncloudProductDirBuffer, LIBENCLOUD_PRODUCT)
-
-// e.g Endian/ConnectApp/libencloud | Exor/JMConnect/libencloud
-static char libEncloudInstallDirBuffer [512];
-#define LIBENCLOUD_INSTALLDIR           LibEncloudInstallDir(libEncloudInstallDirBuffer, LIBENCLOUD_PRODUCT, LIBENCLOUD_APP)
-
 // tap device - MUST match name defined in CheckTap
-static char libEncloudTapNameBuffer [256];
-#define LIBENCLOUD_TAPNAME              LibEncloudTapName(libEncloudTapNameBuffer, LIBENCLOUD_PRODUCT)
+#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_TAPNAME_SUFFIX
 
+#ifdef QICC_XBRAND
+#  define LIBENCLOUD_APP_FULL             LIBENCLOUD_PKGNAME
 #else
-
-#define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
+#  define LIBENCLOUD_APP_FULL             LIBENCLOUD_ORG " " LIBENCLOUD_PKGNAME
+#endif
 
 // e.g Endian/ConnectApp, Exor/JMConnect
 #define LIBENCLOUD_PRODUCTDIR           LIBENCLOUD_ORG "/" LIBENCLOUD_PRODUCT
 
 // e.g Endian/ConnectApp/libencloud | Exor/JMConnect/libencloud
 #define LIBENCLOUD_INSTALLDIR           LIBENCLOUD_PRODUCTDIR "/" LIBENCLOUD_APP
-
-// tap device - MUST match name defined in CheckTap
-#define LIBENCLOUD_TAPNAME              LIBENCLOUD_ORG LIBENCLOUD_PRODUCT
-
-#endif
 
 #ifndef LIBENCLOUD_REVISION
 #  define LIBENCLOUD_REVISION           ""
@@ -67,10 +49,11 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_USERAGENT_QCC        "Endian 4i Connect " PRODUCT_VERSION " (" LIBENCLOUD_OS_STR ")"
 
 #define LIBENCLOUD_SCHEME_HTTPS         "https"
+#define LIBENCLOUD_REG_URL              LIBENCLOUD_SCHEME_HTTPS "://switchboard-registry/"
+#define LIBENCLOUD_REG_CODE_FILE        "activation-code"
+#define LIBENCLOUD_REG_CODE_ENC_FILE    "activation-code_enc"
+#define LIBENCLOUD_REG_PROV_ENC_FILE    "provisioning_enc"
 #define LIBENCLOUD_SB_URL               LIBENCLOUD_SCHEME_HTTPS "://switchboard-host/"
-
-// timeout without exponential backoff
-#define LIBENCLOUD_RETRY_TIMEOUT        5
 
 // time for single requests
 #define LIBENCLOUD_CLIENT_TIMEOUT       30
@@ -133,7 +116,7 @@ static char libEncloudTapNameBuffer [256];
 #  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
-#  ifdef LIBENCLOUD_ENDIAN
+#  ifdef QICC_ENDIAN
 #    define LIBENCLOUD_DATA_PREFIX      "/var/efw/encloud/"
 #  else
 #    define LIBENCLOUD_DATA_PREFIX      "/var/lib/encloud/"
@@ -143,7 +126,6 @@ static char libEncloudTapNameBuffer [256];
 #define LIBENCLOUD_CONF_FILE            LIBENCLOUD_APP ".json"
 #define LIBENCLOUD_SERIAL_FILE          "serial"
 #define LIBENCLOUD_POI_FILE             "poi"
-#define LIBENCLOUD_CSRTMPL_FILE         "csr-tmpl.json"
 #define LIBENCLOUD_AUTH_SB              "sb"
 #define LIBENCLOUD_AUTH_PROXY           "proxy"
 #define LIBENCLOUD_AUTH_NONE            "none"

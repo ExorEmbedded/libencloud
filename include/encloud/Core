@@ -50,30 +50,33 @@ signals:
     void progress (const Progress &p);
     void fallback (bool isFallback);
     void need (const QString &what, const QVariant &params);
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
     void serverConfigSupply (const QVariant &variant);
     void actionRequest (const QString &action, const libencloud::Params &params);
 
 private slots:
     void _start ();
     void _stateChanged (State state);
+    void _vpnIpAssigned (const QString &ip);
+    void _up ();
+    void _down ();
     void _stateEntered ();
     void _stateExited ();
     void _setupCompleted ();
     void _setupStopped ();
     void _fallback (bool isFallback);
     void _errorReceived (const libencloud::Error &err);
+    void _configReceived (const QVariant &config);
     void _progressReceived (const Progress &p);
-    void _authSupplied (const Auth &auth);
-    void _authRequired (Auth::Id id, QVariant params = QVariant());
+    void _authSupplied (const libencloud::Auth &auth);
+    void _authRequired (libencloud::Auth::Id id, QVariant params = QVariant());
     void _clientPortReceived (int port);
     void _logPortReceived (int port);
     void _serverConfigReceived (const QVariant &variant);
-    void _actionRequest (const QString &action, const Params &params);
+    void _actionRequest (const QString &action, const libencloud::Params &params);
     void _clientDown ();
 
 private:
-    int _initConfig ();
     int _initCrypto ();
     int _initSetup ();
     int _initCloud ();
@@ -81,11 +84,16 @@ private:
     int _initFsm ();
     int _init ();
     int _startCloud ();
+    void _setProxy (const Auth &auth);
+    void _saveProxy (const Auth &auth);
+    void _loadProxy ();
     QString _stateStr (QState *state);
 
     bool _isValid;
+    bool _fwEnabled;
     Mode _mode;
     State _state;
+    State _prevState;
 
     Config *_cfg;
     SetupInterface *_setup;
@@ -107,8 +115,10 @@ private:
     QNetworkAccessManager *_qnam;
     NetworkManager *_networkManager;
     libencloud::ProxyFactory *_proxyFactory;
+
     Auth _sbAuth;
     Auth _proxyAuth;
+    QString _vpnIp;
 };
 
 }  // namespace libencloud

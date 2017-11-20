@@ -4,6 +4,8 @@
 #  include <shlobj.h>
 #endif
 #include <encloud/Common>
+#include <encloud/Utils>
+#include <encloud/simplecrypt/simplecrypt.h>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -71,6 +73,71 @@ LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package)
     LIBENCLOUD_UNUSED(package);
     return QString(LIBENCLOUD_LOG_PREFIX);
 #endif
+}
+
+// Agent mode
+LIBENCLOUD_DLLSPEC QString getActivationCode (bool encrypted)
+{
+    SimpleCrypt crypto(QICC_SETTING_KEY);
+    QString s, e;
+
+    QFile activationCodeFile(getCommonAppDataDir() + LIBENCLOUD_REG_CODE_FILE);
+    QFile activationCodeFileEnc(getCommonAppDataDir() + LIBENCLOUD_REG_CODE_ENC_FILE);
+
+    // temporary unencrypted file (can be used for configuration)
+    if (activationCodeFile.open(QFile::ReadOnly))
+    {
+        s = activationCodeFile.readLine().trimmed();
+        LIBENCLOUD_ERR_IF (s.isEmpty());
+
+        // create encrypted version and remove original
+        LIBENCLOUD_ERR_IF ((e = setActivationCode(s, true)).isEmpty());
+        activationCodeFile.remove();
+
+        return (encrypted ? e : s);
+    }
+
+    // encrypted file
+    LIBENCLOUD_ERR_IF (!activationCodeFileEnc.open(QFile::ReadOnly));
+
+    e = activationCodeFileEnc.readLine().trimmed();
+    LIBENCLOUD_ERR_IF (e.isEmpty());
+
+    return (encrypted ? e : crypto.decryptToString(e));
+err:
+    if (activationCodeFileEnc.error()) {
+        LIBENCLOUD_DBG("Error reading encrypted AC file: " << activationCodeFileEnc.errorString());
+    } else if (activationCodeFile.error()) {
+        LIBENCLOUD_DBG("Error reading AC file: " << activationCodeFile.errorString());
+    }
+    return QString();
+}
+
+LIBENCLOUD_DLLSPEC QString setActivationCode (const QString &code, bool encrypt)
+{
+    SimpleCrypt crypto(QICC_SETTING_KEY);
+
+    LIBENCLOUD_DBG("Setting activation code: " << code << ", encrypt: " << encrypt);
+
+    QString path = getCommonAppDataDir() + LIBENCLOUD_REG_CODE_ENC_FILE;
+
+    if (code == QString(utils::file2Data(QFileInfo(path))))
+        return code;
+
+    LIBENCLOUD_DBG("Writing to: " << path);
+
+    QByteArray ba;
+
+    if (encrypt)
+        ba = crypto.encryptToString(code).toAscii();
+    else
+        ba = code.toAscii();
+
+    LIBENCLOUD_ERR_IF (utils::bytes2File(ba, path, true));
+
+    return ba;
+err:
+    return QString();
 }
 
 }  // namespace libencloud

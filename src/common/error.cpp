@@ -159,10 +159,16 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Generic Error");
         case CodeSystemError:
             return QObject::tr("System Error - please check resource status");
+        case CodeUnconfigured:
+            return QObject::tr("Configuration missing");
         case CodeBadCredentials:
             return QObject::tr("Please check credentials");
         case CodeRequestTimeout:
             return QObject::tr("Request timed out");
+        case CodeBadActivation:
+            return QObject::tr("Invalid activation code");
+        case CodeUnregActivation:
+            return QObject::tr("Activation code not registered");
 
         // 1xx
         case CodeServiceUnreach:
@@ -177,6 +183,8 @@ QString Error::_code2Desc (Code code)
             return QObject::tr("Generic Server Error");
         case CodeServerLicenseInvalid:
             return QObject::tr("Server reported Invalid License");
+        case CodeServerNotFound:
+            return QObject::tr("Server reported content not found");
 
         // 3xx
         case CodeAuthFailed:
@@ -189,6 +197,8 @@ QString Error::_code2Desc (Code code)
         // 4xx
         case CodeProxyAuthFailed:
             return QObject::tr("Proxy Authentication Failure - please check credentials");
+        case CodeSetupFailure:
+            return QObject::tr("Configuration download failed - please check logs");
 
         // 5xx
         case CodeClientFailure:

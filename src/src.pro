@@ -11,7 +11,6 @@ win32 {
         TARGET_EXT = .dll
     } else {
         CONFIG += staticlib
-        DEFINES += LIBENCLOUDABOUT_DLLSPEC=
     }
 
     TARGET = encloud$${DBG_SUFFIX}
@@ -62,9 +61,6 @@ SOURCES += common/error.cpp
 HEADERS += $${PUBINCLUDEDIR}/Info
 SOURCES += common/info.cpp
 
-HEADERS += $${PUBINCLUDEDIR}/Json
-SOURCES += common/json.cpp
-
 HEADERS += $${PUBINCLUDEDIR}/Logger
 SOURCES += common/logger.cpp
 
@@ -86,24 +82,30 @@ SOURCES += common/config.cpp
 HEADERS += common/message.h
 SOURCES += common/message.cpp
 
+HEADERS += $${PUBINCLUDEDIR}/Json
+SOURCES += common/json/json.cpp
+
 # old GPL Json implementation (small: self-contained)
 contains(CONFIG, qtjson) {
-    HEADERS += common/qtjson.h
-    SOURCES += common/qtjson.cpp
-    SOURCES += common/json-qtjson.cpp
+    HEADERS += common/json/qtjson.h
+    SOURCES += common/json/qtjson.cpp
+    SOURCES += common/json/json-qtjson.cpp
 }
 
 # new/default LGPL Json implementation (larger: external package)
 contains(CONFIG, qjson) {
-    SOURCES += common/json-qjson.cpp
+    SOURCES += common/json/json-qjson.cpp
     LIBS += -lqjson
 }
 
 SOURCES += common/utils.cpp
 
+# crypto
 !wince {
-    SOURCES += common/crypto.cpp
+    SOURCES += common/crypto/crypto.cpp
 }
+HEADERS += $${PUBINCLUDEDIR}/simplecrypt/simplecrypt.h
+SOURCES += common/crypto/simplecrypt.cpp
 
 !nocloud {
     HEADERS += $${PUBINCLUDEDIR}/Vpn/Vpn*
@@ -131,15 +133,19 @@ SOURCES += core/core.cpp
 !nosetup {
     HEADERS += setup/setup.h
     SOURCES += setup/setup.cpp
+    HEADERS += setup/common/*.h
+    SOURCES += setup/common/*.cpp
+    DEPENDPATH += $${_PRO_FILE_PWD_}/setup/common
     modeqcc {
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
-    }
-    modeece | modesece {
-        HEADERS += $${_PRO_FILE_PWD_}/setup/ece/*.h
-        SOURCES += $${_PRO_FILE_PWD_}/setup/ece/*.cpp
-        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/ece
+        # Agent
+        !splitdeps {
+            HEADERS += $${_PRO_FILE_PWD_}/setup/reg/*.h
+            SOURCES += $${_PRO_FILE_PWD_}/setup/reg/*.cpp
+            DEPENDPATH += $${_PRO_FILE_PWD_}/setup/reg
+        }
     }
     modevpn {
         HEADERS += $${_PRO_FILE_PWD_}/setup/vpn/*.h
@@ -189,11 +195,6 @@ HEADERS += $${PUBINCLUDEDIR}/Http/HttpServer
 HEADERS += $${_PRO_FILE_PWD_}/http/*.h
 SOURCES += $${_PRO_FILE_PWD_}/http/*.cpp
 DEPENDPATH += $${_PRO_FILE_PWD_}/http
-
-# other libs
-about {
-    LIBS += $${ABOUT_LIBS}
-}
 
 # installation
 target.path = $$LIBDIR

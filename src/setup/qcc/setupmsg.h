@@ -27,13 +27,13 @@ public:
 
 signals:
     void error (const libencloud::Error &err);
-    void authRequired (Auth::Id id, const QVariant &params);
+    void authRequired (libencloud::Auth::Id id, const QVariant &params);
     void serverConfigSupply (const QVariant &variant);
     void processed ();
 
 public slots:
     int process ();
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
 
 private slots:
     void _error (const libencloud::Error &error);

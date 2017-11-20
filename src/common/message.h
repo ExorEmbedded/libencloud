@@ -35,6 +35,9 @@ public slots:
     virtual int process () = 0;
 
 protected:
+    QUrl _params;
+    QMap<QByteArray, QByteArray> _headers;
+    QSslConfiguration _sslconf;
     Config *_cfg;
     Client *_client;
     QVariant _data;

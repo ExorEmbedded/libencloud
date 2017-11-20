@@ -37,7 +37,9 @@ QString versionInfo ()
 {
     QString info;
 
+#ifndef QICC_XBRAND
     info += org() + " ";
+#endif
 
     if (product() != "")
         info += product() + " ";

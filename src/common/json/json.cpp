@@ -3,8 +3,8 @@
 #include <QVariant>
 #include <QDebug>
 #include <encloud/Json>
-#include "helpers.h"
-#include "config.h"
+#include "../helpers.h"
+#include "../config.h"
 
 namespace libencloud {
 namespace json {

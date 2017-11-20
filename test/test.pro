@@ -11,7 +11,5 @@ TEMPLATE = subdirs
     }
 }
 
-!nogui:SUBDIRS += sece
-
 # do nothing
 check.commands = true

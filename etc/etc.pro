@@ -3,7 +3,6 @@ include(../common.pri)
 TEMPLATE = subdirs
 
 modeqcc: CONFFILE = libencloud-qcc.json
-modeece|modesece: CONFFILE = libencloud-ece.json
 
 win32 {
     DDIR = $${CONFDIR}
@@ -16,7 +15,11 @@ TO = $${DDIR}/libencloud.json
 win32:FROM ~= s,/,\\,g
 win32:TO ~= s,/,\\,g
 
-post.path = $${CONFDIR}
-post.extra = $${QMAKE_COPY} "\"$${FROM}\"" "\"$${TO}\""
+conf.path = $${CONFDIR}
+conf.extra = $${QMAKE_COPY} "\"$${FROM}\"" "\"$${TO}\""
 
-INSTALLS += post
+certs.files = ca-certificates.crt
+certs.path = $${CONFDIR}
+
+INSTALLS += conf
+INSTALLS += certs

@@ -4,8 +4,6 @@ Encloud API v1
 ### Definitions
 
      QCC        Branded Connect App
-     ECE        Cloud Enabler device
-     SECE       Software Cloud Enabler device
 
 ### Types
 
@@ -50,8 +48,7 @@ e.g:
             },
             "fallback" : true,              # OPTIONAL (default=false) true if fallback VPN server is being used
             "need" : {                      # OPTIONAL needs to be fulfilled via API. Possible values:
-                                            # "license" (SECE), "sb_auth", "proxy_auth"
-                "license" : {},
+                                            # "sb_auth", "proxy_auth"
                 "sb_auth" : {
                     "domains" : [ "myorg1", "myorg2" ]     # optional domains (organizations)
                 }
@@ -79,31 +76,10 @@ e.g:
     id=sb&type=user-pass&url=<url>&user=myuser&pass=mypass
     id=sb&type=x509&url=<url>&pass=mypass&path=c:\key.p12
 
+
 ##### Setup API
 
-__GET <e_url>/api/v1/setup__ (ECE-only)
-
-Definitions:
-
-    "poi"           <uuid> proof of identity returned by ECE for Switchboard association
-
-e.g:
-
-    '{
-        "poi" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"
-     }'
-
-__POST <e_url>/api/v1/setup__ (SECE-only)
-
-Definitions:
-
-    "license"       <uuid> license entered by user to activate SECE
-
-e.g:                
-
-    license=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
-
-__POST <e_url>/api/v1/setup__ (QCC-only)
+__POST <e_url>/api/v1/setup__
 
 Definitions:
 
@@ -122,13 +98,13 @@ e.g.
 
     logPort=12345
 
-__GET <e_url>/api/v1/setup__ (QCC-only)
+__GET <e_url>/api/v1/setup__
 
 e.g
     
     '{
-        "time" : 1396014836.523807,        # When the config data was received
         "server" : {
+            "time" : 1396014836.523807,
             "uuid" : "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
             "openvpn_internal_ip" : "192.168.150.1",
             "fallback_openvpn_internal_ip" : "192.168.151.1"
@@ -147,7 +123,7 @@ Definitions
                     "start","stop"              GUI/browser
                     "syncRoutes"                Switchboard
                     "open","close"              Switchboard
-                     "setGateway"                OpenVPN up script (Windows-only)
+                    "setGateway"                OpenVPN up script (Windows-only)
 
 client -> encloud:
 

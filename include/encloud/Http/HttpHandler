@@ -43,6 +43,7 @@ public:
     State getCoreState () const;
     Progress getCoreProgress () const;
     bool getFallback () const;
+    const QVariantMap &getLogin () const;
     const QVariantMap &getNeed () const;
     void removeNeed (const QString &what);
 
@@ -57,13 +58,13 @@ public:
 
     int setClientPort (int port);
     int setLogPort (int port);
-    int setAuth (const Auth &auth);
+    int setAuth (const libencloud::Auth &auth);
     const QVariant &getServerConfig () const;
 
     //
     // cloud
     //
-    int setAction (const QString &action, const Params &params);
+    int setAction (const QString &action, const libencloud::Params &params);
 
     //
     // config
@@ -79,15 +80,16 @@ signals:
 
     void clientPortSend (int port);
     void logPortSend (int port);
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
 
     //
     // cloud
     //
-    void actionRequest (const QString &action, const Params &params);
+    void actionRequest (const QString &action, const libencloud::Params &params);
     void configSupplied (const QVariant &config);
 
 private slots:
+    void _authReceived (const libencloud::Auth &auth);
     void _coreErrorReceived (const libencloud::Error &err);
     void _coreStateChanged (State state);
     void _coreProgressReceived (const Progress &progress);
@@ -103,6 +105,7 @@ private:
     State _coreState;
     Progress _coreProgress;
     bool _isFallback;
+    QVariantMap _login;
     QVariantMap _needs;
 
     QUuid _poi;

@@ -3,7 +3,6 @@
 #include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
-#include <setup/qcc/setupmsg.h>
 //#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
 //#  include <common/qcc_version.h>
 //#endif
@@ -12,7 +11,7 @@
 #define EMIT_ERROR_ERR_IF(cond) \
     LIBENCLOUD_EMIT_ERR_IF(cond, error(Error(Error::CodeGeneric)))
 
-#include <setup/qcc/closemsg.h>
+#include <setup/common/closemsg.h>
 
 namespace libencloud {
 
@@ -73,28 +72,15 @@ int CloseMsg::process ()
 
     LIBENCLOUD_DBG("[Setup] User Agent: " << headers["User-Agent"]);
 
-    // in Client mode we use Cookie Auth to handle OTP scenario, whereas devices only use Basic Auth
-#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
-    CookieJar *cookieJar = NULL;
-    LIBENCLOUD_NOTICE("[Setup] Closing connection using Cookie Auth");
-
-    LIBENCLOUD_ERR_IF (_cfg->userDataPrefix.isEmpty());
-    LIBENCLOUD_ERR_IF ((cookieJar = new CookieJar(_cfg->userDataPrefix + "/cookies")) == NULL);
-    // hosts and paths are under our control => there's no need for a restrictive cookiejar
-    cookieJar->setRestricted(false);
-    _qnam->setCookieJar(cookieJar);
-#else
     LIBENCLOUD_NOTICE("[Setup] Closing connection using Basic Auth");
-
-    // Setup authentication data
     LIBENCLOUD_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
-#endif
+
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
     LIBENCLOUD_ERR_IF ((_client->setNetworkAccessManager(_qnam)));
 
     // setup signals from client
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_error(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_error(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_clientComplete(QString, QMap<QByteArray, QByteArray>)));
     _client->setVerifyCA(false); // already verified in setupmsg
 
@@ -109,7 +95,7 @@ err:
     return ~0;
 }
 
-void CloseMsg::authSupplied (const Auth &auth)
+void CloseMsg::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("user: " << auth.getUser());
 
