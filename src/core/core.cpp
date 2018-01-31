@@ -40,6 +40,7 @@ Core::Core (Mode mode)
     : _isValid(false)
     , _mode(mode)
     , _state(StateIdle)
+    , _busy(false)
     , _setup(NULL)
     , _setupObj(NULL)
     , _cloud(NULL)
@@ -102,6 +103,12 @@ int Core::start ()
 {
     LIBENCLOUD_TRACE;
 
+    if (_busy)
+        return ~0;
+    _busy = true;
+
+    LIBENCLOUD_RETURN_IF (_state == StateConnect || _state == StateCloud, ~0);
+
     // Connect Client starts immediately
     if (!_cfg->config.decongest)
     {
@@ -127,11 +134,19 @@ void Core::_start ()
 
     if (_clientPort != -1)
         _clientWatchdog.start();
+
+    _busy = false;
 }
 
 int Core::stop ()
 {
     LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_RETURN_IF (_state == StateIdle, ~0);
+
+    if (_busy)
+        return ~0;
+    _busy = true;
 
     if (_clientPort != -1)
         _clientWatchdog.stop();
@@ -357,6 +372,8 @@ void Core::_setupStopped ()
     emit authSupplied(Auth());
     emit stateChanged(StateIdle);
     emit progress(Progress());
+
+    _busy = false;
 }
 
 void Core::_fallback (bool isFallback)

@@ -86,6 +86,7 @@ private:
     bool _isValid;
     Mode _mode;
     State _state;
+    bool _busy;
 
     Config *_cfg;
     SetupInterface *_setup;
