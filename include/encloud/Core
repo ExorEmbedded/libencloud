@@ -94,6 +94,7 @@ private:
     Mode _mode;
     State _state;
     State _prevState;
+    bool _busy;
 
     Config *_cfg;
     SetupInterface *_setup;
