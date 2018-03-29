@@ -147,6 +147,7 @@ void HttpServer::disconnected ()
 
     QTcpSocket* socket = (QTcpSocket*)sender();
     socket->deleteLater();
+    _contexts.remove(socket);
 }
 
 void HttpServer::error (QAbstractSocket::SocketError socketError)
@@ -166,6 +167,7 @@ void HttpServer::error (QAbstractSocket::SocketError socketError)
     }
 
     socket->deleteLater();
+    _contexts.remove(socket);
 }
 
 //
