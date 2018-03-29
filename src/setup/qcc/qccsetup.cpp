@@ -169,6 +169,8 @@ void QccSetup::_onErrorState ()
     {
         // keep on retrying
         default:
+            qDeleteAll(_errorState->transitions());
+            _errorState->transitions().clear();
             _errorState->addTransition(this, SIGNAL(retry()), _previousState);
             if (_cfg->config.autoretry)
                 _retry.start();
