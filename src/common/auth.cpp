@@ -22,13 +22,13 @@ Auth::Auth (Id id, Type type, QString url,
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
 {
-    LIBENCLOUD_ERR_IF (setId(id));
-    LIBENCLOUD_ERR_IF (setType(type));
-    LIBENCLOUD_ERR_IF (setUrl(url));
-    LIBENCLOUD_ERR_IF (setUser(user));
-    LIBENCLOUD_ERR_IF (setPass(pass));
-    LIBENCLOUD_ERR_IF (setPath(path));
-    LIBENCLOUD_ERR_IF (setP12Pass(p12Pass));
+    LIBENCLOUD_ERR_IFS (setId(id));
+    LIBENCLOUD_ERR_IFS (setType(type));
+    LIBENCLOUD_ERR_IFS (setUrl(url));
+    LIBENCLOUD_ERR_IFS (setUser(user));
+    LIBENCLOUD_ERR_IFS (setPass(pass));
+    LIBENCLOUD_ERR_IFS (setPath(path));
+    LIBENCLOUD_ERR_IFS (setP12Pass(p12Pass));
 
     _valid = true;
 

@@ -127,7 +127,7 @@ void Cloud::_vpnClientErr (VpnClient::Error err, const QString &errMsg)
     if (!_isFallback && _setup && _setup->getFallbackVpnConfig() &&
             _setup->getFallbackVpnConfig()->isValid())
     {
-        LIBENCLOUD_DBG("[Cloud] Retrying with fallback configuration");
+        LIBENCLOUD_ERR("[Cloud] Retrying with fallback configuration");
         _restart(true, true);
     }
     else 
@@ -159,7 +159,7 @@ void Cloud::_vpnManagerErr (VpnManager::Error err, const QString &errMsg)
             if (!_isFallback && _setup && _setup->getFallbackVpnConfig() &&
                     _setup->getFallbackVpnConfig()->isValid())
             {
-                LIBENCLOUD_DBG("[Cloud] Retrying with fallback configuration");
+                LIBENCLOUD_ERR("[Cloud] Retrying with fallback configuration");
                 _restart(true, true);
             }
             else

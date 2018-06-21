@@ -130,6 +130,8 @@ int Core::start ()
 
 void Core::_start ()
 {
+    LIBENCLOUD_LOG("[Core] Starting cloud sequence");
+
     _fsm.start();
 
     if (_clientPort != -1)
@@ -369,7 +371,7 @@ void Core::_setupCompleted ()
 
     if (fallbackVpnConfig && fallbackVpnConfig->isValid())
     {
-        LIBENCLOUD_DBG("[Core] Fallback configuration found");
+        LIBENCLOUD_LOG("[Core] Fallback configuration found");
         if (!fallbackVpnConfig->isFile()) {
             LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
                                         _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
@@ -406,7 +408,7 @@ void Core::_fallback (bool isFallback)
 // Forward error state and message to http handler
 void Core::_errorReceived (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG("[Core] " << err.toString());
+    LIBENCLOUD_ERR("[Core] " << err.toString());
 
     switch (err.getCode())
     {

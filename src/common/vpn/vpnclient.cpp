@@ -425,7 +425,7 @@ void VpnClient::processError (QProcess::ProcessError err)
 {
     QString errStr = this->process->errorString();
 
-    LIBENCLOUD_DBG("[VPNClient] error: " << err << " (" << errStr << ")");
+    LIBENCLOUD_ERR("[VPNClient] error: " << err << " (" << errStr << ")");
 
     emit sigError((this->err = ProcessError), errStr);
 
