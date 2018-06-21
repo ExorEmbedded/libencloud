@@ -1,7 +1,6 @@
 #include <QStringList>
 #include <string.h>
 #include <openssl/rand.h>
-#include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
@@ -10,8 +9,8 @@
 #include <encloud/Common>
 #include <encloud/Crypto>
 #include <encloud/Utils>
-#include "common.h"
-#include "config.h"
+#include "../common.h"
+#include "../config.h"
 
 #undef __LIBENCLOUD_MSG
 #define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
@@ -24,6 +23,79 @@
 
 namespace libencloud {
 namespace crypto {
+
+QByteArray encrypt (libencloud_crypto_t *ec, const QByteArray &key, const QByteArray &text)
+{
+    enum {
+        SALT_SZ = 16,
+        CSUM_SZ = 32,
+        HDR_SZ = SALT_SZ + CSUM_SZ,
+        CTEXT_SZ = 8192
+    };
+    unsigned char hdr[HDR_SZ];
+    unsigned char iv[SALT_SZ];
+    unsigned char ctext[CTEXT_SZ];
+    long ctext_sz;
+
+    LIBENCLOUD_RETURN_IF (key.isEmpty() || text.isEmpty(), QByteArray());
+
+    memset(iv, 0, sizeof(iv));
+    memset(hdr, 0, sizeof(hdr));
+
+    // prepend key as checksum 
+    memcpy(&hdr[SALT_SZ], key.data(), CSUM_SZ);
+
+    QByteArray ptext((const char *) hdr, sizeof(hdr));
+    ptext += text;
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_enc (ec, (unsigned char *) ptext.data(), ptext.size(), 
+                (unsigned char *) key.data(), iv, ctext, &ctext_sz));
+
+    return QByteArray((const char *) ctext, ctext_sz);
+err:
+    return QByteArray();
+}
+
+QByteArray decrypt (libencloud_crypto_t *ec, const QByteArray &key, const QByteArray &enc)
+{
+    enum {
+        SALT_SZ = 16,
+        CSUM_SZ = 32,
+        HDR_SZ = SALT_SZ + CSUM_SZ,
+        PTEXT_SZ = 8192
+    };
+    unsigned char iv[SALT_SZ];
+    unsigned char ptext[PTEXT_SZ];
+    long ptext_sz;
+
+    LIBENCLOUD_RETURN_IF (key.isEmpty() || enc.isEmpty(), QByteArray());
+
+    memset(iv, 0, sizeof(iv));
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_dec (ec, (unsigned char *) enc.data(), enc.size(), 
+                (unsigned char *) key.data(), iv, ptext, &ptext_sz));
+    LIBENCLOUD_ERR_IF (ptext_sz < HDR_SZ);
+
+    // verify key as checksum
+    LIBENCLOUD_ERR_IF (key != QByteArray((const char *)&ptext[SALT_SZ], CSUM_SZ));
+
+    return QByteArray((const char *) &ptext[HDR_SZ], (ptext_sz - HDR_SZ));
+err:
+    return QByteArray();
+}
+
+QByteArray hash (libencloud_crypto_t *ec, const QByteArray &ba)
+{
+    unsigned char md[LIBENCLOUD_CRYPTO_MAX_MD_SZ];
+    unsigned int md_sz;
+
+    LIBENCLOUD_ERR_IF (libencloud_crypto_digest(ec, (unsigned char *) ba.data(), ba.size(),
+        md, &md_sz));
+
+    return QByteArray((const char *)md, md_sz);
+err:
+    return QByteArray();
+}
 
 // Set request based on auth
 int requestFromAuth (const Auth &auth, QMap<QByteArray,
@@ -229,6 +301,7 @@ int libencloud_crypto_init (libencloud_crypto_t *ec)
 
     memset(ec, 0, sizeof(libencloud_crypto_t));
     ec->cipher = EVP_aes_256_cbc();
+    ec->digest = EVP_md5();
     ec->zeropad = false;
 
     LIBENCLOUD_ONCE
@@ -244,16 +317,52 @@ int libencloud_crypto_set_cipher (libencloud_crypto_t *ec, libencloud::crypto::C
 {
     switch (cipher)
     {
+        case libencloud::crypto::Aes128CfbCipher:
+            ec->cipher = EVP_aes_128_cfb();
+            return 0;
+
+        case libencloud::crypto::Aes256CfbCipher:
+            ec->cipher = EVP_aes_256_cfb();
+            return 0;
+
+        case libencloud::crypto::Aes128Cfb8Cipher:
+            ec->cipher = EVP_aes_128_cfb8();
+            return 0;
+
+        case libencloud::crypto::Aes256Cfb8Cipher:
+            ec->cipher = EVP_aes_256_cfb8();
+            return 0;
+
         case libencloud::crypto::Aes256CbcCipher:
             ec->cipher = EVP_aes_256_cbc();
-            break;
+            return 0;
 
         case libencloud::crypto::Aes256EcbCipher:
             ec->cipher = EVP_aes_256_ecb();
-            break;
+            return 0;
     }
 
-    return 0;
+    return ~0;
+}
+
+int libencloud_crypto_set_digest (libencloud_crypto_t *ec, libencloud::crypto::Digest digest)
+{
+    switch (digest)
+    {
+        case libencloud::crypto::Md5Digest:
+            ec->digest = EVP_md5();
+            return 0;
+
+        case libencloud::crypto::Sha1Digest:
+            ec->digest = EVP_sha1();
+            return 0;
+
+        case libencloud::crypto::Sha256Digest:
+            ec->digest = EVP_sha256();
+            return 0;
+    }
+
+    return ~0;
 }
 
 /** \brief Do manual zero-padding - e.g. for pycryto compatibility
@@ -464,8 +573,10 @@ err:
  * \brief Calculate md5sum of {buf, buf_sz} and return it as a null-terminated string 
  * 
  * Result string must be free()d by caller.
+ * 
+ * == DEPRECATED == in favour of the more generic libencloud_crypto_digest()
  */
-char *libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_sz)
+char *libencloud_crypto_md5_hex (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz)
 {
     unsigned char md5[MD5_DIGEST_LENGTH];
     char *s = NULL;
@@ -474,7 +585,7 @@ char *libencloud_crypto_md5 (libencloud_crypto_t *ec, const char *buf, long buf_
     LIBENCLOUD_UNUSED(ec);
 
     LIBENCLOUD_ERR_IF (buf == NULL);
-    LIBENCLOUD_ERR_IF (buf_sz <= 0);
+    LIBENCLOUD_ERR_IF (buf_sz == 0);
 
     LIBENCLOUD_ERR_IF (!EVP_Digest(buf, buf_sz, md5, NULL, EVP_md5(), NULL));
     LIBENCLOUD_ERR_IF ((s = (char *) calloc(1, sizeof(char) * MD5_DIGEST_LENGTH*2 + 1)) == NULL);
@@ -490,6 +601,21 @@ err:
         free(s);
 
     return NULL;
+}
+
+int libencloud_crypto_digest (libencloud_crypto_t *ec, unsigned char *buf, size_t buf_sz,
+    unsigned char *md, unsigned int *md_sz)
+{
+    LIBENCLOUD_ERR_IF (buf == NULL);
+    LIBENCLOUD_ERR_IF (buf_sz == 0);
+    LIBENCLOUD_ERR_IF (md == NULL);
+    LIBENCLOUD_ERR_IF (md_sz == NULL);
+
+    LIBENCLOUD_ERR_IF (!EVP_Digest(buf, buf_sz, md, md_sz, ec->digest, NULL));
+
+    return 0;
+err:
+    return ~0;
 }
 
 int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long ptext_sz,
@@ -509,7 +635,7 @@ int libencloud_crypto_enc (libencloud_crypto_t *ec, unsigned char *ptext, long p
 
 #ifdef LIBENCLOUD_CRYPTO_DEBUG
     fprintf(stderr, "<Key: \n");
-    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_key_length(ctx));
     fprintf(stderr, "<iv: \n");
     BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
     fprintf(stderr, "<Plaintext: \n");
@@ -569,7 +695,7 @@ int libencloud_crypto_dec (libencloud_crypto_t *ec, unsigned char *ctext, long c
 
 #ifdef LIBENCLOUD_CRYPTO_DEBUG
     fprintf(stderr, "<Key: \n");
-    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_block_size(ctx));
+    BIO_dump_fp(stderr, (const char *)key, EVP_CIPHER_CTX_key_length(ctx));
     fprintf(stderr, "<iv: \n");
     BIO_dump_fp(stderr, (const char *)iv, EVP_CIPHER_CTX_iv_length(ctx));
     fprintf(stderr, "<Ciphertext: \n");

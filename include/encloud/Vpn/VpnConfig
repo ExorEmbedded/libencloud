@@ -46,6 +46,7 @@ public:
     bool operator== (const VpnConfig &vc) const;
 
     int clear ();
+    bool checkValid (bool strict = true);
     bool isValid () const;
     bool isFile () const;
     int fromMap (const QVariantMap &vm);
@@ -86,6 +87,9 @@ public:
     Proto getRemoteProto () const;
     int setRemoteProto (Proto proto);
 
+    // NOTE: fallback here maps to multiple remotes in VPN config
+    // this is different from Switchboard's higher level fallback config
+    // which maps to two separate VPN configurations!
     bool isFallbackEnabled () const;
     int setFallbackEnabled (bool enabled);
 
@@ -111,8 +115,6 @@ public:
     int setP12Path (const QString &p12Path);
 
 private:
-
-    bool _isValid (bool strict = true);
 
     //
     // internals

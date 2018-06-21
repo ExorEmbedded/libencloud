@@ -25,7 +25,3 @@ LIBS += -lencloud$$DBG_SUFFIX
 target.path = $${BINDIR}
 
 INSTALLS += target
-
-about {
-    LIBS += $${ABOUT_LIBS}
-}

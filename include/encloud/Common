@@ -20,6 +20,17 @@
 #  endif
 #endif
 
+// name of tap device
+#ifdef QICC_XBRAND
+#  ifdef QICC_PKGNAME
+#    define LIBENCLOUD_TAPNAME_SUFFIX     QICC_PKGNAME_STRIP
+#  else
+#    define LIBENCLOUD_TAPNAME_SUFFIX     LIBENCLOUD_PRODUCT
+#  endif
+#else
+#  define LIBENCLOUD_TAPNAME_SUFFIX       "Connect"    // org prepended
+#endif
+
 #define LIBENCLOUD_LOCALHOST    "127.0.0.1"
 
 namespace libencloud {
@@ -59,6 +70,10 @@ LIBENCLOUD_DLLSPEC QString getCommonAppDataDir (QString package = "");
 // win32: getCommonAppDataDir()
 // unix: LOG_PREFIX
 LIBENCLOUD_DLLSPEC QString getCommonLogDir (QString package = "");
+
+// Agent mode
+LIBENCLOUD_DLLSPEC QString getActivationCode (bool encrypted = true);
+LIBENCLOUD_DLLSPEC QString setActivationCode (const QString &code, bool encrypt = true);
 
 } // namespace libencloud
 

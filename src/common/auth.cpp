@@ -22,14 +22,13 @@ Auth::Auth (Id id, Type type, QString url,
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
 {
-    if (setId(id) ||
-            setType(type) ||
-            setUrl(url) ||
-            setUser(user) ||
-            setPass(pass) || 
-            setPath(path) ||
-            setP12Pass(p12Pass))
-        goto err;
+    LIBENCLOUD_ERR_IF (setId(id));
+    LIBENCLOUD_ERR_IF (setType(type));
+    LIBENCLOUD_ERR_IF (setUrl(url));
+    LIBENCLOUD_ERR_IF (setUser(user));
+    LIBENCLOUD_ERR_IF (setPass(pass));
+    LIBENCLOUD_ERR_IF (setPath(path));
+    LIBENCLOUD_ERR_IF (setP12Pass(p12Pass));
 
     _valid = true;
 
@@ -43,14 +42,13 @@ Auth::Auth (const QString &id, QString type, QString url,
     , _id(Auth::NoneId)
     , _type(Auth::NoneType)
 {
-    if (setStrId(id) ||
-            setStrType(type) ||
-            setUrl(url) ||
-            setUser(user) ||
-            setPass(pass) ||
-            setPath(path) ||
-            setP12Pass(p12Pass))
-        goto err;
+    LIBENCLOUD_ERR_IF (setStrId(id));
+    LIBENCLOUD_ERR_IF (setStrType(type));
+    LIBENCLOUD_ERR_IF (setUrl(url));
+    LIBENCLOUD_ERR_IF (setUser(user));
+    LIBENCLOUD_ERR_IF (setPass(pass));
+    LIBENCLOUD_ERR_IF (setPath(path));
+    LIBENCLOUD_ERR_IF (setP12Pass(p12Pass));
 
     _valid = true;
 
@@ -71,11 +69,10 @@ int Auth::validate ()
     LIBENCLOUD_ERR_IF (!isIdValid(_id));
     LIBENCLOUD_ERR_IF (!isTypeValid(_type));
     LIBENCLOUD_ERR_IF (!isUrlValid(_url));
-    LIBENCLOUD_ERR_IF ((_type == Auth::UserpassType || _type == Auth::CertificateUserpassType) &&
-            (!isUserValid(_user) ||
-            !isPassValid(_pass)));
-    LIBENCLOUD_ERR_IF ((_type == Auth::CertificateType || _type == Auth::CertificateUserpassType) &&
-            !isPathValid(_path));
+    LIBENCLOUD_ERR_IF (!isUserValid(_user));
+    LIBENCLOUD_ERR_IF (!isPassValid(_pass));
+    LIBENCLOUD_ERR_IF (!isPathValid(_path));
+    LIBENCLOUD_ERR_IF (!isP12PassValid(_p12Pass));
 
     _valid = true;
 
@@ -174,6 +171,10 @@ const QString Auth::getStrType () const
 {
     switch (_type) 
     {
+        case Auth::NoneType:
+            return "none";
+        case Auth::UrlType:
+            return "url";
         case Auth::UserpassType:
             return "user-pass";
         case Auth::CertificateType:
@@ -191,8 +192,10 @@ const QString Auth::getStrType () const
 
 int Auth::setStrType (const QString &type)
 {
-    if (type == "")
+    if (type == "" || type == "none")
         _type = Auth::NoneType;
+    else if (type == "url")
+        _type = Auth::UrlType;
     else if (type == "user-pass")
         _type = Auth::UserpassType;
     else if (type == "x509")
@@ -273,17 +276,12 @@ const QString &Auth::getPass () const
     return _pass;
 }
 
-/* Password-based auth
-
-   Note: no validity checks are performed here so that it can be reset - just
-   make sure it's set when validate is called().
- */
+/* Password-based auth */
 int Auth::setPass (const QString &pass)
 {
-/*
     if (!isPassValid(pass))
         return ~0;
-*/
+
     _pass = pass;
 
     return 0;
@@ -313,18 +311,13 @@ const QString &Auth::getP12Pass () const
     return _p12Pass;
 }
 
-/* Password to decrypt PKCS12 certs
-
-   Note: no validity checks are performed here so that it can be reset - just
-   make sure it's set when validate is called().
- */
-int Auth::setP12Pass (const QString &pass)
+/* Password to decrypt PKCS12 certs */
+int Auth::setP12Pass (const QString &p12Pass)
 {
-/*
-    if (!isPassValid(pass))
+    if (!isP12PassValid(p12Pass))
         return ~0;
-*/
-    _p12Pass = pass;
+
+    _p12Pass = p12Pass;
 
     return 0;
 }

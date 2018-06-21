@@ -40,8 +40,8 @@ void TestSec::_testClient ()
     LIBENCLOUD_DELETE(_client);
     LIBENCLOUD_ERR_IF ((_client = new libencloud::Client) == NULL);
 
-    connect(_client, SIGNAL(error(libencloud::Error)), this, SLOT(_clientError(libencloud::Error)));
-    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)), this, SLOT(_clientComplete(QString)));
+    connect(_client, SIGNAL(error(libencloud::Error, QVariant)), this, SLOT(_clientError(libencloud::Error)));
+    connect(_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)), this, SLOT(_clientComplete(QString)));
 
     LIBENCLOUD_DBG("i = " << i);
     LIBENCLOUD_DBG("number of cas: " << sslconf.caCertificates().count());

@@ -10,25 +10,22 @@
 #include <encloud/Logger>
 #include <encloud/Progress>
 #include <encloud/Proxy>
+#include <encloud/Settings>
 #include <encloud/Utils>
 #include <encloud/Api/CommonApi>
+#include <encloud/simplecrypt/simplecrypt.h>
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
-#include <setup/qcc/qccsetup.h>
-#endif
-#if defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
-#include <setup/ece/ecesetup.h>
+#  include <setup/qcc/qccsetup.h>
+#  ifndef LIBENCLOUD_SPLITDEPS
+#    include <setup/reg/regsetup.h>
+#  endif
 #endif
 #ifdef LIBENCLOUD_MODE_VPN
 #include <setup/vpn/vpnsetup.h>
 #endif
 #include <cloud/cloud.h>
 
-
-#ifndef Q_OS_WINCE
-/* Subject name settings from JSON CSR template */
-static int _libencloud_context_name_cb (X509_NAME *n, void *arg);
-#endif
 
 namespace libencloud {
 
@@ -38,8 +35,10 @@ namespace libencloud {
 
 Core::Core (Mode mode)
     : _isValid(false)
+    , _fwEnabled(false)
     , _mode(mode)
     , _state(StateIdle)
+    , _prevState(StateIdle)
     , _busy(false)
     , _setup(NULL)
     , _setupObj(NULL)
@@ -61,9 +60,9 @@ Core::Core (Mode mode)
             << " mode: " << QString::number(_mode);
 
     LIBENCLOUD_ERR_IF (_init());
-    LIBENCLOUD_ERR_IF (_initConfig());
     LIBENCLOUD_ERR_IF (_initCrypto());
 
+    // Setup and cloud initally use defaults
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_ERR_IF (_initSetup());
 #endif
@@ -74,6 +73,7 @@ Core::Core (Mode mode)
 
     LIBENCLOUD_ERR_IF (_initApi());
     LIBENCLOUD_ERR_IF (_initFsm());
+    _loadProxy();
 
     _isValid = true;
 
@@ -116,8 +116,8 @@ int Core::start ()
         return 0;
     }
 
-    // for ECE and SECE startup is automated so we introduce a random pause of
-    // 0-5 secs to avoid server congestion due to excessive simultaneous connections
+    // introduce a random pause of 0-5 secs to avoid server congestion due to
+    // excessive simultaneous connections
     int msecs = qRound(5000 * ((qreal) qrand() / (qreal) RAND_MAX));
 
     LIBENCLOUD_DBG(QString("Congestion avoidance - waiting %1 ms")
@@ -158,9 +158,7 @@ int Core::stop ()
     _networkManager->stop();
 
 #ifndef LIBENCLOUD_DISABLE_SETUP
-    _setup->stop(true, (_state == StateSetup ||
-                _state == StateConnect || 
-                _state == StateCloud));
+    _setup->stop(true, (_state == StateConnect || _state == StateCloud));
 #endif
 
     // _setupStopped() will be triggered
@@ -191,7 +189,18 @@ int Core::attachServer (Server *server)
 #ifndef LIBENCLOUD_DISABLE_CLOUD
     // ip assignments from cloud module to server
     connect(_cloud, SIGNAL(ipAssigned(QString)), 
+            this, SLOT(_vpnIpAssigned(QString)));
+    connect(_cloud, SIGNAL(ipAssigned(QString)), 
             obj, SLOT(vpnIpAssigned(QString)));
+    // from server to local objects
+    connect(obj, SIGNAL(configSupply(QVariant)),
+            _cfg, SLOT(receive(QVariant)));
+    connect(obj, SIGNAL(configSupply(QVariant)),
+            this, SLOT(_configReceived(QVariant)));
+    connect(obj, SIGNAL(authSupply(libencloud::Auth)), 
+            this, SLOT(_authSupplied(libencloud::Auth)));
+    connect(obj, SIGNAL(actionRequest(QString, libencloud::Params)), 
+            this, SLOT(_actionRequest(QString, libencloud::Params)));
 #endif
 
 #ifndef Q_OS_WINCE
@@ -200,38 +209,6 @@ int Core::attachServer (Server *server)
     handler = (HttpHandler *) (server->getHandler());
 #endif
     LIBENCLOUD_ERR_IF (handler == NULL);
-
-    //
-    // handler setup
-    // 
-
-#ifdef LIBENCLOUD_MODE_ECE
-    if (_cfg->config.poiPath.exists())
-    {
-        LIBENCLOUD_DBG("Reading PoI from file: " <<
-                _cfg->config.poiPath.absoluteFilePath());
-
-        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(utils::file2Data(_cfg->config.poiPath))));
-    }
-    else if (_cfg->config.sslInit.certPath.exists())
-    {
-        LIBENCLOUD_DBG("Reading PoI from cert: " <<
-                _cfg->config.sslInit.certPath.absoluteFilePath());
-
-        QList<QSslCertificate> initCerts(QSslCertificate::fromPath(
-                    _cfg->config.sslInit.certPath.absoluteFilePath()));
-        QSslCertificate initCert = initCerts.first();
-        QString poiStr;
-
-        LIBENCLOUD_ERR_IF (initCerts.isEmpty());
-        LIBENCLOUD_ERR_IF (initCert.isNull());
-
-        poiStr = initCert.subjectInfo(QSslCertificate::CommonName);
-
-        LIBENCLOUD_DBG("PoI: " << poiStr);
-        LIBENCLOUD_ERR_IF (handler->setPoi(QUuid(poiStr)));
-    }
-#endif
 
     //
     // handler connections
@@ -249,11 +226,8 @@ int Core::attachServer (Server *server)
             obj, SLOT(_coreFallbackReceived(bool)));
     connect(this, SIGNAL(need(QString, QVariant)), 
             obj, SLOT(_needReceived(QString, QVariant)));
-
-#ifdef LIBENCLOUD_MODE_SECE
-    connect(obj, SIGNAL(licenseSend(QUuid)), 
-            _setupObj, SIGNAL(licenseForward(QUuid)));
-#endif
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)),
+           obj, SLOT(_authReceived(libencloud::Auth)));
 
 #ifdef LIBENCLOUD_MODE_QCC
     connect(obj, SIGNAL(clientPortSend(int)), 
@@ -265,27 +239,16 @@ int Core::attachServer (Server *server)
 #endif
 
     // when auth is supplied, it is forwarded to all modules, while
-    // authentication requests are reemitted in _authRequired as need signals
+    // authentication requests are reemitted in _authRequired as "need" signals
     // for handler
-    connect(obj, SIGNAL(authSupplied(Auth)), 
-           this, SLOT(_authSupplied(Auth)));
-#ifndef LIBENCLOUD_DISABLE_SETUP
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _setupObj, SIGNAL(authSupplied(Auth)));
-    connect(_setupObj, SIGNAL(authRequired(Auth::Id, QVariant)), 
-           this, SLOT(_authRequired(Auth::Id, QVariant)));
-#endif
-#ifndef LIBENCLOUD_DISABLE_CLOUD
-    connect(this, SIGNAL(authSupplied(Auth)), 
-           _cloudObj, SIGNAL(authSupplied(Auth)));
-    connect(_cloudObj, SIGNAL(authRequired(Auth::Id)), 
-           this, SLOT(_authRequired(Auth::Id)));
-#endif
-
-    connect(obj, SIGNAL(actionRequest(QString, Params)), 
-            this, SLOT(_actionRequest(QString, Params)));
+    connect(obj, SIGNAL(authSupplied(libencloud::Auth)), 
+           this, SLOT(_authSupplied(libencloud::Auth)));
+    connect(obj, SIGNAL(actionRequest(QString, libencloud::Params)), 
+            this, SLOT(_actionRequest(QString, libencloud::Params)));
     connect(obj, SIGNAL(configSupplied(QVariant)),
             _cfg, SLOT(receive(QVariant)));
+    connect(obj, SIGNAL(configSupplied(QVariant)),
+            this, SLOT(_configReceived(QVariant)));
 
     // attach core configuration
     server->_cfg = _cfg;
@@ -307,6 +270,60 @@ void Core::_stateChanged (State state)
             stateToString(state) << ")");
 
     _state = state;
+
+    switch (_state)
+    {
+        case StateIdle:
+        case StateError:
+            if (_prevState == StateCloud)
+                _down();
+            break;
+        case StateCloud:
+            _up();
+            break;
+        default:
+            break;
+    }
+
+    _prevState = state;
+}
+
+void Core::_vpnIpAssigned (const QString &ip)
+{
+    _vpnIp = ip;
+}
+
+void Core::_up()
+{
+    LIBENCLOUD_TRACE;
+
+#ifdef Q_OS_WIN
+    if (_cfg->config.setupAgent && _cfg->config.vpnFw)
+    {
+        if (utils::executeSync(QString("netsh advfirewall firewall add rule name=\"QCC ICMP\" protocol=icmpv4:8,any dir=in action=allow localip=%1").arg(_vpnIp)))
+            // Windows XP back-compatibility
+            LIBENCLOUD_ERR_IF (utils::executeSync(QString("netsh firewall set icmpsetting type=8 interface=%1 mode=enable").arg(LIBENCLOUD_TAPNAME)));
+        _fwEnabled = true;
+    }
+    else
+        _fwEnabled = false;
+err:
+    return;
+#endif
+}
+
+void Core::_down()
+{
+    LIBENCLOUD_TRACE;
+
+#ifdef Q_OS_WIN
+    if (_fwEnabled)
+        if (utils::executeSync("netsh advfirewall firewall delete rule name=\"QCC ICMP\""))
+            // Windows XP back-compatibility
+            LIBENCLOUD_ERR_IF (utils::executeSync(QString("netsh firewall set icmpsetting type=8 interface=%1 mode=disable").arg(LIBENCLOUD_TAPNAME)));
+err:
+    return;
+#endif
 }
 
 void Core::_stateEntered ()
@@ -369,7 +386,8 @@ void Core::_setupStopped ()
     _cloud->stop();
 #endif
 
-    emit authSupplied(Auth());
+    emit authSupplied((_sbAuth = Auth(Auth::SwitchboardId)));
+    //emit authSupplied((_proxyAuth = Auth(Auth::ProxyId)));  // persists until explicitly reset
     emit stateChanged(StateIdle);
     emit progress(Progress());
 
@@ -402,14 +420,38 @@ void Core::_errorReceived (const libencloud::Error &err)
        // critical errors
        default:
            // QCC stops progress upon critical errors for user intervention
-           // while ECE and SECE keep on retrying automatically (in internal modules)
-           if (!_cfg->config.autoretry)
+           // while devices/agent keep on retrying automatically (in internal modules)
+           if (!_cfg->config.autoretry && !_cfg->config.setupAgent)
                stop();
            break;
     }
 
     emit stateChanged(StateError);
     emit error(err);
+}
+
+void Core::_configReceived (const QVariant &config)
+{
+    // ignore resets
+    if (config.toMap()["reset"].toBool())
+        return;
+
+    if (config.toMap()["setup"].toMap()["agent"].isNull())
+        return;
+
+    _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
+
+#if !defined(LIBENCLOUD_DISABLE_SETUP)
+    LIBENCLOUD_ERR_IF (_initSetup());
+#endif
+
+#if !defined(LIBENCLOUD_DISABLE_CLOUD)
+    _cloud->setSetup(_setup);
+#endif
+
+    LIBENCLOUD_ERR_IF (_initFsm());
+err:
+    return;
 }
 
 // Remap step/nsteps and forward signal for http handler
@@ -432,7 +474,7 @@ void Core::_progressReceived (const Progress &p)
     emit progress(pt);
 }
 
-void Core::_authSupplied (const Auth &auth)
+void Core::_authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("[Core] " << auth.toString());
 
@@ -449,29 +491,7 @@ void Core::_authSupplied (const Auth &auth)
             break;
         case Auth::ProxyId:
         {
-            QUrl url(auth.getUrl());
-
-            QNetworkProxy proxy(
-                Auth::typeToQt(auth.getType()),
-                url.host(),
-                url.port(),
-                auth.getUser(),
-                auth.getPass()
-                );
-
-            _proxyFactory = new libencloud::ProxyFactory;
-            LIBENCLOUD_ERR_IF (_proxyFactory == NULL);
-
-            _proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
-                    QNetworkProxy::NoProxy : proxy);
-            if (_sbAuth.getUrl() != "")
-                _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
-
-            LIBENCLOUD_DBG("[Core] Setting application proxy factory");
-
-            // lib takes ownership of our proxy factory
-            QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
-
+            _saveProxy(auth);
             _proxyAuth = auth;
             break;
         }
@@ -482,12 +502,9 @@ void Core::_authSupplied (const Auth &auth)
     emit authSupplied(auth);
 
     return;
-err:
-    LIBENCLOUD_DELETE(_proxyFactory);
-    return;
 }
 
-void Core::_authRequired (Auth::Id id, QVariant params)
+void Core::_authRequired (libencloud::Auth::Id id, QVariant params)
 {
     switch (id)
     {
@@ -558,7 +575,7 @@ void Core::_logPortReceived (int port)
 }
 
 // This handler is triggered for all API receivers
-void Core::_actionRequest (const QString &action, const Params &params)
+void Core::_actionRequest (const QString &action, const libencloud::Params &params)
 {
     LIBENCLOUD_DBG ("action: " << action);
     
@@ -613,23 +630,6 @@ void Core::_clientDown ()
 // private methods
 // 
 
-int Core::_initConfig ()
-{
-    LIBENCLOUD_TRACE;
-
-    _cfg = new Config();
-    LIBENCLOUD_ERR_IF (_cfg == NULL);
-
-    LIBENCLOUD_ERR_IF (_cfg->loadFromFile());
-
-    g_libencloudCfg = _cfg;
-    LIBENCLOUD_DBG(g_libencloudCfg->dump());
-
-    return 0;
-err:
-    return ~0;
-}
-
 int Core::_initCrypto ()
 {
     // initialize Qt's PRNG
@@ -637,7 +637,6 @@ int Core::_initCrypto ()
 
 #ifndef Q_OS_WINCE
     libencloud_crypto_init(&_cfg->crypto);
-    libencloud_crypto_set_name_cb(&_cfg->crypto, &_libencloud_context_name_cb, this);
 #endif
 
     return 0;
@@ -647,10 +646,18 @@ int Core::_initSetup ()
 {
     LIBENCLOUD_TRACE;
 
+    // reset pre-existing instances
+    LIBENCLOUD_DELETE_LATER(_setup);
+
 #if defined(LIBENCLOUD_MODE_QCC)
-    _setup = new QccSetup(_cfg);
-#elif defined(LIBENCLOUD_MODE_ECE) || defined(LIBENCLOUD_MODE_SECE)
-    _setup = new EceSetup(_cfg);
+    LIBENCLOUD_DBG("[Core] setupAgent: " << _cfg->config.setupAgent);
+
+#  if !defined(LIBENCLOUD_SPLITDEPS)
+    if (_cfg->config.setupAgent)
+        _setup = new RegSetup(_cfg);  // agent mode
+    else
+#  endif
+        _setup = new QccSetup(_cfg);  // app mode (default)
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif
@@ -663,6 +670,14 @@ int Core::_initSetup ()
     // error signal handling
     connect(_setupObj, SIGNAL(error(libencloud::Error)), 
             this, SLOT(_errorReceived(libencloud::Error)));
+
+    // authentication signal handling
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+           _setupObj, SIGNAL(authSupplied(libencloud::Auth)));
+    connect(_setupObj, SIGNAL(authRequired(libencloud::Auth::Id, QVariant)), 
+           this, SLOT(_authRequired(libencloud::Auth::Id, QVariant)));
+    connect(_setupObj, SIGNAL(authChanged(libencloud::Auth)),
+           this, SIGNAL(authSupplied(libencloud::Auth)));
 
     // progress signal handling
     connect(_setupObj, SIGNAL(progress(Progress)), 
@@ -693,6 +708,9 @@ int Core::_initCloud ()
 {
     LIBENCLOUD_TRACE;
 
+    // reset pre-existing instances
+    LIBENCLOUD_DELETE_LATER(_cloud);
+
     _cloud = new Cloud(_cfg);
     LIBENCLOUD_ERR_IF (_cloud == NULL);
     _cloud->setSetup(_setup);
@@ -703,6 +721,12 @@ int Core::_initCloud ()
     // error signal handling
     connect(_cloudObj, SIGNAL(error(libencloud::Error)), 
             this, SLOT(_errorReceived(libencloud::Error)));
+
+    // authentication signal handling
+    connect(this, SIGNAL(authSupplied(libencloud::Auth)), 
+           _cloudObj, SIGNAL(authSupplied(libencloud::Auth)));
+    connect(_cloudObj, SIGNAL(authRequired(libencloud::Auth::Id)), 
+           this, SLOT(_authRequired(libencloud::Auth::Id)));
 
     // state changes forwarding for connecting/connected states
     connect(_cloudObj, SIGNAL(stateChanged(State)), 
@@ -748,9 +772,15 @@ err:
 int Core::_initFsm ()
 {
     LIBENCLOUD_TRACE;
+
+    // clear previous FSM
+    _fsm.stop();
+    Q_FOREACH(QAbstractState *s, _fsm.configuration())
+        _fsm.removeState(s);
     
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_DBG("setupState: " << _setupState);
+    disconnect(_setupState, NULL, NULL, NULL);
     _initialState = _setupState;
     connect(_setupState, SIGNAL(entered()), 
             this, SLOT(_stateEntered()));
@@ -764,6 +794,7 @@ int Core::_initFsm ()
 #if defined(LIBENCLOUD_DISABLE_SETUP)
     _initialState = _cloudState;
 #endif
+    disconnect(_cloudState, NULL, NULL, NULL);
     connect(_cloudState, SIGNAL(entered()), 
             this, SLOT(_stateEntered()));
     connect(_cloudState, SIGNAL(exited()), 
@@ -771,6 +802,8 @@ int Core::_initFsm ()
     _fsm.addState(_cloudState);
 #endif
 
+    Q_FOREACH(QAbstractTransition *t, _setupState->transitions())
+        _setupState->removeTransition(t);
 #if !defined(LIBENCLOUD_DISABLE_SETUP) && !defined(LIBENCLOUD_DISABLE_CLOUD)
     _setupState->addTransition(_setupObj, SIGNAL(completed()), _cloudState);
 #endif
@@ -783,6 +816,14 @@ int Core::_initFsm ()
 // Init local objects
 int Core::_init ()
 {
+    _cfg = new Config();
+    LIBENCLOUD_ERR_IF (_cfg == NULL);
+
+    LIBENCLOUD_ERR_IF (_cfg->loadFromFile());
+
+    g_libencloudCfg = _cfg;
+    LIBENCLOUD_DBG(g_libencloudCfg->dump());
+
     connect(&_clientWatchdog, SIGNAL(down()), this, SLOT(_clientDown()));
 
     _qnam = new QNetworkAccessManager;
@@ -806,68 +847,106 @@ QString Core::_stateStr (QState *state)
         return "";
 }
 
-} // namespace libencloud
-
-//
-// static methods
-// 
-
-#ifndef Q_OS_WINCE
-/* Subject name settings from JSON CSR template */
-static int _libencloud_context_name_cb (X509_NAME *n, void *arg)
+void Core::_setProxy (const libencloud::Auth &auth)
 {
-#undef __LIBENCLOUD_MSG
-#define __LIBENCLOUD_MSG __LIBENCLOUD_PRINT
-
-    LIBENCLOUD_RETURN_IF (n == NULL, ~0);
-    LIBENCLOUD_RETURN_IF (arg == NULL, ~0);
-
-    QVariant json;
-    QVariantMap map;
-    libencloud::Core *core = (libencloud::Core *) arg;
-    bool ok;
-
-    json = libencloud::json::parseFromFile(core->getConfig()->
-            config.csrTmplPath.absoluteFilePath(), ok);
-    LIBENCLOUD_ERR_IF (!ok);
-
-    map = json.toMap()["DN"].toMap();
-
-    // parse DN fields
-    for(QVariantMap::const_iterator iter = map.begin(); 
-            iter != map.end(); ++iter)
+    if (auth.getId() != Auth::ProxyId)
     {
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, 
-                    qPrintable(iter.key()), MBSTRING_UTF8,
-                    (const unsigned char *)
-                    iter.value().toString().toUtf8().data(),
-                    -1, -1, 0));
+        LIBENCLOUD_ERR("Invalid proxy auth!");
+        return;
     }
+    LIBENCLOUD_TRACE;
 
-    // if CN is provided in template use it, otherwise fall back to hwinfo
-    // (SECE) or serial (LIBENCLOUD)
-    if (map["CN"].isNull())
-    {
-#if defined(LIBENCLOUD_MODE_SECE)
-        // SECE: CN based on hw_info
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_UTF8,
-                (const unsigned char *)
-                libencloud::utils::getHwInfo().toUtf8().data(),
-                -1, -1, 0));
-#else
-        // now CN for ECE should be part of template and will use (unique)
-        // label given by user!
-#if 0
-        // LIBENCLOUD: CN based on serial
-        LIBENCLOUD_ERR_IF (!X509_NAME_add_entry_by_txt(n, "CN", MBSTRING_ASC, \
-                (const unsigned char *) core->getSerial(), -1, -1, 0));
-#endif
+    QUrl url(auth.getUrl());
 
-#endif
-    }
+    QNetworkProxy proxy(
+        Auth::typeToQt(auth.getType()),
+        url.host(),
+        url.port(),
+        auth.getUser(),
+        auth.getPass()
+        );
 
-    return 0;
-err:
-    return ~0;
+    _proxyFactory = new libencloud::ProxyFactory;
+    LIBENCLOUD_RETURN_IF (_proxyFactory == NULL, );
+
+    LIBENCLOUD_DBG("[Core] Setting application proxy factory");
+
+    _proxyFactory->setApplicationProxy(auth.getType() == Auth::NoneType ? 
+            QNetworkProxy::NoProxy : proxy);
+    if (_sbAuth.getUrl() != "")
+        _proxyFactory->add(QUrl(_sbAuth.getUrl()).host());
+
+    // lib takes ownership of our proxy factory
+    QNetworkProxyFactory::setApplicationProxyFactory(_proxyFactory);  
 }
-#endif
+
+void Core::_saveProxy (const libencloud::Auth &auth)
+{
+    LIBENCLOUD_TRACE;
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, );
+
+    QUrl url(auth.getUrl());
+
+    _setProxy(auth);
+
+    if (auth.getType() == Auth::NoneType)
+    {
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYENABLED, false);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYSERVER);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPORT);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYUSER);
+        _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPASS);
+    }
+    else
+    {
+        SimpleCrypt crypto(QICC_SETTING_KEY);
+
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYENABLED, true);
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYSERVER, url.host());
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYPORT, url.port());
+        _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED, !auth.getUser().isEmpty());
+        if (auth.getUser().isEmpty())
+        {
+            _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYUSER);
+            _cfg->sysSettings->remove(LIBENCLOUD_SETTINGS_PROXYPASS);
+        }
+        else
+        {
+            _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYUSER, auth.getUser());
+            _cfg->sysSettings->setValue(LIBENCLOUD_SETTINGS_PROXYPASS, crypto.encryptToString(auth.getPass()));
+        }
+    }
+    _cfg->sysSettings->sync();
+}
+
+void Core::_loadProxy ()
+{
+    LIBENCLOUD_RETURN_IF (_cfg == NULL, );
+
+    if (!_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYENABLED).toBool())
+    {
+        LIBENCLOUD_DBG("[Core] Proxy disabled");
+        return;
+    }
+
+    libencloud::Auth auth;
+    SimpleCrypt crypto(QICC_SETTING_KEY);
+
+    auth.setId(Auth::ProxyId);
+    auth.setType(Auth::typeFromQt(QNetworkProxy::HttpProxy));
+    auth.setUrl("http://" + _cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYSERVER).toString() +
+            ':' + _cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYPORT).toString()); 
+
+    if (_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYAUTHENABLED).toBool())
+        auth.setUser(_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYUSER).toString());
+        auth.setPass(crypto.decryptToString(_cfg->sysSettings->value(LIBENCLOUD_SETTINGS_PROXYPASS).toString()));
+
+    LIBENCLOUD_RETURN_IF (auth.validate(), );
+
+    _setProxy(auth);
+
+    emit authSupplied((_proxyAuth = auth));
+}
+
+} // namespace libencloud

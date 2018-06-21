@@ -4,10 +4,6 @@
 #include <common/config.h>
 #include <setup/vpn/VpnSetup.h>
 
-// Login/Logout are unnecessary when using Basic Auth, and logout doesn't kick
-// out of VPN connection which is what we really would need
-//#define LIBENCLOUD_SETUP_QCC_WITH_LOGIN
-
 namespace libencloud {
 
 /**

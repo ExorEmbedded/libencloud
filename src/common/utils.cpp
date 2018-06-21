@@ -1,3 +1,7 @@
+#include <QtGlobal>
+#ifdef Q_OS_WIN
+# include "windows.h"
+#endif
 #include <encloud/Utils>
 #ifndef Q_OS_WINCE
 #include <encloud/Crypto>
@@ -34,7 +38,7 @@ LIBENCLOUD_DLLSPEC QString getHwInfo (void)
     LIBENCLOUD_DBG("[Utils] hwInfo: " << hwInfo);
 
 #ifndef Q_OS_WINCE
-    LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5(NULL, (char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
+    LIBENCLOUD_ERR_IF ((s = libencloud_crypto_md5_hex(NULL, (unsigned char *) qPrintable(hwInfo), hwInfo.size())) == NULL);
     res = QString(s);
 #else
     res = QString::fromLatin1(QCryptographicHash::hash(hwInfo.toUtf8(), QCryptographicHash::Md5));
@@ -76,7 +80,14 @@ LIBENCLOUD_DLLSPEC bool fileCreate (QFile &file, QFile::OpenMode mode)
 
     dir.mkpath(dir.path());
 
-    return file.open(mode);
+    LIBENCLOUD_ERR_IF (!file.open(mode));
+
+    // restrictive by default (only user can read/write) - override if necessary
+    LIBENCLOUD_ERR_IF (!file.setPermissions(QFile::ReadOwner | QFile::WriteOwner));
+
+    return true;
+err:
+    return false;
 }
 
 LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path, bool text)
@@ -87,10 +98,12 @@ LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path, bo
         openMode |= QIODevice::Text;
 
     LIBENCLOUD_ERR_IF (!file.open(openMode));
+
+    // restrictive by default (only user can read/write) - override if necessary
+    LIBENCLOUD_ERR_IF (!file.setPermissions(QFile::ReadOwner|QFile::WriteOwner));
+
     LIBENCLOUD_ERR_IF (file.write(ba) == -1);
     file.close();
-
-    QFile::setPermissions(path, QFile::ReadOwner|QFile::WriteOwner);
 
     return 0;
 err:
@@ -166,6 +179,18 @@ LIBENCLOUD_DLLSPEC QString uuid2String (const QUuid &uuid)
     return uuid.toString().remove('{').remove('}').toUpper();
 }
 
+// [https://docs.python.org/2/library/base64.html]
+// Decode string s using the URL- and filesystem-safe alphabet, which
+// substitutes - instead of + and _ instead of / in the standard Base64
+// alphabet.
+LIBENCLOUD_DLLSPEC QByteArray base642Url (const QByteArray &b64)
+{
+    return QByteArray(b64).
+              replace("+", "-").
+              replace("/", "_").
+              replace("=", "");
+}
+
 LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
 {
     return (s == NULL ? NULL :
@@ -176,6 +201,13 @@ LIBENCLOUD_DLLSPEC char *ustrdup (const char *s)
                         strdup(s)
 #endif
                         );
+}
+
+LIBENCLOUD_DLLSPEC int executeSync (QString cmd)
+{
+    LIBENCLOUD_DBG("[Utils] Exec sync: "  << qPrintable(cmd));
+
+    return QProcess::execute(cmd);
 }
 
 LIBENCLOUD_DLLSPEC int execute (QString path, QStringList args, QString &out, bool wait, bool debug)
@@ -217,10 +249,8 @@ err:
     return ~0;
 }
 
-static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
+void mapMerge (QVariantMap &to, const QVariantMap &from)
 {
-    QVariantMap m = to;
-
     //LIBENCLOUD_DBG("to: " << to);
     //LIBENCLOUD_DBG("from: " << from);
 
@@ -231,7 +261,7 @@ static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
         //LIBENCLOUD_DBG("insert: " << iter.key() << " = " << iter.value());
 
         QVariantMap fromMap = from[iter.key()].toMap();
-        QVariantMap newMap = m[iter.key()].toMap();
+        QVariantMap newMap = to[iter.key()].toMap();
 
         if (!newMap.isEmpty() && !fromMap.isEmpty())
         {
@@ -244,50 +274,13 @@ static QVariantMap _mapMerge (const QVariantMap &to, const QVariantMap &from)
             //LIBENCLOUD_DBG("fromMap: " << fromMap);
             //LIBENCLOUD_DBG("newMap: " << newMap);
 
-            m[iter.key()] = newMap;
+            to[iter.key()] = newMap;
         }
         else 
         {
-            m[iter.key()] = iter.value();
+            to[iter.key()] = iter.value();
         }
     }
-
-    //LIBENCLOUD_DBG("m: " << m);
-
-    return m;
-}
-
-LIBENCLOUD_DLLSPEC void variantMerge (QVariant &to, const QVariant &from)
-{
-    QVariantMap mTo = to.toMap();
-    QVariantMap mFrom = from.toMap();
-
-    //LIBENCLOUD_DBG("TO: " << to);
-    //LIBENCLOUD_DBG("FROM: " << from);
-
-    for (QVariantMap::const_iterator iter = mFrom.begin();
-        iter != mFrom.end();
-        ++iter)
-    {
-        if (iter.value().canConvert<QVariantMap>())
-        {
-            variantMerge(
-                    qvariant_cast<QVariantMap>(to)[iter.key()],
-                    iter.value()
-                    );
-
-            mTo[iter.key()] = _mapMerge(
-                    mTo[iter.key()].toMap(),
-                    iter.value().toMap()
-                    );
-        }
-        else  // not a map - simple copy
-        {
-            mTo[iter.key()] = iter.value();
-        }
-    }
-
-    to = mTo;
 }
 
 LIBENCLOUD_DLLSPEC bool validIp (const QString &s)
@@ -304,6 +297,148 @@ LIBENCLOUD_DLLSPEC bool validHost (const QString &s)
                 "([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$")
         .indexIn(s) == 0);
 }
+
+// Get HKLM Software key according to 32/64 platform
+LIBENCLOUD_DLLSPEC QString sysSWPath (const QString &org, const QString &app)
+{
+    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
+
+#ifdef Q_OS_WIN
+    QString path = "HKEY_LOCAL_MACHINE\\Software";
+    if (win64Sys())
+        path += "\\WOW6432node";
+    if (!org.isEmpty())
+        path += "\\" + org;
+    path += "\\" + app;
+#endif
+
+#ifdef Q_OS_MAC
+    QString path = "/Library/Preferences/com";
+    if (!org.isEmpty())
+        path += "." + org;
+    path += "." + app + ".plist";
+#endif
+
+#ifdef Q_OS_LINUX
+    QString path = "/etc/xdg";
+    if (!org.isEmpty())
+        path += "/" + org;
+    path += "/" + app + ".conf"; 
+#endif
+
+    return path;
+}
+
+LIBENCLOUD_DLLSPEC QString userSWPath (const QString &org, const QString &app)
+{
+    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
+
+#ifdef Q_OS_WIN
+    QString path = "HKEY_CURRENT_USER\\Software";
+    if (!org.isEmpty())
+        path += "\\" + org;
+    path += "\\" + app;
+#else
+
+    // Avoid QtGui dependency by not using storageLocation()
+    //QString path = QDesktopServices::storageLocation(QDesktopServices::HomeLocation);
+    QString path = QDir::homePath();
+# ifdef Q_OS_MAC
+    path += "/Library/Preferences/com";
+    if (!org.isEmpty())
+        path += "." + org;
+    path += "." + app + ".plist";
+# endif
+
+# ifdef Q_OS_LINUX
+    path += "/.config";
+    if (!org.isEmpty())
+        path += "/" + org;
+    path += "/" + app + ".conf"; 
+# endif
+
+#endif
+
+    return path;
+}
+
+
+#ifdef Q_OS_WIN 
+/*
+ * OSVERSIONINFO sample values      major       minor
+ *
+ *  Windows 2000                    5           0
+ *  Windows XP                      5           1
+ *  Windows XP x64                  5           2
+ *  Windows Vista                   6           0
+ *  Windows 7                       6           1
+ *  Windows 8.1                     6           3
+ *  Windows 10                     10           0
+ *
+ * Notes: 
+ *  - applications not manifested for Windows 8.1 or 10 will return the Windows 8
+ *  default value (6.2)
+ *  - GetVersionEx() is deprecated - for other needs refer to "Version Helper
+ *  APIs"
+ */
+LIBENCLOUD_DLLSPEC int winVersion (int *major, int *minor)
+{
+    OSVERSIONINFO osvi;
+
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    if (!GetVersionEx(&osvi))
+        return ~0;
+
+    if (major)
+        *major = osvi.dwMajorVersion;
+
+    if (minor)
+        *minor = osvi.dwMinorVersion;
+
+    //LIBENCLOUD_DBG("major: " << *major << ", minor: " << *minor);
+
+    return 0;
+}
+
+LIBENCLOUD_DLLSPEC bool winVersionGe (int major, int minor)
+{
+    int maj;
+    int min;
+
+    if (winVersion(&maj, &min))
+        return false;
+
+    if (maj > major)
+        return true;
+
+    else if (maj == major && min >= minor)
+        return true;
+
+    return false;
+}
+
+typedef BOOL (WINAPI *LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
+
+LIBENCLOUD_DLLSPEC bool win64Sys ()
+{
+    BOOL bIsWow64 = FALSE;
+    LPFN_ISWOW64PROCESS fnIsWow64Process = NULL;
+
+    fnIsWow64Process = (LPFN_ISWOW64PROCESS) GetProcAddress(
+            GetModuleHandle(TEXT("kernel32")), "IsWow64Process");
+    
+    LIBENCLOUD_ERR_IF (fnIsWow64Process == NULL);
+    LIBENCLOUD_ERR_IF (!fnIsWow64Process(GetCurrentProcess(), &bIsWow64));
+
+    return bIsWow64;
+
+err:
+    return false;
+}
+
+#endif  // Q_OS_WIN
 
 } // namespace utils
 } // namespace libencloud

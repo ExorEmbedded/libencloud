@@ -30,6 +30,7 @@ public slots:
 
     // returns 0 on success, non-zero on failure
     int configSupply (const QVariant &config);
+    void configRetrieve ();
 
 signals:
 
@@ -38,11 +39,25 @@ signals:
     // 
 
     void configSent (libencloud::Api::ResultCode rc);
+    void configReceived (libencloud::Api::ResultCode rc,
+            const QVariant &config);
 
 protected slots:
 
-    void _error (const libencloud::Error &err);
-    void _clientComplete (const QString &response);
+    void _error (const libencloud::Error &err, const QVariant &userData);
+    void _clientComplete (const QString &response, const QMap<QByteArray, QByteArray> &headers, const QVariant &userData);
+
+protected:
+
+    typedef enum 
+    {
+        NoneType = 0,
+        ConfigRetrieveType,
+        ConfigSupplyType
+    }
+    MsgType; 
+
+    MsgType _msgType;
 };
 
 }  // namespace libencloud

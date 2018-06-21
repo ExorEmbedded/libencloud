@@ -105,6 +105,9 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
             if (_parent->getFallback())
                 j["fallback"] = true;
 
+            if (_parent->getLogin() != QVariant())
+                j["login"] = _parent->getLogin();
+
             if (_parent->getNeed() != QVariant())
                 j["need"] = _parent->getNeed();
 

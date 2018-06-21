@@ -30,6 +30,18 @@ NetworkManager::NetworkManager (ProcessManager *processManager)
 
     // default to no fallback (primary gateway)
     setFallback(false);
+
+//
+// <workaround> for: CONNECT-403 Connect App routes are deleted by Cisco AnyConnect Mobility Client
+//
+#ifdef Q_OS_WIN
+    _routeWATimer.setSingleShot(true);
+    connect(&_routeWATimer, SIGNAL(timeout()), this, SLOT(renewLease()));
+#endif
+//
+// </workaround>
+//
+
 err:
     return;
 }
@@ -267,17 +279,19 @@ void NetworkManager::readRoutes (Operation op, bool sync)
 
 void NetworkManager::addRoute (const QString &endpoint)
 {
+    QProcess *process;
+
     QPair<QString,QString> ipmask = parseNetdef(endpoint);
 
     LIBENCLOUD_ERR_IF ((ipmask == QPair<QString,QString>()));
 
 #ifdef Q_OS_WIN  // single syntax for IP and network
-    _processManager->start("route", "ADD " + ipmask.first +
+    process = _processManager->start("route", "ADD " + ipmask.first +
             " MASK " + ipmask.second + " " +  _gw);
 #else
     // single IP
     if (ipmask.second == "255.255.255.255")
-        _processManager->start("route", "add " + ipmask.first +
+        process = _processManager->start("route", "add " + ipmask.first +
 # ifdef Q_OS_MAC
                 " " +
 # else
@@ -285,7 +299,7 @@ void NetworkManager::addRoute (const QString &endpoint)
 # endif
                 _gw);
     else // network
-        _processManager->start("route", "add -net " + ipmask.first +
+        process = _processManager->start("route", "add -net " + ipmask.first +
 # ifdef Q_OS_MAC
                 " -netmask " +
 # else
@@ -300,9 +314,44 @@ void NetworkManager::addRoute (const QString &endpoint)
                 _gw);
 #endif
 
+//
+// <workaround> for: CONNECT-403 Connect App routes are deleted by Cisco AnyConnect Mobility Client
+//
+#ifdef Q_OS_WIN
+    if (g_libencloudCfg && g_libencloudCfg->config.compat)
+    {
+        LIBENCLOUD_DBG("Running 3rd-party VPN client compatibility fix");
+        connect(process, SIGNAL(finished(int, QProcess::ExitStatus)), SLOT(finishedAddRoute(int, QProcess::ExitStatus)));
+    }
+#endif
+
 err:
     return;
 }
+
+#ifdef Q_OS_WIN
+void NetworkManager::finishedAddRoute (int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitCode || (exitStatus != QProcess::NormalExit))
+        return;
+
+    _routeWATimer.start(3000);
+}
+
+void NetworkManager::renewLease ()
+{
+    LIBENCLOUD_TRACE;
+
+    LIBENCLOUD_ERR_IF (QProcess::execute(QString("ipconfig /release ") + LIBENCLOUD_TAPNAME));
+    LIBENCLOUD_ERR_IF (QProcess::execute(QString("ipconfig /renew ") + LIBENCLOUD_TAPNAME));
+
+err:
+    return;
+}
+//
+// </workaround>
+//
+#endif
 
 void NetworkManager::delRoute (const QString &endpoint)
 {

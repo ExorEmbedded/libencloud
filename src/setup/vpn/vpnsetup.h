@@ -46,12 +46,12 @@ signals:
     // internal -> setup -> core
     //
     void need (const QString &what, const QVariant &params);
-    void authRequired (Auth::Id id);
+    void authRequired (libencloud::Auth::Id id);
 
     //
     // core -> setup -> internal
     //
-    void authSupplied (const Auth &auth);
+    void authSupplied (const libencloud::Auth &auth);
 
 
 private:

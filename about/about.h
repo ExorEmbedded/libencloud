@@ -1,3 +1,5 @@
+/** __DEPRECATED__ by light branding */
+
 #ifndef _LIBENCLOUD_ABOUT_H_
 #define _LIBENCLOUD_ABOUT_H_
 

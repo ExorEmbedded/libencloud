@@ -1,3 +1,5 @@
+/** __DEPRECATED__ by light branding */
+
 #include "about.h"
 
 #include <QDebug>
@@ -7,9 +9,13 @@ LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudOrganization = BRAND_ORGANIZATION;
 
 LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudProductDir(char* buffer, const char* productName)
 {
+#ifndef QICC_XBRAND
     strncpy(buffer, LibEncloudOrganization, 120);
     strncat(buffer, "/", 1);
     strncat(buffer, productName, 120);
+#else
+    strncpy(buffer, productName, 120);
+#endif
     return buffer;
 }
 
@@ -23,20 +29,12 @@ LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudInstallDir(char* buffer, const cha
 
 LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudFullAppName(char* buffer, const char* pkgName)
 {
+#ifndef QICC_XBRAND
     strncpy(buffer, LibEncloudOrganization, 120);
     strncat(buffer, " ", 1);
     strncat(buffer, pkgName, 120);
-    return buffer;
-}
-
-LIBENCLOUDABOUT_DLLSPEC const char* LibEncloudTapName(char* buffer, const char* productName)
-{
-    strncpy(buffer, LibEncloudOrganization, 120);
-#ifdef LIBENCLOUD_EXOR
-    strncat(buffer, productName, 120);
-#else  // ENDIAN, PANDA
-    // Tap name is plain ORG + "Connect"
-    strncat(buffer, "Connect", 120);
+#else
+    strncpy(buffer, pkgName, 120);
 #endif
     return buffer;
 }

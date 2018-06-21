@@ -2,6 +2,7 @@
 #include <encloud/Common>
 #include <encloud/Http/HttpServer>
 #include <encloud/Server>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -134,6 +135,9 @@ int Server::start ()
 
     LIBENCLOUD_ERR_IF (!_localServer->isListening());
 
+    if (_mode == EncloudMode)
+        LIBENCLOUD_ERR_IF (_autoconnect());
+
     _running = true;
 
     return 0;
@@ -166,6 +170,42 @@ err:
 //
 // private methods
 // 
+
+int Server::_autoconnect()
+{
+    LIBENCLOUD_SYS_SETTINGS_DECL(appSettings, LIBENCLOUD_ORG, LIBENCLOUD_PRODUCT);
+
+    LIBENCLOUD_LOG("App settings file: " << appSettings.fileName());
+
+    QString appMode = appSettings.value("mode").toString();
+
+    LIBENCLOUD_LOG("Running mode: " << appMode);
+
+    if (appMode != "Agent")
+        return 0;
+
+    QVariantMap config;
+    QVariantMap configSetup;
+    configSetup["agent"] = "true";
+    config["setup"] = configSetup;
+
+#ifdef QICC_BRANDS_DISABLE_VERIFYCA
+    QVariantMap configSsl;
+    QVariantMap configSslInit;
+    configSslInit["verify_ca"] = false;
+    configSsl["init"] = configSslInit;
+    config["ssl"] = configSsl;
+#endif
+
+    emit configSupply(config);
+    emit authSupply(libencloud::Auth(libencloud::Auth::SwitchboardId,
+                    libencloud::Auth::UrlType,
+                    _cfg->config.regUrl.toString()));
+
+    emit actionRequest("start", libencloud::Params());
+
+    return 0;
+}
 
 void Server::_delete()
 {

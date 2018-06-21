@@ -2,8 +2,6 @@
 #    
 # [ General ]
 #
-#   endian      Endian build
-#   exor        Exor build
 #   debug       compile libraries with debugging symbols
 #   nodll       build a static library
 #   splitdeps   Dependencies are split into different parts of the system
@@ -14,9 +12,11 @@
 # 
 # Note: mode selection has implications on both behaviour and packaging!
 #
-#   modeqcc     Endian Connect App / Exor JMConnect mode
-#   modeece     Endian Cloud Enabler mode
-#   modesece    Software Endian Cloud Enabler mode
+#   modeqcc  a) Endian Connect App / Exor JMConnect mode client mode
+#            b) Agents in "fake connect mode" that authenticate via Status API (unregistered on EN)
+#                config.agent = false
+#            c) Agents which use autoregistration API based on activation code (registered on EN)
+#                config.agent = true
 #   modevpn     Only vpn manager with static ovpn file configuration
 #               Note: use this mode only if no setup is ever required
 #               (other modes now also support vpn-only mode via Config API)
@@ -29,8 +29,12 @@
 #   nogui       totally disable Qt Gui modally (also in tests)
 #   notest      don't build tests
 #
-# [ About definitions ]
-#   about       use brand info from about dll, instead of using default for major brand (exor/endian)
+# [ Branding Options ]
+#
+#   endian      Endian build
+#   exor        Exor build
+#   panda       Panda build
+#   xbrand      light branding - build a brandless App without references to
 
 contains(DEFINES, WINCE) {
     CONFIG += wince
@@ -71,7 +75,7 @@ DEFINES += PRODUCT_VERSION=\\\"$${VERSION}\\\"
 # [ libencloud version ] 
 # *** CHANGE THIS TO UPDATE LIBENCLOUD VERSION ***
 # only x.x.x.x format allowed, where x is a number
-VERSION = 0.10.0
+VERSION = 0.12.0
 #VERSION_TAG = Wip  # Dev version - comment this for official release!
 #VERSION_TAG = Beta  # Dev version - comment this for official release!
 
@@ -81,9 +85,9 @@ DEFINES += LIBENCLOUD_VERSION=\\\"$${VERSION}\\\"
 }
 
 endian {
-    DEFINES += LIBENCLOUD_ENDIAN
+    DEFINES += QICC_ENDIAN
 } else:exor {
-    DEFINES += LIBENCLOUD_EXOR
+    DEFINES += QICC_EXOR
 } else:panda {
 } else {
     error("an organization must be specified in CONFIG!")
@@ -131,28 +135,20 @@ Debug:DESTDIR = debug
 
 modeqcc {
     DEFINES += LIBENCLOUD_MODE_QCC
-} else:modeece {
-    DEFINES += LIBENCLOUD_MODE_ECE
-} else:modesece {
-    DEFINES += LIBENCLOUD_MODE_SECE
 } else:modevpn {
     DEFINES += LIBENCLOUD_MODE_VPN
 } else {
-    error("a mode must be defined (CONFIG += modeqcc|modeece|modesece|modevpn)!")
+    error("a mode must be defined (CONFIG += modeqcc|modevpn)!")
 }
-DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_DIR}\\\"
+DEFINES += LIBENCLOUD_PRODUCT=\\\"$${PRODUCT_STRIP}\\\"
 
 splitdeps {
     DEFINES += LIBENCLOUD_SPLITDEPS
 }
 
-PROGDIR=$$(ProgramFiles)/$${ORG}/$${PRODUCT_DIR}
-
 nosetup     { DEFINES += LIBENCLOUD_DISABLE_SETUP }
 nocloud     { DEFINES += LIBENCLOUD_DISABLE_CLOUD }
 noapi       { DEFINES += LIBENCLOUD_DISABLE_API }
-
-about       { DEFINES += LIBENCLOUD_USE_ABOUT }
 
 exists(".git") {
     REVISION=$$system(git rev-parse --short HEAD)
@@ -161,7 +157,12 @@ exists(".git") {
     DEFINES += LIBENCLOUD_REVISION=\\\"$$cat(.revision)\\\"
 }
 DEFINES += LIBENCLOUD_PKGNAME=\\\"$${PKGNAME}\\\"
-DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
+
+xbrand {
+    DEFINES += LIBENCLOUD_ORG=\\\"\\\"
+} else {
+    DEFINES += LIBENCLOUD_ORG=\\\"$${ORG}\\\"
+}
 
 # uncomment or set globally to avoid debug output
 #DEFINES += QT_NO_DEBUG_OUTPUT
@@ -196,13 +197,11 @@ windows{
     LIBS += -lssl -lcrypto
 }
 
-# libabout
-about {
-    win32 {
-        ABOUT_LIBS += $$SRCBASEDIR/about/$$DESTDIR/about$${DBG_SUFFIX}.$${LIBEXT}
-    } unix {
-        ABOUT_LIBS += -L$$SRCBASEDIR/about/$$DESTDIR/ -labout
-    }
+# yaml
+!splitdeps {
+    QTYAML_PATH = $${SRCBASEDIR}/../yaml-cpp
+    INCLUDEPATH += $${QTYAML_PATH}/include
+    LIBS += -L$${QTYAML_PATH}/src/$$DESTDIR -lyaml-cpp
 }
 
 # for SHGetFolderPath()
@@ -224,18 +223,31 @@ INCLUDEPATH += $${SRCBASEDIR}/include
 INCLUDEPATH += $${SRCBASEDIR}/src
 DEPENDPATH += $${INCLUDEPATH}
 
+# 
 # install dirs
-windows {  # used only for dev - installer handles positioning on target
-           # and runtime paths are defined in src/common/defaults.h
-    INSTALLDIR = "$${PROGDIR}"
-    LIBDIR = "$${INSTALLDIR}/bin"
-    BINDIR = "$${INSTALLDIR}/bin"
-    CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"
-} else {  # used for dev and production
+# 
+unix {
     INSTALLDIR = /usr
     LIBDIR = $${INSTALLDIR}/lib
     BINDIR = $${INSTALLDIR}/bin
     INCDIR = $${INSTALLDIR}/include
-    CONFDIR = /etc/encloud
 }
 
+# overrides for Connect packaging
+CONNECT_DEFINES=$${SRCBASEDIR}/../connectapp/defines.pri
+exists($${CONNECT_DEFINES}): include($${CONNECT_DEFINES})
+
+!exists($${SETTINGKEYPATH}) { 
+    # dummy in case key is unused (e.g. device)
+    SETTINGKEY="0xdeadbeef"  
+} else {
+    SETTINGKEY=$$cat($${SETTINGKEYPATH})
+}
+DEFINES += QICC_SETTING_KEY=$$SETTINGKEY
+
+# local overrides
+windows {
+    CONFDIR = "$${INSTALLDIR}/$${PKGNAME}/etc"
+} else {
+    CONFDIR = /etc/encloud
+}

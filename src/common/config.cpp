@@ -10,8 +10,7 @@ namespace libencloud {
 
 /* Set defaults from defaults.h definitions */
 Config::Config ()
-    : settings(NULL)
-    , sysSettings(NULL)
+    : sysSettings(NULL)
 {
     QString sep = "/";
 
@@ -36,10 +35,7 @@ Config::Config ()
 
     // data are package-specific on win
 
-    settings = new QSettings(LIBENCLOUD_ORG, LIBENCLOUD_APP);
-    LIBENCLOUD_ERR_IF (settings == NULL);
-
-    sysSettings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    sysSettings = new LIBENCLOUD_SYS_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_ERR_IF (sysSettings == NULL);
 
 err:
@@ -48,11 +44,10 @@ err:
 
 Config::~Config()
 {
-    LIBENCLOUD_DELETE(settings);
     LIBENCLOUD_DELETE(sysSettings);
 }
 
-QVariant Config::getVariant ()
+QVariantMap Config::getMap ()
 {
     return _json;
 }
@@ -68,16 +63,11 @@ QString Config::dump ()
 
 #if defined(LIBENCLOUD_MODE_QCC)
     ts << "mode=QCC" << endl;
-#elif defined(LIBENCLOUD_MODE_ECE)
-    ts << "mode=ECE" << endl;
-#elif defined(LIBENCLOUD_MODE_SECE)
-    ts << "mode=SECE" << endl;
 #endif
     ts << "confPrefix=" << confPrefix << endl;
     ts << "sbinPrefix=" << sbinPrefix << endl;
     ts << "dataPrefix=" << dataPrefix << endl;
     ts << "logPrefix=" << logPrefix << endl;
-    ts << "settings=" << settings->fileName() << endl;
     ts << "sysSettings=" << sysSettings->fileName() << endl;
 
     ts << libencloud::json::serialize(_json, ok);
@@ -90,19 +80,37 @@ int Config::loadFromFile ()
 {
     bool ok;
 
-    _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok);
-    if (!ok || _json.isNull())
+    _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok).toMap();
+    if (!ok || _json.isEmpty())
     {
         LIBENCLOUD_DBG("[Config] Failed parsing config file: " << filePath.absoluteFilePath());
         goto err;
     }
     _jsonOrig = _json;
 
-    LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+    LIBENCLOUD_ERR_IF (_parse(_json));
+    LIBENCLOUD_ERR_IF (_loadExt());
 
     return 0;
 err: 
     return ~0;
+}
+
+/* load other external data */
+int Config::_loadExt ()
+{
+#ifndef LIBENCLOUD_SPLITDEPS  // not agent
+    QVariantMap setup; 
+    QString setupCode = getActivationCode(true);  // encrypted
+
+    if (!setupCode.isEmpty())
+    {
+        setup["code_enc"] = setupCode;
+        _json["setup"] = setup;
+    }
+#endif
+
+    return 0;
 }
 
 //
@@ -120,12 +128,12 @@ void Config::receive (const QVariant &cfg)
     }
     else
     {
-        utils::variantMerge(_json, cfg);
+        utils::mapMerge(_json, cfg.toMap());
     }
 
     //LIBENCLOUD_DBG("[Config] new cfg: " << dump());
 
-    LIBENCLOUD_ERR_IF (_parse(_json.toMap()));
+    LIBENCLOUD_ERR_IF (_parse(_json));
 
 err:
     return;
@@ -149,14 +157,6 @@ int Config::_parse (const QVariantMap &jo)
     else
         config.bind = jo["bind"].toString();
 
-#ifdef LIBENCLOUD_MODE_ECE
-    if (jo["poi"].isNull())
-        config.poiPath = _joinPaths(dataPrefix, LIBENCLOUD_POI_FILE);
-    else
-        config.poiPath = _joinPaths(dataPrefix, \
-                jo["poi"].toString());
-#endif
-
     if (jo["timeout"].isNull())
         config.timeout = LIBENCLOUD_TIMEOUT;
     else
@@ -164,6 +164,7 @@ int Config::_parse (const QVariantMap &jo)
 
     if (jo["autoretry"].isNull())
 #if defined(LIBENCLOUD_MODE_QCC)
+        // Note: autoretry assumed always true in QCC agent mode
         config.autoretry = false;
 #else
         config.autoretry = true;
@@ -180,12 +181,12 @@ int Config::_parse (const QVariantMap &jo)
     else
         config.decongest = jo["decongest"].toBool();
 
-    if (jo["csr"].toMap()["tmpl"].isNull())
-        config.csrTmplPath = _joinPaths(dataPrefix, LIBENCLOUD_CSRTMPL_FILE);
+    if (jo["compat"].isNull())
+        config.compat = false;
     else
-        config.csrTmplPath = _joinPaths(dataPrefix, \
-                jo["csr"].toMap()["tmpl"].toString());
+        config.compat = jo["compat"].toBool();
 
+    LIBENCLOUD_ERR_IF (_parseRegistry(jo));
     LIBENCLOUD_ERR_IF (_parseSb(jo));
     LIBENCLOUD_ERR_IF (_parseSsl(jo, config.ssl));
 
@@ -198,10 +199,26 @@ int Config::_parse (const QVariantMap &jo)
                 "rsa bits must be a multiple of 512!");
     }
 
-    if (jo["setup"].toMap()["enabled"].isNull())
-        config.setupEnabled = true;
-    else  // plain VPN
-        config.setupEnabled = jo["setup"].toMap()["enabled"].toBool();
+    config.setupEnabled = true;
+    config.setupAgent = false;
+
+    if (!jo["setup"].isNull())
+    {
+        QVariantMap setup = jo["setup"].toMap();
+
+        if (!setup["enabled"].isNull())
+            config.setupEnabled = setup["enabled"].toBool();
+
+        if (!setup["agent"].isNull())
+            config.setupAgent = setup["agent"].toBool();
+
+        if (config.setupAgent)
+        {
+            if (!setup["code_enc"].isNull())
+                LIBENCLOUD_ERR_IF (setActivationCode(setup["code_enc"].toString(), false).isEmpty());
+        }
+    }
+    config.regProvisioningPath = _joinPaths(dataPrefix, LIBENCLOUD_REG_PROV_ENC_FILE);
 
     LIBENCLOUD_ERR_IF (_parseVpn(jo));
     LIBENCLOUD_ERR_IF (_parseLog(jo));
@@ -221,6 +238,30 @@ int Config::_parsePaths (const QVariantMap &jo)
     }
 
     return 0;
+}
+
+int Config::_parseRegistry (const QVariantMap &jo)
+{
+    config.regUrl = QUrl(LIBENCLOUD_REG_URL);
+
+    if (jo["registry"].isValid())
+    {
+        QVariantMap jot = jo["registry"].toMap();
+
+        if (jot["url"].isValid())
+        {
+            QString s = jot["url"].toString();
+            if (QUrl(s).scheme().isEmpty())
+                s.prepend(QString(LIBENCLOUD_SCHEME_HTTPS) + "://");
+            config.regUrl = s;
+            LIBENCLOUD_ERR_MSG_IF (!config.regUrl.isValid(), 
+                    "Not a valid URL: " << s);
+        }
+    }
+
+    return 0;
+err:
+    return ~0;
 }
 
 int Config::_parseSb (const QVariantMap &jo)
@@ -350,6 +391,7 @@ int Config::_parseVpn (const QVariantMap &jo)
     config.vpnMgmtPeriod = LIBENCLOUD_VPN_MGMT_PERIOD;
     config.vpnVerbosity = LIBENCLOUD_VPN_VERBOSITY;
     config.vpnArgs = "";
+    config.vpnFw = true;
 
     if (jo["vpn"].isNull())
         return 0;
@@ -376,6 +418,9 @@ int Config::_parseVpn (const QVariantMap &jo)
 
     if (jot["args"].isValid())
         config.vpnArgs = jot["args"].toString();
+
+    if (jot["fw"].isValid())
+        config.vpnFw = jot["fw"].toBool();
 
     return 0;
 }

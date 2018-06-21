@@ -8,7 +8,13 @@ echo "Generating brand-specific OpenVPN scripts for OSX"
 ROUTE_UP_SCRIPT="openvpn-route-up.sh"
 
 # Setup env for paths
-APPDIR="/Applications/${PACKAGE_ORG}/${PACKAGE_NAME}.app"
+if [ "${PACKAGE_XBRAND}" = "true" ]; then
+    APPDIR="/Applications/${PACKAGE_NAME}.app"
+    PLISTFILE="/Library/Preferences/com.libencloud.plist"
+else
+    APPDIR="/Applications/${PACKAGE_ORG}/${PACKAGE_NAME}.app"
+    PLISTFILE="/Library/Preferences/com.${PACKAGE_ORG}.libencloud.plist"
+fi
 BINDIR="${APPDIR}/Contents/MacOS"
 
 cat << EOF > ${ROUTE_UP_SCRIPT}
@@ -41,7 +47,7 @@ die()
 #
 # Read port from OSX Defaults
 #
-ENCLOUD_PORT=\$(defaults read "/Library/Preferences/com.${PACKAGE_ORG}.libencloud.plist" port)
+ENCLOUD_PORT=\$(defaults read "${PLISTFILE}" port)
 log "Read Encloud Port: \${ENCLOUD_PORT}"
 
 #

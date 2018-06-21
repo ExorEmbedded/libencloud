@@ -55,6 +55,14 @@ int Logger::open ()
     QtMsgHandler prev_log_handler;
     LIBENCLOUD_DBG("[Logger] path: " << _path);
 
+    if (QFile::exists(_path))
+    {
+        QFileInfo pathInfo(_path);
+        QString prevPath = pathInfo.absolutePath() + "/" + pathInfo.baseName() + ".0." + pathInfo.completeSuffix();
+        QFile::remove(prevPath);
+        QFile::rename(_path, prevPath);
+    }
+
     _logFile.setFileName(_path);
     LIBENCLOUD_ERR_IF (!utils::fileCreate(_logFile, QIODevice::WriteOnly | QIODevice::Text | _extraMode));
 

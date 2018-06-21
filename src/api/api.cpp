@@ -1,4 +1,5 @@
 #include <encloud/Api/CommonApi>
+#include <encloud/Utils>
 #include <common/common.h>
 #include <common/config.h>
 
@@ -41,7 +42,7 @@ int Api::init ()
     LIBENCLOUD_DBG("[Api] Creating shared Settings object");
 
     // API settings have System Scope (used by Encloud Service)
-    __settings = new QSettings(QSettings::SystemScope, LIBENCLOUD_ORG, LIBENCLOUD_APP);
+    __settings = new LIBENCLOUD_SYS_SETTINGS(LIBENCLOUD_ORG, LIBENCLOUD_APP);
     LIBENCLOUD_DBG("[Api] file: " << __settings->fileName());
     LIBENCLOUD_ERR_IF (__settings == NULL);
 

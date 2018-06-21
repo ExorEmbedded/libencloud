@@ -242,7 +242,7 @@ int VpnConfig::fromString (const QString &s, bool parse)
             }
         }
 
-        LIBENCLOUD_ERR_IF (!_isValid(false));
+        LIBENCLOUD_ERR_IF (!checkValid(false));
     }
     else
     {
@@ -310,7 +310,6 @@ err:
 int VpnConfig::toFile (const QString &path) const
 {
     QString s;
-    QFile configFile(path);
 
     QTextStream out(&s);
 
@@ -363,13 +362,10 @@ int VpnConfig::toFile (const QString &path) const
         }
     }
 
-    LIBENCLOUD_ERR_IF (!configFile.open(QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (configFile.write(s.toAscii()) < 0);
-    configFile.close();
+    LIBENCLOUD_ERR_IF (!utils::bytes2File(s.toAscii(), path));
 
     return 0;
 err:
-    configFile.close();
     return ~0;
 }
 
@@ -631,7 +627,7 @@ int VpnConfig::setP12Path (const QString &p12Path)
 
 // Basic consistency check
 // Note: to be used only for parsed configuration (parse=true)
-bool VpnConfig::_isValid (bool strict)
+bool VpnConfig::checkValid (bool strict) 
 {
     LIBENCLOUD_ERR_IF (!VpnConfig::validDev(getDev()));
     LIBENCLOUD_ERR_IF (!VpnConfig::validProto(getRemoteProto()));
@@ -643,9 +639,9 @@ bool VpnConfig::_isValid (bool strict)
                 getP12Path().isEmpty());
     }
 
-    return true;
+    return (_valid = true);
 err:
-    return false;
+    return (_valid = false);
 }
 
 } // namespace libencloud

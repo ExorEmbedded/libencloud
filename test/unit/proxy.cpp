@@ -30,9 +30,9 @@ void TestProxy::run ()
     QMap<QByteArray, QByteArray> headers;
     QSslConfiguration conf;
 
-    connect(&_client, SIGNAL(error(libencloud::Error)),
+    connect(&_client, SIGNAL(error(libencloud::Error, QVariant)),
             this, SLOT(_clientError(libencloud::Error)));
-    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>)),
+    connect(&_client, SIGNAL(complete(QString, QMap<QByteArray, QByteArray>, QVariant)),
             this, SLOT(_clientComplete(QString)));
 
     _proxy.setType(LIBENCLOUD_TEST_PROXY_TYPE);
