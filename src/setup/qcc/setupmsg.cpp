@@ -139,8 +139,10 @@ void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, 
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_ERR_IF (_decodeResponse(response, headers));
-    LIBENCLOUD_ERR_IF (_unpackResponse());
+    LIBENCLOUD_ERR_IFS (_decodeResponse(response, headers));
+    LIBENCLOUD_ERR_IFS (_unpackResponse());
+
+    LIBENCLOUD_LOG("[Setup] response: " << response);
 
     emit processed();
 err:
@@ -258,8 +260,8 @@ int SetupMsg::_unpackResponse ()
     QFile caf(cafn);
 
     // save the Operation CA certificate to file
-    LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
+    LIBENCLOUD_ERR_IFS (!utils::fileCreate(caf, QIODevice::WriteOnly));
+    LIBENCLOUD_ERR_IFS (caf.write(_caCert.toPem()) == -1);
     caf.close();
 
     return 0;

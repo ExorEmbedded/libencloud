@@ -64,10 +64,12 @@
         } \
     } while (0);
 
-#define LIBENCLOUD_GOTOERR_IF(cond) do { if (cond) { goto err; } } while (0)
-
 // Used to redefine __LIBENCLOUD_MSG, so interface must match
 #define __LIBENCLOUD_PRINT(lev, levstr, msg) fprintf(stderr, "[%s] libencloud:%s:%s:%d] %s\n", levstr, __FILE__, __FUNCTION__, __LINE__, msg)
+
+/* silent macros */
+#define LIBENCLOUD_ERR_IFS(cond) do { if (cond) { goto err; } } while (0)
+#define LIBENCLOUD_RETURN_IFS(cond, rc) do { if (cond) { return rc; } } while (0)
 
 /* lev >= LIBENCLOUD_LOG_DEBUG */
 #ifndef LIBENCLOUD_DISABLE_TRACE

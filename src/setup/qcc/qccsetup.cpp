@@ -180,8 +180,6 @@ void QccSetup::_onErrorState ()
 
 void QccSetup::_onError (const libencloud::Error &err)
 {
-    LIBENCLOUD_DBG(err.toString());
-
     emit error((_error = err));
 }
 

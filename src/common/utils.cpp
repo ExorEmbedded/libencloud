@@ -301,7 +301,7 @@ LIBENCLOUD_DLLSPEC bool validHost (const QString &s)
 // Get HKLM Software key according to 32/64 platform
 LIBENCLOUD_DLLSPEC QString sysSWPath (const QString &org, const QString &app)
 {
-    LIBENCLOUD_RETURN_IF (app.isEmpty(), QString());
+    LIBENCLOUD_RETURN_IFS (app.isEmpty(), QString());
 
 #ifdef Q_OS_WIN
     QString path = "HKEY_LOCAL_MACHINE\\Software";
