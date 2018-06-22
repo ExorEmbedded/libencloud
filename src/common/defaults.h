@@ -3,6 +3,10 @@
 
 #include <encloud/Common>
 
+#if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
+#  define LIBENCLOUD_MODE_CLIENT
+#endif
+
 #define LIBENCLOUD_APP                  LIBENCLOUD_PKGNAME
 
 // tap device - MUST match name defined in CheckTap
