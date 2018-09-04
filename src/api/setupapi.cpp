@@ -48,7 +48,7 @@ void SetupApi::licenseSupply (const QUuid &uuid)
     url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
-    _params.addQueryItem("license", uuid.toString());
+    addQueryItem(_params, "license", uuid.toString());
 
     _msgType = LicenseSupplyType;
 
@@ -65,7 +65,7 @@ void SetupApi::portSupply (int port)
     url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
-    _params.addQueryItem("clientPort", QString::number(port));
+    addQueryItem(_params, "clientPort", QString::number(port));
 
     _msgType = PortSupplyType;
 
@@ -82,7 +82,7 @@ void SetupApi::logPortSupply (int port)
     url.setPath(LIBENCLOUD_API_SETUP_PATH);
 
     _params.clear();
-    _params.addQueryItem("logPort", QString::number(port));
+    addQueryItem(_params, "logPort", QString::number(port));
 
     _msgType = LogPortSupplyType;
 

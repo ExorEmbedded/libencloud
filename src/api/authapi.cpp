@@ -1,6 +1,9 @@
 #include <encloud/Api/AuthApi>
 #include <common/common.h>
 #include <common/config.h>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 namespace libencloud {
 
@@ -43,20 +46,20 @@ void AuthApi::authSupply (const libencloud::Auth &auth)
     libencloud::Auth::Type type = auth.getType();
 
     _params.clear();
-    _params.addQueryItem("id", auth.getStrId());
-    _params.addQueryItem("type", auth.getStrType());
-    _params.addQueryItem("url", auth.getUrl());
+    addQueryItem(_params, "id", auth.getStrId());
+    addQueryItem(_params, "type", auth.getStrType());
+    addQueryItem(_params, "url", auth.getUrl());
 
     if (type != Auth::CertificateType)
     {
-        _params.addQueryItem("user", auth.getUser());
-        _params.addQueryItem("pass", auth.getPass());
+        addQueryItem(_params, "user", auth.getUser());
+        addQueryItem(_params, "pass", auth.getPass());
     }
 
     if (type == Auth::CertificateType || type == Auth::CertificateUserpassType)
     {
-        _params.addQueryItem("path", auth.getPath());
-        _params.addQueryItem("p12pass", auth.getP12Pass());
+        addQueryItem(_params, "path", auth.getPath());
+        addQueryItem(_params, "p12pass", auth.getP12Pass());
     }
 
     _client.run(url, _params, _headers, _config);

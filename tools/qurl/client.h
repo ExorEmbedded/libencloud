@@ -2,6 +2,9 @@
 #define _LIBENCLOUD_QURL_CLIENT_H_
 
 #include <encloud/Client>
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 namespace qurl {
 

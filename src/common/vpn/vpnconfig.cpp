@@ -362,7 +362,7 @@ int VpnConfig::toFile (const QString &path) const
         }
     }
 
-    LIBENCLOUD_ERR_IF (!utils::bytes2File(s.toAscii(), path));
+    LIBENCLOUD_ERR_IF (!utils::bytes2File(s.toLatin1(), path));
 
     return 0;
 err:

@@ -50,7 +50,7 @@ int ConfigApi::configSupply (const QVariant &config)
 
     LIBENCLOUD_DBG("[ConfigApi] config url: " << url.toString() << ", data: " << js);
 
-    _client.post(url, _headers, js.toAscii(), _config, ConfigSupplyType);
+    _client.post(url, _headers, js.toLatin1(), _config, ConfigSupplyType);
 
 	return 0;
 err:

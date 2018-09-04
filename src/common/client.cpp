@@ -116,7 +116,11 @@ err:
 void Client::run (const QUrl &url, const QUrl &params,
 		const QMap<QByteArray, QByteArray> &headers, const QSslConfiguration &conf, const QVariant &userData)
 {
+#if QT_VERSION < 0x050000
 	_send(MSG_TYPE_NONE, url, headers, params.encodedQuery(), conf, userData);
+#else
+	_send(MSG_TYPE_NONE, url, headers, params.query(QUrl::FullyEncoded).toLatin1(), conf, userData);
+#endif
 }
 
 void Client::get (const QUrl &url, const QMap<QByteArray, QByteArray> &headers,
@@ -225,7 +229,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
 
     // default headers
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
-    request.setRawHeader("Host", url.host().toAscii());
+    request.setRawHeader("Host", url.host().toLatin1());
     if ((msgType == MSG_TYPE_POST) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
         request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");

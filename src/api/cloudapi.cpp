@@ -30,10 +30,10 @@ void CloudApi::actionRequest (const QString &action, const libencloud::Params &p
     url.setPath(LIBENCLOUD_API_CLOUD_PATH);
 
     _params.clear();
-    _params.addQueryItem("action", action);
+    addQueryItem(_params, "action", action);
 
     foreach (Param param, params)
-        _params.addQueryItem(param.first, param.second);
+        addQueryItem(_params, param.first, param.second);
 
     LIBENCLOUD_DBG("[CloudApi] action url: " << url.toString() << 
             ", params: " << _params.toString());

@@ -129,9 +129,9 @@ LIBENCLOUD_DLLSPEC QString setActivationCode (const QString &code, bool encrypt)
     QByteArray ba;
 
     if (encrypt)
-        ba = crypto.encryptToString(code).toAscii();
+        ba = crypto.encryptToString(code).toLatin1();
     else
-        ba = code.toAscii();
+        ba = code.toLatin1();
 
     LIBENCLOUD_ERR_IF (utils::bytes2File(ba, path, true));
 
@@ -141,3 +141,47 @@ err:
 }
 
 }  // namespace libencloud
+
+QString getQueryItemValue(const QUrl &url, const QString &param) {
+#if QT_VERSION < 0x050000
+        return url.queryItemValue(param);
+#else
+        return QUrlQuery(url).queryItemValue(param);
+#endif
+}
+
+void removeQueryItem(QUrl &url, const QString &param) {
+#if QT_VERSION < 0x050000
+        url.removeQueryItem(param);
+#else
+        QUrlQuery query = QUrlQuery(url);
+        query.removeQueryItem(param);
+        url.setQuery(query);
+#endif
+}
+
+void addQueryItem(QUrl &url, const QString &param, const QString &value) {
+#if QT_VERSION < 0x050000
+        url.addQueryItem(param, value);
+#else
+        QUrlQuery query = QUrlQuery(url);
+        query.addQueryItem(param, value);
+        url.setQuery(query);
+#endif
+}
+
+void setEncodedQuery(QUrl &url, const QString &query) {
+#if QT_VERSION < 0x050000
+        url.setEncodedQuery(query.toLatin1());
+#else
+        url.setQuery(query);
+#endif
+}
+
+QList<QPair<QString, QString>> queryItems(const QUrl &url) {
+#if QT_VERSION < 0x050000
+        return url.queryItems();
+#else
+        return QUrlQuery(url).queryItems();
+#endif
+}

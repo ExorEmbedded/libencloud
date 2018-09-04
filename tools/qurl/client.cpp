@@ -67,7 +67,13 @@ bool Client::run (const QString &url, const QVariantMap &opts)
 
             qDebug() << "var:" << dataRx.cap(1);
             qDebug() << "val:" << dataRx.cap(2);
+#if QT_VERSION < 0x050000
             params.addQueryItem(dataRx.cap(1), dataRx.cap(2));
+#else
+            QUrlQuery query = QUrlQuery(params);
+            query.addQueryItem(dataRx.cap(1), dataRx.cap(2));
+            params.setQuery(query);
+#endif
         }
 
         m_client.run(url, params, headers, conf);

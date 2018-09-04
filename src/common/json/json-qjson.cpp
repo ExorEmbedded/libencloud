@@ -13,7 +13,7 @@ QVariant parse (const QString &str, bool &ok)
 {
     QJson::Parser parser;
 
-    return parser.parse(str.toAscii(), &ok);
+    return parser.parse(str.toLatin1(), &ok);
 }
 
 QString serialize (const QVariant &json, bool &ok)

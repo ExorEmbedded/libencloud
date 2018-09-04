@@ -4,10 +4,16 @@
 #include <common/config.h>
 #include <QTcpSocket>
 
-// logging: Qt4 forces usage of globals with qInstallMsgHandler()
+// logging: Qt forces usage of globals with qInstallMsgHandler()
 static QTextStream *g_svcLogText = NULL;
+
+#if QT_VERSION < 0x050000
 static void __log_handler (QtMsgType type, const char *msg);
 static QtMsgHandler __default_log_handler = NULL;
+#else
+static void __log_handler (QtMsgType type, const QMessageLogContext &context, const QString &msg);
+static QtMessageHandler __default_log_handler = NULL;
+#endif
 
 namespace libencloud {
 
@@ -52,7 +58,6 @@ int Logger::setExtraMode (QIODevice::OpenModeFlag flags)
 
 int Logger::open ()
 {
-    QtMsgHandler prev_log_handler;
     LIBENCLOUD_DBG("[Logger] path: " << _path);
 
     if (QFile::exists(_path))
@@ -69,7 +74,14 @@ int Logger::open ()
     _logText.setDevice(&_logFile);
     g_svcLogText = &_logText;
 
+#if QT_VERSION < 0x050000
+    QtMsgHandler prev_log_handler;
     prev_log_handler = qInstallMsgHandler(__log_handler);
+#else
+    QtMessageHandler prev_log_handler;
+    prev_log_handler = qInstallMessageHandler(__log_handler);
+#endif
+
     // Save default qt log handler
     if (prev_log_handler != __log_handler) {
         __default_log_handler = prev_log_handler;
@@ -284,7 +296,7 @@ void LogListener::_socketError (QAbstractSocket::SocketError socketError)
 // static functions
 //
 
-static void __log_handler (QtMsgType type, const char *msg)
+static void log_handler (QtMsgType type, const char *msg)
 {
     Q_UNUSED(type);
 
@@ -308,8 +320,24 @@ static void __log_handler (QtMsgType type, const char *msg)
 #endif
 
     *g_svcLogText << msg << endl;
+}
+
+#if QT_VERSION < 0x050000
+static void __log_handler (QtMsgType type, const char *msg)
+{
+    log_handler(type, msg);
 
     if (__default_log_handler) {
         __default_log_handler(type, msg);
     }
 }
+#else
+static void __log_handler (QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    log_handler(type, msg.toLatin1().constData());
+
+    if (__default_log_handler) {
+        __default_log_handler(type, context, msg);
+    }
+}
+#endif

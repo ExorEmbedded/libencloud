@@ -82,7 +82,7 @@ int run (const QVariantMap &opts)
     LIBENCLOUD_ERR_IF (libencloud_crypto_set_cipher(&ec, libencloud::crypto::Aes256Cfb8Cipher));
     LIBENCLOUD_ERR_IF (libencloud_crypto_set_digest(&ec, libencloud::crypto::Sha256Digest));
 
-    ac = libencloud::getActivationCode(false).toUpper().toAscii();
+    ac = libencloud::getActivationCode(false).toUpper().toLatin1();
 
     out << "<activation_code>" << ac << "</activation_code>" << endl;
     out << endl;

@@ -69,7 +69,7 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
     QUrl url;
 
     LIBENCLOUD_TRACE;
-    url.setEncodedQuery((*request.getContent()).toAscii());
+    setEncodedQuery(url, (*request.getContent()));
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -132,7 +132,7 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
     QUrl url;
 
     LIBENCLOUD_TRACE;
-    url.setEncodedQuery((*request.getContent()).toAscii());
+    setEncodedQuery(url, (*request.getContent()));
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -148,26 +148,26 @@ int ApiHandler1::_handle_auth (const HttpRequest &request, HttpResponse &respons
 
             /* allow empty credentials for reset
             LIBENCLOUD_HANDLER_ERR_IF (
-                    ((id = url.queryItemValue("id")) == "") ||
-                    ((aurl = url.queryItemValue("url")) == "") ||
-                    ((user = url.queryItemValue("user")) == "") ||
-                    ((pass = url.queryItemValue("pass")) == ""),
+                    ((id = getQueryItemValue(url, "id")) == "") ||
+                    ((aurl = getQueryItemValue(url, "url")) == "") ||
+                    ((user = getQueryItemValue(url, "user")) == "") ||
+                    ((pass = getQueryItemValue(url, "pass")) == ""),
                 LIBENCLOUD_HTTP_STATUS_BADREQUEST);
                 */
 
-            id = url.queryItemValue("id");
+            id = getQueryItemValue(url, "id");
             if (id.isEmpty())
                 id = LIBENCLOUD_AUTH_SB;
 
-            type = url.queryItemValue("type");
+            type = getQueryItemValue(url, "type");
             if (type.isEmpty())
                 type = LIBENCLOUD_AUTH_USERPASS;
 
-            aurl = url.queryItemValue("url");
-            user = url.queryItemValue("user");
-            pass = url.queryItemValue("pass");
-            path = url.queryItemValue("path");
-            p12pass = url.queryItemValue("p12pass");
+            aurl = getQueryItemValue(url, "url");
+            user = getQueryItemValue(url, "user");
+            pass = getQueryItemValue(url, "pass");
+            path = getQueryItemValue(url, "path");
+            p12pass = getQueryItemValue(url, "p12pass");
 
             Auth auth(id, type, aurl, user, pass, path, p12pass);
 
@@ -198,7 +198,7 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
     QUrl url;
 
     LIBENCLOUD_TRACE;
-    url.setEncodedQuery((*request.getContent()).toAscii());
+    setEncodedQuery(url, (*request.getContent()));
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -232,18 +232,18 @@ int ApiHandler1::_handle_setup (const HttpRequest &request, HttpResponse &respon
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
 #if defined(LIBENCLOUD_MODE_SECE)
-            if ((val = url.queryItemValue("license")) != "")
+            if ((val = getQueryItemValue(url, "license")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLicense(val),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
 #elif defined(LIBENCLOUD_MODE_QCC)
-            if ((val = url.queryItemValue("clientPort")) != "")
+            if ((val = getQueryItemValue(url, "clientPort")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setClientPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             } 
-            else if ((val = url.queryItemValue("logPort")) != "")
+            else if ((val = getQueryItemValue(url, "logPort")) != "")
             {
                 LIBENCLOUD_HANDLER_ERR_IF (_parent->setLogPort(val.toInt()),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
@@ -275,7 +275,7 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
     QUrl url;
 
     LIBENCLOUD_TRACE;
-    url.setEncodedQuery((*request.getContent()).toAscii());
+    setEncodedQuery(url, (*request.getContent()));
 
     switch (httpMethodFromString(request.getMethod()))
     {
@@ -287,10 +287,10 @@ int ApiHandler1::_handle_cloud (const HttpRequest &request, HttpResponse &respon
                         "application/x-www-form-urlencoded",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
-            if ((val = url.queryItemValue("action")) != "")
+            if ((val = getQueryItemValue(url, "action")) != "")
             {
-                url.removeQueryItem("action");
-                LIBENCLOUD_HANDLER_ERR_IF (_parent->setAction(val, url.queryItems()),
+                removeQueryItem(url, "action");
+                LIBENCLOUD_HANDLER_ERR_IF (_parent->setAction(val, queryItems(url)),
                         LIBENCLOUD_HTTP_STATUS_BADREQUEST);
             }
             else
@@ -338,7 +338,7 @@ int ApiHandler1::_handle_config (const HttpRequest &request, HttpResponse &respo
                         "application/json",
                     LIBENCLOUD_HTTP_STATUS_BADMETHOD);
 
-    		js = (*request.getContent()).toAscii();
+    		js = (*request.getContent()).toLatin1();
 			LIBENCLOUD_DBG("[Http] js: " << js);
 
 			json = json::parse(js, ok);
@@ -362,7 +362,7 @@ err:
 
 void ApiHandler1::_setContent (const HttpRequest &request, HttpResponse &response, const QString &content)
 {
-    QString jsonpCallback = QUrl(request.getUrl()).queryItemValue("callback");
+    QString jsonpCallback = getQueryItemValue(QUrl(request.getUrl()), "callback");
 
     if (jsonpCallback != "")
     {

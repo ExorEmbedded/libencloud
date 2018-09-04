@@ -1,6 +1,7 @@
 #include <common/config.h>
 #include <common/common.h>
 #include <encloud/CookieJar>
+#include <QNetworkCookie>
 
 namespace libencloud 
 {

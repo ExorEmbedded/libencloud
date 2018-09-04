@@ -7,6 +7,9 @@
 #if defined(LIBENCLOUD_MODE_QCC) && !defined(LIBENCLOUD_SPLITDEPS)
 #  include <common/qcc_version.h>
 #endif
+#if QT_VERSION >= 0x050000
+#include <QUrlQuery>
+#endif
 
 // use only to wrap upper-level methods, otherwise duplicates will be emitted
 #define EMIT_ERROR_ERR_IF(cond) \
@@ -238,8 +241,13 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
     }
 
     // and CA certificate
-    _caCert = QSslCertificate(json["openvpn_cert"].toString().toAscii());
-    LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
+    _caCert = QSslCertificate(json["openvpn_cert"].toString().toLatin1());
+    LIBENCLOUD_EMIT_ERR_IF (
+#if QT_VERSION < 0x050000
+            !_caCert.isValid(),
+#else
+            ( _caCert.expiryDate() > QDateTime::currentDateTime() && !_caCert.isBlacklisted() ) ,
+#endif
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
     // copy all fields from Switchboard

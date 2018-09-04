@@ -209,7 +209,7 @@ int RegMsg::_decodeRedirect (const QString &response)
     QString s(response);
     s.remove(headerRx);
 
-    QByteArray enc = QByteArray::fromBase64(s.toAscii());
+    QByteArray enc = QByteArray::fromBase64(s.toLatin1());
     QByteArray redirect;
 
     redirect = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), enc);
@@ -253,7 +253,7 @@ int RegMsg::_decodeConfig (const QString &response)
     s.remove(headerRx);
     QUrl sbUrl(_redirectUrl);
 
-    QByteArray enc = QByteArray::fromBase64(s.toAscii());
+    QByteArray enc = QByteArray::fromBase64(s.toLatin1());
 
     _provisioning = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), enc);
     LIBENCLOUD_ERR_IF (_provisioning.isEmpty());
@@ -344,7 +344,7 @@ err:
 
 QByteArray RegMsg::_getCode ()
 {
-    return getActivationCode(false).toUpper().toAscii();  // unencrypted
+    return getActivationCode(false).toUpper().toLatin1();  // unencrypted
 }
 
 // Registry path is based on hash(hash(AC))

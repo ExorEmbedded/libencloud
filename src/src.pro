@@ -133,8 +133,8 @@ SOURCES += core/core.cpp
 !nosetup {
     HEADERS += setup/setup.h
     SOURCES += setup/setup.cpp
-    HEADERS += setup/common/*.h
-    SOURCES += setup/common/*.cpp
+    HEADERS += setup/common/closemsg.h
+    SOURCES += setup/common/closemsg.cpp
     DEPENDPATH += $${_PRO_FILE_PWD_}/setup/common
     modeqcc {
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
