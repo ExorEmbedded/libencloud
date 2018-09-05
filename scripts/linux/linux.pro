@@ -5,6 +5,6 @@ TEMPLATE = subdirs
 QMAKE_STRIP =
 
 scripts.path = $${BINDIR}
-scripts.files += run-parts-args.sh
+scripts.files += $$PWD/run-parts-args.sh
 
 INSTALLS += scripts

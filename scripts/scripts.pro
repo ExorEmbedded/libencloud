@@ -10,6 +10,6 @@ macx {
     SUBDIRS += macx
 }
 
-linux-g++ {
+linux {
     SUBDIRS += linux
 }
