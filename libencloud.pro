@@ -8,6 +8,7 @@ SUBDIRS += src
 SUBDIRS += scripts
 SUBDIRS += tools
 SUBDIRS += etc
+SUBDIRS += about
 
 !notest:SUBDIRS += test
 
