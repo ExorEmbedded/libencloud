@@ -534,11 +534,15 @@ static X509_REQ *__make_req (libencloud_crypto_t *ec, EVP_PKEY *pkey)
 {
     X509_REQ *req = NULL;
     X509_NAME *n = NULL;
-    EVP_MD_CTX mctx;
     EVP_PKEY_CTX *pkctx = NULL;
     const EVP_MD *digest = NULL;
 
+#if OPENSSL_VERSION_NUMBER >= 0x010100000
+    EVP_MD_CTX *mctx = EVP_MD_CTX_new();
+#else
+    EVP_MD_CTX mctx;
     EVP_MD_CTX_init(&mctx);
+#endif
 
     LIBENCLOUD_ERR_IF (ec == NULL);
     LIBENCLOUD_ERR_IF (pkey == NULL);
@@ -546,16 +550,23 @@ static X509_REQ *__make_req (libencloud_crypto_t *ec, EVP_PKEY *pkey)
 
     LIBENCLOUD_ERR_IF ((req = X509_REQ_new()) == NULL);
     LIBENCLOUD_ERR_IF ((n = X509_NAME_new()) == NULL);
-    
+
     LIBENCLOUD_ERR_IF (ec->name_cb(n, ec->name_cb_ctx));
     LIBENCLOUD_ERR_IF (!X509_REQ_set_subject_name(req, n));
     LIBENCLOUD_ERR_IF (!X509_REQ_set_pubkey(req, pkey));
 
     // LIBENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha256)) == NULL); Not supported by the current Switchboard openssl version
     LIBENCLOUD_ERR_IF ((digest = EVP_get_digestbyname(SN_sha1)) == NULL);
+
+#if OPENSSL_VERSION_NUMBER >= 0x010100000
+    LIBENCLOUD_ERR_IF (!EVP_DigestSignInit(mctx, &pkctx, digest, NULL, pkey));
+    LIBENCLOUD_ERR_IF (!X509_REQ_sign_ctx(req, mctx));
+    EVP_MD_CTX_free(mctx);
+#else
     LIBENCLOUD_ERR_IF (!EVP_DigestSignInit(&mctx, &pkctx, digest, NULL, pkey));
     LIBENCLOUD_ERR_IF (!X509_REQ_sign_ctx(req, &mctx));
     EVP_MD_CTX_cleanup(&mctx);
+#endif
 
     X509_NAME_free(n);
 
@@ -565,6 +576,10 @@ err:
         X509_NAME_free(n);
     if (req)
         X509_REQ_free(req);
+#if OPENSSL_VERSION_NUMBER >= 0x010100000
+    if (mctx)
+        EVP_MD_CTX_free(mctx);
+#endif
 
     return NULL;
 }
