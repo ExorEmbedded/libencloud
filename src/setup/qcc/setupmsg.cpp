@@ -142,7 +142,7 @@ void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, 
     LIBENCLOUD_ERR_IFS (_decodeResponse(response, headers));
     LIBENCLOUD_ERR_IFS (_unpackResponse());
 
-    LIBENCLOUD_LOG("[Setup] response: " << response);
+    LIBENCLOUD_LOG("[Setup] response: " << response.replace("exor", "____"));
 
     emit processed();
 err:
