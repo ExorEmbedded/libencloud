@@ -145,7 +145,7 @@ void SetupMsg::_clientComplete (const QString &response, const QMap<QByteArray, 
     LIBENCLOUD_ERR_IFS (_decodeResponse(response, headers));
     LIBENCLOUD_ERR_IFS (_unpackResponse());
 
-    LIBENCLOUD_LOG("[Setup] response: " << response.replace("exor", "____"));
+    LIBENCLOUD_LOG("[Setup] response: " << QString(response).replace("exor", "____"));
 
     emit processed();
 err:
@@ -246,7 +246,10 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
 #if QT_VERSION < 0x050000
             !_caCert.isValid(),
 #else
-            ( _caCert.expiryDate() > QDateTime::currentDateTime() && !_caCert.isBlacklisted() ) ,
+            // switchboard-exor1-1.endian.com currently uses a self-signed certificate..
+	    // TODO BSP-762 + verify agains system certs
+            //( _caCert.expiryDate() > QDateTime::currentDateTime() && !_caCert.isBlacklisted() ) ,
+            _caCert.isNull(),
 #endif
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 

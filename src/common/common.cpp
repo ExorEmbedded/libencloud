@@ -146,7 +146,7 @@ QString getQueryItemValue(const QUrl &url, const QString &param) {
 #if QT_VERSION < 0x050000
         return url.queryItemValue(param);
 #else
-        return QUrlQuery(url).queryItemValue(param);
+        return QUrlQuery(url).queryItemValue(param, QUrl::FullyDecoded);
 #endif
 }
 
