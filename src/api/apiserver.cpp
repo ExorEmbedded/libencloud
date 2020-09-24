@@ -94,6 +94,15 @@ int Server::setInitialPort (int port)
 
 void Server::vpnIpAssigned (const QString &ip)
 {
+    LIBENCLOUD_UNUSED(ip);
+
+    // We no longer support scenarios where Switchboard controls the client via tap interface
+    // (similar results can be obtained via JS localhost API calls)
+    // IMPORTANT NOTE: If we ever reintroduce this, we need to selectively bind on interface
+    // to avoid DHCP spoofing attacks
+    return;
+
+/*
     LIBENCLOUD_DBG ("[ApiServer] Assigned ip: " << ip);
 
     if (_cloudServer == NULL)
@@ -104,6 +113,7 @@ void Server::vpnIpAssigned (const QString &ip)
 
     if (ip != "")
         _cloudServer->start(QHostAddress(ip), _port);
+*/
 }
 
 //
