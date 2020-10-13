@@ -46,8 +46,11 @@ void AuthApi::authSupply (const libencloud::Auth &auth)
     _params.addQueryItem("id", auth.getStrId());
     _params.addQueryItem("type", auth.getStrType());
     _params.addQueryItem("url", auth.getUrl());
-
-    if (type != Auth::CertificateType)
+    
+    if (type == Auth::ActivationCodeType)
+    {
+        _params.addQueryItem("activation-code", auth.getPass());
+    } else if (type != Auth::CertificateType)
     {
         _params.addQueryItem("user", auth.getUser());
         _params.addQueryItem("pass", auth.getPass());

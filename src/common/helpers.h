@@ -96,6 +96,7 @@
 #define LIBENCLOUD_ERR_MSG_IF(cond, msg) do { if (cond) { LIBENCLOUD_ERR(msg); goto err; } } while (0)
 
 /* lev >= 0 (log always) */
+#define LIBENCLOUD_WARN(msg) __LIBENCLOUD_MSG(-1, "WARN", msg)
 #define LIBENCLOUD_LOG(msg) __LIBENCLOUD_MSG(-1, "LOG", msg)
 
 // New Qt-specific macros

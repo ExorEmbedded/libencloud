@@ -16,6 +16,7 @@
 #include <encloud/simplecrypt/simplecrypt.h>
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
+#  include <setup/cc2/cc2setup.h>
 #  include <setup/qcc/qccsetup.h>
 #  ifndef LIBENCLOUD_SPLITDEPS
 #    include <setup/reg/regsetup.h>
@@ -423,7 +424,7 @@ void Core::_errorReceived (const libencloud::Error &err)
        default:
            // QCC stops progress upon critical errors for user intervention
            // while devices/agent keep on retrying automatically (in internal modules)
-           if (!_cfg->config.autoretry && !_cfg->config.setupAgent)
+           if (!_cfg->config.autoretry && !_cfg->config.setupAgent && !_cfg->config.setupCC2Agent)
                stop();
            break;
     }
@@ -438,10 +439,12 @@ void Core::_configReceived (const QVariant &config)
     if (config.toMap()["reset"].toBool())
         return;
 
-    if (config.toMap()["setup"].toMap()["agent"].isNull())
+    if (!config.toMap()["setup"].toMap()["agent"].isNull())
+        _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
+    else if (!config.toMap()["setup"].toMap()["cc2_agent"].isNull())
+        _cfg->config.setupCC2Agent = config.toMap()["setup"].toMap()["cc2_agent"].toBool();
+    else
         return;
-
-    _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
 
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_ERR_IF (_initSetup());
@@ -652,14 +655,17 @@ int Core::_initSetup ()
     LIBENCLOUD_DELETE_LATER(_setup);
 
 #if defined(LIBENCLOUD_MODE_QCC)
-    LIBENCLOUD_DBG("[Core] setupAgent: " << _cfg->config.setupAgent);
+    LIBENCLOUD_DBG("[Core] setupAgent: " << (_cfg->config.setupAgent|_cfg->config.setupCC2Agent));
 
 #  if !defined(LIBENCLOUD_SPLITDEPS)
     if (_cfg->config.setupAgent)
         _setup = new RegSetup(_cfg);  // agent mode
     else
-#  endif
-        _setup = new QccSetup(_cfg);  // app mode (default)
+#   endif
+        if (_cfg->config.setupCC2Agent)
+            _setup = new CC2Setup(_cfg);  // app mode (default)
+        else
+            _setup = new QccSetup(_cfg);  // app mode (default)
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif

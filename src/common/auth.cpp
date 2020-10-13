@@ -185,6 +185,8 @@ const QString Auth::getStrType () const
             return "http";
         case Auth::SocksProxyType:
             return "socks";
+        case Auth::ActivationCodeType:
+            return "activation-code";
         default:
             return "";
     }
@@ -206,6 +208,8 @@ int Auth::setStrType (const QString &type)
         _type = Auth::HttpProxyType;
     else if (type == "socks")
         _type = Auth::SocksProxyType;
+    else if (type == "activation-code")
+        _type = Auth::ActivationCodeType;
     else
         return ~0;
 

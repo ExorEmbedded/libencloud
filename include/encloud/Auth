@@ -41,6 +41,7 @@ public:
         CertificateType,
         CertificateUserpassType,    // 2-factor
         CookieType,
+        ActivationCodeType,
         
         //
         // (id == ProxyId)
@@ -95,7 +96,7 @@ public:
     const QString &getPass () const;
     int setPass (const QString &pass);
     inline bool isPassValid (const QString &pass) { return !(pass == "" &&
-            (_type == UserpassType || _type == CertificateUserpassType)); };
+            (_type == UserpassType ||  _type == ActivationCodeType || _type == CertificateUserpassType)); };
 
     const QString &getPath () const;
     int setPath (const QString &path);

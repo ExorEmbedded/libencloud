@@ -54,6 +54,7 @@ typedef struct
 
     bool setupEnabled;
     bool setupAgent;
+    bool setupCC2Agent;
     QFileInfo regProvisioningPath;
 
     QFileInfo vpnExePath;
