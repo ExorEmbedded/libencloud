@@ -41,7 +41,7 @@ private slots:
 private:
     // message handling
     int _decodeConfig (const QString &response);
-    int _unpackConfig ();
+    int _unpackConfig (const QByteArray &provisioning);
 
     // internals
     int _init ();

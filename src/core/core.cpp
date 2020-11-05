@@ -367,7 +367,7 @@ void Core::_setupCompleted ()
     if (!vpnConfig->isFile()) {
         LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(
                                     _cfg->config.vpnConfPath.absoluteFilePath()),
-                                error(Error(tr("Failed writing configuration to file"))));
+                                error(Error(QString(tr("Failed writing configuration to file %1")).arg(_cfg->config.vpnConfPath.absoluteFilePath()))));
     }
 
     if (fallbackVpnConfig && fallbackVpnConfig->isValid())
@@ -376,7 +376,7 @@ void Core::_setupCompleted ()
         if (!fallbackVpnConfig->isFile()) {
             LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
                                         _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
-                                    error(Error(tr("Failed writing fallback configuration to file"))));
+                                    error(Error(QString(tr("Failed writing fallback configuration to file %1")).arg(_cfg->config.fallbackVpnConfPath.absoluteFilePath()))));
         }
     }
 err:

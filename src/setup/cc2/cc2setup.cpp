@@ -38,6 +38,11 @@ CC2Setup::CC2Setup (Config *cfg)
     connect(_qccSetupState, SIGNAL(entered()), this, SLOT(_stateEntered()));
     connect(_qccSetupState, SIGNAL(entered()), &_qccSetup, SLOT(start()));
     connect(_qccSetupState, SIGNAL(exited()), this, SLOT(_stateExited()));
+    connect(&_cc2Msg, SIGNAL(authChanged(libencloud::Auth)),
+            &_qccSetup, SIGNAL(authSupplied(libencloud::Auth)));
+    connect(&_qccSetup, SIGNAL(completed()), this, SIGNAL(completed()));
+    // do not connect error (has its own retry logic): connect(&_qccSetup, SIGNAL(error()), this, SIGNAL(error()));
+
     
     _initMsg(_closeMsg);
     connect(this, SIGNAL(authSupplied(libencloud::Auth)),
@@ -122,7 +127,7 @@ void CC2Setup::_stateEntered ()
     Progress p = _stateToProgress(state);
 
     LIBENCLOUD_DBG("state: " << state << " (" << p.getDesc() << ") " <<
-            " previousState: " << _previousState);
+            " previousState: " << _stateToProgress(_previousState).getDesc());
 
     if (!_isError)
         _retry.stop();
@@ -149,7 +154,6 @@ void CC2Setup::_onProcessed ()
 {
     LIBENCLOUD_TRACE;
 
-    emit completed();
 }
 
 void CC2Setup::_onCloseProcessed ()
@@ -222,9 +226,8 @@ int CC2Setup::_initFsm ()
         _cc2MsgState->addTransition(&_cc2Msg, SIGNAL(error(libencloud::Error)), _errorState);
         _cc2MsgState->addTransition(&_cc2Msg, SIGNAL(processed()), _qccSetupState);
 
-        _qccSetupState->addTransition(&_qccSetup, SIGNAL(error(libencloud::Error)), _errorState);
+        // do not connect error (has its own retry logic):  _qccSetupState->addTransition(&_qccSetup, SIGNAL(error(libencloud::Error)), _errorState);
         _qccSetupState->addTransition(&_qccSetup, SIGNAL(completed()), _finalState);
-        
     }
 
     _fsm.addState(_errorState);
@@ -295,12 +298,12 @@ Progress CC2Setup::_stateToProgress (QState *state)
     else if (state == _qccSetupState)
     {
         p.setStep(StateQCCStarted);
-        p.setDesc(tr("Retrieving Configuration from Switchboard"));
+        p.setDesc(tr("Retrieving Configuration from Switchboard via qcc"));
     }
     else if (state == _finalState)
     {
         p.setStep(StateQCCCompleted);
-        p.setDesc(tr("Received Configuration from Switchboard"));
+        p.setDesc(tr("Received Configuration from Switchboard via qcc"));
     }
     else
     {

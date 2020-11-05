@@ -99,6 +99,11 @@ void CC2Msg::authSupplied (const libencloud::Auth &auth)
 {
     LIBENCLOUD_DBG("url: " << auth.getUrl() << ", user: " << auth.getUser());
 
+    if (auth.getType() != Auth::ActivationCodeType) {
+        // ignore his own supplied credentials via authChanged
+        return;
+    }
+    
     switch (auth.getId())
     {
         case Auth::SwitchboardId:
@@ -151,7 +156,7 @@ void CC2Msg::_gotConfig (const QString &response, const QMap<QByteArray, QByteAr
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (_decodeConfig(response));
-    LIBENCLOUD_ERR_IF (_unpackConfig());
+    LIBENCLOUD_ERR_IF (_unpackConfig(response.toUtf8()));
 
     // detached slot since _client is reused
     QTimer::singleShot (0, this, SLOT(_completeSetup()));
@@ -185,6 +190,7 @@ int CC2Msg::_decodeConfig (const QString &response)
         LIBENCLOUD_ERR_MSG_IF( userAndPass.length() != 2, "Failed decoding vpnKey field" );
         _sbAuth.setUser(userAndPass[0]);
         _sbAuth.setPass(userAndPass[1]);
+        _sbAuth.setType(Auth::UserpassType);
         emit authChanged(_sbAuth);
     }
     
@@ -194,7 +200,7 @@ err:
     return ~0;
 }
 
-int CC2Msg::_unpackConfig ()
+int CC2Msg::_unpackConfig (const QByteArray& provisioning)
 {
     QByteArray provisioningEnc;
 
@@ -204,7 +210,7 @@ int CC2Msg::_unpackConfig ()
 
     // save encrypted provisioning file
     LIBENCLOUD_ERR_MSG_IF ( (!utils::fileCreate(pf, QIODevice::WriteOnly)), "Failed creating provisioning file " << pf.fileName() );
-    provisioningEnc = crypto::encrypt(&_ec, crypto::hash(&_ec, _getCode()), _provisioning);
+    provisioningEnc = crypto::encrypt(&_ec, crypto::hash(&_ec, _getCode()), provisioning);
     LIBENCLOUD_ERR_MSG_IF (pf.write(provisioningEnc) == -1, "Failed to write provisioning file " << pf.fileName());
     pf.close();
 
