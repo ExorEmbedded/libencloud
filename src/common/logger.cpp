@@ -233,7 +233,7 @@ err:
     return ~0;
 }
 
-void LogListener::incomingConnection (int sd)
+void LogListener::incomingConnection (qintptr sd)
 {
     LIBENCLOUD_TRACE;
 

@@ -96,7 +96,7 @@ signals:
     void log (const QString &line);
 
 protected:
-    void incomingConnection (int sd);
+    void incomingConnection (qintptr sd);
 
 private slots:
     void _socketReadyRead ();

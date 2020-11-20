@@ -77,7 +77,7 @@ int HttpServer::stop ()
     return 0;
 }
 
-void HttpServer::incomingConnection (int sd)
+void HttpServer::incomingConnection (qintptr sd)
 {
     LIBENCLOUD_TRACE;
 

@@ -35,7 +35,7 @@ signals:
     void portBound (int port);
 
 protected:
-    void incomingConnection (int sd);
+    void incomingConnection (qintptr sd);
 
 private slots:
     void readyRead ();
