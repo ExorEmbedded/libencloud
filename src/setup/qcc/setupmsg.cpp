@@ -238,8 +238,8 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
     }
 
     // and CA certificate
-    _caCert = QSslCertificate(json["openvpn_cert"].toString().toAscii());
-    LIBENCLOUD_EMIT_ERR_IF (!_caCert.isValid(),
+    _caCert = QSslCertificate::fromData(json["openvpn_cert"].toString().toLocal8Bit());
+    LIBENCLOUD_EMIT_ERR_IF (_caCert.isEmpty(),
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
     // copy all fields from Switchboard
@@ -258,10 +258,14 @@ int SetupMsg::_unpackResponse ()
 
     QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
+    QByteArray pemData;
 
     // save the Operation CA certificate to file
     LIBENCLOUD_ERR_IFS (!utils::fileCreate(caf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IFS (caf.write(_caCert.toPem()) == -1);
+    for(int i=0; i<_caCert.size(); i++) {
+        pemData += _caCert[i].toPem();
+    }
+    LIBENCLOUD_ERR_IFS (caf.write(pemData) == -1);
     caf.close();
 
     return 0;

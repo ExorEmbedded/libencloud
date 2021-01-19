@@ -142,6 +142,7 @@ void RegMsg::_error (const libencloud::Error &err)
     LIBENCLOUD_DBG("Reading cached provisioning file");
 
     QByteArray config;
+    QByteArray pemData;
     LIBENCLOUD_ERR_IF (!pf.open(QIODevice::ReadOnly));
 
     config = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), pf.readAll());
@@ -151,7 +152,10 @@ void RegMsg::_error (const libencloud::Error &err)
 
     // save the Operation CA certificate to file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
+    for(int i=0; i<_caCert.size(); i++) {
+        pemData += _caCert[i].toPem();
+    }
+    LIBENCLOUD_ERR_IF (caf.write(pemData) == -1);
     caf.close();
 
     emit processed();  // success
@@ -290,6 +294,7 @@ int RegMsg::_unpackConfig ()
 
     QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
     QFile caf(_cfg->config.sslOp.caPath.absoluteFilePath());
+    QByteArray pemData;
 
     // save encrypted provisioning file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(pf, QIODevice::WriteOnly));
@@ -299,7 +304,10 @@ int RegMsg::_unpackConfig ()
 
     // save the Operation CA certificate to file
     LIBENCLOUD_ERR_IF (!utils::fileCreate(caf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IF (caf.write(_caCert.toPem()) == -1);
+    for(int i=0; i<_caCert.size(); i++) {
+        pemData += _caCert[i].toPem();
+    }
+    LIBENCLOUD_ERR_IF (caf.write(pemData) == -1);
     caf.close();
 
     return 0;
@@ -415,8 +423,8 @@ int RegMsg::_decodeConfig (const QByteArray &config)
     LIBENCLOUD_ERR_IF (_decodeConfigFallbackVpn(node));
 
     LIBENCLOUD_ERR_IF ((n = node.FindValue("VPN_CERTIFICATE")) == NULL);
-    _caCert = QSslCertificate(_yamlNodeToStr(n).toLocal8Bit());
-    LIBENCLOUD_ERR_IF (!_caCert.isValid());
+    _caCert = QSslCertificate::fromData(_yamlNodeToStr(n).toLocal8Bit());
+    LIBENCLOUD_ERR_IF (_caCert.isEmpty());
 
     LIBENCLOUD_ERR_IF ((n = node.FindValue("ACTIVATION_KEY")) == NULL);
     LIBENCLOUD_ERR_IF (_yamlNodeToStr(n) != _getCode());
