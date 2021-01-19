@@ -205,7 +205,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
             QList<QSslCertificate> caCerts = QSslConfiguration::defaultConfiguration().caCertificates();
             if (caCerts.empty() && g_libencloudCfg)
             {
-                LIBENCLOUD_DBG("[Client] Could not load system CA certificates - using packaged bundle");
+                LIBENCLOUD_DBG("[Client] Could not load system CA certificates - using packaged bundle " << g_libencloudCfg->confPrefix + "/ca-certificates.crt");
                 caCerts = QSslCertificate::fromPath(g_libencloudCfg->confPrefix + "/ca-certificates.crt");
             }
             sslConf.setCaCertificates(caCerts);
