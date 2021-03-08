@@ -59,6 +59,7 @@ int CC2Msg::process ()
     LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
 
     LIBENCLOUD_DBG("[Setup] appdata dir: " << getCommonAppDataDir());
+    QByteArray regData;
 
     if (_sbAuth.getUrl().isEmpty() || _getCode().isEmpty())
     {
@@ -74,8 +75,9 @@ int CC2Msg::process ()
     }
 
     _regUrl.setUrl(_sbAuth.getUrl());
-    _regUrl.addQueryItem("activationKey", _sbAuth.getPass());
-    _regUrl.addQueryItem("serialNumber", "");
+//    _regUrl.addQueryItem("activationKey", _sbAuth.getPass());
+//    _regUrl.addQueryItem("serialNumber", "");
+    regData = QString("{ \"activationKey\" : \"%1\",  \"serialNumber\" : \"%2\" }").arg( _sbAuth.getPass()).arg("").toUtf8();
 
     LIBENCLOUD_DELETE_LATER(_client);
     EMIT_ERROR_ERR_IF ((_client = new Client) == NULL);
@@ -87,7 +89,9 @@ int CC2Msg::process ()
     LIBENCLOUD_NOTICE("[Setup] Requesting config from URL: " << _regUrl.host());
 
     _client->setVerifyCA(_cfg->config.sslInit.verifyCA);
-    _client->get(_regUrl, _headers, _sslconf);
+    // Use post version to avoid logging sensitive informations
+    _headers["Content-Type"] = "application/json";
+    _client->post(_regUrl, _headers, regData, _sslconf);
 
     return 0;
 err:
@@ -176,22 +180,23 @@ int CC2Msg::_decodeConfig (const QString &response)
     LIBENCLOUD_ERR_MSG_IF (object.value("vpnPairingApiUrl").toString().isEmpty(), "Missing required field vpnPairingApiUrl");
     
     {
+        _retrievedSbAuth = _sbAuth;
         QUrl sbUrl(object.value("vpnPairingApiUrl").toString());
         sbUrl.setPath("");
         if (sbUrl.toString().isEmpty()) {
             LIBENCLOUD_NOTICE("Using default sb url " << _cfg->config.sbUrl.toString() );
-            _sbAuth.setUrl(  _cfg->config.sbUrl.toString() );
+            _retrievedSbAuth.setUrl(  _cfg->config.sbUrl.toString() );
         } else {
-            _sbAuth.setUrl(sbUrl.toString());
+            _retrievedSbAuth.setUrl(sbUrl.toString());
         }
 
         QByteArray userPass = QByteArray::fromBase64( object.value("vpnKey").toString().toUtf8() );
         QList<QByteArray> userAndPass = userPass.split(':');
         LIBENCLOUD_ERR_MSG_IF( userAndPass.length() != 2, "Failed decoding vpnKey field" );
-        _sbAuth.setUser(userAndPass[0]);
-        _sbAuth.setPass(userAndPass[1]);
-        _sbAuth.setType(Auth::UserpassType);
-        emit authChanged(_sbAuth);
+        _retrievedSbAuth.setUser(userAndPass[0]);
+        _retrievedSbAuth.setPass(userAndPass[1]);
+        _retrievedSbAuth.setType(Auth::UserpassType);
+        emit authChanged(_retrievedSbAuth);
     }
     
     return 0;

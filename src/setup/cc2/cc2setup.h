@@ -68,6 +68,7 @@ signals:
     // internals
     // 
     void retry ();
+    void retryAfterConsecutiveErrorsInQccSetup();
 
 private slots:
     void _stateEntered ();
@@ -77,6 +78,7 @@ private slots:
     void _onErrorState ();
     void _onError (const libencloud::Error &error);
     void _onRetryTimeout ();
+    void _onQccError(const libencloud::Error &error);
 
 private:
     int _initFsm ();
@@ -105,6 +107,7 @@ private:
     bool _isError;
     Error _error;
     Retry _retry;
+    int _qccConsecutiveErrors;
 
     VpnConfig _vpnConfig;
     VpnConfig _vpnFallbackConfig;

@@ -226,7 +226,7 @@ void Client::_send (MsgType msgType, const QUrl &url, const QMap<QByteArray, QBy
     // default headers
     request.setRawHeader("User-Agent", LIBENCLOUD_USERAGENT);
     request.setRawHeader("Host", url.host().toAscii());
-    if ((msgType == MSG_TYPE_POST) ||
+    if ((msgType == MSG_TYPE_POST && !headers.contains("Content-Type")) ||
             (msgType == MSG_TYPE_NONE && !data.isEmpty()))
         request.setRawHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -356,7 +356,7 @@ void Client::_finished (QNetworkReply *reply)
 
     _response = reply->readAll();
 
-    CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << _response);
+    CLIENT_DBG("[Client] id " << QString::number(_id) << " ### <<<<< ### " << QString(_response).replace(QRegExp("(key\":)\"[^\"]*\"", Qt::CaseInsensitive), "\\1\"*************\""));
 
     // convert QList<QNetworkReply::RawHeaderPair> to QMap<QByteArray, QByteArray>
     foreach (QNetworkReply::RawHeaderPair header, headerPairs)

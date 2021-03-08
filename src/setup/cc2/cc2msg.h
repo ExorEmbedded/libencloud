@@ -51,6 +51,7 @@ private:
 
     // request inputs
     Auth _sbAuth;
+    Auth _retrievedSbAuth;
 
     // internals
     libencloud_crypto_t _ec;

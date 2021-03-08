@@ -9,6 +9,7 @@ namespace libencloud {
 CC2Setup::CC2Setup (Config *cfg)
     : SetupInterface(cfg)
     , _qccSetup(cfg)
+    , _qccConsecutiveErrors(0)
 {
     LIBENCLOUD_TRACE;
 
@@ -41,7 +42,7 @@ CC2Setup::CC2Setup (Config *cfg)
     connect(&_cc2Msg, SIGNAL(authChanged(libencloud::Auth)),
             &_qccSetup, SIGNAL(authSupplied(libencloud::Auth)));
     connect(&_qccSetup, SIGNAL(completed()), this, SIGNAL(completed()));
-    // do not connect error (has its own retry logic): connect(&_qccSetup, SIGNAL(error()), this, SIGNAL(error()));
+    connect(&_qccSetup, SIGNAL(error(libencloud::Error)), this, SLOT(_onQccError(libencloud::Error)));
 
     
     _initMsg(_closeMsg);
@@ -200,6 +201,17 @@ void CC2Setup::_onRetryTimeout ()
     emit retry();
 }
 
+void CC2Setup::_onQccError(const Error &error)
+{
+    _qccConsecutiveErrors++;
+    if (_qccConsecutiveErrors > 3) {
+        _qccConsecutiveErrors = 0;
+        _qccSetup.stop(true, false);
+        LIBENCLOUD_ERR("Retry pairing after consecutive errors in setup phase");
+        emit retryAfterConsecutiveErrorsInQccSetup();
+    }
+}
+
 //
 // private methods
 //
@@ -228,6 +240,7 @@ int CC2Setup::_initFsm ()
 
         // do not connect error (has its own retry logic):  _qccSetupState->addTransition(&_qccSetup, SIGNAL(error(libencloud::Error)), _errorState);
         _qccSetupState->addTransition(&_qccSetup, SIGNAL(completed()), _finalState);
+        _qccSetupState->addTransition(this, SIGNAL(retryAfterConsecutiveErrorsInQccSetup()), _cc2MsgState);
     }
 
     _fsm.addState(_errorState);
@@ -302,6 +315,7 @@ Progress CC2Setup::_stateToProgress (QState *state)
     }
     else if (state == _finalState)
     {
+        _qccConsecutiveErrors = 0;
         p.setStep(StateQCCCompleted);
         p.setDesc(tr("Received Configuration from Switchboard via qcc"));
     }
