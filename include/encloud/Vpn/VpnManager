@@ -61,6 +61,7 @@ signals:
     void authRequired (libencloud::Auth::Id id);
     void ipAssigned (const QString &ip);
     void sigError (VpnManager::Error err, QString msg = "");
+    void customProvisioningRequired(QString assignedIp);
 
 public slots:
 
@@ -83,6 +84,7 @@ private:
     void parseLine (QByteArray line);
     void parseLinePass (QByteArray rest);
     void parseLineState (QByteArray line);
+    void parseLineLog (QByteArray line);
     void sendAuth (const QString type, const QString &user, const QString &pass);
 
     const Config *cfg;

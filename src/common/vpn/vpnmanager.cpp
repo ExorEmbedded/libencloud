@@ -176,7 +176,9 @@ void VpnManager::parseLine (QByteArray line)
     }
     else if (line.startsWith('>'))
     {
-        LIBENCLOUD_DBG("[VPNManager] line: " << line);
+        if (!line.startsWith(">LOG")) {
+            LIBENCLOUD_DBG("[VPNManager] line: " << line);
+        }
 
         QByteArray msgType;
         QByteArray rest;
@@ -191,7 +193,8 @@ void VpnManager::parseLine (QByteArray line)
         } else if (qstrcmp(msgType, "PASSWORD") == 0) {
             parseLinePass(rest);
         } else if (qstrcmp(msgType, "LOG") == 0) {
-            __LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
+            //__LIBENCLOUD_SIMPLE_MSG(-1, "LOG", line.prepend("[VPN] "));
+            parseLineLog(rest);
         } else if (qstrcmp(msgType, "FATAL") == 0) {
             LIBENCLOUD_EMIT_ERR(sigError((this->err = MgmtError), rest));
         }
@@ -328,6 +331,16 @@ err:
     return;
 }
 
+void VpnManager::parseLineLog(QByteArray line)
+{
+    //Try to match this line: 
+    // 1616174001,N,WARNING: Received unknown control message: CUSTOM provisioning
+    if (line[11] == 'N' && line.contains("CUSTOM provisioning")) {
+        emit customProvisioningRequired(assignedIp);
+    }
+}
+
+
 QString VpnManager::escape (const QString &s)
 {
     QString s2(s);
@@ -338,7 +351,7 @@ QString VpnManager::escape (const QString &s)
 
 void VpnManager::sendAuth (const QString type, const QString &user, const QString &pass)
 {
-    LIBENCLOUD_DBG("[VPNManager] Sending auth type: " << type << " user: " << user << " pass: <not shown>");
+    LIBENCLOUD_DBG("[VPNManager] Sending auth type: " << type << " user: " << user << " pass: <not shown>" << pass);
     //LIBENCLOUD_DBG("[VPNManager] Sending pass: " << pass);
 
     if (this->socket == NULL)
@@ -419,9 +432,9 @@ void VpnManager::connected ()
 
     this->st = StateAttached;
 
-#ifdef Q_OS_WINCE
+//#ifdef Q_OS_WINCE
     enableLogging(true);
-#endif
+//#endif
 }
 
 void VpnManager::disconnected ()

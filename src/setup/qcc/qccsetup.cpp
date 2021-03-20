@@ -13,7 +13,7 @@ QccSetup::QccSetup (Config *cfg)
 
     _initFsm();
 
-    _retry.setBackoff(2);
+    _retry.setBackoff(16);
     connect(&_retry, SIGNAL(timeout()), SLOT(_onRetryTimeout()));
 
     connect(_errorState, SIGNAL(entered()), this, SLOT(_onErrorState()));
