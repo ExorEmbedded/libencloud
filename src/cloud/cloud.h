@@ -45,6 +45,10 @@ private slots:
     void _vpnManagerErr (VpnManager::Error err, const QString &errMsg);
     void _onRetry ();
 
+    void _doCustomProvisioning(const QString& ip);
+    void _customProvisioningConfig(const QString& config);
+    void _customProvisioningError(const libencloud::Error& error);
+
 private:
     void _restart (bool fallback = false, bool force = false);
 
@@ -54,6 +58,8 @@ private:
     VpnClient *_vpnClient;
     VpnManager *_vpnManager;
     Retry _retry;
+    
+    class Client  *_client;
 };
 
 } // namespace libencloud

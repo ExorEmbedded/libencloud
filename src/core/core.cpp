@@ -16,6 +16,7 @@
 #include <encloud/simplecrypt/simplecrypt.h>
 #include <common/config.h>
 #ifdef LIBENCLOUD_MODE_QCC
+#  include <setup/cc2/cc2setup.h>
 #  include <setup/qcc/qccsetup.h>
 #  ifndef LIBENCLOUD_SPLITDEPS
 #    include <setup/reg/regsetup.h>
@@ -52,6 +53,7 @@ Core::Core (Mode mode)
     , _qnam(NULL)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
+    , _fullRestartRequired(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -76,6 +78,8 @@ Core::Core (Mode mode)
     _loadProxy();
 
     _isValid = true;
+    
+    _timeSinceOk.invalidate();
 
 err:
     return;
@@ -134,8 +138,8 @@ void Core::_start ()
 
     _fsm.start();
 
-    if (_clientPort != -1)
-        _clientWatchdog.start();
+//    if (_clientPort != -1)
+//        _clientWatchdog.start();
 
     _busy = false;
 }
@@ -150,11 +154,10 @@ int Core::stop ()
         return ~0;
     _busy = true;
 
-    if (_clientPort != -1)
-        _clientWatchdog.stop();
+//    if (_clientPort != -1)
+//        _clientWatchdog.stop();
 
     _fsm.stop();
-    _clientWatchdog.stop();
 
     // make sure routes are removed before client is stopped
     _networkManager->stop();
@@ -164,6 +167,7 @@ int Core::stop ()
 #endif
 
     // _setupStopped() will be triggered
+    _timeSinceOk.invalidate();
 
     return 0;
 }
@@ -277,10 +281,22 @@ void Core::_stateChanged (State state)
     {
         case StateIdle:
         case StateError:
-            if (_prevState == StateCloud)
+            if (_prevState == StateCloud) {
                 _down();
+            }
+            if ( _state == StateError ) {
+                // must run in a new event loop to skip the automatic cloud _restart
+                QMetaObject::invokeMethod(this, "_shouldRestartOnErrors", Qt::QueuedConnection);
+            }
+
+            if ( _state == StateIdle && _fullRestartRequired) {
+                // must run in a new event loop to ensure _busy is false
+                QMetaObject::invokeMethod(this, "_restartOnErrors", Qt::QueuedConnection);
+                _fullRestartRequired = false;
+            }
             break;
         case StateCloud:
+            _timeSinceOk.invalidate();
             _up();
             break;
         default:
@@ -366,7 +382,7 @@ void Core::_setupCompleted ()
     if (!vpnConfig->isFile()) {
         LIBENCLOUD_EMIT_ERR_IF (vpnConfig->toFile(
                                     _cfg->config.vpnConfPath.absoluteFilePath()),
-                                error(Error(tr("Failed writing configuration to file"))));
+                                error(Error(QString(tr("Failed writing configuration to file %1")).arg(_cfg->config.vpnConfPath.absoluteFilePath()))));
     }
 
     if (fallbackVpnConfig && fallbackVpnConfig->isValid())
@@ -375,7 +391,7 @@ void Core::_setupCompleted ()
         if (!fallbackVpnConfig->isFile()) {
             LIBENCLOUD_EMIT_ERR_IF (fallbackVpnConfig->toFile(
                                         _cfg->config.fallbackVpnConfPath.absoluteFilePath()),
-                                    error(Error(tr("Failed writing fallback configuration to file"))));
+                                    error(Error(QString(tr("Failed writing fallback configuration to file %1")).arg(_cfg->config.fallbackVpnConfPath.absoluteFilePath()))));
         }
     }
 err:
@@ -423,7 +439,7 @@ void Core::_errorReceived (const libencloud::Error &err)
        default:
            // QCC stops progress upon critical errors for user intervention
            // while devices/agent keep on retrying automatically (in internal modules)
-           if (!_cfg->config.autoretry && !_cfg->config.setupAgent)
+           if (!_cfg->config.autoretry && !_cfg->config.setupAgent && !_cfg->config.setupCC2Agent)
                stop();
            break;
     }
@@ -438,10 +454,12 @@ void Core::_configReceived (const QVariant &config)
     if (config.toMap()["reset"].toBool())
         return;
 
-    if (config.toMap()["setup"].toMap()["agent"].isNull())
+    if (!config.toMap()["setup"].toMap()["agent"].isNull())
+        _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
+    else if (!config.toMap()["setup"].toMap()["cc2_agent"].isNull())
+        _cfg->config.setupCC2Agent = config.toMap()["setup"].toMap()["cc2_agent"].toBool();
+    else
         return;
-
-    _cfg->config.setupAgent = config.toMap()["setup"].toMap()["agent"].toBool();
 
 #if !defined(LIBENCLOUD_DISABLE_SETUP)
     LIBENCLOUD_ERR_IF (_initSetup());
@@ -628,6 +646,29 @@ void Core::_clientDown ()
     stop();
 }
 
+void Core::_shouldRestartOnErrors()
+{
+    if (_sbAuth.getType() == Auth::ActivationCodeType) {
+#define RETRY_SETUP_TIMEOUT (60 * 15 * 1000)
+        _restartAuth = _sbAuth;
+        if (!_timeSinceOk.isValid()) {
+            _timeSinceOk.start();
+            return;
+        }
+        if (_timeSinceOk.hasExpired(RETRY_SETUP_TIMEOUT)) {
+            LIBENCLOUD_WARN("Retry full setup after consecutive errors during last " << (RETRY_SETUP_TIMEOUT/1000) << " seconds" )
+            _fullRestartRequired = true;
+            stop();
+        }
+    }
+}
+
+void Core::_restartOnErrors()
+{
+    _authSupplied(_restartAuth);
+    start();
+}
+
 //
 // private methods
 // 
@@ -652,14 +693,17 @@ int Core::_initSetup ()
     LIBENCLOUD_DELETE_LATER(_setup);
 
 #if defined(LIBENCLOUD_MODE_QCC)
-    LIBENCLOUD_DBG("[Core] setupAgent: " << _cfg->config.setupAgent);
+    LIBENCLOUD_DBG("[Core] setupAgent: " << (_cfg->config.setupAgent|_cfg->config.setupCC2Agent));
 
 #  if !defined(LIBENCLOUD_SPLITDEPS)
     if (_cfg->config.setupAgent)
         _setup = new RegSetup(_cfg);  // agent mode
     else
-#  endif
-        _setup = new QccSetup(_cfg);  // app mode (default)
+#   endif
+        if (_cfg->config.setupCC2Agent)
+            _setup = new CC2Setup(_cfg);  // app mode (default)
+        else
+            _setup = new QccSetup(_cfg);  // app mode (default)
 #elif defined(LIBENCLOUD_MODE_VPN)
     _setup = new VpnSetup(_cfg);
 #endif

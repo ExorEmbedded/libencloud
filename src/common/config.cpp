@@ -201,6 +201,7 @@ int Config::_parse (const QVariantMap &jo)
 
     config.setupEnabled = true;
     config.setupAgent = false;
+    config.setupCC2Agent = false;
 
     if (!jo["setup"].isNull())
     {
@@ -212,6 +213,9 @@ int Config::_parse (const QVariantMap &jo)
         if (!setup["agent"].isNull())
             config.setupAgent = setup["agent"].toBool();
 
+        if (!setup["cc2_agent"].isNull())
+            config.setupCC2Agent = setup["cc2_agent"].toBool();
+        
         if (config.setupAgent)
         {
             if (!setup["code_enc"].isNull())

@@ -97,12 +97,12 @@ LIBENCLOUD_DLLSPEC int bytes2File (const QByteArray &ba, const QString &path, bo
     if (text)
         openMode |= QIODevice::Text;
 
-    LIBENCLOUD_ERR_IF (!file.open(openMode));
+    LIBENCLOUD_ERR_MSG_IF (!file.open(openMode), "Error opening file " << path);
 
     // restrictive by default (only user can read/write) - override if necessary
-    LIBENCLOUD_ERR_IF (!file.setPermissions(QFile::ReadOwner|QFile::WriteOwner));
+    LIBENCLOUD_ERR_MSG_IF (!file.setPermissions(QFile::ReadOwner|QFile::WriteOwner), "Error setting permissions on file " << path);
 
-    LIBENCLOUD_ERR_IF (file.write(ba) == -1);
+    LIBENCLOUD_ERR_MSG_IF (file.write(ba) == -1, "Error writing on file " << path);
     file.close();
 
     return 0;

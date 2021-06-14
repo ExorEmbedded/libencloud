@@ -19,8 +19,14 @@
 #define LIBENCLOUD_LOG_DEBUG   7   /* debug-level messages */
 #define LIBENCLOUD_LOG_MAX     LIBENCLOUD_LOG_DEBUG
 
-#define LIBENCLOUD_FREE(ptr) do { if (ptr) { free(ptr); ptr = NULL; } } while(0)
-#define LIBENCLOUD_DELETE(ptr) do { if (ptr) { delete ptr; ptr = NULL; } } while(0)
+template<class T> void nullifyAndDeletePtr(T*& x) {
+    T* tmp = x;
+    x = NULL;
+    delete tmp;
+};
+
+#define LIBENCLOUD_FREE(ptr) do { if (ptr) { void* tmp = ptr; ptr = NULL; free(tmp); } } while(0)
+#define LIBENCLOUD_DELETE(ptr) do { if (ptr) { nullifyAndDeletePtr(ptr); } } while(0)
 #define LIBENCLOUD_DELETE_LATER(ptr) do { if (ptr) { ptr->deleteLater(); ptr = NULL; } } while(0)
 
 #define LIBENCLOUD_ONCE for (static bool once = true; once; once = false)
@@ -96,6 +102,7 @@
 #define LIBENCLOUD_ERR_MSG_IF(cond, msg) do { if (cond) { LIBENCLOUD_ERR(msg); goto err; } } while (0)
 
 /* lev >= 0 (log always) */
+#define LIBENCLOUD_WARN(msg) __LIBENCLOUD_MSG(-1, "WARN", msg)
 #define LIBENCLOUD_LOG(msg) __LIBENCLOUD_MSG(-1, "LOG", msg)
 
 // New Qt-specific macros

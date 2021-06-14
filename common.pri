@@ -17,6 +17,8 @@
 #                config.agent = false
 #            c) Agents which use autoregistration API based on activation code (registered on EN)
 #                config.agent = true
+#            d) Agents which use autoregistration API based on activation code (registered on CC2)
+#                config.cc2agent = true
 #   modevpn     Only vpn manager with static ovpn file configuration
 #               Note: use this mode only if no setup is ever required
 #               (other modes now also support vpn-only mode via Config API)

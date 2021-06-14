@@ -122,6 +122,7 @@ int configFromAuth (const Auth &auth, QUrl &url, QMap<QByteArray,
     switch (auth.getType())
     {
         case Auth::UserpassType:
+        case Auth::ActivationCodeType:
         {
             headers["Authorization"] =  crypto::userpassToBasic(
                     auth.getUser(), auth.getPass()).toLocal8Bit();

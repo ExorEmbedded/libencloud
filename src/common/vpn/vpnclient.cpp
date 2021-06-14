@@ -174,7 +174,7 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
     
     authType = sbAuth.getType();
 
-    if (authType == Auth::UserpassType || authType == Auth::CertificateUserpassType)
+    if (authType == Auth::UserpassType || authType == Auth::ActivationCodeType || authType == Auth::CertificateUserpassType)
     {
         args << "--auth-user-pass";
         args << "--auth-nocache";
