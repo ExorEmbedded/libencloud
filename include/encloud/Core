@@ -6,6 +6,7 @@
 #include <QStateMachine>
 #include <QString>
 #include <QUuid>
+#include <QElapsedTimer>
 #include <encloud/Api/CloudApi>
 #include <encloud/Auth>
 #include <encloud/Common>
@@ -75,6 +76,8 @@ private slots:
     void _serverConfigReceived (const QVariant &variant);
     void _actionRequest (const QString &action, const libencloud::Params &params);
     void _clientDown ();
+    void _shouldRestartOnErrors ();
+    void _restartOnErrors ();
 
 private:
     int _initCrypto ();
@@ -120,6 +123,10 @@ private:
     Auth _sbAuth;
     Auth _proxyAuth;
     QString _vpnIp;
+    
+    QElapsedTimer _timeSinceOk;
+    bool _fullRestartRequired;
+    Auth _restartAuth;
 };
 
 }  // namespace libencloud

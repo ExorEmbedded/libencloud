@@ -53,6 +53,7 @@ Core::Core (Mode mode)
     , _qnam(NULL)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
+    , _fullRestartRequired(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -77,6 +78,8 @@ Core::Core (Mode mode)
     _loadProxy();
 
     _isValid = true;
+    
+    _timeSinceOk.invalidate();
 
 err:
     return;
@@ -165,6 +168,7 @@ int Core::stop ()
 #endif
 
     // _setupStopped() will be triggered
+    _timeSinceOk.invalidate();
 
     return 0;
 }
@@ -278,10 +282,22 @@ void Core::_stateChanged (State state)
     {
         case StateIdle:
         case StateError:
-            if (_prevState == StateCloud)
+            if (_prevState == StateCloud) {
                 _down();
+            }
+            if ( _state == StateError ) {
+                // must run in a new event loop to skip the automatic cloud _restart
+                QMetaObject::invokeMethod(this, "_shouldRestartOnErrors", Qt::QueuedConnection);
+            }
+
+            if ( _state == StateIdle && _fullRestartRequired) {
+                // must run in a new event loop to ensure _busy is false
+                QMetaObject::invokeMethod(this, "_restartOnErrors", Qt::QueuedConnection);
+                _fullRestartRequired = false;
+            }
             break;
         case StateCloud:
+            _timeSinceOk.invalidate();
             _up();
             break;
         default:
@@ -629,6 +645,29 @@ void Core::_clientDown ()
     LIBENCLOUD_TRACE;
 
     stop();
+}
+
+void Core::_shouldRestartOnErrors()
+{
+    if (_sbAuth.getType() == Auth::ActivationCodeType) {
+#define RETRY_SETUP_TIMEOUT (60 * 15 * 1000)
+        _restartAuth = _sbAuth;
+        if (!_timeSinceOk.isValid()) {
+            _timeSinceOk.start();
+            return;
+        }
+        if (_timeSinceOk.hasExpired(RETRY_SETUP_TIMEOUT)) {
+            LIBENCLOUD_WARN("Retry full setup after consecutive errors during last " << (RETRY_SETUP_TIMEOUT/1000) << " seconds" )
+            _fullRestartRequired = true;
+            stop();
+        }
+    }
+}
+
+void Core::_restartOnErrors()
+{
+    _authSupplied(_restartAuth);
+    start();
 }
 
 //
