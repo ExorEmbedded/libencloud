@@ -138,8 +138,8 @@ void Core::_start ()
 
     _fsm.start();
 
-    if (_clientPort != -1)
-        _clientWatchdog.start();
+//    if (_clientPort != -1)
+//        _clientWatchdog.start();
 
     _busy = false;
 }
@@ -154,11 +154,10 @@ int Core::stop ()
         return ~0;
     _busy = true;
 
-    if (_clientPort != -1)
-        _clientWatchdog.stop();
+//    if (_clientPort != -1)
+//        _clientWatchdog.stop();
 
     _fsm.stop();
-    _clientWatchdog.stop();
 
     // make sure routes are removed before client is stopped
     _networkManager->stop();

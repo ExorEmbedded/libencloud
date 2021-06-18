@@ -111,7 +111,15 @@ void CC2Msg::authSupplied (const libencloud::Auth &auth)
     switch (auth.getId())
     {
         case Auth::SwitchboardId:
-            _sbAuth = auth;
+            if (auth.getId() == _sbAuth.getId() && auth.getPass() == _sbAuth.getPass()) {
+                LIBENCLOUD_DBG("Reusing existing credentials for same activation code. A full stop/start is required to get VPN credentials");
+                // need to change to avoid overwriting actual auth with activation code
+                emit authChanged(_retrievedSbAuth);
+            } else {
+                LIBENCLOUD_DBG("Activation code has changed. A full stop/start is required to get the new VPN credentials");
+                _sbAuth = auth;
+                _retrievedSbAuth = Auth();
+            }
             break;
         default:
             // Qt Proxy is handled globally in core

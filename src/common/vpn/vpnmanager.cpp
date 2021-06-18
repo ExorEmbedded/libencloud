@@ -223,13 +223,13 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else if (qstrcmp(rest, "Need 'Auth' username/password") == 0)
     {
-        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid(), authRequired(Auth::SwitchboardId));
+        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid() || _sbAuth.getId() != Auth::SwitchboardId, authRequired(Auth::SwitchboardId));
 
         sendAuth("Auth", _sbAuth.getUser(), _sbAuth.getPass());
     }
     else if (qstrcmp(rest, "Need 'Private Key' password") == 0)  // PKCS12
     {
-        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid(), authRequired(Auth::SwitchboardId));
+        LIBENCLOUD_EMIT_ERR_IF (!_sbAuth.isValid() || _sbAuth.getId() != Auth::SwitchboardId, authRequired(Auth::SwitchboardId));
 
         sendAuth("Private Key", "", _sbAuth.getP12Pass());
     }
@@ -359,11 +359,9 @@ void VpnManager::sendAuth (const QString type, const QString &user, const QStrin
 
     QTextStream ts(this->socket);
 
-    if (user != "")
-        ts << "username \"" << type << "\" \"" << escape(user) << "\"\r\n";
+    ts << "username \"" << type << "\" \"" << escape(user) << "\"\r\n";
 
-    if (pass != "")
-        ts << "password \"" << type << "\" \"" << escape(pass) << "\"\r\n";
+    ts << "password \"" << type << "\" \"" << escape(pass) << "\"\r\n";
 
     this->socket->flush();
 }

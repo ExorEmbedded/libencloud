@@ -105,6 +105,7 @@ int Cloud::getTotalSteps () const
 // private slots
 //
 
+
 void Cloud::_vpnStateChanged (VpnClient::State state)
 {
     QString stateStr = VpnClient::stateString(state);
@@ -118,13 +119,17 @@ void Cloud::_vpnStateChanged (VpnClient::State state)
                     _cfg->config.vpnMgmtPort);
             break;
         case VpnClient::StateConnecting:
+        case VpnClient::StateConnectingWaitingInitialResponse:
+        case VpnClient::StateConnectingAuthenticating:
+        case VpnClient::StateConnectingDownloadingConfiguration:
+        case VpnClient::StateConnectingAssigningIP:
+        case VpnClient::StateConnectingAddingRoutes:
+        case VpnClient::StateExiting:
             emit stateChanged(StateConnect);
             break;
         case VpnClient::StateConnected:
             emit stateChanged(StateCloud);
             emit fallback(_isFallback);
-            break;
-        default:
             break;
     }
 
