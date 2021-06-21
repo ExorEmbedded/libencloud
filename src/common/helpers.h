@@ -19,8 +19,8 @@
 #define LIBENCLOUD_LOG_DEBUG   7   /* debug-level messages */
 #define LIBENCLOUD_LOG_MAX     LIBENCLOUD_LOG_DEBUG
 
-#define LIBENCLOUD_FREE(ptr) do { if (ptr) { free(ptr); ptr = NULL; } } while(0)
-#define LIBENCLOUD_DELETE(ptr) do { if (ptr) { delete ptr; ptr = NULL; } } while(0)
+#define LIBENCLOUD_FREE(ptr) do { if (ptr) { void* tmp = ptr; ptr = NULL; free(tmp); } } while(0)
+#define LIBENCLOUD_DELETE(ptr) do { if (ptr) { void* tmp = ptr; ptr = NULL; delete tmp; } } while(0)
 #define LIBENCLOUD_DELETE_LATER(ptr) do { if (ptr) { ptr->deleteLater(); ptr = NULL; } } while(0)
 
 #define LIBENCLOUD_ONCE for (static bool once = true; once; once = false)
