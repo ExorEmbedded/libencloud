@@ -246,8 +246,6 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
         args << "--up" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/ifup.client.d";
     if (QFileInfo("/etc/openvpn/ifdown.client.d").isDir())
         args << "--down" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/ifdown.client.d";
-    if (QFileInfo("/etc/openvpn/custom.client.d").isDir())
-        args << "--custom" << QString(LIBENCLOUD_BIN_PREFIX) + "run-parts-args.sh /etc/openvpn/custom.client.d";
 #endif
 #endif
 
@@ -277,8 +275,6 @@ QStringList VpnClient::getArgs (const QString &vpnConfigPath)
 #endif
 
     return args;
-err:
-    return QStringList();
 }
 
 void VpnClient::start (bool fallback)

@@ -3,4 +3,6 @@ include(../common.pri)
 TEMPLATE = subdirs
 
 SUBDIRS += qurl
-SUBDIRS += dbgagent
+
+# deprecated
+# SUBDIRS += dbgagent

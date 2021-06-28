@@ -231,7 +231,6 @@ int CC2Msg::_unpackConfig (const QByteArray& provisioning)
 err:
 
     pf.close();
-    //caf.close();
     return ~0;
 }
 

@@ -77,7 +77,7 @@ int Cloud::start (bool fallback)
 
     _vpnClient->start(fallback);
 
-	return 0;
+    return 0;
 }
 
 int Cloud::stop (bool retry) 
@@ -93,7 +93,7 @@ int Cloud::stop (bool retry)
     // Flush firewall
     system("iptables -t nat -F ENCLOUD ");
 
-	return 0;
+    return 0;
 }
 
 int Cloud::getTotalSteps () const
