@@ -95,7 +95,8 @@ contains(CONFIG, qtjson) {
 # new/default LGPL Json implementation (larger: external package)
 contains(CONFIG, qjson) {
     SOURCES += common/json/json-qjson.cpp
-    LIBS += -lqjson
+    LIBS += -lqjson -L$$_PRO_FILE_PWD_/../../qjson/src
+    INCLUDEPATH += $$_PRO_FILE_PWD_/../../qjson/include/
 }
 
 SOURCES += common/utils.cpp
@@ -140,6 +141,11 @@ SOURCES += core/core.cpp
         HEADERS += $${_PRO_FILE_PWD_}/setup/qcc/*.h
         SOURCES += $${_PRO_FILE_PWD_}/setup/qcc/*.cpp
         DEPENDPATH += $${_PRO_FILE_PWD_}/setup/qcc
+
+        HEADERS += $${_PRO_FILE_PWD_}/setup/cc2/*.h
+        SOURCES += $${_PRO_FILE_PWD_}/setup/cc2/*.cpp
+        DEPENDPATH += $${_PRO_FILE_PWD_}/setup/cc2
+
         # Agent
         !splitdeps {
             HEADERS += $${_PRO_FILE_PWD_}/setup/reg/*.h

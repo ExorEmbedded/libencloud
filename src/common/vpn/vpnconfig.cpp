@@ -345,7 +345,7 @@ int VpnConfig::toFile (const QString &path) const
             out << "</connection>" << endl;
         }
 
-        if (_authType == Auth::NoneType || _authType == Auth::UserpassType)
+        if (_authType == Auth::NoneType || _authType == Auth::UserpassType || _authType == Auth::ActivationCodeType)
         {
             if (getCaPath() != "")
                 out << "ca" << ' ' << '"' << getCaPath() << '"' << endl;

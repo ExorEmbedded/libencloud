@@ -32,9 +32,11 @@ public:
 
     QccSetup (Config *cfg);
 
+public slots:
     int start ();
     int stop (bool reset, bool close);
 
+public:
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;
 

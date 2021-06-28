@@ -6,7 +6,7 @@ SUBDIRS += include
 # __DEPRECATED__ by light branding 
 SUBDIRS += src
 SUBDIRS += scripts
-SUBDIRS += tools
+!splitdeps:SUBDIRS += tools
 SUBDIRS += etc
 SUBDIRS += about
 

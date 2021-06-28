@@ -117,7 +117,7 @@
 #    define LIBENCLOUD_LOG_PREFIX       LIBENCLOUD_DATA_PREFIX
 #  endif
 #else // LIBENCLOUD_SPLITDEPS - absolute paths - only used on Linux/Yocto for now
-#  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud/"
+#  define LIBENCLOUD_ETC_PREFIX         "/etc/encloud"
 #  define LIBENCLOUD_BIN_PREFIX         "/usr/bin/"
 #  define LIBENCLOUD_SBIN_PREFIX        "/usr/sbin/"
 #  ifdef QICC_ENDIAN
@@ -126,6 +126,7 @@
 #    define LIBENCLOUD_DATA_PREFIX      "/var/lib/encloud/"
 #  endif
 #  define LIBENCLOUD_LOG_PREFIX         "/var/log/encloud/"
+#  define LIBENCLOUD_WWW_PREFIX         "/var/lib/encloud/"
 #endif
 #define LIBENCLOUD_CONF_FILE            LIBENCLOUD_APP ".json"
 #define LIBENCLOUD_SERIAL_FILE          "serial"

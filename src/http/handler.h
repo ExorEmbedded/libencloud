@@ -17,6 +17,7 @@
         } \
     } while (0);
 
+
 #define LIBENCLOUD_HANDLER_OK response.setStatus(LIBENCLOUD_HTTP_STATUS_OK)
 #define LIBENCLOUD_HANDLER_STATUS(status) response.setStatus(status)
 

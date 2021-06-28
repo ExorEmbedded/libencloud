@@ -62,19 +62,20 @@ __POST <e_url>/api/v1/auth__
 
 Definitions:
 
-    "id"            OPTIONAL authentication identifier: "sb" (default), "proxy"
-    "type"          OPTIONAL type of authentication: "user-pass" (default), "x509" or "x509-user-pass" (2-factor)
-    "url"           destination url (for Switchboard login or proxy)
-    "user"          OPTIONAL user for authentication (type="user-pass" or "x509-user-pass")
-    "pass"          OPTIONAL password for authentication (type="user-pass" or "x509-user-pass")
-    "path"          OPTIONAL path (for type="x509")
-    "p12pass"       OPTIONAL path (for type="x509-user-pass")
+    "id"              OPTIONAL authentication identifier: "sb" (default), "proxy"
+    "type"            OPTIONAL type of authentication: "user-pass" (default), "x509" or "x509-user-pass" (2-factor), "activation-code"
+    "url"             destination url (for Switchboard login or proxy)
+    "user"            OPTIONAL user for authentication (type="user-pass" or "x509-user-pass")
+    "pass"            OPTIONAL password for authentication (type="user-pass",  "x509-user-pass" or "activation-code")
+    "path"            OPTIONAL path (for type="x509")
+    "p12pass"         OPTIONAL path (for type="x509-user-pass")
 
 e.g:
     
     id=proxy&type=http&url=<url>&user=myuser&pass=mypass
     id=sb&type=user-pass&url=<url>&user=myuser&pass=mypass
     id=sb&type=x509&url=<url>&pass=mypass&path=c:\key.p12
+    id=sb&url=https://pairing.corvina.io/api/v1/&type=activation-code&url=<url>&pass=XXXX-YYYY-ZZZZ-WWWW
 
 
 ##### Setup API

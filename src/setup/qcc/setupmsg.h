@@ -51,7 +51,7 @@ private:
     //response outputs
     VpnConfig _vpnConfig;
     VpnConfig _fallbackVpnConfig;
-    QSslCertificate _caCert;
+    QList<QSslCertificate> _caCert;
     QVariantMap _serverConfig;
 };
 

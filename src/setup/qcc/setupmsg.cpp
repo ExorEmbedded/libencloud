@@ -119,7 +119,7 @@ void SetupMsg::authSupplied (const libencloud::Auth &auth)
     switch (auth.getId())
     {
         case Auth::SwitchboardId:
-            _sbAuth = auth;
+            _sbAuth = auth;     
             break;
         default:
             // Qt Proxy is handled globally in core
@@ -241,7 +241,7 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
     }
 
     // and CA certificate
-    _caCert = QSslCertificate(json["openvpn_cert"].toString().toLatin1());
+    _caCert = QSslCertificate::fromData(json["openvpn_cert"].toString().toLocal8Bit());
     LIBENCLOUD_EMIT_ERR_IF (
 #if QT_VERSION < 0x050000
             !_caCert.isValid(),
@@ -249,7 +249,7 @@ int SetupMsg::_decodeResponse (const QString &response, const QMap<QByteArray, Q
             // switchboard-exor1-1.endian.com currently uses a self-signed certificate..
 	    // TODO BSP-762 + verify agains system certs
             //( _caCert.expiryDate() > QDateTime::currentDateTime() && !_caCert.isBlacklisted() ) ,
-            _caCert.isNull(),
+            _caCert.isEmpty(),
 #endif
             error(Error(tr("CA Certificate from Switchboard not valid"))));
 
@@ -269,10 +269,14 @@ int SetupMsg::_unpackResponse ()
 
     QString cafn = _cfg->config.sslOp.caPath.absoluteFilePath();
     QFile caf(cafn);
+    QByteArray pemData;
 
     // save the Operation CA certificate to file
     LIBENCLOUD_ERR_IFS (!utils::fileCreate(caf, QIODevice::WriteOnly));
-    LIBENCLOUD_ERR_IFS (caf.write(_caCert.toPem()) == -1);
+    for(int i=0; i<_caCert.size(); i++) {
+        pemData += _caCert[i].toPem();
+    }
+    LIBENCLOUD_ERR_IFS (caf.write(pemData) == -1);
     caf.close();
 
     return 0;
