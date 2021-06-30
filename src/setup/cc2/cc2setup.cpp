@@ -204,6 +204,8 @@ void CC2Setup::_onRetryTimeout ()
 void CC2Setup::_onQccError(const Error &error)
 {
     _qccConsecutiveErrors++;
+    _onError(error);
+
     if (_qccConsecutiveErrors > 3) {
         _qccConsecutiveErrors = 0;
         _qccSetup.stop(true, false);
