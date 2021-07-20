@@ -442,6 +442,18 @@ void Core::_errorReceived (const libencloud::Error &err)
            if (!_cfg->config.autoretry && !_cfg->config.setupAgent && !_cfg->config.setupCC2Agent)
                stop();
            break;
+
+        // temporary issues which could be resolved by retrying (e.g. connectivity..)
+        // in these cases, QCC stops for user intervention,
+        // while devices/agent keep on retrying automatically
+        case libencloud::Error::CodeServerUnreach:
+        default:
+            if (_cfg->config.autoretry && _cfg->config.setupIsAgent) {
+                LIBENCLOUD_DBG("[Core] Not stopping for autoretry");
+                return;
+            }
+            stop();
+            break;
     }
 
     emit stateChanged(StateError);
