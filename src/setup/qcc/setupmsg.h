@@ -21,6 +21,7 @@ class SetupMsg : public QObject, public MessageInterface
 
 public:
     SetupMsg();
+    ~SetupMsg();
     int clear ();
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;

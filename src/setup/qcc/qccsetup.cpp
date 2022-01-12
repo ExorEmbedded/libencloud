@@ -237,10 +237,16 @@ int QccSetup::_deinitFsm (bool reset)
     if (m_setupEnabled)
         _fsm.removeState(_setupMsgState);
     _fsm.removeState(_errorState);
+    Q_FOREACH(QAbstractTransition *transition, _errorState->transitions()) {
+        _errorState->removeTransition(transition);
+        delete transition;
+    }
 
     if (m_setupEnabled)
-        Q_FOREACH(QAbstractTransition *transition, _setupMsgState->transitions())
+        Q_FOREACH(QAbstractTransition *transition, _setupMsgState->transitions()) {
             _setupMsgState->removeTransition(transition);
+            delete transition;
+        }
 
     if (reset)
         _setupMsg.clear();

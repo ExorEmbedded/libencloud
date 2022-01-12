@@ -15,6 +15,7 @@ class CloseMsg : public QObject, public MessageInterface
 
 public:
     CloseMsg();
+    ~CloseMsg();
     int clear ();
     int setNetworkAccessManager (QNetworkAccessManager *qnam);
 

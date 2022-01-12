@@ -32,6 +32,11 @@ CC2Msg::CC2Msg ()
     clear();
 }
 
+CC2Msg::~CC2Msg ()
+{
+    clear();
+}
+
 int CC2Msg::clear ()
 {
     LIBENCLOUD_TRACE;

@@ -27,6 +27,11 @@ SetupMsg::SetupMsg ()
     clear();
 }
 
+SetupMsg::~SetupMsg ()
+{
+    clear();
+}
+
 int SetupMsg::clear ()
 {
     LIBENCLOUD_TRACE;

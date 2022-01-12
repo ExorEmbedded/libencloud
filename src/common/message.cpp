@@ -21,7 +21,7 @@ MessageInterface::MessageInterface()
 int MessageInterface::clear ()
 {
     _cfg = NULL;
-    _client = NULL;
+    LIBENCLOUD_DELETE_LATER(_client);
     _data.clear();
 
     return 0;

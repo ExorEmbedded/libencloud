@@ -19,6 +19,7 @@ class CC2Msg : public QObject, public MessageInterface
 
 public:
     CC2Msg();
+    ~CC2Msg();
     int clear ();
     const VpnConfig *getVpnConfig () const;
     const VpnConfig *getFallbackVpnConfig () const;

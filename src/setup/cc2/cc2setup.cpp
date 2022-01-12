@@ -271,12 +271,20 @@ int CC2Setup::_deinitFsm (bool reset)
         _fsm.removeState(_qccSetupState);
     }
     _fsm.removeState(_errorState);
+    Q_FOREACH(QAbstractTransition *transition, _errorState->transitions()) {
+        _errorState->removeTransition(transition);
+        delete transition;
+    }
 
     if (m_setupEnabled) {
-        Q_FOREACH(QAbstractTransition *transition, _cc2MsgState->transitions())
+        Q_FOREACH(QAbstractTransition *transition, _cc2MsgState->transitions()) {
             _cc2MsgState->removeTransition(transition);
-        Q_FOREACH(QAbstractTransition *transition, _qccSetupState->transitions())
+            delete transition;
+        }
+        Q_FOREACH(QAbstractTransition *transition, _qccSetupState->transitions()) {
             _qccSetupState->removeTransition(transition);
+            delete transition;
+       }
     }
 
     if (reset) {

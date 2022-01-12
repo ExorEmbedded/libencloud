@@ -26,6 +26,11 @@ CloseMsg::CloseMsg ()
     clear();
 }
 
+CloseMsg::~CloseMsg ()
+{
+    clear();
+}
+
 int CloseMsg::clear ()
 {
     LIBENCLOUD_TRACE;
@@ -75,6 +80,7 @@ int CloseMsg::process ()
     LIBENCLOUD_NOTICE("[Setup] Closing connection using Basic Auth");
     LIBENCLOUD_ERR_IF (crypto::configFromAuth(_sbAuth, url, headers, sslconf));
 
+    LIBENCLOUD_DELETE_LATER(_client);
     LIBENCLOUD_ERR_IF ((_client = new Client) == NULL);
     LIBENCLOUD_ERR_IF ((_client->setNetworkAccessManager(_qnam)));
 
