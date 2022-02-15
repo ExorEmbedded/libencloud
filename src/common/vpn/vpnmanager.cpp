@@ -247,8 +247,7 @@ void VpnManager::parseLinePass (QByteArray rest)
     }
     else
     {
-        LIBENCLOUD_DBG("[VPNManager] rest: " << rest);
-        LIBENCLOUD_EMIT_ERR(sigError((this->err = UnhandledError)));
+        LIBENCLOUD_WARN("[VPNManager] Unhandled command: " << rest);
     }
 err:
     return;
