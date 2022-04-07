@@ -440,8 +440,8 @@ Connection::~Connection ()
 
     if (_reply)
     {
-        disconnect(_reply, NULL, NULL, NULL);
-        LIBENCLOUD_DELETE (_reply);
+        disconnect(_reply.data(), NULL, NULL, NULL);
+        delete _reply;
     }
 }
 

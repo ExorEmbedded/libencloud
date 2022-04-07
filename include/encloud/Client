@@ -2,6 +2,7 @@
 #define _LIBENCLOUD_CLIENT_H_
 
 #include <QObject>
+#include <QPointer>
 // Avoid weird error on OSX:
 //  ./QUrl:1:1: error: source file is not valid UTF-8 <CF><FA><ED><FE><U+0007>
 //#include <QUrl>
@@ -54,8 +55,11 @@ protected:
     QVariant userData;
 
 private:
-    Client *_client;
-    QNetworkReply *_reply;
+    // Since this connection is often deleted from Client in a deleteLater
+    // the client could be deleted before its connections resulint in crashes.
+    // QPointer will ensure pointers will be nullified in these conditions.
+    QPointer<Client> _client;
+    QPointer<QNetworkReply> _reply;
     QTimer _timer;
     bool _timeoutRetry;
 };
