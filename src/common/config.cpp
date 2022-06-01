@@ -83,8 +83,9 @@ int Config::loadFromFile ()
     _json = libencloud::json::parseFromFile(filePath.absoluteFilePath(), ok).toMap();
     if (!ok || _json.isEmpty())
     {
-        LIBENCLOUD_DBG("[Config] Failed parsing config file: " << filePath.absoluteFilePath());
-        goto err;
+        LIBENCLOUD_WARN("[Config] Failed parsing config file: " << filePath.absoluteFilePath());
+        // configuration file is now optional
+        //goto err;
     }
     _jsonOrig = _json;
 

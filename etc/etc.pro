@@ -21,5 +21,7 @@ conf.extra = $${QMAKE_COPY} "\"$${FROM}\"" "\"$${TO}\""
 certs.files = $$PWD/ca-certificates.crt
 certs.path = $${CONFDIR}
 
-INSTALLS += conf
+# configuration file is now optional / no longer installed
+#INSTALLS += conf
+
 INSTALLS += certs
