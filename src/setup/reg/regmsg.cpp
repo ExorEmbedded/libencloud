@@ -157,7 +157,6 @@ void RegMsg::_error (const libencloud::Error &err)
     }
     LIBENCLOUD_ERR_IF (caf.write(pemData) == -1);
     caf.close();
-
     emit processed();  // success
     return;
 

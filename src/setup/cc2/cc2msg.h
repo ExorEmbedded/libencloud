@@ -42,13 +42,13 @@ private slots:
 private:
     // message handling
     int _decodeConfig (const QString &response);
-    int _unpackConfig (const QByteArray &provisioning);
 
     // internals
     int _init ();
     QByteArray _getCode ();
     QByteArray _calcRegPath ();
     QByteArray _calcConfigPath ();
+    bool loadedConfiguration = false;
 
     // request inputs
     Auth _sbAuth;

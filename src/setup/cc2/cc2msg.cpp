@@ -66,6 +66,8 @@ int CC2Msg::process ()
     LIBENCLOUD_DBG("[Setup] appdata dir: " << getCommonAppDataDir());
     QByteArray regData;
 
+    loadedConfiguration = false;
+
     if (_sbAuth.getUrl().isEmpty() || _getCode().isEmpty())
     {
         LIBENCLOUD_DBG("No login info - doing nothing");
@@ -140,26 +142,8 @@ void CC2Msg::_error (const libencloud::Error &err)
 {
     LIBENCLOUD_RETURN_IF (_cfg == NULL, );
 
-    QFile caf(_cfg->config.sslOp.caPath.absoluteFilePath());
-    QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
-
-    LIBENCLOUD_DBG("err: " << err.toString());
-
     LIBENCLOUD_EMIT_RETURN_IF (err.getCode() != libencloud::Error::CodeServerNotFound, error(err), );
-    LIBENCLOUD_EMIT_RETURN_IF (!pf.exists(), error(Error(Error::CodeUnregActivation)), );
-
-    LIBENCLOUD_DBG("Reading cached provisioning file");
-
-    QByteArray config;
-    LIBENCLOUD_ERR_MSG_IF (!pf.open(QIODevice::ReadOnly), "Failed opening provisioning file " << pf.fileName());
-
-    config = crypto::decrypt(&_ec, crypto::hash(&_ec, _getCode()), pf.readAll());
-    pf.close();
-    LIBENCLOUD_EMIT_RETURN_IF (config.isEmpty(), error(Error(Error::CodeBadActivation)), );  
-    LIBENCLOUD_ERR_MSG_IF (_decodeConfig(config), "Error decoding provisioning file " << pf.fileName());
-
-    emit processed();  // success
-    return;
+    LIBENCLOUD_EMIT_RETURN_IF (!loadedConfiguration, error(Error(Error::CodeUnregActivation)), );
 
 err:
     emit error(Error(Error::CodeSetupFailure));
@@ -173,7 +157,7 @@ void CC2Msg::_gotConfig (const QString &response, const QMap<QByteArray, QByteAr
     LIBENCLOUD_TRACE;
 
     LIBENCLOUD_ERR_IF (_decodeConfig(response));
-    LIBENCLOUD_ERR_IF (_unpackConfig(response.toUtf8()));
+    loadedConfiguration = true;
 
     // detached slot since _client is reused
     QTimer::singleShot (0, this, SLOT(_completeSetup()));
@@ -215,27 +199,6 @@ int CC2Msg::_decodeConfig (const QString &response)
     return 0;
 
 err:
-    return ~0;
-}
-
-int CC2Msg::_unpackConfig (const QByteArray& provisioning)
-{
-    QByteArray provisioningEnc;
-
-    LIBENCLOUD_RETURN_IF (_cfg == NULL, ~0);
-
-    QFile pf(_cfg->config.regProvisioningPath.absoluteFilePath());
-
-    // save encrypted provisioning file
-    LIBENCLOUD_ERR_MSG_IF ( (!utils::fileCreate(pf, QIODevice::WriteOnly)), "Failed creating provisioning file " << pf.fileName() );
-    provisioningEnc = crypto::encrypt(&_ec, crypto::hash(&_ec, _getCode()), provisioning);
-    LIBENCLOUD_ERR_MSG_IF (pf.write(provisioningEnc) == -1, "Failed to write provisioning file " << pf.fileName());
-    pf.close();
-
-    return 0;
-err:
-
-    pf.close();
     return ~0;
 }
 
