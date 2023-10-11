@@ -102,6 +102,10 @@ int ApiHandler1::_handle_status (const HttpRequest &request, HttpResponse &respo
                 j["progress"] = jMap;
             }
 
+            QVariant connInfo = _parent->getConnInfo();
+            if (!connInfo.isNull())
+                j["conn"] = _parent->getConnInfo();
+
             if (_parent->getFallback())
                 j["fallback"] = true;
 

@@ -38,12 +38,14 @@ signals:
     void need (const QString &what, const QVariant &params);
     void authRequired (libencloud::Auth::Id id);
     void authSupplied (const libencloud::Auth &auth);
+    void gatewayChanged(const QString& gw);
 
 private slots:
     void _vpnStateChanged (VpnClient::State state);
     void _vpnClientErr (VpnClient::Error err, const QString &errMsg);
     void _vpnManagerErr (VpnManager::Error err, const QString &errMsg);
     void _onRetry ();
+    void _connInfoReceived (const QVariant &connInfo);
 
     void _doCustomProvisioning(const QString& ip);
     void _customProvisioningConfig(const QString& config);
@@ -58,6 +60,7 @@ private:
     VpnClient *_vpnClient;
     VpnManager *_vpnManager;
     Retry _retry;
+    QVariant _connInfo;
     
     class Client  *_client;
 };

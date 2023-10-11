@@ -78,6 +78,7 @@ void StatusApi::_clientComplete (const QString &response)
     LIBENCLOUD_ERR_IF (_parseError(jo["error"]));
     LIBENCLOUD_ERR_IF (_parseProgress(jo["progress"]));
     LIBENCLOUD_ERR_IF (_parseFallback(jo["fallback"]));
+    LIBENCLOUD_ERR_IF (_parseConnInfo(jo["conn"]));
     LIBENCLOUD_ERR_IF (_parseLogin(jo["login"]));
     LIBENCLOUD_ERR_IF (_parseNeed(jo["need"]));
 err:
@@ -185,6 +186,17 @@ int StatusApi::_parseFallback (const QVariant &v)
 
     if ((int)b != _isFallback)
         emit apiFallback((_isFallback = (int)b));
+
+    return 0;
+}
+
+int StatusApi::_parseConnInfo (const QVariant &v)
+{
+    if (v != _connInfo)
+    {
+        emit apiConnInfo(v);
+        _connInfo = v;
+    }
 
     return 0;
 }

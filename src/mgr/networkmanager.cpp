@@ -313,6 +313,8 @@ void NetworkManager::addRoute (const QString &endpoint)
 # endif
                 _gw);
 #endif
+    LIBENCLOUD_DBG("[NetworkManager] gatewayAdded " << _gw);
+    emit gatewayAdded(_gw);
 
 //
 // <workaround> for: CONNECT-403 Connect App routes are deleted by Cisco AnyConnect Mobility Client

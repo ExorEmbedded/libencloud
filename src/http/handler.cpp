@@ -28,6 +28,7 @@ HttpHandler::~HttpHandler ()
 const Error &HttpHandler::getCoreError () const     { return _coreError; }
 State HttpHandler::getCoreState () const            { return _coreState; }
 Progress HttpHandler::getCoreProgress () const      { return _coreProgress; }
+QVariant HttpHandler::getConnInfo () const          { return _connInfo; }
 bool HttpHandler::getFallback () const              { return _isFallback; }
 const QVariantMap &HttpHandler::getLogin () const   { return _login; }
 const QVariantMap &HttpHandler::getNeed () const    { return _needs; }
@@ -243,6 +244,11 @@ void HttpHandler::_coreFallbackReceived (bool isFallback)
     _isFallback = isFallback;
 }
 
+void HttpHandler::_connInfoReceived (const QVariant &connInfo)
+{
+    _connInfo = connInfo;
+}
+
 void HttpHandler::_needReceived (const QString &what, const QVariant &params)
 {
     LIBENCLOUD_DBG("[Http] what: " << what);
@@ -268,6 +274,7 @@ void HttpHandler::_clear()
     _coreError = Error::CodeSuccess;
     _coreState = StateNone;
     _coreProgress = Progress();
+    _connInfo.clear();
     _isFallback = false;
     _needs.clear();
     _login.clear();

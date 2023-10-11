@@ -44,6 +44,7 @@ signals:
     void apiError (const libencloud::Error &err);
     void apiProgress (const libencloud::Progress &progress);
     void apiFallback (bool isFallback);
+    void apiConnInfo (const QVariant &connInfo);
     void apiLogin (const QVariant &login);
     void apiNeed (const QString &need, const QVariant &params);
 
@@ -66,6 +67,7 @@ protected:
     int _parseError (const QVariant &v);
     int _parseProgress (const QVariant &v);
     int _parseFallback (const QVariant &v);
+    int _parseConnInfo (const QVariant &v);
     int _parseLogin (const QVariant &v);
     int _parseNeed (const QVariant &v);
 
@@ -76,6 +78,7 @@ protected:
     Error _error;
     Progress _progress;
     int _isFallback;  // tristate (-1 = null)
+    QVariant _connInfo;
     QVariantMap _needs;
     QVariantMap _login;
 };

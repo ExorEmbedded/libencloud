@@ -101,6 +101,11 @@ int Cloud::getTotalSteps () const
     return VpnClient::StateLast - VpnClient::StateFirst + 1;
 }
 
+void Cloud::_connInfoReceived (const QVariant &connInfo)
+{
+    _connInfo = connInfo;
+}
+
 //
 // private slots
 //
@@ -262,6 +267,10 @@ void Cloud::_doCustomProvisioning(const QString& ipStr)
         LIBENCLOUD_ERR("[Cloud] failed to vpn gateway address" );
         return;
     }
+
+    _connInfo.toMap()["gateway_ip"] = gwAddr.toString();
+    emit gatewayChanged(gwAddr.toString());
+    LIBENCLOUD_DBG("[Cloud] gwaddr " << _connInfo.toMap()["gateway_ip"].toString());
     
     QUrl url;
     url.setScheme("http");
@@ -328,6 +337,7 @@ void Cloud::_customProvisioningConfig(const QString &config)
     int endPos = config.indexOf(QRegExp("\n\s*[^- ]"), dnatPos);
     QRegExp elRx("\n\s*-");
     int nextElementPos = config.indexOf(elRx, dnatPos);
+    QString ip = _connInfo.toMap()["ip"].toString();
     while (nextElementPos != -1 && (endPos < 0 || nextElementPos < endPos) ) {
         int enabledPos = config.indexOf("ENABLED", nextElementPos);
         if (extractYamlValue(config, enabledPos).contains("on")) {

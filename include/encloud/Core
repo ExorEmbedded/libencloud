@@ -54,6 +54,7 @@ signals:
     void authSupplied (const libencloud::Auth &auth);
     void serverConfigSupply (const QVariant &variant);
     void actionRequest (const QString &action, const libencloud::Params &params);
+    void connInfoSupply (const QVariant &connInfo);
 
 private slots:
     void _start ();
@@ -78,6 +79,7 @@ private slots:
     void _clientDown ();
     void _shouldRestartOnErrors ();
     void _restartOnErrors ();
+    void onGatewayAdded(const QString& gw);
 
 private:
     int _initCrypto ();
@@ -122,6 +124,7 @@ private:
 
     Auth _sbAuth;
     Auth _proxyAuth;
+    QVariantMap _connInfo;
     QString _vpnIp;
     
     QElapsedTimer _timeSinceOk;

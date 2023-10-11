@@ -51,6 +51,7 @@ public:
 
 signals:
     void sigError (NetworkManager::Error err, QString msg = "");
+    void gatewayAdded(const QString& gw);
 
 public:
     void setGateway (const QString &addr);

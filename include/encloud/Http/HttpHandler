@@ -46,6 +46,7 @@ public:
     const QVariantMap &getLogin () const;
     const QVariantMap &getNeed () const;
     void removeNeed (const QString &what);
+    QVariant getConnInfo () const;
 
 #ifdef LIBENCLOUD_MODE_ECE
     const QUuid &getPoi () const;
@@ -96,6 +97,8 @@ private slots:
     void _coreFallbackReceived (bool isFallback);
     void _needReceived (const QString &what, const QVariant &params);
     void _serverConfigReceived (const QVariant &config);
+    void _connInfoReceived (const QVariant &connInfo);
+
 
 private:
     void _clear ();
@@ -107,6 +110,7 @@ private:
     bool _isFallback;
     QVariantMap _login;
     QVariantMap _needs;
+    QVariant _connInfo;
 
     QUuid _poi;
 

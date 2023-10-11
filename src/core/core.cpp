@@ -198,6 +198,8 @@ int Core::attachServer (Server *server)
             this, SLOT(_vpnIpAssigned(QString)));
     connect(_cloud, SIGNAL(ipAssigned(QString)), 
             obj, SLOT(vpnIpAssigned(QString)));
+    connect(this, SIGNAL(connInfoSupply(QVariant)),
+            _cloud, SLOT(_connInfoReceived(QVariant)));
     // from server to local objects
     connect(obj, SIGNAL(configSupply(QVariant)),
             _cfg, SLOT(receive(QVariant)));
@@ -207,6 +209,8 @@ int Core::attachServer (Server *server)
             this, SLOT(_authSupplied(libencloud::Auth)));
     connect(obj, SIGNAL(actionRequest(QString, libencloud::Params)), 
             this, SLOT(_actionRequest(QString, libencloud::Params)));
+    connect(_cloud,SIGNAL(gatewayChanged(const QString&)),
+            this, SLOT(onGatewayAdded(const QString&)));
 #endif
 
 #ifndef Q_OS_WINCE
@@ -234,6 +238,8 @@ int Core::attachServer (Server *server)
             obj, SLOT(_needReceived(QString, QVariant)));
     connect(this, SIGNAL(authSupplied(libencloud::Auth)),
            obj, SLOT(_authReceived(libencloud::Auth)));
+    connect(this, SIGNAL(connInfoSupply(QVariant)),
+            obj, SLOT(_connInfoReceived(QVariant)));
 
 #ifdef LIBENCLOUD_MODE_QCC
     connect(obj, SIGNAL(clientPortSend(int)), 
@@ -283,6 +289,8 @@ void Core::_stateChanged (State state)
         case StateError:
             if (_prevState == StateCloud) {
                 _down();
+                _connInfo.remove("start_time");
+                emit connInfoSupply(_connInfo);
             }
             if ( _state == StateError ) {
                 // must run in a new event loop to skip the automatic cloud _restart
@@ -297,6 +305,8 @@ void Core::_stateChanged (State state)
             break;
         case StateCloud:
             _timeSinceOk.invalidate();
+            _connInfo["start_time"] = QDateTime::currentMSecsSinceEpoch();
+            emit connInfoSupply(_connInfo);
             _up();
             break;
         default:
@@ -309,6 +319,9 @@ void Core::_stateChanged (State state)
 void Core::_vpnIpAssigned (const QString &ip)
 {
     _vpnIp = ip;
+    _connInfo["ip"] = ip;
+
+    emit connInfoSupply(_connInfo);
 }
 
 void Core::_up()
@@ -408,6 +421,7 @@ void Core::_setupStopped ()
     //emit authSupplied((_proxyAuth = Auth(Auth::ProxyId)));  // persists until explicitly reset
     emit stateChanged(StateIdle);
     emit progress(Progress());
+    _connInfo.clear();
 
     _busy = false;
 }
@@ -564,6 +578,13 @@ err:
     return;
 }
 
+void Core::onGatewayAdded(const QString& gw)
+{
+    LIBENCLOUD_DBG("onGatewayAdded " << gw);
+    _connInfo["gateway_ip"] = gw;
+    emit connInfoSupply(_connInfo);
+}
+
 // Setup watchdog which is started/stopped according to core state
 void Core::_clientPortReceived (int port)
 {
@@ -630,8 +651,17 @@ void Core::_actionRequest (const QString &action, const libencloud::Params &para
         emit actionRequest(action, params);
     }
     else if (action == "setGateway")
-        _networkManager->setGateway(paramsFind(params, "ip"));
-    else 
+    {
+        QString ip = paramsFind(params, "ip");
+        if (!ip.isEmpty())
+        {
+            _networkManager->setGateway(ip);
+
+            _connInfo["gateway_ip"] = ip;
+            emit connInfoSupply(_connInfo);
+        }
+    }
+    else
         emit error(Error(tr("Invalid action: ") + action));
 
 err:
