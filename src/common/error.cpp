@@ -198,7 +198,7 @@ QString Error::_code2Desc (Code code)
         case CodeProxyAuthFailed:
             return QObject::tr("Proxy Authentication Failure - please check credentials");
         case CodeSetupFailure:
-            return QObject::tr("Configuration download failed - please check logs");
+            return QObject::tr("Configuration download failed - Please check that your license is valid and credits assigned");
 
         // 5xx
         case CodeClientFailure:
