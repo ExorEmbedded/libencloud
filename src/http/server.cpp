@@ -45,7 +45,12 @@ err:
 
 int HttpServer::start (const QHostAddress &address, quint16 port)
 {
+    // Fixed port in BSP mode => single attempt / no port scanning
+#ifdef LIBENCLOUD_SPLITDEPS
+    enum { MAX_ATTEMPTS = 1 };
+#else
     enum { MAX_ATTEMPTS = 10 };
+#endif
     int i;
 
     if (isListening())
