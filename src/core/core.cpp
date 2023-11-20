@@ -907,6 +907,8 @@ int Core::_init ()
 
     _networkManager = new NetworkManager;
     LIBENCLOUD_ERR_IF (_networkManager == NULL);
+    connect(_networkManager,SIGNAL(gatewayAdded(const QString&)),
+                this,SLOT(onGatewayAdded(const QString&)));
 
     return 0;
 err:
