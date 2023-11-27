@@ -224,6 +224,7 @@ void NetworkManager::readRoutesEx (QProcess *process)
         }
     }
 
+    bool routeAdded = false;
     // add new endpoints which are not already in routing table
     foreach (QString endpoint, _connectedEndpoints)
     {
@@ -235,10 +236,13 @@ void NetworkManager::readRoutesEx (QProcess *process)
         if (!currentRoutes.contains(ipmask.first))
         {
             addRoute(endpoint);
+            routeAdded = true;
             if (!_previousEndpoints.contains(endpoint))
                 _previousEndpoints.append(endpoint);
         }
     }
+    if (!routeAdded)
+        emit gatewayAdded(_gw);
 
 }
 
