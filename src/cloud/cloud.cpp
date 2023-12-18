@@ -217,7 +217,7 @@ void Cloud::_onRetry ()
     _vpnClient->start(_isFallback);
 }
 
-void Cloud::_doCustomProvisioning(const QString& ipStr)
+bool Cloud::retrieveGatewayFromRoute(const QString& ipStr,QHostAddress& gwAddr)
 {
 #ifdef Q_OS_LINUX
     QHostAddress ip(ipStr);
@@ -232,21 +232,21 @@ void Cloud::_doCustomProvisioning(const QString& ipStr)
             }
         }
     }
-    
+
     if (ifaceName.length() <= 0) {
         LIBENCLOUD_ERR("[Cloud] failed to find network inteface matching vpn ip " << ipStr );
-        return;
+        return false;
     }
 
     // find default gw for vpn to contact for getting configuration
     QFile f("/proc/net/route");
     if (!f.open(QIODevice::ReadOnly)) {
         LIBENCLOUD_ERR("[Cloud] failed to open /proc/net/route: " << f.errorString() );
-        return;
+        return false;
     }
-    
+
     QString line = f.readLine();
-    QHostAddress gwAddr;
+
     while(line.length() > 0) {
         if (line.startsWith(ifaceName + "\t")) {
             QStringList data = line.split("\t");
@@ -262,8 +262,28 @@ void Cloud::_doCustomProvisioning(const QString& ipStr)
         }
         line = f.readLine();
     }
+    if (gwAddr.isNull())
+    {
+        return false;
+    }
+    else
+    {
+        LIBENCLOUD_DBG("[Cloud] Gateway retrieve: " << gwAddr.toString());
+        return true;
+    }
+#else
+    LIBENCLOUD_ERR("[Cloud] retrieveGatewayFromRoute is not supported in this OS");
+    return false;
+#endif
+}
+
+void Cloud::_doCustomProvisioning(const QString& ipStr)
+{
+#ifdef Q_OS_LINUX
+
+    QHostAddress gwAddr;
     
-    if (gwAddr.isNull()) {
+    if (!retrieveGatewayFromRoute(ipStr,gwAddr) || gwAddr.isNull()) {
         LIBENCLOUD_ERR("[Cloud] failed to vpn gateway address" );
         return;
     }

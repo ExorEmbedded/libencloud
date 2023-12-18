@@ -321,6 +321,10 @@ void Core::_vpnIpAssigned (const QString &ip)
     _vpnIp = ip;
     _connInfo["ip"] = ip;
 
+    QHostAddress gwAddr;
+    if (Cloud::retrieveGatewayFromRoute(ip,gwAddr) && !gwAddr.isNull())
+        _connInfo["gateway_ip"] = gwAddr.toString();
+
     emit connInfoSupply(_connInfo);
 }
 

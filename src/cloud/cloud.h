@@ -29,6 +29,8 @@ public:
 
     int getTotalSteps() const;
 
+    static bool retrieveGatewayFromRoute(const QString& ipStr,QHostAddress& gwAddr);
+
 signals:
     void error (const libencloud::Error &error);
     void stateChanged (State state);
