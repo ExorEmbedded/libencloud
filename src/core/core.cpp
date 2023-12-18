@@ -319,13 +319,16 @@ void Core::_stateChanged (State state)
 void Core::_vpnIpAssigned (const QString &ip)
 {
     _vpnIp = ip;
-    _connInfo["ip"] = ip;
+    if (_connInfo["ip"] != ip || !_connInfo.contains("gateway_ip") || _connInfo["gateway_ip"] == "")
+    {
+        _connInfo["ip"] = ip;
 
-    QHostAddress gwAddr;
-    if (Cloud::retrieveGatewayFromRoute(ip,gwAddr) && !gwAddr.isNull())
-        _connInfo["gateway_ip"] = gwAddr.toString();
+        QHostAddress gwAddr;
+        if (Cloud::retrieveGatewayFromRoute(ip,gwAddr) && !gwAddr.isNull())
+            _connInfo["gateway_ip"] = gwAddr.toString();
 
-    emit connInfoSupply(_connInfo);
+        emit connInfoSupply(_connInfo);
+    }
 }
 
 void Core::_up()

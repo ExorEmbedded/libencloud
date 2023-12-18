@@ -307,11 +307,9 @@ void VpnManager::parseLineState (QByteArray line)
         this->connTimer.stop();
         this->client->setState(VpnClient::StateConnected);
 
-        if (words[3] != this->assignedIp)
-        {
-            this->assignedIp = words[3];
-            emit ipAssigned(this->assignedIp);
-        }
+        this->assignedIp = words[3];
+        //ipAssigned checks if ip has been already assigned
+        emit ipAssigned(this->assignedIp);
     }
     else if (qstrcmp(state, "EXITING") == 0)
     {
