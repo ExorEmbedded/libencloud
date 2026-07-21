@@ -54,6 +54,7 @@ Core::Core (Mode mode)
     , _networkManager(NULL)
     , _proxyFactory(NULL)
     , _fullRestartRequired(false)
+    , _restartRequested(false)
 {
     LIBENCLOUD_TRACE;
 
@@ -109,9 +110,20 @@ int Core::start ()
 
     if (_busy)
         return ~0;
-    _busy = true;
 
-    LIBENCLOUD_RETURN_IF (_state == StateConnect || _state == StateCloud, ~0);
+    // A start request while already connecting/connected means the caller's
+    // view of our state is stale (e.g. it was killed and restarted without
+    // ever seeing us go up) - force a clean restart instead of dropping the
+    // request, so the caller doesn't need to know our current state.
+    if (_state == StateConnect || _state == StateCloud)
+    {
+        LIBENCLOUD_WARN("[Core] start() requested while already " <<
+                stateToString(_state) << " - restarting");
+        _restartRequested = true;
+        return stop();
+    }
+
+    _busy = true;
 
     // Connect Client starts immediately
     if (!_cfg->config.decongest)
@@ -148,7 +160,9 @@ int Core::stop ()
 {
     LIBENCLOUD_TRACE;
 
-    LIBENCLOUD_RETURN_IF (_state == StateIdle, ~0);
+    // nothing to do - not an error condition
+    if (_state == StateIdle)
+        return 0;
 
     if (_busy)
         return ~0;
@@ -301,6 +315,12 @@ void Core::_stateChanged (State state)
                 // must run in a new event loop to ensure _busy is false
                 QMetaObject::invokeMethod(this, "_restartOnErrors", Qt::QueuedConnection);
                 _fullRestartRequired = false;
+            }
+
+            if ( _state == StateIdle && _restartRequested) {
+                // must run in a new event loop to ensure _busy is false
+                _restartRequested = false;
+                QMetaObject::invokeMethod(this, "start", Qt::QueuedConnection);
             }
             break;
         case StateCloud:

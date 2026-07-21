@@ -130,6 +130,7 @@ private:
     QElapsedTimer _timeSinceOk;
     bool _fullRestartRequired;
     Auth _restartAuth;
+    bool _restartRequested;
 };
 
 }  // namespace libencloud
